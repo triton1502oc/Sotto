@@ -1,6 +1,6 @@
 # Sotto
 
-**TL;DR**: Sotto is an assistive communication Android app designed for autistic teens and adults, featuring a dignified, low-stimulation UI and one-touch Text-to-Speech (TTS).
+**TL;DR**: Sotto (meaning *"under one's breath"* or a soft voice) is an assistive communication Android app designed for autistic teens and adults, featuring a dignified, low-stimulation UI and one-touch Text-to-Speech (TTS).
 
 ## Features
 - **Modern Low-Stimulus UI**: Dark/Neutral Material 3 theme with high contrast text, avoiding visual clutter.
