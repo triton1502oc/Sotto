@@ -2,16 +2,25 @@ package com.example.sotto.ui.main
 
 import androidx.lifecycle.ViewModel
 import com.example.sotto.data.PhraseRepository
+import com.example.sotto.data.VoiceSettings
+import com.example.sotto.data.VoiceSettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class MainViewModel(private val repository: PhraseRepository) : ViewModel() {
+class MainViewModel(
+    private val repository: PhraseRepository,
+    private val voiceSettingsRepository: VoiceSettingsRepository
+) : ViewModel() {
     private val _phrases = MutableStateFlow<List<String>>(emptyList())
     val phrases: StateFlow<List<String>> = _phrases.asStateFlow()
 
+    private val _voiceSettings = MutableStateFlow(VoiceSettings())
+    val voiceSettings: StateFlow<VoiceSettings> = _voiceSettings.asStateFlow()
+
     init {
         _phrases.value = repository.getPhrases()
+        _voiceSettings.value = voiceSettingsRepository.getVoiceSettings()
     }
 
     fun addPhrase(newPhrase: String) {
@@ -47,5 +56,10 @@ class MainViewModel(private val repository: PhraseRepository) : ViewModel() {
             _phrases.value = currentList
             repository.savePhrases(currentList)
         }
+    }
+
+    fun updateVoiceSettings(newSettings: VoiceSettings) {
+        _voiceSettings.value = newSettings
+        voiceSettingsRepository.saveVoiceSettings(newSettings)
     }
 }

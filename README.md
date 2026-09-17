@@ -2,12 +2,17 @@
 
 **TL;DR**: Sotto (meaning *"under one's breath"* or a soft voice) is an assistive communication Android app designed for autistic teens and adults, featuring a dignified, low-stimulation UI and one-touch Text-to-Speech (TTS).
 
+<p align="center">
+  <img src="screenshot.png" alt="Sotto Interface" width="300"/>
+</p>
+
 ## Features
 - **Modern Low-Stimulus UI**: Dark/Neutral Material 3 theme with high contrast text, avoiding visual clutter.
 - **Zero-Distraction Layout**: The main interface has zero administrative buttons, providing a safe, predictable communication environment.
 - **Instant Speech**: Tap a phrase card to speak immediately using Android's native TextToSpeech engine.
 - **High-Visibility Display**: Long press a phrase to open a full-screen, high-contrast modal for silent communication in noisy environments.
-- **Customizable**: Toggle "Edit List" to add, edit, delete, and drag-and-drop to rearrange phrase cards. Your preferences are saved automatically.
+- **Customizable**: Toggle "Edit List" to add, edit, delete, and drag-and-drop to rearrange phrase cards.
+- **Configurable Voice & Speed**: Adjust speech rate, pitch, and choose from installed speaker voices via Edit Mode with a live "Test Voice" preview.
 - **Offline Capable**: Completely local processing with zero tracking or pediatric aesthetics.
 
 ## How to Install (For Users)

@@ -2,17 +2,19 @@ package com.example.sotto
 
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
+import android.speech.tts.Voice
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,26 +32,31 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.sotto.data.PhraseRepository
 import com.example.sotto.data.SharedPreferencesPhraseRepository
+import com.example.sotto.data.SharedPreferencesVoiceSettingsRepository
+import com.example.sotto.data.VoiceSettings
 import com.example.sotto.ui.main.MainViewModel
+import com.example.sotto.ui.main.VoiceSettingsDialog
 import sh.calvin.reorderable.*
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import java.util.Locale
 
 class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
 
     private var tts: TextToSpeech? = null
     private var ttsReady by mutableStateOf(false)
+    private var availableVoices by mutableStateOf<List<Voice>>(emptyList())
+    private var latestVoiceSettings by mutableStateOf(VoiceSettings())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         tts = TextToSpeech(this, this)
 
-        val repository = SharedPreferencesPhraseRepository(applicationContext)
+        val phraseRepository = SharedPreferencesPhraseRepository(applicationContext)
+        val voiceSettingsRepository = SharedPreferencesVoiceSettingsRepository(applicationContext)
         val viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return MainViewModel(repository) as T
+                return MainViewModel(phraseRepository, voiceSettingsRepository) as T
             }
         })[MainViewModel::class.java]
 
@@ -60,10 +67,20 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val phrases by viewModel.phrases.collectAsState()
+                    val voiceSettings by viewModel.voiceSettings.collectAsState()
+
+                    LaunchedEffect(voiceSettings, ttsReady) {
+                        latestVoiceSettings = voiceSettings
+                        if (ttsReady) {
+                            applyVoiceSettings(voiceSettings)
+                        }
+                    }
 
                     SottoApp(
                         phrases = phrases,
                         ttsReady = ttsReady,
+                        voiceSettings = voiceSettings,
+                        availableVoices = availableVoices,
                         onSpeak = { text ->
                             if (ttsReady) {
                                 tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
@@ -72,9 +89,26 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         onAddPhrase = { viewModel.addPhrase(it) },
                         onEditPhrase = { old, new -> viewModel.editPhrase(old, new) },
                         onDeletePhrase = { viewModel.deletePhrase(it) },
-                        onMovePhrase = { from, to -> viewModel.movePhrase(from, to) }
+                        onMovePhrase = { from, to -> viewModel.movePhrase(from, to) },
+                        onUpdateVoiceSettings = { viewModel.updateVoiceSettings(it) },
+                        onTestVoice = {
+                            if (ttsReady) {
+                                tts?.speak("Hello, this is my speaking voice.", TextToSpeech.QUEUE_FLUSH, null, null)
+                            }
+                        }
                     )
                 }
+            }
+        }
+    }
+
+    private fun applyVoiceSettings(settings: VoiceSettings) {
+        tts?.setSpeechRate(settings.speechRate)
+        tts?.setPitch(settings.speechPitch)
+        if (settings.voiceName != null) {
+            val targetVoice = tts?.voices?.firstOrNull { it.name == settings.voiceName }
+            if (targetVoice != null) {
+                tts?.setVoice(targetVoice)
             }
         }
     }
@@ -84,6 +118,14 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             val result = tts?.setLanguage(Locale.US)
             if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
                 ttsReady = true
+                tts?.voices?.let { voices ->
+                    val currentLang = tts?.voice?.locale?.language ?: Locale.getDefault().language
+                    val localVoices = voices.filter { !it.isNetworkConnectionRequired }
+                    val matchingLang = localVoices.filter { it.locale.language.equals(currentLang, ignoreCase = true) }
+                    val listToShow = if (matchingLang.isNotEmpty()) matchingLang else localVoices
+                    availableVoices = listToShow.sortedWith(compareBy({ it.locale.displayCountry }, { it.name }))
+                }
+                applyVoiceSettings(latestVoiceSettings)
             }
         }
     }
@@ -116,14 +158,19 @@ fun SottoAppTheme(content: @Composable () -> Unit) {
 fun SottoApp(
     phrases: List<String>,
     ttsReady: Boolean,
+    voiceSettings: VoiceSettings,
+    availableVoices: List<Voice>,
     onSpeak: (String) -> Unit,
     onAddPhrase: (String) -> Unit,
     onEditPhrase: (String, String) -> Unit,
     onDeletePhrase: (String) -> Unit,
-    onMovePhrase: (Int, Int) -> Unit
+    onMovePhrase: (Int, Int) -> Unit,
+    onUpdateVoiceSettings: (VoiceSettings) -> Unit,
+    onTestVoice: () -> Unit
 ) {
     var expandedPhrase by remember { mutableStateOf<String?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
+    var showVoiceDialog by remember { mutableStateOf(false) }
     var phraseToEdit by remember { mutableStateOf<String?>(null) }
     var isEditMode by remember { mutableStateOf(false) }
 
@@ -140,23 +187,31 @@ fun SottoApp(
             TopAppBar(
                 title = { Text("Sotto") },
                 actions = {
+                    if (isEditMode) {
+                        TextButton(onClick = { showVoiceDialog = true }) {
+                            Text("Voice", color = MaterialTheme.colorScheme.primary)
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
                     TextButton(onClick = { isEditMode = !isEditMode }) {
                         Text(
                             text = if (isEditMode) "Done" else "Edit List",
                             color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Surface(
-                        color = if (ttsReady) Color(0xFF4CAF50) else Color(0xFFFFC107),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = if (ttsReady) "Ready" else "Initializing",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Black
-                        )
+                    if (!ttsReady) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            color = Color(0xFFFFC107),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "Initializing",
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.Black
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                 },
@@ -233,6 +288,17 @@ fun SottoApp(
         }
     }
 
+    // Voice Settings Dialog
+    if (showVoiceDialog) {
+        VoiceSettingsDialog(
+            currentSettings = voiceSettings,
+            availableVoices = availableVoices,
+            onSettingsChanged = onUpdateVoiceSettings,
+            onTestVoice = onTestVoice,
+            onDismiss = { showVoiceDialog = false }
+        )
+    }
+
     // Modal Dialog for viewing/speaking giant text
     expandedPhrase?.let { phrase ->
         Dialog(
@@ -250,8 +316,6 @@ fun SottoApp(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-
                     Text(
                         text = phrase,
                         fontSize = 48.sp,
