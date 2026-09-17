@@ -29,6 +29,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.sotto.data.PhraseRepository
+import com.example.sotto.data.SharedPreferencesPhraseRepository
 import com.example.sotto.ui.main.MainViewModel
 import sh.calvin.reorderable.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -44,7 +45,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         enableEdgeToEdge()
         tts = TextToSpeech(this, this)
 
-        val repository = PhraseRepository(applicationContext)
+        val repository = SharedPreferencesPhraseRepository(applicationContext)
         val viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {

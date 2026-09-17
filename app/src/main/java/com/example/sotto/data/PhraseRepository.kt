@@ -4,7 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import org.json.JSONArray
 
-class PhraseRepository(context: Context) {
+interface PhraseRepository {
+    fun getPhrases(): List<String>
+    fun savePhrases(phrases: List<String>)
+}
+
+class SharedPreferencesPhraseRepository(context: Context) : PhraseRepository {
     private val prefs: SharedPreferences = context.getSharedPreferences("sotto_prefs", Context.MODE_PRIVATE)
     private val KEY_PHRASES = "saved_phrases"
 
@@ -17,7 +22,7 @@ class PhraseRepository(context: Context) {
         "Can you write that down or text me?"
     )
 
-    fun getPhrases(): List<String> {
+    override fun getPhrases(): List<String> {
         val phrasesJson = prefs.getString(KEY_PHRASES, null)
         if (phrasesJson == null) {
             savePhrases(defaultPhrases)
@@ -36,7 +41,7 @@ class PhraseRepository(context: Context) {
         }
     }
 
-    fun savePhrases(phrases: List<String>) {
+    override fun savePhrases(phrases: List<String>) {
         val jsonArray = JSONArray()
         phrases.forEach { jsonArray.put(it) }
         prefs.edit().putString(KEY_PHRASES, jsonArray.toString()).apply()
