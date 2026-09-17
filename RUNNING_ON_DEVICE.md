@@ -31,6 +31,6 @@ Open your Mac terminal, ensure you are inside the `Sotto` project folder, and ru
 
 **Option B: Using the Android CLI tool**
 ```bash
-android run --apks=app/build/outputs/apk/debug/app-debug.apk --activity=com.example.sotto.MainActivity
+android run --apks=app/build/outputs/apk/debug/app-debug.apk --activity=com.amh.sotto.MainActivity
 ```
 *This command will install the APK and automatically launch it on your screen.*

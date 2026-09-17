@@ -1,0 +1,81 @@
+# Google Play Store Listing & Compliance Guide
+
+### TL;DR
+Ready-to-use metadata, descriptions, graphics specifications, and policy questionnaire answers for submitting Sotto to the Google Play Console.
+
+---
+
+## 1. Store Listing Metadata
+
+### App Details
+* **App Name:** `Sotto` *(5 / 30 characters)*
+* **Short Description:**  
+  `Dignified, one-touch AAC speech communication for autistic teens & adults.` *(73 / 80 characters)*
+
+### Full Description *(Markdown & Plain Text compliant, ~1,800 / 4,000 characters)*
+```text
+Sotto (meaning "under one's breath" or a soft voice) is an assistive communication (AAC) app designed for autistic teens, adults, and non-speaking individuals who need clear, dignified, and low-stimulation text-to-speech support.
+
+Unlike typical AAC tools designed with pediatric cartoon graphics and cluttered menus, Sotto provides a calm, mature, and predictable environment built specifically for adult communication needs.
+
+KEY FEATURES:
+
+• Modern Low-Stimulus UI
+Dark-neutral Material 3 theme with high contrast and zero unnecessary animations or visual distractions.
+
+• Zero-Distraction Communication Mode
+In normal mode, all administrative buttons (add, delete, reorder) are completely hidden. Tap any phrase card to speak immediately using Android's offline Text-to-Speech engine.
+
+• High-Visibility Fullscreen Mode
+In noisy, crowded, or overwhelming environments, long-press any card to display the phrase in giant, high-contrast text across your entire screen so you can silently show your phone to others.
+
+• Configurable Voice & Speed
+Tailor your speech output to your comfort. Adjust speech rate (speed) and pitch, and choose from available installed voices on your device.
+
+• Fully Customizable
+Toggle "Edit List" when you want to add new phrases, edit existing text, delete phrases safely, or drag-and-drop cards to rearrange their order.
+
+• 100% Offline & Private
+Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay entirely on your local device.
+```
+
+---
+
+## 2. Graphic Asset Requirements
+
+| Asset | Dimensions | Format | Notes |
+|---|---|---|---|
+| **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | Max 1024 KB. Available in app icon resources. |
+| **Feature Graphic** | 1024 x 500 px | JPEG or 24-bit PNG | No alpha. Banner displayed on store listing. |
+| **Phone Screenshots** | Min 2 screenshots (1080 x 2400 px) | JPEG or 24-bit PNG | [screenshot.png](screenshot.png) in repo meets all requirements. |
+
+---
+
+## 3. Data Safety Form (Google Play Console)
+
+When completing the Google Play **Data Safety** questionnaire:
+
+1. **Does your app collect or share any of the required user data types?**  
+   👉 Select **No**.
+2. **Is all of the user data collected by your app encrypted in transit?**  
+   👉 Select **N/A** (no data collected).
+3. **Do you provide a way for users to request that their data be deleted?**  
+   👉 Select **Yes** (Uninstalling the app or clearing app storage deletes all local data immediately).
+
+---
+
+## 4. App Content & Policy Ratings
+
+* **Category:** Communication (or Tools / Health)
+* **Tags:** AAC, Assistive, Speech, Autism, Communication
+* **Target Audience:** Select **13–15**, **16–17**, and **18+**.  
+  *(Selecting 13+ prevents your app from being categorized under the "Designed for Families" COPPA framework, avoiding unnecessary pediatric compliance scrutiny).*
+* **Content Rating (IARC):** Complete the questionnaire:
+  * Violence: No
+  * Sexual content: No
+  * Offensive language: No
+  * Controlled substances: No
+  * Miscellaneous (user location, purchases, etc.): No  
+  👉 Results in **Everyone / PEGI 3 / USK 0**.
+* **Privacy Policy URL:** Link to your repository's policy or GitHub Pages URL:  
+  `https://github.com/triton1502oc/Sotto/blob/main/PRIVACY_POLICY.md`
