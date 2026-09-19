@@ -30,7 +30,7 @@ In normal mode, all administrative buttons (add, delete, reorder) are completely
 In noisy, crowded, or overwhelming environments, long-press any card to display the phrase in giant, high-contrast text across your entire screen so you can silently show your phone to others.
 
 • Configurable Voice & Speed
-Tailor your speech output to your comfort. Adjust speech rate (speed) and pitch, and choose from available installed voices on your device.
+Tailor your speech output to your comfort. Switch between Male, Female, or System Default speaker voices, and adjust speech rate (speed) and pitch with live preview.
 
 • Fully Customizable
 Toggle "Edit List" when you want to add new phrases, edit existing text, delete phrases safely, or drag-and-drop cards to rearrange their order.

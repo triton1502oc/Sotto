@@ -35,6 +35,8 @@
     <string name="label_speed">Speed</string>
     <string name="label_pitch">Pitch</string>
     <string name="label_speaker_voice">Speaker Voice</string>
+    <string name="voice_male">Male</string>
+    <string name="voice_female">Female</string>
     <string name="system_default">System Default</string>
     <string name="speed_slower">Slower</string>
     <string name="speed_normal">Normal</string>

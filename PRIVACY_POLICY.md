@@ -18,7 +18,7 @@ Sotto is an assistive communication (AAC) application designed for autistic indi
 * **No Network Transmission by Sotto:** Sotto itself does not communicate with external servers or cloud services.
 
 ## 3. Local Device Storage
-Any customizations you make—such as adding, editing, or rearranging phrases, or adjusting voice speed and pitch—are stored strictly on your local device using Android's private app storage (`SharedPreferences`). This data never leaves your device and is erased if you uninstall the app or clear app data.
+Any customizations you make—such as adding, editing, or rearranging phrases, or adjusting voice speed, pitch, and voice gender—are stored strictly on your local device using Android's private app storage (`SharedPreferences`). This data never leaves your device and is erased if you uninstall the app or clear app data.
 
 ## 4. Third-Party Services
 Sotto does not integrate with any third-party APIs or cloud services. The Text-to-Speech synthesis is handled directly by the speech engine installed on your Android operating system.

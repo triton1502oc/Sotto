@@ -12,7 +12,7 @@
 - **Instant Speech**: Tap a phrase card to speak immediately. Sotto automatically detects the text language for seamless multilingual playback.
 - **High-Visibility Display**: Long press a phrase to open a full-screen, high-contrast modal for silent communication in noisy environments.
 - **Customizable**: Toggle "Edit List" to add, edit, delete, and drag-and-drop to rearrange phrase cards.
-- **Configurable Voice & Language**: Choose your App Language from installed TTS packages. Adjust speech rate, pitch, and voice, with a live "Test Voice" preview.
+- **Configurable Voice & Language**: Choose your App Language from installed TTS packages. Switch between Male, Female, and System Default voices, and adjust speech rate and pitch with a live "Test Voice" preview.
 - **Voice Input Support**: Use the microphone button to quickly dictate phrases in your selected App Language.
 - **Offline Capable**: Completely local processing (depending on your device's TTS and speech recognition settings) with zero tracking.
 

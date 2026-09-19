@@ -44,6 +44,7 @@ import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
 import com.amh.sotto.data.SharedPreferencesPhraseRepository
 import com.amh.sotto.data.SharedPreferencesVoiceSettingsRepository
+import com.amh.sotto.data.VoiceGender
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.ui.main.MainViewModel
 import com.amh.sotto.ui.main.VoiceSettingsDialog
@@ -137,14 +138,66 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         }
     }
 
+    private fun findVoiceForGender(gender: VoiceGender, targetLocale: Locale?): Voice? {
+        if (gender == VoiceGender.DEFAULT) return null
+        val voices = tts?.voices ?: return null
+
+        val candidateVoices = if (targetLocale != null) {
+            val matchingLang = voices.filter { voice ->
+                val voiceLang = voice.locale.language
+                val targetLang = targetLocale.language
+                voiceLang.equals(targetLang, ignoreCase = true) ||
+                (targetLang == "id" && voiceLang.equals("in", ignoreCase = true)) ||
+                (targetLang == "in" && voiceLang.equals("id", ignoreCase = true))
+            }
+            if (matchingLang.isNotEmpty()) matchingLang else voices.toList()
+        } else {
+            voices.toList()
+        }
+
+        val installedVoices = candidateVoices.filter {
+            !it.features.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)
+        }
+        val pool = if (installedVoices.isNotEmpty()) installedVoices else candidateVoices
+
+        val sortedPool = pool.sortedWith(
+            compareBy<Voice>(
+                { it.isNetworkConnectionRequired },
+                { if (targetLocale != null && it.locale.country.equals(targetLocale.country, ignoreCase = true)) 0 else 1 }
+            )
+        )
+
+        return when (gender) {
+            VoiceGender.FEMALE -> {
+                sortedPool.firstOrNull { voice ->
+                    voice.name.contains("female", ignoreCase = true) ||
+                    voice.features.any { it.contains("gender:female", ignoreCase = true) || it.equals("female", ignoreCase = true) }
+                }
+            }
+            VoiceGender.MALE -> {
+                sortedPool.firstOrNull { voice ->
+                    (voice.name.contains("male", ignoreCase = true) && !voice.name.contains("female", ignoreCase = true)) ||
+                    voice.features.any { (it.contains("gender:male", ignoreCase = true) || it.equals("male", ignoreCase = true)) && !it.contains("female", ignoreCase = true) }
+                }
+            }
+            VoiceGender.DEFAULT -> null
+        }
+    }
+
     private fun applyVoiceSettings(settings: VoiceSettings, targetLocale: Locale? = null) {
         tts?.setSpeechRate(settings.speechRate)
         tts?.setPitch(settings.speechPitch)
-        if (settings.voiceName != null) {
+
+        val genderVoice = findVoiceForGender(settings.voiceGender, targetLocale)
+        if (genderVoice != null) {
+            tts?.setVoice(genderVoice)
+        } else if (settings.voiceName != null) {
             val targetVoice = tts?.voices?.firstOrNull { it.name == settings.voiceName }
             if (targetVoice != null && (targetLocale == null || targetVoice.locale.language.equals(targetLocale.language, ignoreCase = true))) {
                 tts?.setVoice(targetVoice)
             }
+        } else {
+            tts?.defaultVoice?.let { tts?.setVoice(it) }
         }
     }
 

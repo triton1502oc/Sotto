@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.amh.sotto.R
+import com.amh.sotto.data.VoiceGender
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.util.LocaleHelper
 import java.util.Locale
@@ -35,21 +36,35 @@ fun VoiceSettingsDialog(
 ) {
     var rate by remember { mutableFloatStateOf(currentSettings.speechRate) }
     var pitch by remember { mutableFloatStateOf(currentSettings.speechPitch) }
+    var voiceGender by remember { mutableStateOf(currentSettings.voiceGender) }
     var langDropdownExpanded by remember { mutableStateOf(false) }
     var langSearchQuery by remember { mutableStateOf("") }
+    var voiceDropdownExpanded by remember { mutableStateOf(false) }
 
     val systemDefaultLabel = stringResource(R.string.system_default)
 
-    fun updateSettings(newRate: Float = rate, newPitch: Float = pitch) {
+    fun updateSettings(
+        newRate: Float = rate,
+        newPitch: Float = pitch,
+        newGender: VoiceGender = voiceGender
+    ) {
         rate = newRate
         pitch = newPitch
+        voiceGender = newGender
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
                 speechPitch = ((newPitch * 10).roundToInt() / 10f),
-                voiceName = null
+                voiceName = null,
+                voiceGender = newGender
             )
         )
+    }
+
+    val selectedVoiceLabel = when (voiceGender) {
+        VoiceGender.DEFAULT -> stringResource(R.string.system_default)
+        VoiceGender.FEMALE -> stringResource(R.string.voice_female)
+        VoiceGender.MALE -> stringResource(R.string.voice_male)
     }
 
     val selectedLanguageLabel = remember(currentLanguage, availableLanguages, systemDefaultLabel) {
@@ -158,6 +173,77 @@ fun VoiceSettingsDialog(
                                     }
                                 )
                             }
+                        }
+                    }
+                }
+
+                // Speaker Voice Dropdown (System Default, Female, Male)
+                Column {
+                    Text(
+                        text = stringResource(R.string.label_speaker_voice),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { voiceDropdownExpanded = true },
+                            color = MaterialTheme.colorScheme.background,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 14.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = selectedVoiceLabel,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "▼",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = voiceDropdownExpanded,
+                            onDismissRequest = { voiceDropdownExpanded = false },
+                            modifier = Modifier
+                                .fillMaxWidth(0.85f)
+                                .background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.system_default), color = MaterialTheme.colorScheme.onSurface) },
+                                onClick = {
+                                    updateSettings(newGender = VoiceGender.DEFAULT)
+                                    voiceDropdownExpanded = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.voice_female), color = MaterialTheme.colorScheme.onSurface) },
+                                onClick = {
+                                    updateSettings(newGender = VoiceGender.FEMALE)
+                                    voiceDropdownExpanded = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.voice_male), color = MaterialTheme.colorScheme.onSurface) },
+                                onClick = {
+                                    updateSettings(newGender = VoiceGender.MALE)
+                                    voiceDropdownExpanded = false
+                                }
+                            )
                         }
                     }
                 }
