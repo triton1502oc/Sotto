@@ -57,9 +57,9 @@ Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay
 
 | Asset | Dimensions | Format | Status / Location |
 |---|---|---|---|
-| **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | ✅ Ready: [`play_store_icon_512.png`](play_store_icon_512.png) |
-| **Feature Graphic** | 1024 x 500 px | 24-bit PNG / JPEG | ✅ Ready: [`play_store_feature_graphic.png`](play_store_feature_graphic.png) |
-| **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 2 Ready: [`screenshot.png`](screenshot.png) (Main phrase view), [`screenshot_voice_settings.png`](screenshot_voice_settings.png) (Voice & Language Settings) |
+| **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | ✅ Ready: [`play_store_icon_512.png`](../assets/play_store_icon_512.png) |
+| **Feature Graphic** | 1024 x 500 px | 24-bit PNG / JPEG | ✅ Ready: [`play_store_feature_graphic.png`](../assets/play_store_feature_graphic.png) |
+| **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 2 Ready: [`screenshot.png`](../assets/screenshot.png) (Main phrase view), [`screenshot_voice_settings.png`](../assets/screenshot_voice_settings.png) (Voice & Language Settings) |
 
 ---
 

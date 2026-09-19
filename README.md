@@ -3,7 +3,7 @@
 **TL;DR**: Sotto (meaning *"under one's breath"* or a soft voice) is an assistive communication Android app designed for autistic teens and adults, featuring a dignified, low-stimulation UI and one-touch Text-to-Speech (TTS).
 
 <p align="center">
-  <img src="screenshot.png" alt="Sotto Interface" width="300"/>
+  <img src="assets/screenshot.png" alt="Sotto Interface" width="300"/>
 </p>
 
 ## Features
@@ -25,6 +25,10 @@
 3. Once downloaded, open the file from your notifications or using a File Manager app.
 4. Your phone may warn you about installing from "Unknown Sources". Tap "Settings" on the prompt and toggle the switch to allow your browser or file manager to install the app.
 5. Tap "Install". You're ready to use Sotto!
+
+## Documentation & Development
+- **Running on Physical Device**: See [RUNNING_ON_DEVICE.md](docs/RUNNING_ON_DEVICE.md) for USB debugging and installation instructions.
+- **Contributing & Architecture**: See [CONTRIBUTING.md](CONTRIBUTING.md) for design philosophy, architectural guardrails, and verification rules.
 
 ## Build (For Developers)
 ```bash
