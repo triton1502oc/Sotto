@@ -40,6 +40,8 @@ android {
             val keystoreFile = rootProject.file("keystore.properties")
             if (keystoreFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }
