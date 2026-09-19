@@ -33,14 +33,12 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getFloat("speech_rate", 1.0f) } returns 1.0f
         every { sharedPreferences.getFloat("speech_pitch", 1.0f) } returns 1.0f
         every { sharedPreferences.getString("voice_name", null) } returns null
-        every { sharedPreferences.getString("voice_gender", null) } returns null
 
         val settings = repository.getVoiceSettings()
 
         assertEquals(1.0f, settings.speechRate)
         assertEquals(1.0f, settings.speechPitch)
         assertEquals(null, settings.voiceName)
-        assertEquals(VoiceGender.DEFAULT, settings.voiceGender)
     }
 
     @Test
@@ -48,14 +46,12 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getFloat("speech_rate", 1.0f) } returns 0.8f
         every { sharedPreferences.getFloat("speech_pitch", 1.0f) } returns 1.2f
         every { sharedPreferences.getString("voice_name", null) } returns "en-us-x-sfg#male_1"
-        every { sharedPreferences.getString("voice_gender", null) } returns "MALE"
 
         val settings = repository.getVoiceSettings()
 
         assertEquals(0.8f, settings.speechRate)
         assertEquals(1.2f, settings.speechPitch)
         assertEquals("en-us-x-sfg#male_1", settings.voiceName)
-        assertEquals(VoiceGender.MALE, settings.voiceGender)
     }
 
     @Test
@@ -63,8 +59,7 @@ class VoiceSettingsRepositoryTest {
         val newSettings = VoiceSettings(
             speechRate = 1.25f,
             speechPitch = 0.9f,
-            voiceName = "en-gb-x-rjs#female_1",
-            voiceGender = VoiceGender.FEMALE
+            voiceName = "en-gb-x-rjs#female_1"
         )
 
         repository.saveVoiceSettings(newSettings)
@@ -73,7 +68,6 @@ class VoiceSettingsRepositoryTest {
             editor.putFloat("speech_rate", 1.25f)
             editor.putFloat("speech_pitch", 0.9f)
             editor.putString("voice_name", "en-gb-x-rjs#female_1")
-            editor.putString("voice_gender", "FEMALE")
             editor.apply()
         }
     }

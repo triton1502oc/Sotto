@@ -2,7 +2,6 @@ package com.amh.sotto.ui.main
 
 import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
-import com.amh.sotto.data.VoiceGender
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.data.VoiceSettingsRepository
 import io.mockk.every
@@ -100,19 +99,6 @@ class MainViewModelTest {
     @Test
     fun `updateVoiceSettings updates state and saves to repository`() {
         val newSettings = VoiceSettings(speechRate = 0.8f, speechPitch = 1.1f, voiceName = "test_voice")
-        viewModel.updateVoiceSettings(newSettings)
-
-        assertEquals(newSettings, viewModel.voiceSettings.value)
-        verify { voiceSettingsRepository.saveVoiceSettings(newSettings) }
-    }
-
-    @Test
-    fun `updateVoiceSettings with gender updates state and saves to repository`() {
-        val newSettings = VoiceSettings(
-            speechRate = 1.0f,
-            speechPitch = 1.0f,
-            voiceGender = VoiceGender.FEMALE
-        )
         viewModel.updateVoiceSettings(newSettings)
 
         assertEquals(newSettings, viewModel.voiceSettings.value)

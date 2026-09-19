@@ -45,7 +45,6 @@ import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
 import com.amh.sotto.data.SharedPreferencesPhraseRepository
 import com.amh.sotto.data.SharedPreferencesVoiceSettingsRepository
-import com.amh.sotto.data.VoiceGender
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.ui.main.MainViewModel
 import com.amh.sotto.ui.main.VoiceSettingsDialog
@@ -142,87 +141,8 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun findVoiceForGender(gender: VoiceGender, targetLocale: Locale?): Pair<Voice?, Boolean> {
-        if (gender == VoiceGender.DEFAULT) return Pair(null, false)
-        val voices = tts?.voices ?: return Pair(null, false)
-
-        val candidateVoices = if (targetLocale != null) {
-            val matchingLang = voices.filter { voice ->
-                val voiceLang = voice.locale.language
-                val targetLang = targetLocale.language
-                voiceLang.equals(targetLang, ignoreCase = true) ||
-                (targetLang == "id" && voiceLang.equals("in", ignoreCase = true)) ||
-                (targetLang == "in" && voiceLang.equals("id", ignoreCase = true))
-            }
-            if (matchingLang.isNotEmpty()) matchingLang else voices.toList()
-        } else {
-            voices.toList()
-        }
-
-        val installedVoices = candidateVoices.filter {
-            !it.features.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)
-        }
-        val pool = if (installedVoices.isNotEmpty()) installedVoices else candidateVoices
-
-        val sortedPool = pool.sortedWith(
-            compareBy<Voice>(
-                { it.isNetworkConnectionRequired },
-                { if (targetLocale != null && it.locale.country.equals(targetLocale.country, ignoreCase = true)) 0 else 1 }
-            )
-        )
-
-        val maleCodes = listOf("sfg", "iob", "iol", "fis", "gda", "dft", "eed", "ccc", "ald", "gcl", "omj", "baf", "zha", "wls", "olb")
-        val femaleCodes = listOf("tpf", "tpc", "iom", "rjs", "aub", "dfz", "izg", "efa", "lga", "apa", "bmd", "sfd")
-
-        fun isMale(voice: Voice): Boolean {
-            val name = voice.name
-            if (name.contains("female", ignoreCase = true)) return false
-            if (name.contains("male", ignoreCase = true)) return true
-            if (name.contains("_m0", ignoreCase = true) || name.contains("-m0", ignoreCase = true) || name.contains("m00", ignoreCase = true) || name.contains("m01", ignoreCase = true)) return true
-            if (maleCodes.any { code -> name.contains("-x-$code", ignoreCase = true) || name.contains("#$code", ignoreCase = true) }) return true
-            if (voice.features.any { (it.contains("gender:male", ignoreCase = true) || it.equals("male", ignoreCase = true)) && !it.contains("female", ignoreCase = true) }) return true
-            return false
-        }
-
-        fun isFemale(voice: Voice): Boolean {
-            val name = voice.name
-            if (name.contains("female", ignoreCase = true)) return true
-            if (name.contains("_f0", ignoreCase = true) || name.contains("-f0", ignoreCase = true) || name.contains("f00", ignoreCase = true) || name.contains("f01", ignoreCase = true)) return true
-            if (femaleCodes.any { code -> name.contains("-x-$code", ignoreCase = true) || name.contains("#$code", ignoreCase = true) }) return true
-            if (voice.features.any { it.contains("gender:female", ignoreCase = true) || it.equals("female", ignoreCase = true) }) return true
-            return false
-        }
-
-        return when (gender) {
-            VoiceGender.FEMALE -> {
-                val explicit = sortedPool.firstOrNull { isFemale(it) }
-                if (explicit != null) {
-                    Pair(explicit, true)
-                } else if (sortedPool.isNotEmpty()) {
-                    Pair(sortedPool.first(), false)
-                } else {
-                    Pair(null, false)
-                }
-            }
-            VoiceGender.MALE -> {
-                val explicit = sortedPool.firstOrNull { isMale(it) }
-                if (explicit != null) {
-                    Pair(explicit, true)
-                } else if (sortedPool.size >= 2) {
-                    Pair(sortedPool[1], false)
-                } else {
-                    Pair(null, false)
-                }
-            }
-            VoiceGender.DEFAULT -> Pair(null, false)
-        }
-    }
-
     private fun applyVoiceSettings(settings: VoiceSettings, targetLocale: Locale? = null) {
-        val (genderVoice, isExplicitVoice) = findVoiceForGender(settings.voiceGender, targetLocale)
-        if (genderVoice != null) {
-            tts?.setVoice(genderVoice)
-        } else if (settings.voiceName != null) {
+        if (settings.voiceName != null) {
             val targetVoice = tts?.voices?.firstOrNull { it.name == settings.voiceName }
             if (targetVoice != null && (targetLocale == null || targetVoice.locale.language.equals(targetLocale.language, ignoreCase = true))) {
                 tts?.setVoice(targetVoice)
@@ -231,26 +151,8 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             tts?.defaultVoice?.let { tts?.setVoice(it) }
         }
 
-        val effectivePitch = when (settings.voiceGender) {
-            VoiceGender.MALE -> {
-                if (isExplicitVoice) {
-                    settings.speechPitch
-                } else {
-                    (settings.speechPitch * 0.78f).coerceIn(0.5f, 2.0f)
-                }
-            }
-            VoiceGender.FEMALE -> {
-                if (isExplicitVoice) {
-                    settings.speechPitch
-                } else {
-                    (settings.speechPitch * 1.15f).coerceIn(0.5f, 2.0f)
-                }
-            }
-            VoiceGender.DEFAULT -> settings.speechPitch
-        }
-
         tts?.setSpeechRate(settings.speechRate)
-        tts?.setPitch(effectivePitch)
+        tts?.setPitch(settings.speechPitch)
     }
 
     override fun onInit(status: Int) {
