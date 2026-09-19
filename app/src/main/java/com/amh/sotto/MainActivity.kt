@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -321,9 +322,9 @@ fun SottoApp(
 ) {
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var showVoiceDialog by remember { mutableStateOf(false) }
+    var showVoiceDialog by rememberSaveable { mutableStateOf(false) }
     var phraseToEdit by remember { mutableStateOf<Phrase?>(null) }
-    var isEditMode by remember { mutableStateOf(false) }
+    var isEditMode by rememberSaveable { mutableStateOf(false) }
 
     val lazyGridState = rememberLazyGridState()
     val state = sh.calvin.reorderable.rememberReorderableLazyGridState(
