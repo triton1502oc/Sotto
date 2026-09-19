@@ -1,3 +1,56 @@
 <resources>
     <string name="app_name">Sotto</string>
+
+    <!-- Actions -->
+    <string name="action_done">Done</string>
+    <string name="action_edit_list">Edit List</string>
+    <string name="action_voice">Voice</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_speak_aloud">Speak Aloud</string>
+    <string name="action_test_voice">Test Voice</string>
+
+    <!-- Status -->
+    <string name="status_initializing">Initializing</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_dismiss">Dismiss</string>
+    <string name="cd_add_phrase">Add phrase</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_voice_settings_title">Voice &amp; Language Settings</string>
+    <string name="dialog_add_phrase_title">Add Phrase</string>
+    <string name="dialog_edit_phrase_title">Edit Phrase</string>
+    <string name="label_phrase_text">Phrase text</string>
+
+    <!-- Voice & Language Settings -->
+    <string name="label_language">App Language</string>
+    <string name="search_language">Search language…</string>
+    <string name="label_card_language">Card Language</string>
+    <string name="lang_auto">Auto-detect</string>
+    <string name="lang_english">English</string>
+    <string name="lang_indonesian">Bahasa Indonesia</string>
+    <string name="cd_voice_input">Speak to type</string>
+    <string name="label_speed">Speed</string>
+    <string name="label_pitch">Pitch</string>
+    <string name="label_speaker_voice">Speaker Voice</string>
+    <string name="system_default">System Default</string>
+    <string name="speed_slower">Slower</string>
+    <string name="speed_normal">Normal</string>
+    <string name="speed_faster">Faster</string>
+    <string name="pitch_lower">Lower</string>
+    <string name="pitch_normal">Normal</string>
+    <string name="pitch_higher">Higher</string>
+    <string name="test_voice_phrase">Hello, this is my speaking voice.</string>
+
+    <!-- Default Phrases -->
+    <string-array name="default_phrases">
+        <item>I need a quiet space, please.</item>
+        <item>Please give me a moment to respond.</item>
+        <item>Yes, that is fine.</item>
+        <item>No, not right now.</item>
+        <item>I am feeling overwhelmed.</item>
+        <item>Can you write that down or text me?</item>
+    </string-array>
 </resources>

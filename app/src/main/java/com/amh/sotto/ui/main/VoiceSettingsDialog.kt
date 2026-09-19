@@ -1,6 +1,5 @@
 package com.amh.sotto.ui.main
 
-import android.speech.tts.Voice
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,10 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.amh.sotto.R
 import com.amh.sotto.data.VoiceSettings
+import com.amh.sotto.util.LocaleHelper
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -24,35 +26,48 @@ import kotlin.math.roundToInt
 @Composable
 fun VoiceSettingsDialog(
     currentSettings: VoiceSettings,
-    availableVoices: List<Voice>,
+    currentLanguage: String,
+    availableLanguages: List<Pair<String, String>> = remember { LocaleHelper.getAvailableLanguages() },
+    onLanguageChanged: (String) -> Unit,
     onSettingsChanged: (VoiceSettings) -> Unit,
     onTestVoice: () -> Unit,
     onDismiss: () -> Unit
 ) {
     var rate by remember { mutableFloatStateOf(currentSettings.speechRate) }
     var pitch by remember { mutableFloatStateOf(currentSettings.speechPitch) }
-    var selectedVoiceName by remember { mutableStateOf(currentSettings.voiceName) }
-    var voiceDropdownExpanded by remember { mutableStateOf(false) }
+    var langDropdownExpanded by remember { mutableStateOf(false) }
+    var langSearchQuery by remember { mutableStateOf("") }
 
-    fun updateSettings(newRate: Float = rate, newPitch: Float = pitch, newVoice: String? = selectedVoiceName) {
+    val systemDefaultLabel = stringResource(R.string.system_default)
+
+    fun updateSettings(newRate: Float = rate, newPitch: Float = pitch) {
         rate = newRate
         pitch = newPitch
-        selectedVoiceName = newVoice
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
                 speechPitch = ((newPitch * 10).roundToInt() / 10f),
-                voiceName = newVoice
+                voiceName = null
             )
         )
     }
 
-    val selectedVoiceLabel = remember(selectedVoiceName, availableVoices) {
-        if (selectedVoiceName == null) {
-            "System Default"
+    val selectedLanguageLabel = remember(currentLanguage, availableLanguages, systemDefaultLabel) {
+        if (currentLanguage == LocaleHelper.LANG_SYSTEM) {
+            systemDefaultLabel
         } else {
-            val v = availableVoices.firstOrNull { it.name == selectedVoiceName }
-            if (v != null) formatVoiceLabel(v) else "System Default"
+            availableLanguages.firstOrNull { it.first == currentLanguage }?.second
+                ?: LocaleHelper.getLanguageDisplayName(currentLanguage)
+        }
+    }
+
+    val filteredLanguages = remember(availableLanguages, langSearchQuery) {
+        if (langSearchQuery.isBlank()) {
+            availableLanguages
+        } else {
+            availableLanguages.filter { (code, label) ->
+                code == LocaleHelper.LANG_SYSTEM || label.contains(langSearchQuery, ignoreCase = true)
+            }
         }
     }
 
@@ -60,7 +75,7 @@ fun VoiceSettingsDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Voice Settings",
+                text = stringResource(R.string.dialog_voice_settings_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -73,17 +88,91 @@ fun VoiceSettingsDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
+                // App Language Dropdown (Set Once)
+                Column {
+                    Text(
+                        text = stringResource(R.string.label_language),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { langDropdownExpanded = true },
+                            color = MaterialTheme.colorScheme.background,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 14.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = selectedLanguageLabel,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "▼",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = langDropdownExpanded,
+                            onDismissRequest = {
+                                langDropdownExpanded = false
+                                langSearchQuery = ""
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth(0.85f)
+                                .heightIn(max = 360.dp)
+                                .background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            OutlinedTextField(
+                                value = langSearchQuery,
+                                onValueChange = { langSearchQuery = it },
+                                placeholder = { Text(stringResource(R.string.search_language), fontSize = 14.sp) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                singleLine = true
+                            )
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                            filteredLanguages.forEach { (code, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
+                                    onClick = {
+                                        onLanguageChanged(code)
+                                        langDropdownExpanded = false
+                                        langSearchQuery = ""
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Speech Rate (Speed)
                 Column {
                     val rateText = when {
-                        rate <= 0.7f -> "Slower"
-                        rate in 0.9f..1.1f -> "Normal"
-                        rate >= 1.3f -> "Faster"
+                        rate <= 0.7f -> stringResource(R.string.speed_slower)
+                        rate in 0.9f..1.1f -> stringResource(R.string.speed_normal)
+                        rate >= 1.3f -> stringResource(R.string.speed_faster)
                         else -> ""
                     }
                     val speedDisplay = String.format(Locale.US, "%.1fx", rate)
                     Text(
-                        text = "Speed: $speedDisplay ${if (rateText.isNotEmpty()) "($rateText)" else ""}",
+                        text = "${stringResource(R.string.label_speed)}: $speedDisplay ${if (rateText.isNotEmpty()) "($rateText)" else ""}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
@@ -103,14 +192,14 @@ fun VoiceSettingsDialog(
                 // Speech Pitch
                 Column {
                     val pitchText = when {
-                        pitch <= 0.8f -> "Lower"
-                        pitch in 0.95f..1.05f -> "Normal"
-                        pitch >= 1.2f -> "Higher"
+                        pitch <= 0.8f -> stringResource(R.string.pitch_lower)
+                        pitch in 0.95f..1.05f -> stringResource(R.string.pitch_normal)
+                        pitch >= 1.2f -> stringResource(R.string.pitch_higher)
                         else -> ""
                     }
                     val pitchDisplay = String.format(Locale.US, "%.1fx", pitch)
                     Text(
-                        text = "Pitch: $pitchDisplay ${if (pitchText.isNotEmpty()) "($pitchText)" else ""}",
+                        text = "${stringResource(R.string.label_pitch)}: $pitchDisplay ${if (pitchText.isNotEmpty()) "($pitchText)" else ""}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
@@ -127,73 +216,6 @@ fun VoiceSettingsDialog(
                     )
                 }
 
-                // Speaker / Voice Selection
-                Column {
-                    Text(
-                        text = "Speaker Voice",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable { voiceDropdownExpanded = true },
-                            color = MaterialTheme.colorScheme.background,
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 14.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = selectedVoiceLabel,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "▼",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-
-                        DropdownMenu(
-                            expanded = voiceDropdownExpanded,
-                            onDismissRequest = { voiceDropdownExpanded = false },
-                            modifier = Modifier
-                                .fillMaxWidth(0.75f)
-                                .heightIn(max = 280.dp)
-                                .background(MaterialTheme.colorScheme.surface)
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("System Default", color = MaterialTheme.colorScheme.onSurface) },
-                                onClick = {
-                                    updateSettings(newVoice = null)
-                                    voiceDropdownExpanded = false
-                                }
-                            )
-                            availableVoices.forEach { voice ->
-                                DropdownMenuItem(
-                                    text = { Text(formatVoiceLabel(voice), color = MaterialTheme.colorScheme.onSurface) },
-                                    onClick = {
-                                        updateSettings(newVoice = voice.name)
-                                        voiceDropdownExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
                 // Test Voice Button
                 OutlinedButton(
                     onClick = onTestVoice,
@@ -203,32 +225,20 @@ fun VoiceSettingsDialog(
                         contentColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text("Test Voice")
+                    Text(stringResource(R.string.action_test_voice))
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Done", color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.action_done),
+                    color = Color(0xFF4CAF50),
+                    fontWeight = FontWeight.Bold
+                )
             }
         },
         containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp)
     )
-}
-
-private fun formatVoiceLabel(voice: Voice): String {
-    val locale = voice.locale
-    val country = locale.displayCountry.ifBlank { locale.country }
-    val nameSimplified = voice.name
-        .substringAfterLast("/")
-        .substringAfterLast(":")
-        .removePrefix("en-us-x-")
-        .removePrefix("en-gb-x-")
-        .removeSuffix("-local")
-    return if (country.isNotEmpty()) {
-        "$country - $nameSimplified"
-    } else {
-        voice.name
-    }
 }

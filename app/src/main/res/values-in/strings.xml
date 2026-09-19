@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">Sotto</string>
+
+    <!-- Actions -->
+    <string name="action_done">Selesai</string>
+    <string name="action_edit_list">Ubah Daftar</string>
+    <string name="action_voice">Suara</string>
+    <string name="action_save">Simpan</string>
+    <string name="action_delete">Hapus</string>
+    <string name="action_cancel">Batal</string>
+    <string name="action_speak_aloud">Bicara</string>
+    <string name="action_test_voice">Tes Suara</string>
+
+    <!-- Status -->
+    <string name="status_initializing">Memuat...</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_dismiss">Tutup</string>
+    <string name="cd_add_phrase">Tambah frasa</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_voice_settings_title">Pengaturan Suara &amp; Bahasa</string>
+    <string name="dialog_add_phrase_title">Tambah Frasa</string>
+    <string name="dialog_edit_phrase_title">Ubah Frasa</string>
+    <string name="label_phrase_text">Teks frasa</string>
+
+    <!-- Voice & Language Settings -->
+    <string name="label_language">Bahasa Aplikasi</string>
+    <string name="search_language">Cari bahasa…</string>
+    <string name="label_card_language">Bahasa Frasa</string>
+    <string name="lang_auto">Deteksi otomatis</string>
+    <string name="lang_english">English</string>
+    <string name="lang_indonesian">Bahasa Indonesia</string>
+    <string name="cd_voice_input">Bicara untuk mengetik</string>
+    <string name="label_speed">Kecepatan</string>
+    <string name="label_pitch">Nada</string>
+    <string name="label_speaker_voice">Suara Pembicara</string>
+    <string name="system_default">Default Sistem</string>
+    <string name="speed_slower">Lebih lambat</string>
+    <string name="speed_normal">Normal</string>
+    <string name="speed_faster">Lebih cepat</string>
+    <string name="pitch_lower">Lebih rendah</string>
+    <string name="pitch_normal">Normal</string>
+    <string name="pitch_higher">Lebih tinggi</string>
+    <string name="test_voice_phrase">Halo, ini adalah suara bicara saya.</string>
+
+    <!-- Default Phrases -->
+    <string-array name="default_phrases">
+        <item>Saya butuh tempat yang tenang.</item>
+        <item>Tolong beri saya waktu sebentar untuk merespons.</item>
+        <item>Ya, tidak apa-apa.</item>
+        <item>Tidak untuk sekarang.</item>
+        <item>Saya merasa kewalahan.</item>
+        <item>Bisa tolong tuliskan atau kirim pesan?</item>
+    </string-array>
+</resources>

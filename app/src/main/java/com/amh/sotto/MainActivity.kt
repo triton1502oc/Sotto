@@ -1,13 +1,21 @@
 package com.amh.sotto
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -22,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,12 +40,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
 import com.amh.sotto.data.SharedPreferencesPhraseRepository
 import com.amh.sotto.data.SharedPreferencesVoiceSettingsRepository
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.ui.main.MainViewModel
 import com.amh.sotto.ui.main.VoiceSettingsDialog
+import com.amh.sotto.util.LocaleHelper
 import sh.calvin.reorderable.*
 import java.util.Locale
 
@@ -44,11 +56,18 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     private var tts: TextToSpeech? = null
     private var ttsReady by mutableStateOf(false)
     private var availableVoices by mutableStateOf<List<Voice>>(emptyList())
+    private var availableTtsLanguages by mutableStateOf<Set<Locale>>(emptySet())
     private var latestVoiceSettings by mutableStateOf(VoiceSettings())
+    private var currentLanguage by mutableStateOf(LocaleHelper.LANG_SYSTEM)
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrapContext(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        currentLanguage = LocaleHelper.getLanguage(this)
         tts = TextToSpeech(this, this)
 
         val phraseRepository = SharedPreferencesPhraseRepository(applicationContext)
@@ -81,9 +100,20 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         ttsReady = ttsReady,
                         voiceSettings = voiceSettings,
                         availableVoices = availableVoices,
-                        onSpeak = { text ->
+                        availableTtsLanguages = availableTtsLanguages,
+                        currentLanguage = currentLanguage,
+                        onLanguageChanged = { newLang ->
+                            LocaleHelper.setLanguage(this@MainActivity, newLang)
+                            currentLanguage = newLang
+                            recreate()
+                        },
+                        onSpeak = { phrase ->
                             if (ttsReady) {
-                                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+                                val effectiveLang = LocaleHelper.getEffectiveLanguage(this@MainActivity)
+                                val targetLocale = LocaleHelper.resolvePhraseLocale(phrase.language, phrase.text, effectiveLang)
+                                tts?.setLanguage(targetLocale)
+                                applyVoiceSettings(latestVoiceSettings, targetLocale)
+                                tts?.speak(phrase.text, TextToSpeech.QUEUE_FLUSH, null, null)
                             }
                         },
                         onAddPhrase = { viewModel.addPhrase(it) },
@@ -93,7 +123,12 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         onUpdateVoiceSettings = { viewModel.updateVoiceSettings(it) },
                         onTestVoice = {
                             if (ttsReady) {
-                                tts?.speak("Hello, this is my speaking voice.", TextToSpeech.QUEUE_FLUSH, null, null)
+                                val effectiveLang = LocaleHelper.getEffectiveLanguage(this@MainActivity)
+                                val testLocale = LocaleHelper.getLocaleForLanguage(effectiveLang)
+                                tts?.setLanguage(testLocale)
+                                applyVoiceSettings(latestVoiceSettings, testLocale)
+                                val testPhrase = getString(R.string.test_voice_phrase)
+                                tts?.speak(testPhrase, TextToSpeech.QUEUE_FLUSH, null, null)
                             }
                         }
                     )
@@ -102,12 +137,12 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun applyVoiceSettings(settings: VoiceSettings) {
+    private fun applyVoiceSettings(settings: VoiceSettings, targetLocale: Locale? = null) {
         tts?.setSpeechRate(settings.speechRate)
         tts?.setPitch(settings.speechPitch)
         if (settings.voiceName != null) {
             val targetVoice = tts?.voices?.firstOrNull { it.name == settings.voiceName }
-            if (targetVoice != null) {
+            if (targetVoice != null && (targetLocale == null || targetVoice.locale.language.equals(targetLocale.language, ignoreCase = true))) {
                 tts?.setVoice(targetVoice)
             }
         }
@@ -115,17 +150,22 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            val result = tts?.setLanguage(Locale.US)
+            val effectiveLang = LocaleHelper.getEffectiveLanguage(this)
+            val initialLocale = LocaleHelper.getLocaleForLanguage(effectiveLang)
+            val result = tts?.setLanguage(initialLocale)
             if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
                 ttsReady = true
+                availableTtsLanguages = tts?.availableLanguages ?: emptySet()
                 tts?.voices?.let { voices ->
-                    val currentLang = tts?.voice?.locale?.language ?: Locale.getDefault().language
                     val localVoices = voices.filter { !it.isNetworkConnectionRequired }
-                    val matchingLang = localVoices.filter { it.locale.language.equals(currentLang, ignoreCase = true) }
+                    val matchingLang = localVoices.filter {
+                        it.locale.language.equals(initialLocale.language, ignoreCase = true) ||
+                        (initialLocale.language == "id" && it.locale.language.equals("in", ignoreCase = true))
+                    }
                     val listToShow = if (matchingLang.isNotEmpty()) matchingLang else localVoices
                     availableVoices = listToShow.sortedWith(compareBy({ it.locale.displayCountry }, { it.name }))
                 }
-                applyVoiceSettings(latestVoiceSettings)
+                applyVoiceSettings(latestVoiceSettings, initialLocale)
             }
         }
     }
@@ -156,22 +196,25 @@ fun SottoAppTheme(content: @Composable () -> Unit) {
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SottoApp(
-    phrases: List<String>,
+    phrases: List<Phrase>,
     ttsReady: Boolean,
     voiceSettings: VoiceSettings,
     availableVoices: List<Voice>,
-    onSpeak: (String) -> Unit,
-    onAddPhrase: (String) -> Unit,
-    onEditPhrase: (String, String) -> Unit,
-    onDeletePhrase: (String) -> Unit,
+    availableTtsLanguages: Set<Locale> = emptySet(),
+    currentLanguage: String,
+    onLanguageChanged: (String) -> Unit,
+    onSpeak: (Phrase) -> Unit,
+    onAddPhrase: (Phrase) -> Unit,
+    onEditPhrase: (Phrase, Phrase) -> Unit,
+    onDeletePhrase: (Phrase) -> Unit,
     onMovePhrase: (Int, Int) -> Unit,
     onUpdateVoiceSettings: (VoiceSettings) -> Unit,
     onTestVoice: () -> Unit
 ) {
-    var expandedPhrase by remember { mutableStateOf<String?>(null) }
+    var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showVoiceDialog by remember { mutableStateOf(false) }
-    var phraseToEdit by remember { mutableStateOf<String?>(null) }
+    var phraseToEdit by remember { mutableStateOf<Phrase?>(null) }
     var isEditMode by remember { mutableStateOf(false) }
 
     val lazyGridState = rememberLazyGridState()
@@ -185,17 +228,17 @@ fun SottoApp(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Sotto") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     if (isEditMode) {
                         TextButton(onClick = { showVoiceDialog = true }) {
-                            Text("Voice", color = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(R.string.action_voice), color = MaterialTheme.colorScheme.primary)
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                     }
                     TextButton(onClick = { isEditMode = !isEditMode }) {
                         Text(
-                            text = if (isEditMode) "Done" else "Edit List",
+                            text = if (isEditMode) stringResource(R.string.action_done) else stringResource(R.string.action_edit_list),
                             color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
                         )
                     }
@@ -206,7 +249,7 @@ fun SottoApp(
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
-                                text = "Initializing",
+                                text = stringResource(R.string.status_initializing),
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = Color.Black
@@ -243,8 +286,8 @@ fun SottoApp(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            items(phrases, key = { it }) { phrase ->
-                ReorderableItem(state, key = phrase) { isDragging ->
+            items(phrases, key = { it.text }) { phrase ->
+                ReorderableItem(state, key = phrase.text) { isDragging ->
                     val elevation = animateDpAsState(if (isDragging) 8.dp else 0.dp, label = "elevation")
                     var cardModifier = Modifier
                         .fillMaxWidth()
@@ -276,7 +319,7 @@ fun SottoApp(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = phrase,
+                                text = phrase.text,
                                 style = MaterialTheme.typography.titleMedium,
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -288,11 +331,17 @@ fun SottoApp(
         }
     }
 
+    val availableLanguages = remember(availableTtsLanguages) {
+        LocaleHelper.getAvailableLanguages(availableTtsLanguages)
+    }
+
     // Voice Settings Dialog
     if (showVoiceDialog) {
         VoiceSettingsDialog(
             currentSettings = voiceSettings,
-            availableVoices = availableVoices,
+            currentLanguage = currentLanguage,
+            availableLanguages = availableLanguages,
+            onLanguageChanged = onLanguageChanged,
             onSettingsChanged = onUpdateVoiceSettings,
             onTestVoice = onTestVoice,
             onDismiss = { showVoiceDialog = false }
@@ -312,76 +361,133 @@ fun SottoApp(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(32.dp),
-                    verticalArrangement = Arrangement.Center,
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        IconButton(
+                            onClick = { expandedPhrase = null },
+                            modifier = Modifier.align(Alignment.TopEnd)
+                        ) {
+                            Text(
+                                text = "✕",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
+
                     Text(
-                        text = phrase,
+                        text = phrase.text,
                         fontSize = 48.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                         lineHeight = 56.sp,
                         color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.weight(1f).wrapContentHeight(Alignment.CenterVertically)
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentHeight(Alignment.CenterVertically)
                     )
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+
+                    Button(
+                        onClick = { onSpeak(phrase) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp)
                     ) {
-                        OutlinedButton(
-                            onClick = { expandedPhrase = null },
-                            modifier = Modifier.weight(1f).height(64.dp)
-                        ) {
-                            Text("Dismiss", fontSize = 24.sp)
-                        }
-                        Button(
-                            onClick = { onSpeak(phrase) },
-                            modifier = Modifier.weight(1f).height(64.dp)
-                        ) {
-                            Text("Speak Aloud", fontSize = 24.sp)
-                        }
+                        Text(stringResource(R.string.action_speak_aloud), fontSize = 24.sp)
                     }
                 }
             }
         }
     }
 
-    // Add/Edit Dialog
+    // Add/Edit Dialog with Voice Input
     if (showAddDialog || phraseToEdit != null) {
-        var textValue by remember { mutableStateOf(phraseToEdit ?: "") }
+        val context = LocalContext.current
+        var textValue by remember { mutableStateOf(phraseToEdit?.text ?: "") }
         val isEditModeDialog = phraseToEdit != null
+
+        val speechLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                if (!matches.isNullOrEmpty()) {
+                    textValue = if (textValue.isBlank()) matches[0] else "$textValue ${matches[0]}"
+                }
+            }
+        }
 
         AlertDialog(
             onDismissRequest = {
                 showAddDialog = false
                 phraseToEdit = null
             },
-            title = { Text(if (isEditModeDialog) "Edit Phrase" else "Add Phrase") },
-            text = {
-                OutlinedTextField(
-                    value = textValue,
-                    onValueChange = { textValue = it },
-                    label = { Text("Phrase text") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = false,
-                    minLines = 2
+            title = {
+                Text(
+                    if (isEditModeDialog) {
+                        stringResource(R.string.dialog_edit_phrase_title)
+                    } else {
+                        stringResource(R.string.dialog_add_phrase_title)
+                    }
                 )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Phrase Text Field with Voice Input (Microphone button)
+                    OutlinedTextField(
+                        value = textValue,
+                        onValueChange = { textValue = it },
+                        label = { Text(stringResource(R.string.label_phrase_text)) },
+                        trailingIcon = {
+                            IconButton(
+                                onClick = {
+                                    val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                                    val langTag = if (effectiveLang == LocaleHelper.LANG_INDONESIAN) "id-ID" else "en-US"
+                                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+                                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+                                        putExtra(RecognizerIntent.EXTRA_PROMPT, context.getString(R.string.cd_voice_input))
+                                    }
+                                    try {
+                                        speechLauncher.launch(intent)
+                                    } catch (e: Exception) {
+                                        // Ignore if speech recognizer not present
+                                    }
+                                }
+                            ) {
+                                Text("🎤", fontSize = 20.sp)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = false,
+                        minLines = 2
+                    )
+                }
             },
             confirmButton = {
                 Button(onClick = {
                     if (textValue.isNotBlank()) {
+                        val newPhrase = Phrase(textValue.trim(), LocaleHelper.LANG_AUTO)
                         if (isEditModeDialog) {
-                            onEditPhrase(phraseToEdit!!, textValue.trim())
+                            onEditPhrase(phraseToEdit!!, newPhrase)
                         } else {
-                            onAddPhrase(textValue.trim())
+                            onAddPhrase(newPhrase)
                         }
                     }
                     showAddDialog = false
                     phraseToEdit = null
                 }) {
-                    Text("Save")
+                    Text(stringResource(R.string.action_save))
                 }
             },
             dismissButton = {
@@ -394,14 +500,14 @@ fun SottoApp(
                             showAddDialog = false
                             phraseToEdit = null
                         }) {
-                            Text("Delete", color = Color(0xFFEF5350))
+                            Text(stringResource(R.string.action_delete), color = Color(0xFFEF5350))
                         }
                     }
                     TextButton(onClick = {
                         showAddDialog = false
                         phraseToEdit = null
                     }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.action_cancel))
                     }
                 }
             }

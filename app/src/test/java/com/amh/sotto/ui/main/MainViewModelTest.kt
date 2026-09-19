@@ -1,5 +1,6 @@
 package com.amh.sotto.ui.main
 
+import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.data.VoiceSettingsRepository
@@ -16,18 +17,24 @@ class MainViewModelTest {
     private lateinit var voiceSettingsRepository: VoiceSettingsRepository
     private lateinit var viewModel: MainViewModel
 
+    private val initialPhrases = listOf(
+        Phrase("Phrase 1", "auto"),
+        Phrase("Phrase 2", "en"),
+        Phrase("Phrase 3", "id")
+    )
+
     @Before
     fun setup() {
         repository = mockk(relaxed = true)
         voiceSettingsRepository = mockk(relaxed = true)
-        every { repository.getPhrases() } returns listOf("Phrase 1", "Phrase 2", "Phrase 3")
+        every { repository.getPhrases() } returns initialPhrases
         every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(speechRate = 1.0f, speechPitch = 1.0f)
         viewModel = MainViewModel(repository, voiceSettingsRepository)
     }
 
     @Test
     fun `initial state loads phrases and voice settings from repository`() {
-        assertEquals(listOf("Phrase 1", "Phrase 2", "Phrase 3"), viewModel.phrases.value)
+        assertEquals(initialPhrases, viewModel.phrases.value)
         assertEquals(VoiceSettings(speechRate = 1.0f, speechPitch = 1.0f), viewModel.voiceSettings.value)
         verify { repository.getPhrases() }
         verify { voiceSettingsRepository.getVoiceSettings() }
@@ -35,27 +42,43 @@ class MainViewModelTest {
 
     @Test
     fun `addPhrase appends phrase and saves to repository`() {
-        viewModel.addPhrase("Phrase 4")
+        val newPhrase = Phrase("Phrase 4", "auto")
+        viewModel.addPhrase(newPhrase)
 
-        val expected = listOf("Phrase 1", "Phrase 2", "Phrase 3", "Phrase 4")
+        val expected = listOf(
+            Phrase("Phrase 1", "auto"),
+            Phrase("Phrase 2", "en"),
+            Phrase("Phrase 3", "id"),
+            newPhrase
+        )
         assertEquals(expected, viewModel.phrases.value)
         verify { repository.savePhrases(expected) }
     }
 
     @Test
     fun `editPhrase updates existing phrase and saves to repository`() {
-        viewModel.editPhrase("Phrase 2", "Updated Phrase 2")
+        val oldPhrase = Phrase("Phrase 2", "en")
+        val updatedPhrase = Phrase("Updated Phrase 2", "id")
+        viewModel.editPhrase(oldPhrase, updatedPhrase)
 
-        val expected = listOf("Phrase 1", "Updated Phrase 2", "Phrase 3")
+        val expected = listOf(
+            Phrase("Phrase 1", "auto"),
+            updatedPhrase,
+            Phrase("Phrase 3", "id")
+        )
         assertEquals(expected, viewModel.phrases.value)
         verify { repository.savePhrases(expected) }
     }
 
     @Test
     fun `deletePhrase removes phrase and saves to repository`() {
-        viewModel.deletePhrase("Phrase 2")
+        val phraseToDelete = Phrase("Phrase 2", "en")
+        viewModel.deletePhrase(phraseToDelete)
 
-        val expected = listOf("Phrase 1", "Phrase 3")
+        val expected = listOf(
+            Phrase("Phrase 1", "auto"),
+            Phrase("Phrase 3", "id")
+        )
         assertEquals(expected, viewModel.phrases.value)
         verify { repository.savePhrases(expected) }
     }
@@ -64,7 +87,11 @@ class MainViewModelTest {
     fun `movePhrase reorders list and saves to repository`() {
         viewModel.movePhrase(0, 2)
 
-        val expected = listOf("Phrase 2", "Phrase 3", "Phrase 1")
+        val expected = listOf(
+            Phrase("Phrase 2", "en"),
+            Phrase("Phrase 3", "id"),
+            Phrase("Phrase 1", "auto")
+        )
         assertEquals(expected, viewModel.phrases.value)
         verify { repository.savePhrases(expected) }
     }

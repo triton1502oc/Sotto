@@ -1,6 +1,7 @@
 package com.amh.sotto.ui.main
 
 import androidx.lifecycle.ViewModel
+import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.data.VoiceSettingsRepository
@@ -12,8 +13,8 @@ class MainViewModel(
     private val repository: PhraseRepository,
     private val voiceSettingsRepository: VoiceSettingsRepository
 ) : ViewModel() {
-    private val _phrases = MutableStateFlow<List<String>>(emptyList())
-    val phrases: StateFlow<List<String>> = _phrases.asStateFlow()
+    private val _phrases = MutableStateFlow<List<Phrase>>(emptyList())
+    val phrases: StateFlow<List<Phrase>> = _phrases.asStateFlow()
 
     private val _voiceSettings = MutableStateFlow(VoiceSettings())
     val voiceSettings: StateFlow<VoiceSettings> = _voiceSettings.asStateFlow()
@@ -23,14 +24,14 @@ class MainViewModel(
         _voiceSettings.value = voiceSettingsRepository.getVoiceSettings()
     }
 
-    fun addPhrase(newPhrase: String) {
+    fun addPhrase(newPhrase: Phrase) {
         val currentList = _phrases.value.toMutableList()
         currentList.add(newPhrase)
         _phrases.value = currentList
         repository.savePhrases(currentList)
     }
 
-    fun editPhrase(oldPhrase: String, newPhrase: String) {
+    fun editPhrase(oldPhrase: Phrase, newPhrase: Phrase) {
         val currentList = _phrases.value.toMutableList()
         val index = currentList.indexOf(oldPhrase)
         if (index != -1) {
@@ -40,7 +41,7 @@ class MainViewModel(
         }
     }
 
-    fun deletePhrase(phrase: String) {
+    fun deletePhrase(phrase: Phrase) {
         val currentList = _phrases.value.toMutableList()
         if (currentList.remove(phrase)) {
             _phrases.value = currentList
