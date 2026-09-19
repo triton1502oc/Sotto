@@ -455,12 +455,11 @@ fun SottoApp(
                             IconButton(
                                 onClick = {
                                     val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                                    val langTag = if (effectiveLang == LocaleHelper.LANG_INDONESIAN) "id-ID" else "en-US"
+                                    val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
                                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-                                        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
                                         putExtra(RecognizerIntent.EXTRA_PROMPT, context.getString(R.string.cd_voice_input))
                                     }
                                     try {
