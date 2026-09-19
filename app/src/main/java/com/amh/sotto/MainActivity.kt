@@ -170,8 +170,8 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             )
         )
 
-        val maleCodes = listOf("sfg", "iob", "iol", "fis", "gda", "dfz", "eed", "ccc", "ald", "gcl", "omj", "baf", "zha", "wls", "olb")
-        val femaleCodes = listOf("tpf", "tpc", "iom", "rjs", "aub", "dft", "izg", "efa", "lga", "apa", "bmd", "sfd")
+        val maleCodes = listOf("sfg", "iob", "iol", "fis", "gda", "dft", "eed", "ccc", "ald", "gcl", "omj", "baf", "zha", "wls", "olb")
+        val femaleCodes = listOf("tpf", "tpc", "iom", "rjs", "aub", "dfz", "izg", "efa", "lga", "apa", "bmd", "sfd")
 
         fun isMale(voice: Voice): Boolean {
             val name = voice.name
@@ -233,7 +233,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         val effectivePitch = when (settings.voiceGender) {
             VoiceGender.MALE -> {
                 if (isExplicitVoice) {
-                    (settings.speechPitch * 0.9f).coerceIn(0.5f, 2.0f)
+                    settings.speechPitch
                 } else {
                     (settings.speechPitch * 0.78f).coerceIn(0.5f, 2.0f)
                 }
