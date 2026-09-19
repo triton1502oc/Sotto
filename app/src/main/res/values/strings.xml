@@ -43,6 +43,10 @@
     <string name="pitch_higher">Higher</string>
     <string name="test_voice_phrase">Hello, this is my speaking voice.</string>
 
+    <!-- About -->
+    <string name="about_version">Sotto v%1$s</string>
+    <string name="action_feedback">Feedback &amp; Suggestions</string>
+
     <!-- Default Phrases -->
     <string-array name="default_phrases">
         <item>I need a quiet space, please.</item>

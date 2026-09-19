@@ -43,6 +43,10 @@
     <string name="pitch_higher">Lebih tinggi</string>
     <string name="test_voice_phrase">Halo, ini adalah suara bicara saya.</string>
 
+    <!-- About -->
+    <string name="about_version">Sotto v%1$s</string>
+    <string name="action_feedback">Masukan &amp; Saran</string>
+
     <!-- Default Phrases -->
     <string-array name="default_phrases">
         <item>Saya butuh tempat yang tenang.</item>

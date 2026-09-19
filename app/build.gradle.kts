@@ -14,8 +14,8 @@ android {
         applicationId = "com.amh.sotto"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.3.3"
+        versionCode = 8
+        versionName = "1.3.4"
     }
 
     signingConfigs {
@@ -52,7 +52,7 @@ android {
     buildFeatures {
       compose = true
       aidl = false
-      buildConfig = false
+      buildConfig = true
       shaders = false
     }
 
@@ -60,6 +60,18 @@ android {
       resources {
         excludes += "/META-INF/{AL2.0,LGPL2.1}"
       }
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            @Suppress("DEPRECATION")
+            val out = output as com.android.build.api.variant.impl.VariantOutputImpl
+            val buildType = variant.buildType ?: "debug"
+            val suffix = if (buildType == "release") "" else "-$buildType"
+            out.outputFileName = "Sotto-v${android.defaultConfig.versionName}${suffix}.apk"
+        }
     }
 }
 
