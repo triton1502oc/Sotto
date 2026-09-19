@@ -43,11 +43,11 @@ Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay
 
 ## 2. Graphic Asset Requirements
 
-| Asset | Dimensions | Format | Notes |
+| Asset | Dimensions | Format | Status / Location |
 |---|---|---|---|
-| **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | Max 1024 KB. Available in app icon resources. |
-| **Feature Graphic** | 1024 x 500 px | JPEG or 24-bit PNG | No alpha. Banner displayed on store listing. |
-| **Phone Screenshots** | Min 2 screenshots (1080 x 2400 px) | JPEG or 24-bit PNG | [screenshot.png](screenshot.png) in repo meets all requirements. |
+| **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | ✅ Ready: [`play_store_icon_512.png`](play_store_icon_512.png) |
+| **Feature Graphic** | 1024 x 500 px | 24-bit PNG / JPEG | ✅ Ready: [`play_store_feature_graphic.png`](play_store_feature_graphic.png) |
+| **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 2 Ready: [`screenshot.png`](screenshot.png) (Main phrase view), [`screenshot_voice_settings.png`](screenshot_voice_settings.png) (Voice & Language Settings) |
 
 ---
 
