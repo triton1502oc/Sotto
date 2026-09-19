@@ -147,8 +147,6 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             if (targetVoice != null && (targetLocale == null || targetVoice.locale.language.equals(targetLocale.language, ignoreCase = true))) {
                 tts?.setVoice(targetVoice)
             }
-        } else {
-            tts?.defaultVoice?.let { tts?.setVoice(it) }
         }
 
         tts?.setSpeechRate(settings.speechRate)
