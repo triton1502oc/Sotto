@@ -1,5 +1,6 @@
 package com.amh.sotto.ui.main
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -270,8 +271,14 @@ fun VoiceSettingsDialog(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                         modifier = Modifier
                             .clickable {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/triton1502oc/Sotto/issues"))
-                                context.startActivity(intent)
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/triton1502oc/Sotto/issues"))
+                                    context.startActivity(intent)
+                                } catch (e: ActivityNotFoundException) {
+                                    // Ignore if no browser or activity can handle the URL
+                                } catch (e: Exception) {
+                                    // Protect against any unexpected security or runtime exception
+                                }
                             }
                             .padding(vertical = 4.dp)
                     )
