@@ -9,11 +9,12 @@
 ## Features
 - **Modern Low-Stimulus UI**: Dark/Neutral Material 3 theme with high contrast text, avoiding visual clutter.
 - **Zero-Distraction Layout**: The main interface has zero administrative buttons, providing a safe, predictable communication environment.
-- **Instant Speech**: Tap a phrase card to speak immediately using Android's native TextToSpeech engine.
+- **Instant Speech**: Tap a phrase card to speak immediately. Sotto automatically detects the text language for seamless multilingual playback.
 - **High-Visibility Display**: Long press a phrase to open a full-screen, high-contrast modal for silent communication in noisy environments.
 - **Customizable**: Toggle "Edit List" to add, edit, delete, and drag-and-drop to rearrange phrase cards.
-- **Configurable Voice & Speed**: Adjust speech rate, pitch, and choose from installed speaker voices via Edit Mode with a live "Test Voice" preview.
-- **Offline Capable**: Completely local processing with zero tracking or pediatric aesthetics.
+- **Configurable Voice & Language**: Choose your App Language from installed TTS packages. Adjust speech rate, pitch, and voice, with a live "Test Voice" preview.
+- **Voice Input Support**: Use the microphone button to quickly dictate phrases in your selected App Language.
+- **Offline Capable**: Completely local processing (depending on your device's TTS and speech recognition settings) with zero tracking.
 
 ## How to Install (For Users)
 1. On your Android phone, go to the [Releases](https://github.com/triton1502oc/Sotto/releases) page.
