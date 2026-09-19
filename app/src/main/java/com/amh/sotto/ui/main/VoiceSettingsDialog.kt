@@ -31,7 +31,7 @@ fun VoiceSettingsDialog(
     availableLanguages: List<Pair<String, String>> = remember { LocaleHelper.getAvailableLanguages() },
     onLanguageChanged: (String) -> Unit,
     onSettingsChanged: (VoiceSettings) -> Unit,
-    onTestVoice: () -> Unit,
+    onTestVoice: (VoiceSettings) -> Unit,
     onDismiss: () -> Unit
 ) {
     var rate by remember { mutableFloatStateOf(currentSettings.speechRate) }
@@ -304,7 +304,16 @@ fun VoiceSettingsDialog(
 
                 // Test Voice Button
                 OutlinedButton(
-                    onClick = onTestVoice,
+                    onClick = {
+                        onTestVoice(
+                            VoiceSettings(
+                                speechRate = ((rate * 10).roundToInt() / 10f),
+                                speechPitch = ((pitch * 10).roundToInt() / 10f),
+                                voiceName = null,
+                                voiceGender = voiceGender
+                            )
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.outlinedButtonColors(

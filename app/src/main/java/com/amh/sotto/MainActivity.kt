@@ -121,13 +121,16 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         onEditPhrase = { old, new -> viewModel.editPhrase(old, new) },
                         onDeletePhrase = { viewModel.deletePhrase(it) },
                         onMovePhrase = { from, to -> viewModel.movePhrase(from, to) },
-                        onUpdateVoiceSettings = { viewModel.updateVoiceSettings(it) },
-                        onTestVoice = {
+                        onUpdateVoiceSettings = {
+                            latestVoiceSettings = it
+                            viewModel.updateVoiceSettings(it)
+                        },
+                        onTestVoice = { testSettings ->
                             if (ttsReady) {
                                 val effectiveLang = LocaleHelper.getEffectiveLanguage(this@MainActivity)
                                 val testLocale = LocaleHelper.getLocaleForLanguage(effectiveLang)
                                 tts?.setLanguage(testLocale)
-                                applyVoiceSettings(latestVoiceSettings, testLocale)
+                                applyVoiceSettings(testSettings, testLocale)
                                 val testPhrase = getString(R.string.test_voice_phrase)
                                 tts?.speak(testPhrase, TextToSpeech.QUEUE_FLUSH, null, null)
                             }
@@ -138,9 +141,9 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun findVoiceForGender(gender: VoiceGender, targetLocale: Locale?): Voice? {
-        if (gender == VoiceGender.DEFAULT) return null
-        val voices = tts?.voices ?: return null
+    private fun findVoiceForGender(gender: VoiceGender, targetLocale: Locale?): Pair<Voice?, Boolean> {
+        if (gender == VoiceGender.DEFAULT) return Pair(null, false)
+        val voices = tts?.voices ?: return Pair(null, false)
 
         val candidateVoices = if (targetLocale != null) {
             val matchingLang = voices.filter { voice ->
@@ -167,28 +170,55 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             )
         )
 
+        val maleCodes = listOf("sfg", "iob", "iol", "fis", "gda", "dfz", "eed", "ccc", "ald", "gcl", "omj", "baf", "zha", "wls", "olb")
+        val femaleCodes = listOf("tpf", "tpc", "iom", "rjs", "aub", "dft", "izg", "efa", "lga", "apa", "bmd", "sfd")
+
+        fun isMale(voice: Voice): Boolean {
+            val name = voice.name
+            if (name.contains("female", ignoreCase = true)) return false
+            if (name.contains("male", ignoreCase = true)) return true
+            if (name.contains("_m0", ignoreCase = true) || name.contains("-m0", ignoreCase = true) || name.contains("m00", ignoreCase = true) || name.contains("m01", ignoreCase = true)) return true
+            if (maleCodes.any { code -> name.contains("-x-$code", ignoreCase = true) || name.contains("#$code", ignoreCase = true) }) return true
+            if (voice.features.any { (it.contains("gender:male", ignoreCase = true) || it.equals("male", ignoreCase = true)) && !it.contains("female", ignoreCase = true) }) return true
+            return false
+        }
+
+        fun isFemale(voice: Voice): Boolean {
+            val name = voice.name
+            if (name.contains("female", ignoreCase = true)) return true
+            if (name.contains("_f0", ignoreCase = true) || name.contains("-f0", ignoreCase = true) || name.contains("f00", ignoreCase = true) || name.contains("f01", ignoreCase = true)) return true
+            if (femaleCodes.any { code -> name.contains("-x-$code", ignoreCase = true) || name.contains("#$code", ignoreCase = true) }) return true
+            if (voice.features.any { it.contains("gender:female", ignoreCase = true) || it.equals("female", ignoreCase = true) }) return true
+            return false
+        }
+
         return when (gender) {
             VoiceGender.FEMALE -> {
-                sortedPool.firstOrNull { voice ->
-                    voice.name.contains("female", ignoreCase = true) ||
-                    voice.features.any { it.contains("gender:female", ignoreCase = true) || it.equals("female", ignoreCase = true) }
+                val explicit = sortedPool.firstOrNull { isFemale(it) }
+                if (explicit != null) {
+                    Pair(explicit, true)
+                } else if (sortedPool.isNotEmpty()) {
+                    Pair(sortedPool.first(), false)
+                } else {
+                    Pair(null, false)
                 }
             }
             VoiceGender.MALE -> {
-                sortedPool.firstOrNull { voice ->
-                    (voice.name.contains("male", ignoreCase = true) && !voice.name.contains("female", ignoreCase = true)) ||
-                    voice.features.any { (it.contains("gender:male", ignoreCase = true) || it.equals("male", ignoreCase = true)) && !it.contains("female", ignoreCase = true) }
+                val explicit = sortedPool.firstOrNull { isMale(it) }
+                if (explicit != null) {
+                    Pair(explicit, true)
+                } else if (sortedPool.size >= 2) {
+                    Pair(sortedPool[1], false)
+                } else {
+                    Pair(null, false)
                 }
             }
-            VoiceGender.DEFAULT -> null
+            VoiceGender.DEFAULT -> Pair(null, false)
         }
     }
 
     private fun applyVoiceSettings(settings: VoiceSettings, targetLocale: Locale? = null) {
-        tts?.setSpeechRate(settings.speechRate)
-        tts?.setPitch(settings.speechPitch)
-
-        val genderVoice = findVoiceForGender(settings.voiceGender, targetLocale)
+        val (genderVoice, isExplicitVoice) = findVoiceForGender(settings.voiceGender, targetLocale)
         if (genderVoice != null) {
             tts?.setVoice(genderVoice)
         } else if (settings.voiceName != null) {
@@ -199,6 +229,27 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         } else {
             tts?.defaultVoice?.let { tts?.setVoice(it) }
         }
+
+        val effectivePitch = when (settings.voiceGender) {
+            VoiceGender.MALE -> {
+                if (isExplicitVoice) {
+                    (settings.speechPitch * 0.9f).coerceIn(0.5f, 2.0f)
+                } else {
+                    (settings.speechPitch * 0.78f).coerceIn(0.5f, 2.0f)
+                }
+            }
+            VoiceGender.FEMALE -> {
+                if (isExplicitVoice) {
+                    settings.speechPitch
+                } else {
+                    (settings.speechPitch * 1.15f).coerceIn(0.5f, 2.0f)
+                }
+            }
+            VoiceGender.DEFAULT -> settings.speechPitch
+        }
+
+        tts?.setSpeechRate(settings.speechRate)
+        tts?.setPitch(effectivePitch)
     }
 
     override fun onInit(status: Int) {
@@ -266,7 +317,7 @@ fun SottoApp(
     onDeletePhrase: (Phrase) -> Unit,
     onMovePhrase: (Int, Int) -> Unit,
     onUpdateVoiceSettings: (VoiceSettings) -> Unit,
-    onTestVoice: () -> Unit
+    onTestVoice: (VoiceSettings) -> Unit
 ) {
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
