@@ -5,15 +5,11 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <!-- Disallow cloud backup to prevent user phrases/data from leaving the device -->
+        <exclude domain="root" path="." />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <!-- Allow direct device-to-device migration so users keep their phrases when switching devices -->
+        <include domain="sharedpref" path="." />
     </device-transfer>
-    -->
 </data-extraction-rules>

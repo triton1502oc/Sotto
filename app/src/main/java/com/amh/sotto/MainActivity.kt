@@ -155,7 +155,11 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             val result = tts?.setLanguage(initialLocale)
             if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
                 ttsReady = true
-                availableTtsLanguages = tts?.availableLanguages ?: emptySet()
+                val installedLocales = tts?.voices?.filter { voice ->
+                    !voice.features.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)
+                }?.map { it.locale }?.toSet()
+                
+                availableTtsLanguages = installedLocales ?: tts?.availableLanguages ?: emptySet()
                 tts?.voices?.let { voices ->
                     val localVoices = voices.filter { !it.isNetworkConnectionRequired }
                     val matchingLang = localVoices.filter {
@@ -456,6 +460,7 @@ fun SottoApp(
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+                                        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
                                         putExtra(RecognizerIntent.EXTRA_PROMPT, context.getString(R.string.cd_voice_input))
                                     }
                                     try {

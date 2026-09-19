@@ -14,8 +14,8 @@ android {
         applicationId = "com.amh.sotto"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.2.0"
     }
 
     signingConfigs {
@@ -35,13 +35,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             val keystoreFile = rootProject.file("keystore.properties")
             if (keystoreFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
-            } else {
-                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }

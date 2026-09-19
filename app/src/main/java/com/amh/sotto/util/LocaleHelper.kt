@@ -16,11 +16,7 @@ object LocaleHelper {
     const val LANG_ENGLISH = "en"
     const val LANG_INDONESIAN = "id"
 
-    // Curated top global languages for a minimal choice list
-    val BASE_SUPPORTED_LANGUAGES = listOf(
-        "en", "id", "es", "fr", "de", "it", "pt", "ru",
-        "zh", "ja", "ko", "ar", "hi", "tr", "vi"
-    )
+
 
     fun getLanguage(context: Context): String {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -98,7 +94,21 @@ object LocaleHelper {
     }
 
     fun getAvailableLanguages(ttsLocales: Set<Locale>? = null): List<Pair<String, String>> {
-        val list = BASE_SUPPORTED_LANGUAGES.map { code ->
+        val languageCodes = linkedSetOf<String>()
+        
+        if (ttsLocales.isNullOrEmpty()) {
+            languageCodes.add("en")
+            languageCodes.add("id")
+        } else {
+            ttsLocales.forEach { locale ->
+                val lang = locale.language
+                if (lang.isNotBlank()) {
+                    languageCodes.add(lang)
+                }
+            }
+        }
+
+        val list = languageCodes.map { code ->
             code to getLanguageDisplayName(code)
         }.sortedBy { it.second }
 
