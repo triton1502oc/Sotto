@@ -14,6 +14,21 @@
 .cxx
 local.properties
 keystore.properties
+*keystore*.properties
+*signing*.properties
 *.jks
 *.keystore
+*.p12
+*.pem
+*.key
+*.pk8
+
+# Android & Google service credentials
+*google-services.json
+*credentials.json
+
+# Environment & local secrets
+*.env
+.env.*
+
 app/build/
