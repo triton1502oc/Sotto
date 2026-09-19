@@ -47,13 +47,43 @@
     <string name="about_version">Sotto v%1$s</string>
     <string name="action_feedback">Masukan &amp; Saran</string>
 
-    <!-- Default Phrases -->
-    <string-array name="default_phrases">
-        <item>Saya butuh tempat yang tenang.</item>
-        <item>Tolong beri saya waktu sebentar untuk merespons.</item>
-        <item>Ya, tidak apa-apa.</item>
-        <item>Tidak untuk sekarang.</item>
-        <item>Saya merasa kewalahan.</item>
-        <item>Bisa tolong tuliskan atau kirim pesan?</item>
+    <!-- Quick-Speak & Emergency Card (Phase 1) -->
+    <string name="hint_quick_speak">Ketik sesuatu untuk diucapkan…</string>
+    <string name="cd_quick_speak">Ucapkan teks yang diketik</string>
+    <string name="cd_show_fullscreen">Tampilkan layar penuh</string>
+    <string name="cd_clear_text">Hapus teks</string>
+    <string name="emergency_phrase_text">Saya tidak bisa bicara sekarang. Tolong baca layar saya.</string>
+    <string name="emergency_badge">Darurat</string>
+
+    <!-- Categories & Attention Chime (Phase 2) -->
+    <string name="label_category">Kategori</string>
+    <string name="category_all">Semua</string>
+    <string name="category_emergency">Darurat</string>
+    <string name="category_needs">Kebutuhan</string>
+    <string name="category_social">Sosial</string>
+    <string name="category_general">Umum</string>
+    <string name="label_attention_chime">Nada perhatian sebelum bicara</string>
+    <string name="label_attention_chime_desc">Membunyikan nada singkat untuk menarik perhatian sebelum bicara</string>
+
+    <!-- Default Phrases by Category -->
+    <string-array name="default_phrases_emergency">
+        <item>Saya tidak bisa bicara sekarang. Tolong baca layar saya.</item>
+    </string-array>
+
+    <string-array name="default_phrases_needs">
+        <item>Saya butuh tempat tenang.</item>
+        <item>Tolong beri saya waktu.</item>
+        <item>Saya harus pergi sekarang.</item>
+    </string-array>
+
+    <string-array name="default_phrases_social">
+        <item>Ya, silakan.</item>
+        <item>Tidak, terima kasih.</item>
+        <item>Terima kasih.</item>
+    </string-array>
+
+    <string-array name="default_phrases_general">
+        <item>Halo.</item>
+        <item>Tolong ulangi.</item>
     </string-array>
 </resources>

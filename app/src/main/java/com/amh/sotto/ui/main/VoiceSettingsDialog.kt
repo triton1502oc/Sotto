@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.amh.sotto.BuildConfig
 import com.amh.sotto.R
 import com.amh.sotto.data.VoiceSettings
+import com.amh.sotto.util.ChimePlayer
 import com.amh.sotto.util.LocaleHelper
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -38,8 +39,10 @@ fun VoiceSettingsDialog(
     onTestVoice: (VoiceSettings) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
     var rate by remember { mutableFloatStateOf(currentSettings.speechRate) }
     var pitch by remember { mutableFloatStateOf(currentSettings.speechPitch) }
+    var attentionChime by remember { mutableStateOf(currentSettings.playAttentionChime) }
     var langDropdownExpanded by remember { mutableStateOf(false) }
     var langSearchQuery by remember { mutableStateOf("") }
 
@@ -47,15 +50,18 @@ fun VoiceSettingsDialog(
 
     fun updateSettings(
         newRate: Float = rate,
-        newPitch: Float = pitch
+        newPitch: Float = pitch,
+        newChime: Boolean = attentionChime
     ) {
         rate = newRate
         pitch = newPitch
+        attentionChime = newChime
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
                 speechPitch = ((newPitch * 10).roundToInt() / 10f),
-                voiceName = null
+                voiceName = null,
+                playAttentionChime = newChime
             )
         )
     }
@@ -225,6 +231,54 @@ fun VoiceSettingsDialog(
                     )
                 }
 
+                // Attention Chime Toggle
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            val nextState = !attentionChime
+                            updateSettings(newChime = nextState)
+                            if (nextState) {
+                                ChimePlayer.play(context)
+                            }
+                        }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.label_attention_chime),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = stringResource(R.string.label_attention_chime_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                    Switch(
+                        checked = attentionChime,
+                        onCheckedChange = {
+                            updateSettings(newChime = it)
+                            if (it) {
+                                ChimePlayer.play(context)
+                            }
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                        )
+                    )
+                }
+
                 // Test Voice Button
                 OutlinedButton(
                     onClick = {
@@ -232,7 +286,8 @@ fun VoiceSettingsDialog(
                             VoiceSettings(
                                 speechRate = ((rate * 10).roundToInt() / 10f),
                                 speechPitch = ((pitch * 10).roundToInt() / 10f),
-                                voiceName = null
+                                voiceName = null,
+                                playAttentionChime = attentionChime
                             )
                         )
                     },
@@ -250,8 +305,6 @@ fun VoiceSettingsDialog(
                     modifier = Modifier.padding(top = 8.dp),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                 )
-
-                val context = LocalContext.current
 
                 Column(
                     modifier = Modifier

@@ -19,22 +19,34 @@ Sotto (meaning "under one's breath" or a soft voice) is an assistive communicati
 Unlike typical AAC tools designed with pediatric cartoon graphics and cluttered menus, Sotto provides a calm, mature, and predictable environment built specifically for adult communication needs.
 
 KEY FEATURES:
-
+ 
 • Modern Low-Stimulus UI
 Dark-neutral Material 3 theme with high contrast and zero unnecessary animations or visual distractions.
-
+ 
 • Zero-Distraction Communication Mode
 In normal mode, all administrative buttons (add, delete, reorder) are completely hidden. Tap any phrase card to speak immediately using Android's offline Text-to-Speech engine.
+ 
+• Emergency Bystander Mode
+A dedicated hero card for verbal shutdowns. Long-press or tap fullscreen to display a high-contrast emergency banner explaining non-verbal episodes directly to bystanders, medical staff, or first responders.
+
+• Quick-Speak Bar
+Speak spontaneous, one-off thoughts instantly without adding them to your curated phrase board. Includes voice dictation and instant fullscreen display.
+
+• Contextual Categories
+Organize and filter phrases by situation (Emergency, Needs, Social, General) using clean, low-stimulus filter chips.
 
 • High-Visibility Fullscreen Mode
-In noisy, crowded, or overwhelming environments, long-press any card to display the phrase in giant, high-contrast text across your entire screen so you can silently show your phone to others.
+In noisy, crowded, or overwhelming environments, view any phrase in giant, high-contrast text across your entire screen to silently show your phone to others.
 
+• Attention Chime & Haptics
+Optionally sound a gentle chime and vibration before speaking to politely capture listener attention in noisy spaces.
+ 
 • Configurable Voice & Speed
 Tailor your speech output to your comfort. Adjust speech rate (speed) and pitch with live preview.
-
+ 
 • Fully Customizable
 Toggle "Edit List" when you want to add new phrases, edit existing text, delete phrases safely, or drag-and-drop cards to rearrange their order.
-
+ 
 • 100% Offline & Private
 Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay entirely on your local device.
 ```

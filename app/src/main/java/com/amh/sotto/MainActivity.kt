@@ -3,8 +3,12 @@ package com.amh.sotto
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
@@ -14,16 +18,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +58,7 @@ import com.amh.sotto.data.SharedPreferencesPhraseRepository
 import com.amh.sotto.data.SharedPreferencesVoiceSettingsRepository
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.ui.main.MainViewModel
+import com.amh.sotto.util.ChimePlayer
 import com.amh.sotto.ui.main.VoiceSettingsDialog
 import com.amh.sotto.util.LocaleHelper
 import sh.calvin.reorderable.*
@@ -110,35 +122,55 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         },
                         onSpeak = { phrase ->
                             if (ttsReady) {
+                                if (latestVoiceSettings.playAttentionChime) {
+                                    playAttentionChime()
+                                }
                                 val effectiveLang = LocaleHelper.getEffectiveLanguage(this@MainActivity)
                                 val targetLocale = LocaleHelper.resolvePhraseLocale(phrase.language, phrase.text, effectiveLang)
                                 tts?.setLanguage(targetLocale)
                                 applyVoiceSettings(latestVoiceSettings, targetLocale)
-                                tts?.speak(phrase.text, TextToSpeech.QUEUE_FLUSH, null, null)
+                                if (latestVoiceSettings.playAttentionChime) {
+                                    tts?.playSilentUtterance(280, TextToSpeech.QUEUE_FLUSH, null)
+                                    tts?.speak(phrase.text, TextToSpeech.QUEUE_ADD, null, null)
+                                } else {
+                                    tts?.speak(phrase.text, TextToSpeech.QUEUE_FLUSH, null, null)
+                                }
                             }
                         },
                         onAddPhrase = { viewModel.addPhrase(it) },
                         onEditPhrase = { old, new -> viewModel.editPhrase(old, new) },
                         onDeletePhrase = { viewModel.deletePhrase(it) },
-                        onMovePhrase = { from, to -> viewModel.movePhrase(from, to) },
+                        onMovePhrase = { fromPhrase, toPhrase -> viewModel.movePhrase(fromPhrase, toPhrase) },
                         onUpdateVoiceSettings = {
                             latestVoiceSettings = it
                             viewModel.updateVoiceSettings(it)
                         },
                         onTestVoice = { testSettings ->
                             if (ttsReady) {
+                                if (testSettings.playAttentionChime) {
+                                    playAttentionChime()
+                                }
                                 val effectiveLang = LocaleHelper.getEffectiveLanguage(this@MainActivity)
                                 val testLocale = LocaleHelper.getLocaleForLanguage(effectiveLang)
                                 tts?.setLanguage(testLocale)
                                 applyVoiceSettings(testSettings, testLocale)
                                 val testPhrase = getString(R.string.test_voice_phrase)
-                                tts?.speak(testPhrase, TextToSpeech.QUEUE_FLUSH, null, null)
+                                if (testSettings.playAttentionChime) {
+                                    tts?.playSilentUtterance(280, TextToSpeech.QUEUE_FLUSH, null)
+                                    tts?.speak(testPhrase, TextToSpeech.QUEUE_ADD, null, null)
+                                } else {
+                                    tts?.speak(testPhrase, TextToSpeech.QUEUE_FLUSH, null, null)
+                                }
                             }
                         }
                     )
                 }
             }
         }
+    }
+
+    private fun playAttentionChime() {
+        ChimePlayer.play(this)
     }
 
     private fun applyVoiceSettings(settings: VoiceSettings, targetLocale: Locale? = null) {
@@ -216,7 +248,7 @@ fun SottoApp(
     onAddPhrase: (Phrase) -> Unit,
     onEditPhrase: (Phrase, Phrase) -> Unit,
     onDeletePhrase: (Phrase) -> Unit,
-    onMovePhrase: (Int, Int) -> Unit,
+    onMovePhrase: (Phrase, Phrase) -> Unit,
     onUpdateVoiceSettings: (VoiceSettings) -> Unit,
     onTestVoice: (VoiceSettings) -> Unit
 ) {
@@ -226,52 +258,235 @@ fun SottoApp(
     var phraseToEdit by remember { mutableStateOf<Phrase?>(null) }
     var isEditMode by rememberSaveable { mutableStateOf(false) }
 
+    val allCategoryKey = "ALL"
+    var selectedCategory by rememberSaveable { mutableStateOf(allCategoryKey) }
+
+    val categories = remember {
+        listOf(
+            allCategoryKey to R.string.category_all,
+            Phrase.CATEGORY_EMERGENCY to R.string.category_emergency,
+            Phrase.CATEGORY_NEEDS to R.string.category_needs,
+            Phrase.CATEGORY_SOCIAL to R.string.category_social,
+            Phrase.CATEGORY_GENERAL to R.string.category_general
+        )
+    }
+
+    val filteredPhrases = remember(phrases, selectedCategory) {
+        if (selectedCategory == allCategoryKey) {
+            phrases
+        } else if (selectedCategory == Phrase.CATEGORY_EMERGENCY) {
+            phrases.filter { it.isEmergency }
+        } else {
+            phrases.filter { !it.isEmergency && it.category == selectedCategory }
+        }
+    }
+
     val lazyGridState = rememberLazyGridState()
     val state = sh.calvin.reorderable.rememberReorderableLazyGridState(
         lazyGridState = lazyGridState,
         onMove = { from, to ->
-            onMovePhrase(from.index, to.index)
+            val fromPhrase = filteredPhrases.getOrNull(from.index)
+            val toPhrase = filteredPhrases.getOrNull(to.index)
+            if (fromPhrase != null && toPhrase != null) {
+                onMovePhrase(fromPhrase, toPhrase)
+            }
         }
     )
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
-                actions = {
-                    if (isEditMode) {
-                        TextButton(onClick = { showVoiceDialog = true }) {
-                            Text(stringResource(R.string.action_voice), color = MaterialTheme.colorScheme.primary)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.app_name)) },
+                    actions = {
+                        if (isEditMode) {
+                            TextButton(onClick = { showVoiceDialog = true }) {
+                                Text(stringResource(R.string.action_voice), color = MaterialTheme.colorScheme.primary)
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
                         }
-                        Spacer(modifier = Modifier.width(4.dp))
-                    }
-                    TextButton(onClick = { isEditMode = !isEditMode }) {
-                        Text(
-                            text = if (isEditMode) stringResource(R.string.action_done) else stringResource(R.string.action_edit_list),
-                            color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    if (!ttsReady) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Surface(
-                            color = Color(0xFFFFC107),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
+                        TextButton(onClick = { isEditMode = !isEditMode }) {
                             Text(
-                                text = stringResource(R.string.status_initializing),
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.Black
+                                text = if (isEditMode) stringResource(R.string.action_done) else stringResource(R.string.action_edit_list),
+                                color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
                             )
                         }
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                        if (!ttsReady) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                color = Color(0xFFFFC107),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.status_initializing),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
-            )
+
+                // Category Filter Chips
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items(categories) { (catKey, strRes) ->
+                        val isSelected = selectedCategory == catKey
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { selectedCategory = catKey },
+                            label = {
+                                Text(
+                                    text = stringResource(strRes),
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = if (catKey == Phrase.CATEGORY_EMERGENCY) Color(0xFF4E342E) else MaterialTheme.colorScheme.surfaceVariant,
+                                selectedLabelColor = if (catKey == Phrase.CATEGORY_EMERGENCY) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface,
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            ),
+                            border = if (catKey == Phrase.CATEGORY_EMERGENCY && isSelected) {
+                                BorderStroke(1.dp, Color(0xFFFFB74D))
+                            } else null
+                        )
+                    }
+                }
+            }
+        },
+        bottomBar = {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 4.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+            ) {
+                var quickText by rememberSaveable { mutableStateOf("") }
+                val context = LocalContext.current
+                val voiceInputPrompt = stringResource(R.string.cd_voice_input)
+
+                val quickSpeechLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult()
+                ) { result ->
+                    if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                        val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                        if (!matches.isNullOrEmpty()) {
+                            quickText = if (quickText.isBlank()) matches[0] else "$quickText ${matches[0]}"
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = quickText,
+                        onValueChange = { quickText = it },
+                        placeholder = {
+                            Text(
+                                stringResource(R.string.hint_quick_speak),
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        trailingIcon = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (quickText.isNotBlank()) {
+                                    IconButton(onClick = { quickText = "" }) {
+                                        Text(
+                                            "✕",
+                                            fontSize = 16.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                }
+                                IconButton(
+                                    onClick = {
+                                        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                                        val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
+                                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+                                            putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
+                                        }
+                                        try {
+                                            quickSpeechLauncher.launch(intent)
+                                        } catch (e: Exception) {
+                                            // Ignore if speech recognizer not present
+                                        }
+                                    }
+                                ) {
+                                    Text("🎤", fontSize = 18.sp)
+                                }
+                            }
+                        },
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                if (quickText.isNotBlank()) {
+                                    onSpeak(Phrase(quickText.trim(), LocaleHelper.LANG_AUTO))
+                                }
+                            }
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                    )
+
+                    // Fullscreen Button
+                    IconButton(
+                        onClick = {
+                            if (quickText.isNotBlank()) {
+                                expandedPhrase = Phrase(quickText.trim(), LocaleHelper.LANG_AUTO)
+                            }
+                        },
+                        enabled = quickText.isNotBlank()
+                    ) {
+                        Text(
+                            "⛶",
+                            fontSize = 22.sp,
+                            color = if (quickText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+
+                    // Speak Button
+                    FilledIconButton(
+                        onClick = {
+                            if (quickText.isNotBlank()) {
+                                onSpeak(Phrase(quickText.trim(), LocaleHelper.LANG_AUTO))
+                            }
+                        },
+                        enabled = quickText.isNotBlank(),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text("🔊", fontSize = 18.sp)
+                    }
+                }
+            }
         },
         floatingActionButton = {
             if (isEditMode) {
@@ -295,12 +510,24 @@ fun SottoApp(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            items(phrases, key = { it.text }) { phrase ->
+            items(
+                items = filteredPhrases,
+                key = { it.text },
+                span = { phrase ->
+                    if (phrase.isEmergency) GridItemSpan(2) else GridItemSpan(1)
+                }
+            ) { phrase ->
                 ReorderableItem(state, key = phrase.text) { isDragging ->
                     val elevation = animateDpAsState(if (isDragging) 8.dp else 0.dp, label = "elevation")
                     var cardModifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(1f)
+                        .then(
+                            if (phrase.isEmergency) {
+                                Modifier.wrapContentHeight()
+                            } else {
+                                Modifier.aspectRatio(1f)
+                            }
+                        )
                         .clip(RoundedCornerShape(16.dp))
                         
                     cardModifier = if (isEditMode) {
@@ -318,21 +545,59 @@ fun SottoApp(
                         modifier = cardModifier,
                         elevation = CardDefaults.cardElevation(defaultElevation = elevation.value),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isEditMode) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
-                        )
+                            containerColor = if (isEditMode) {
+                                MaterialTheme.colorScheme.surfaceVariant
+                            } else if (phrase.isEmergency) {
+                                Color(0xFF251E14)
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            }
+                        ),
+                        border = if (phrase.isEmergency) BorderStroke(1.5.dp, Color(0xFFFFB74D)) else null
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = phrase.text,
-                                style = MaterialTheme.typography.titleMedium,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                        if (phrase.isEmergency) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Surface(
+                                    color = Color(0x33FFB74D),
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "🚨 " + stringResource(R.string.emergency_badge),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color(0xFFFFB74D),
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                    )
+                                }
+                                Text(
+                                    text = phrase.text,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center,
+                                    color = Color(0xFFFFE0B2),
+                                    lineHeight = 24.sp
+                                )
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = phrase.text,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 }
@@ -359,13 +624,15 @@ fun SottoApp(
 
     // Modal Dialog for viewing/speaking giant text
     expandedPhrase?.let { phrase ->
+        val isEmergency = phrase.isEmergency
         Dialog(
             onDismissRequest = { expandedPhrase = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
+                color = if (isEmergency) Color(0xFF1E1710) else MaterialTheme.colorScheme.background,
+                border = if (isEmergency) BorderStroke(2.dp, Color(0xFFFFB74D)) else null
             ) {
                 Column(
                     modifier = Modifier
@@ -378,6 +645,21 @@ fun SottoApp(
                     Box(
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        if (isEmergency) {
+                            Surface(
+                                color = Color(0x33FFB74D),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.align(Alignment.Center)
+                            ) {
+                                Text(
+                                    text = "🚨 " + stringResource(R.string.emergency_badge),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFFFB74D),
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
                         IconButton(
                             onClick = { expandedPhrase = null },
                             modifier = Modifier.align(Alignment.TopEnd)
@@ -386,18 +668,18 @@ fun SottoApp(
                                 text = "✕",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = if (isEmergency) Color(0xFFFFB74D) else MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
 
                     Text(
                         text = phrase.text,
-                        fontSize = 48.sp,
+                        fontSize = if (isEmergency && phrase.text.length > 60) 36.sp else 48.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
-                        lineHeight = 56.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        lineHeight = if (isEmergency && phrase.text.length > 60) 44.sp else 56.sp,
+                        color = if (isEmergency) Color(0xFFFFE0B2) else MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier
                             .weight(1f)
                             .wrapContentHeight(Alignment.CenterVertically)
@@ -407,20 +689,38 @@ fun SottoApp(
                         onClick = { onSpeak(phrase) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(64.dp)
+                            .height(64.dp),
+                        colors = if (isEmergency) {
+                            ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFB74D),
+                                contentColor = Color(0xFF1E1710)
+                            )
+                        } else {
+                            ButtonDefaults.buttonColors()
+                        }
                     ) {
-                        Text(stringResource(R.string.action_speak_aloud), fontSize = 24.sp)
+                        Text(
+                            stringResource(R.string.action_speak_aloud),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
         }
     }
 
-    // Add/Edit Dialog with Voice Input
+    // Add/Edit Dialog with Voice Input and Category selection
     if (showAddDialog || phraseToEdit != null) {
         val context = LocalContext.current
         val voiceInputPrompt = stringResource(R.string.cd_voice_input)
-        var textValue by remember { mutableStateOf(phraseToEdit?.text ?: "") }
+        var textValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.text ?: "") }
+        var selectedCat by remember(phraseToEdit, showAddDialog) {
+            mutableStateOf(
+                if (phraseToEdit?.isEmergency == true) Phrase.CATEGORY_EMERGENCY
+                else (phraseToEdit?.category ?: Phrase.CATEGORY_GENERAL)
+            )
+        }
         val isEditModeDialog = phraseToEdit != null
 
         val speechLauncher = rememberLauncherForActivityResult(
@@ -482,12 +782,64 @@ fun SottoApp(
                         singleLine = false,
                         minLines = 2
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Category Selection
+                    Text(
+                        text = stringResource(R.string.label_category),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val dialogCategories = listOf(
+                        Phrase.CATEGORY_GENERAL to R.string.category_general,
+                        Phrase.CATEGORY_NEEDS to R.string.category_needs,
+                        Phrase.CATEGORY_SOCIAL to R.string.category_social,
+                        Phrase.CATEGORY_EMERGENCY to R.string.category_emergency
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        dialogCategories.forEach { (catKey, strRes) ->
+                            val isSelected = selectedCat == catKey
+                            val isEmergencyCat = catKey == Phrase.CATEGORY_EMERGENCY
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { selectedCat = catKey },
+                                label = {
+                                    Text(
+                                        text = if (isEmergencyCat) "🚨 " + stringResource(strRes) else stringResource(strRes),
+                                        fontSize = 11.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = if (isEmergencyCat) Color(0xFF4E342E) else MaterialTheme.colorScheme.surfaceVariant,
+                                    selectedLabelColor = if (isEmergencyCat) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface
+                                ),
+                                border = if (isEmergencyCat && isSelected) {
+                                    BorderStroke(1.dp, Color(0xFFFFB74D))
+                                } else null
+                            )
+                        }
+                    }
                 }
             },
             confirmButton = {
                 Button(onClick = {
                     if (textValue.isNotBlank()) {
-                        val newPhrase = Phrase(textValue.trim(), LocaleHelper.LANG_AUTO)
+                        val isEmergency = selectedCat == Phrase.CATEGORY_EMERGENCY
+                        val newPhrase = Phrase(
+                            text = textValue.trim(),
+                            language = LocaleHelper.LANG_AUTO,
+                            isEmergency = isEmergency,
+                            category = selectedCat
+                        )
                         if (isEditModeDialog) {
                             onEditPhrase(phraseToEdit!!, newPhrase)
                         } else {

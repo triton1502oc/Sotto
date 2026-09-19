@@ -97,6 +97,21 @@ class MainViewModelTest {
     }
 
     @Test
+    fun `movePhrase by Phrase object reorders list and saves to repository`() {
+        val phrase1 = initialPhrases[0]
+        val phrase3 = initialPhrases[2]
+        viewModel.movePhrase(phrase1, phrase3)
+
+        val expected = listOf(
+            Phrase("Phrase 2", "en"),
+            Phrase("Phrase 3", "id"),
+            Phrase("Phrase 1", "auto")
+        )
+        assertEquals(expected, viewModel.phrases.value)
+        verify { repository.savePhrases(expected) }
+    }
+
+    @Test
     fun `updateVoiceSettings updates state and saves to repository`() {
         val newSettings = VoiceSettings(speechRate = 0.8f, speechPitch = 1.1f, voiceName = "test_voice")
         viewModel.updateVoiceSettings(newSettings)

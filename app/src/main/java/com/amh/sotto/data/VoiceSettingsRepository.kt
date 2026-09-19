@@ -6,7 +6,8 @@ import android.content.SharedPreferences
 data class VoiceSettings(
     val speechRate: Float = 1.0f,
     val speechPitch: Float = 1.0f,
-    val voiceName: String? = null
+    val voiceName: String? = null,
+    val playAttentionChime: Boolean = false
 )
 
 interface VoiceSettingsRepository {
@@ -21,16 +22,19 @@ class SharedPreferencesVoiceSettingsRepository(context: Context) : VoiceSettings
         private const val KEY_SPEECH_RATE = "speech_rate"
         private const val KEY_SPEECH_PITCH = "speech_pitch"
         private const val KEY_VOICE_NAME = "voice_name"
+        private const val KEY_ATTENTION_CHIME = "attention_chime"
     }
 
     override fun getVoiceSettings(): VoiceSettings {
         val rate = prefs.getFloat(KEY_SPEECH_RATE, 1.0f)
         val pitch = prefs.getFloat(KEY_SPEECH_PITCH, 1.0f)
         val voiceName = prefs.getString(KEY_VOICE_NAME, null)
+        val attentionChime = prefs.getBoolean(KEY_ATTENTION_CHIME, false)
         return VoiceSettings(
             speechRate = rate,
             speechPitch = pitch,
-            voiceName = voiceName
+            voiceName = voiceName,
+            playAttentionChime = attentionChime
         )
     }
 
@@ -39,6 +43,7 @@ class SharedPreferencesVoiceSettingsRepository(context: Context) : VoiceSettings
         editor.putFloat(KEY_SPEECH_RATE, settings.speechRate)
         editor.putFloat(KEY_SPEECH_PITCH, settings.speechPitch)
         editor.putString(KEY_VOICE_NAME, settings.voiceName)
+        editor.putBoolean(KEY_ATTENTION_CHIME, settings.playAttentionChime)
         editor.apply()
     }
 }

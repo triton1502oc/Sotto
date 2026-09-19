@@ -47,13 +47,43 @@
     <string name="about_version">Sotto v%1$s</string>
     <string name="action_feedback">Feedback &amp; Suggestions</string>
 
-    <!-- Default Phrases -->
-    <string-array name="default_phrases">
-        <item>I need a quiet space, please.</item>
-        <item>Please give me a moment to respond.</item>
-        <item>Yes, that is fine.</item>
-        <item>No, not right now.</item>
-        <item>I am feeling overwhelmed.</item>
-        <item>Can you write that down or text me?</item>
+    <!-- Quick-Speak & Emergency Card (Phase 1) -->
+    <string name="hint_quick_speak">Type something to speak…</string>
+    <string name="cd_quick_speak">Speak typed text</string>
+    <string name="cd_show_fullscreen">Show in fullscreen</string>
+    <string name="cd_clear_text">Clear text</string>
+    <string name="emergency_phrase_text">I cannot speak right now. Please read my screen.</string>
+    <string name="emergency_badge">Emergency</string>
+
+    <!-- Categories & Attention Chime (Phase 2) -->
+    <string name="label_category">Category</string>
+    <string name="category_all">All</string>
+    <string name="category_emergency">Emergency</string>
+    <string name="category_needs">Needs</string>
+    <string name="category_social">Social</string>
+    <string name="category_general">General</string>
+    <string name="label_attention_chime">Attention chime before speaking</string>
+    <string name="label_attention_chime_desc">Plays a brief chime to alert listeners before speaking</string>
+
+    <!-- Default Phrases by Category -->
+    <string-array name="default_phrases_emergency">
+        <item>I cannot speak right now. Please read my screen.</item>
+    </string-array>
+
+    <string-array name="default_phrases_needs">
+        <item>I need a quiet space.</item>
+        <item>Please give me time.</item>
+        <item>I need to leave now.</item>
+    </string-array>
+
+    <string-array name="default_phrases_social">
+        <item>Yes, please.</item>
+        <item>No, thank you.</item>
+        <item>Thank you.</item>
+    </string-array>
+
+    <string-array name="default_phrases_general">
+        <item>Hello.</item>
+        <item>Please repeat that.</item>
     </string-array>
 </resources>

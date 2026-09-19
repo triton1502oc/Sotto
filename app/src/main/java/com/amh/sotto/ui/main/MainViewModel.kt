@@ -59,6 +59,18 @@ class MainViewModel(
         }
     }
 
+    fun movePhrase(fromPhrase: Phrase, toPhrase: Phrase) {
+        val currentList = _phrases.value.toMutableList()
+        val from = currentList.indexOf(fromPhrase)
+        val to = currentList.indexOf(toPhrase)
+        if (from != -1 && to != -1 && from != to) {
+            val item = currentList.removeAt(from)
+            currentList.add(to, item)
+            _phrases.value = currentList
+            repository.savePhrases(currentList)
+        }
+    }
+
     fun updateVoiceSettings(newSettings: VoiceSettings) {
         _voiceSettings.value = newSettings
         voiceSettingsRepository.saveVoiceSettings(newSettings)

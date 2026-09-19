@@ -9,8 +9,17 @@ import org.json.JSONObject
 
 data class Phrase(
     val text: String,
-    val language: String = LocaleHelper.LANG_AUTO
-)
+    val language: String = LocaleHelper.LANG_AUTO,
+    val isEmergency: Boolean = false,
+    val category: String = CATEGORY_GENERAL
+) {
+    companion object {
+        const val CATEGORY_GENERAL = "General"
+        const val CATEGORY_EMERGENCY = "Emergency"
+        const val CATEGORY_NEEDS = "Needs"
+        const val CATEGORY_SOCIAL = "Social"
+    }
+}
 
 interface PhraseRepository {
     fun getPhrases(): List<Phrase>
@@ -20,24 +29,40 @@ interface PhraseRepository {
 class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRepository {
     private val prefs: SharedPreferences = context.getSharedPreferences("sotto_prefs", Context.MODE_PRIVATE)
     private val KEY_PHRASES = "saved_phrases"
+    private val KEY_V2_MIGRATED = "v2_migrated"
 
     private val fallbackPhrases = listOf(
-        Phrase("I need a quiet space, please.", LocaleHelper.LANG_AUTO),
-        Phrase("Please give me a moment to respond.", LocaleHelper.LANG_AUTO),
-        Phrase("Yes, that is fine.", LocaleHelper.LANG_AUTO),
-        Phrase("No, not right now.", LocaleHelper.LANG_AUTO),
-        Phrase("I am feeling overwhelmed.", LocaleHelper.LANG_AUTO),
-        Phrase("Can you write that down or text me?", LocaleHelper.LANG_AUTO)
+        // Emergency
+        Phrase("I cannot speak right now. Please read my screen.", LocaleHelper.LANG_AUTO, isEmergency = true, category = Phrase.CATEGORY_EMERGENCY),
+        // Needs
+        Phrase("I need a quiet space.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_NEEDS),
+        Phrase("Please give me time.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_NEEDS),
+        Phrase("I need to leave now.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_NEEDS),
+        // Social
+        Phrase("Yes, please.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_SOCIAL),
+        Phrase("No, thank you.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_SOCIAL),
+        Phrase("Thank you.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_SOCIAL),
+        // General
+        Phrase("Hello.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_GENERAL),
+        Phrase("Please repeat that.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_GENERAL)
     )
 
     private fun getDefaultPhrases(): List<Phrase> {
         return try {
-            val array = context.resources.getStringArray(R.array.default_phrases)
-            if (array.isNotEmpty()) {
-                array.map { Phrase(text = it, language = LocaleHelper.LANG_AUTO) }
-            } else {
-                fallbackPhrases
+            val emergency = context.resources.getStringArray(R.array.default_phrases_emergency).map {
+                Phrase(text = it, language = LocaleHelper.LANG_AUTO, isEmergency = true, category = Phrase.CATEGORY_EMERGENCY)
             }
+            val needs = context.resources.getStringArray(R.array.default_phrases_needs).map {
+                Phrase(text = it, language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_NEEDS)
+            }
+            val social = context.resources.getStringArray(R.array.default_phrases_social).map {
+                Phrase(text = it, language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_SOCIAL)
+            }
+            val general = context.resources.getStringArray(R.array.default_phrases_general).map {
+                Phrase(text = it, language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_GENERAL)
+            }
+            val all = emergency + needs + social + general
+            if (all.isNotEmpty()) all else fallbackPhrases
         } catch (e: Exception) {
             fallbackPhrases
         }
@@ -48,6 +73,7 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
         if (phrasesJson == null) {
             val defaults = getDefaultPhrases()
             savePhrases(defaults)
+            prefs.edit().putBoolean(KEY_V2_MIGRATED, true).apply()
             return defaults
         }
 
@@ -59,13 +85,30 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
                 if (item is JSONObject) {
                     val text = item.optString("text", "")
                     val lang = item.optString("language", LocaleHelper.LANG_AUTO)
+                    val isEmergency = item.optBoolean("isEmergency", false)
+                    val rawCategory = item.optString("category", if (isEmergency) Phrase.CATEGORY_EMERGENCY else Phrase.CATEGORY_GENERAL)
+                    val category = if (isEmergency) Phrase.CATEGORY_EMERGENCY else if (rawCategory == Phrase.CATEGORY_EMERGENCY) Phrase.CATEGORY_GENERAL else rawCategory
                     if (text.isNotBlank()) {
-                        list.add(Phrase(text = text, language = lang))
+                        list.add(Phrase(text = text, language = lang, isEmergency = isEmergency, category = category))
                     }
                 } else if (item is String && item.isNotBlank()) {
-                    list.add(Phrase(text = item, language = LocaleHelper.LANG_AUTO))
+                    list.add(Phrase(text = item, language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_GENERAL))
                 }
             }
+
+            // One-time upgrade: If user upgraded and has no emergency card, prepend the localized default emergency card
+            val isMigrated = prefs.getBoolean(KEY_V2_MIGRATED, false)
+            if (!isMigrated) {
+                if (list.none { it.isEmergency }) {
+                    val emergencyDefault = getDefaultPhrases().firstOrNull { it.isEmergency }
+                    if (emergencyDefault != null) {
+                        list.add(0, emergencyDefault)
+                    }
+                }
+                prefs.edit().putBoolean(KEY_V2_MIGRATED, true).apply()
+                savePhrases(list)
+            }
+
             if (list.isNotEmpty()) list else getDefaultPhrases()
         } catch (e: Exception) {
             getDefaultPhrases()
@@ -78,6 +121,8 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
             val obj = JSONObject()
             obj.put("text", phrase.text)
             obj.put("language", phrase.language)
+            obj.put("isEmergency", phrase.isEmergency)
+            obj.put("category", phrase.category)
             jsonArray.put(obj)
         }
         prefs.edit().putString(KEY_PHRASES, jsonArray.toString()).apply()
