@@ -419,6 +419,7 @@ fun SottoApp(
     // Add/Edit Dialog with Voice Input
     if (showAddDialog || phraseToEdit != null) {
         val context = LocalContext.current
+        val voiceInputPrompt = stringResource(R.string.cd_voice_input)
         var textValue by remember { mutableStateOf(phraseToEdit?.text ?: "") }
         val isEditModeDialog = phraseToEdit != null
 
@@ -465,7 +466,7 @@ fun SottoApp(
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-                                        putExtra(RecognizerIntent.EXTRA_PROMPT, context.getString(R.string.cd_voice_input))
+                                        putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
                                     }
                                     try {
                                         speechLauncher.launch(intent)
