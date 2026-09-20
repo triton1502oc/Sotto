@@ -84,3 +84,9 @@ All contributors and AI agents must follow this standard checklist before releas
        --title "v<version>" \
        --notes-file <release-notes-file>
      ```
+
+---
+
+## 5. Licensing & Inbound Contributions
+
+Sotto is licensed under the [GNU General Public License v3.0](LICENSE) with an Apple App Store Exception. All contributions submitted to this repository are understood to be licensed under these same terms.
