@@ -410,7 +410,7 @@ fun VoiceSettingsDialog(
                             // Language Model Download Status & Action
                             var isModelDownloaded by remember(secondaryLang) { mutableStateOf<Boolean?>(null) }
                             var isDownloadingModel by remember { mutableStateOf(false) }
-                            var downloadError by remember { mutableStateOf<String?>(null) }
+                            var downloadErrorResId by remember { mutableStateOf<Int?>(null) }
 
                             LaunchedEffect(secondaryLang) {
                                 TranslationHelper.isModelDownloaded(secondaryLang) { downloaded ->
@@ -449,9 +449,9 @@ fun VoiceSettingsDialog(
                                             style = MaterialTheme.typography.labelSmall,
                                             color = if (isModelDownloaded == true) Color(0xFF81C784) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                         )
-                                        if (downloadError != null) {
+                                        if (downloadErrorResId != null) {
                                             Text(
-                                                text = downloadError!!,
+                                                text = stringResource(downloadErrorResId!!),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = Color(0xFFEF5350)
                                             )
@@ -461,7 +461,7 @@ fun VoiceSettingsDialog(
                                         OutlinedButton(
                                             onClick = {
                                                 if (!isDownloadingModel) {
-                                                    downloadError = null
+                                                    downloadErrorResId = null
                                                     isDownloadingModel = true
                                                     TranslationHelper.downloadModel(
                                                         langCode = secondaryLang,
@@ -472,7 +472,7 @@ fun VoiceSettingsDialog(
                                                         },
                                                         onError = {
                                                             isDownloadingModel = false
-                                                            downloadError = context.getString(R.string.error_model_download_network)
+                                                            downloadErrorResId = R.string.error_model_download_network
                                                         }
                                                     )
                                                 }

@@ -1,0 +1,24 @@
+title = "Sotto Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "personal-machine-path"
+description = "Personal machine path detected (e.g. /Users/ or C:\\Users\\)"
+regex = '''(?i)(?:/Users/|C:\\Users\\)[a-zA-Z0-9_-]+'''
+keywords = [
+    "/Users/",
+    "C:\\Users\\"
+]
+
+[[rules]]
+id = "keystore-properties"
+description = "Potential keystore or signing properties file or content"
+regex = '''(?i)(?:keyAlias|keyPassword|storePassword|storeFile)\s*='''
+keywords = [
+    "keyAlias",
+    "keyPassword",
+    "storePassword",
+    "storeFile"
+]

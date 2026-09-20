@@ -41,6 +41,10 @@ Sotto (meaning *"under one's breath"* / soft voice) is designed specifically for
   ```bash
   ./gradlew test
   ```
+* **Run Android Lint**:
+  ```bash
+  ./gradlew lintDebug
+  ```
 * **Run on Physical Device**:
   See [docs/RUNNING_ON_DEVICE.md](docs/RUNNING_ON_DEVICE.md) for USB debugging and installation instructions.
 
@@ -54,6 +58,10 @@ All contributors and AI agents must follow this standard checklist before releas
    - Run unit tests:
      ```bash
      ./gradlew testDebugUnitTest
+     ```
+   - Run Android lint check:
+     ```bash
+     ./gradlew lintDebug
      ```
    - Run compilation check:
      ```bash

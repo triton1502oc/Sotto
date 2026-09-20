@@ -32,7 +32,7 @@ Before making changes, familiarize yourself with [CONTRIBUTING.md](CONTRIBUTING.
    - Rely on standard environment variables (`JAVA_HOME`, `ANDROID_HOME`).
 5. **Standard Pre-Release & Release Checklist**:
    - Before cutting a release, agents must strictly follow the 6-step release checklist in [CONTRIBUTING.md](CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow):
-     1. Automated Verification (`./gradlew testDebugUnitTest`, `./gradlew assembleDebug`).
+     1. Automated Verification (`./gradlew testDebugUnitTest`, `./gradlew lintDebug`, `./gradlew assembleDebug`).
      2. Version Bump (`versionCode`, `versionName` in `app/build.gradle.kts`).
      3. Documentation Updates (`CHANGELOG.md`, `README.md`, `docs/PLAY_STORE_LISTING.md`).
      4. Build Signed Release APK (`./gradlew assembleRelease`).

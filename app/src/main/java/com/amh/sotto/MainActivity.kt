@@ -915,7 +915,7 @@ fun SottoApp(
         var isTranslating by remember { mutableStateOf(false) }
         var isModelDownloading by remember { mutableStateOf(false) }
         var showModelDownloadConfirmDialog by remember { mutableStateOf(false) }
-        var translationError by remember { mutableStateOf<String?>(null) }
+        var translationErrorResId by remember { mutableStateOf<Int?>(null) }
         var selectedCat by remember(phraseToEdit, showAddDialog) {
             mutableStateOf(
                 if (phraseToEdit?.isEmergency == true) Phrase.CATEGORY_EMERGENCY
@@ -925,7 +925,7 @@ fun SottoApp(
         val isEditModeDialog = phraseToEdit != null
 
         fun executeTranslation(targetLang: String, sourceLang: String) {
-            translationError = null
+            translationErrorResId = null
             TranslationHelper.translate(
                 text = textValue.trim(),
                 sourceLangCode = sourceLang,
@@ -938,7 +938,7 @@ fun SottoApp(
                 },
                 onError = {
                     isModelDownloading = false
-                    translationError = context.getString(R.string.error_translation_failed)
+                    translationErrorResId = R.string.error_translation_failed
                 }
             )
         }
@@ -1094,7 +1094,7 @@ fun SottoApp(
                                 OutlinedButton(
                                     onClick = {
                                         if (textValue.isNotBlank() && !isTranslating && !isModelDownloading) {
-                                            translationError = null
+                                            translationErrorResId = null
                                             val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
                                             val sourceLang = LocaleHelper.resolvePhraseLocale(LocaleHelper.LANG_AUTO, textValue, effectiveLang).language
                                             val targetLang = voiceSettings.secondaryLanguage
@@ -1130,9 +1130,9 @@ fun SottoApp(
                                 }
                             }
 
-                            if (translationError != null) {
+                            if (translationErrorResId != null) {
                                 Text(
-                                    text = translationError!!,
+                                    text = stringResource(translationErrorResId!!),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Color(0xFFEF5350),
                                     modifier = Modifier.padding(vertical = 2.dp)
