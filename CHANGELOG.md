@@ -3,6 +3,19 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.5.4] - 2026-09-21
+
+### Added
+- **Settings Gear Icon in Edit Mode**: Replaced the text button ("Voice") in edit mode with a settings gear icon for cleaner and more intuitive access to Voice & Language Settings.
+- **Automated Asset Pipeline**: Added `scripts/update_assets.sh` to automate capturing screenshots and generating Google Play Store feature graphics directly from an emulator or physical device.
+
+### Changed
+- **Visual Assets**: Updated phone screenshots (`screenshot.png`, `screenshot_voice_settings.png`) and Play Store feature graphic (`play_store_feature_graphic.png`) to reflect the new settings gear icon.
+- **Documentation Overhaul**: Streamlined and condensed `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `docs/PLAY_STORE_LISTING.md`, `docs/RUNNING_ON_DEVICE.md`, and `demo/README.md` with clear, concise guides and standard release procedures.
+
+### Assets
+- `Sotto-v1.5.4.apk`: Signed release APK for Android devices.
+
 ## [v1.5.3] - 2026-09-20
 
 ### Fixed

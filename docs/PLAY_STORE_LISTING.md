@@ -66,6 +66,12 @@ Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay
 | **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 2 Ready: [`screenshot.png`](../assets/screenshot.png) (Main phrase view), [`screenshot_voice_settings.png`](../assets/screenshot_voice_settings.png) (Voice & Language Settings) |
 | **Preview Video** | YouTube URL | YouTube link (`watch?v=`) | ✅ Ready: [English](https://www.youtube.com/watch?v=xpPbsiT7jks) / [Indonesian](https://www.youtube.com/watch?v=UBBUd36im48) |
 
+### Rebuilding Graphic Assets
+To automatically regenerate and format all visual assets (`screenshot.png`, `screenshot_voice_settings.png`, and `play_store_feature_graphic.png`) from the latest app build:
+```bash
+./scripts/update_assets.sh
+```
+
 ---
 
 ## 3. Data Safety Form (Google Play Console)

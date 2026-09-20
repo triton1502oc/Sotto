@@ -7,22 +7,20 @@ Sotto is an assistive communication (AAC) app designed for autistic teens and ad
 
 ## 1. Mission & Design Philosophy
 
-Sotto (meaning *"under one's breath"* / soft voice) is designed specifically for autistic teens, adults, speech-impaired individuals, and non-speaking users who need clear, dignified text-to-speech support.
-
-* **Dignified & Mature UI**: Zero cartoon clip-art, zero pediatric pastel palettes, and zero nested visual clutter.
-* **Low-Stimulus & High-Contrast**: Dark-neutral Material 3 theme with high contrast text and large, fast touch targets.
-* **Zero-Distraction Communication**: In active communication mode, administrative actions (add, edit, delete, reorder) are hidden.
-* **100% Offline & Private**: Zero accounts, zero tracking SDKs, and zero cloud uploads. All data remains on the device.
+- **Dignified & Mature UI**: Zero cartoon clip-art, pediatric palettes, or nested visual clutter.
+- **Low-Stimulus & High-Contrast**: Dark-neutral Material 3 theme with high contrast and large touch targets.
+- **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
+- **100% Offline & Private**: Zero accounts, zero analytics/tracking SDKs, and zero cloud uploads.
 
 ---
 
 ## 2. Technical Guardrails
 
-* **Platform**: Android (Min SDK 26, Target SDK 35).
-* **Language**: 100% Kotlin.
-* **UI**: 100% Jetpack Compose + Material 3. Never use legacy XML layouts or `findViewById`.
-* **Architecture**: Single Activity, unidirectional data flow (UDF: State flows down, Events flow up).
-* **Speech Synthesis**: Native Android `TextToSpeech` engine tied to the `ComponentActivity` lifecycle.
+- **Platform**: Android (Min SDK 26, Target SDK 35).
+- **Language**: 100% Kotlin.
+- **UI**: 100% Jetpack Compose + Material 3 (no XML layouts or `findViewById`).
+- **Architecture**: Single Activity, unidirectional data flow (UDF: state flows down, events flow up).
+- **Speech Synthesis**: Native Android `TextToSpeech` tied to `ComponentActivity` lifecycle.
 
 ---
 
