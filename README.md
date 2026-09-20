@@ -1,15 +1,20 @@
 # Sotto
 
-**TL;DR**: Sotto (meaning *"under one's breath"* or a soft voice) is an assistive communication Android app designed for autistic teens and adults, featuring a dignified, low-stimulation UI and one-touch Text-to-Speech (TTS).
+**TL;DR**: Sotto (meaning *"under one's breath"* or a soft voice) is a dignified, low-stimulation assistive communication (AAC) Android app designed for autistic teens and adults, speech-impaired individuals, and anyone needing one-touch Text-to-Speech (TTS).
 
 <p align="center">
   <img src="assets/screenshot.png" alt="Sotto Interface" width="300"/>
 </p>
 
+## Who is Sotto For?
+- **Autistic Teens & Adults**: A sensory-friendly, mature dark-neutral interface with zero pediatric clutter, designed for routine communication, sensory overload, and verbal shutdowns.
+- **Speech-Impaired Individuals**: Accessible one-touch speech synthesis for individuals living with apraxia, dysarthria, ALS, cerebral palsy, vocal chord paralysis, or recovering from a stroke (aphasia).
+- **Situational & Temporary Speech Loss**: Anyone experiencing vocal strain, laryngitis, post-surgical recovery, severe fatigue, or needing silent communication in loud, overwhelming environments.
+
 ## Features
 - **Modern Low-Stimulus UI**: Dark/Neutral Material 3 theme with high contrast text, avoiding visual clutter.
 - **Zero-Distraction Layout**: The main interface has zero administrative buttons during communication, providing a safe, predictable environment.
-- **Emergency Bystander Mode**: Dedicated full-width hero card for non-verbal episodes and shutdowns. Features a distinct `🚨 Emergency` badge and a specialized fullscreen view with high-contrast amber styling and prominent emergency header for bystanders, doctors, or first responders.
+- **Emergency Bystander Mode**: Dedicated full-width hero card for non-verbal episodes, verbal shutdowns, or speech emergencies. Features a distinct `🚨 Emergency` badge and a specialized fullscreen view with high-contrast amber styling and prominent emergency header for bystanders, doctors, or first responders.
 - **Quick-Speak Bar**: Spontaneous communication bar docked at the bottom with instant speech (`🔊`), fullscreen expansion (`⛶`), and voice dictation (`🎤`) without modifying your curated phrase grid.
 - **Contextual Categories**: Group and filter phrases with subtle, low-stimulus filter chips (**All**, **Emergency**, **Needs**, **Social**, **General**).
 - **Instant Speech**: Tap a phrase card to speak immediately with automatic language detection for seamless multilingual playback.

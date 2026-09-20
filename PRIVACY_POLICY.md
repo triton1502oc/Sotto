@@ -8,7 +8,7 @@ Sotto is completely private and operates 100% offline. Sotto does not collect, s
 **Last Updated:** September 18, 2026
 
 ## 1. Overview
-Sotto is an assistive communication (AAC) application designed for autistic individuals, non-speaking individuals, and anyone needing text-to-speech support. Your privacy, autonomy, and security are fundamental to our design philosophy.
+Sotto is an assistive communication (AAC) application designed for autistic individuals, speech-impaired individuals, non-speaking individuals, and anyone needing text-to-speech support. Your privacy, autonomy, and security are fundamental to our design philosophy.
 
 ## 2. Information We Do Not Collect
 * **No Personal Information:** Sotto does not ask for, access, or store your name, email address, phone number, location, or any personal details.

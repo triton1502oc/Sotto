@@ -1,13 +1,13 @@
 # Contributing to Sotto
 
 ### TL;DR
-Sotto is an assistive communication (AAC) app designed for autistic teens and adults. We welcome contributions that uphold our dignified, low-stimulation design philosophy and strict Jetpack Compose / Material 3 architecture.
+Sotto is an assistive communication (AAC) app designed for autistic teens and adults, speech-impaired individuals, and non-speaking users. We welcome contributions that uphold our dignified, low-stimulation design philosophy and strict Jetpack Compose / Material 3 architecture.
 
 ---
 
 ## 1. Mission & Design Philosophy
 
-Sotto (meaning *"under one's breath"* / soft voice) is designed specifically for autistic teens, adults, and non-speaking individuals who need clear, dignified text-to-speech support.
+Sotto (meaning *"under one's breath"* / soft voice) is designed specifically for autistic teens, adults, speech-impaired individuals, and non-speaking users who need clear, dignified text-to-speech support.
 
 * **Dignified & Mature UI**: Zero cartoon clip-art, zero pediatric pastel palettes, and zero nested visual clutter.
 * **Low-Stimulus & High-Contrast**: Dark-neutral Material 3 theme with high contrast text and large, fast touch targets.

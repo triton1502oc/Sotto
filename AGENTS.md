@@ -8,7 +8,7 @@ All AI coding agents (Copilot, Cursor, Claude, Antigravity, etc.) working on Sot
 ## 1. Context & Architecture
 
 Before making changes, familiarize yourself with [CONTRIBUTING.md](CONTRIBUTING.md):
-- **Domain**: Assistive Communication (AAC) for autistic teens & adults.
+- **Domain**: Assistive Communication (AAC) for autistic teens, adults, and speech-impaired individuals.
 - **UI Policy**: Low-stimulus, dignified, 100% Jetpack Compose + Material 3. Never use legacy XML layouts or `findViewById`.
 - **Data Flow**: Unidirectional data flow (State flows down, Events flow up).
 - **TTS**: Tied to `ComponentActivity` lifecycle.

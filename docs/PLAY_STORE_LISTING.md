@@ -10,11 +10,11 @@ Ready-to-use metadata, descriptions, graphics specifications, and policy questio
 ### App Details
 * **App Name:** `Sotto` *(5 / 30 characters)*
 * **Short Description:**  
-  `Dignified, one-touch AAC speech communication for autistic teens & adults.` *(73 / 80 characters)*
+  `Dignified AAC speech communication for autistic & speech-impaired users.` *(71 / 80 characters)*
 
 ### Full Description *(Markdown & Plain Text compliant, ~1,800 / 4,000 characters)*
 ```text
-Sotto (meaning "under one's breath" or a soft voice) is an assistive communication (AAC) app designed for autistic teens, adults, and non-speaking individuals who need clear, dignified, and low-stimulation text-to-speech support.
+Sotto (meaning "under one's breath" or a soft voice) is an assistive communication (AAC) app designed for autistic teens, adults, speech-impaired individuals, and non-speaking users who need clear, dignified, and low-stimulation text-to-speech support.
 
 Unlike typical AAC tools designed with pediatric cartoon graphics and cluttered menus, Sotto provides a calm, mature, and predictable environment built specifically for adult communication needs.
 
@@ -79,7 +79,7 @@ When completing the Google Play **Data Safety** questionnaire:
 ## 4. App Content & Policy Ratings
 
 * **Category:** Communication (or Tools / Health)
-* **Tags:** AAC, Assistive, Speech, Autism, Communication
+* **Tags:** AAC, Assistive, Speech, Autism, Speech Impairment, Communication
 * **Target Audience:** Select **13–15**, **16–17**, and **18+**.  
   *(Selecting 13+ prevents your app from being categorized under the "Designed for Families" COPPA framework, avoiding unnecessary pediatric compliance scrutiny).*
 * **Content Rating (IARC):** Complete the questionnaire:
