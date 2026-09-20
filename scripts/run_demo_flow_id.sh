@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-ADB="$HOME/Library/Android/sdk/platform-tools/adb"
+ADB="${ADB:-$(which adb 2>/dev/null || echo "${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb")}"
 EVENTS_FILE="demo/events_id.txt"
 rm -f "$EVENTS_FILE"
 
@@ -15,7 +15,7 @@ log_event() {
 
 echo "=== Scene 1: Instant Quick Speak ==="
 # Focus Quick Speak input field
-$ADB shell input tap 350 2210
+$ADB shell input tap 303 2242
 sleep 0.8
 
 # Type phrase
@@ -30,12 +30,12 @@ sleep 0.8
 
 # Tap 🔊 Speak button
 log_event "speak_waktu_1"
-$ADB shell input tap 986 2210
+$ADB shell input tap 986 2243
 sleep 2.4
 
 echo "=== Scene 2: Large Visual Presentation Mode ==="
 # Tap ⛶ Fullscreen button
-$ADB shell input tap 839 2210
+$ADB shell input tap 839 2243
 sleep 2.5
 
 # Tap Bicara button in fullscreen
@@ -47,48 +47,67 @@ sleep 2.4
 $ADB shell input keyevent 4
 sleep 1.0
 
-echo "=== Scene 3: Phrase Categories & Emergency ==="
-# Tap "Kebutuhan" (Needs)
-$ADB shell input tap 618 305
+echo "=== Scene 3: Category Filtering & Emergency Dual-Language ==="
+# Tap "Kebutuhan"
+$ADB shell input tap 574 305
 sleep 1.8
 
-# Tap "Sosial" (Social)
-$ADB shell input tap 863 305
+# Tap "Sosial"
+$ADB shell input tap 783 305
 sleep 1.8
 
-# Tap "Darurat" (Emergency)
-$ADB shell input tap 364 305
+# Tap "Darurat"
+$ADB shell input tap 325 305
 sleep 1.8
 
 # Long-press emergency card to open full-screen emergency
-$ADB shell input swipe 540 600 540 600 900
+$ADB shell input swipe 540 620 540 621 800
 sleep 2.5
 
-# Tap Bicara button in emergency fullscreen
-log_event "speak_darurat"
-$ADB shell input tap 540 2175
-sleep 3.8
+# Tap Bicara (Indonesia) button
+log_event "speak_emergency_id"
+$ADB shell input tap 294 2200
+sleep 3.5
+
+# Tap Bicara (Inggris) button
+log_event "speak_emergency_en"
+$ADB shell input tap 787 2200
+sleep 3.2
 
 # Dismiss emergency dialog
 $ADB shell input keyevent 4
 sleep 1.0
 
-# Return to "Semua" (All)
-$ADB shell input tap 141 305
+# Return to "Semua"
+$ADB shell input tap 107 305
 sleep 1.5
 
-echo "=== Scene 4: Edit Mode & Personalization ==="
-# Tap "Ubah Daftar"
-$ADB shell input tap 897 147
+echo "=== Scene 4: Dual-Language TopBar Switcher & Card Taps ==="
+# Tap phrase card while ID is active -> Speaks Indonesian
+log_event "speak_time_id"
+$ADB shell input tap 281 1080
+sleep 2.4
+
+# Tap EN in top bar switcher
+$ADB shell input tap 778 147
 sleep 1.5
 
-# Long-press & drag card to reorder
-$ADB shell input swipe 280 1020 800 1020 900
-sleep 2.0
+# Tap phrase card again while EN is active -> Speaks English
+log_event "speak_time_en"
+$ADB shell input tap 281 1080
+sleep 2.4
+
+# Switch back to ID
+$ADB shell input tap 696 147
+sleep 1.0
 
 echo "=== Scene 5: Voice Customization & Attention Chime ==="
+# Tap "Ubah Daftar"
+$ADB shell input tap 929 147
+sleep 1.5
+
 # Tap "Suara" button in edit mode
-$ADB shell input tap 753 147
+$ADB shell input tap 786 147
 sleep 2.0
 
 # Tap "Nada perhatian sebelum bicara" switch
@@ -97,15 +116,15 @@ sleep 1.0
 
 # Tap "Tes Suara" button
 log_event "test_voice"
-$ADB shell input tap 540 1552 || true
+$ADB shell input tap 540 1550 || true
 sleep 3.5
 
-# Dismiss voice dialog (or tap Selesai at 804 2020)
-$ADB shell input tap 804 2020 || $ADB shell input keyevent 4
+# Dismiss voice dialog
+$ADB shell input keyevent 4
 sleep 1.0
 
 # Tap "Selesai" to exit edit mode
-$ADB shell input tap 935 147
+$ADB shell input tap 951 147
 sleep 2.5
 
 log_event "end"

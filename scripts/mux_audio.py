@@ -41,15 +41,18 @@ def main():
             name, t_str = line.split(':', 1)
             events[name] = float(t_str)
 
-    total_duration = events.get('end', 42.0) + 1.0
+    total_duration = events.get('end', 52.0) + 1.0
     total_samples = int(total_duration * SAMPLE_RATE)
     timeline = [0] * total_samples
 
     mapping = {
         'speak_moment_1': 'demo/audio_scratch/moment.wav',
         'speak_moment_2': 'demo/audio_scratch/moment.wav',
-        'speak_emergency': 'demo/audio_scratch/emergency.wav',
-        'test_voice': 'demo/audio_scratch/chime_test_voice.wav'
+        'speak_emergency_en': 'demo/audio_scratch/emergency_en.wav',
+        'speak_emergency_id': 'demo/audio_scratch/emergency_id.wav',
+        'speak_time_en': 'demo/audio_scratch/time_en.wav',
+        'speak_time_id': 'demo/audio_scratch/time_id.wav',
+        'test_voice': 'demo/audio_scratch/chime_test_voice_en.wav'
     }
 
     for event_name, wav_file in mapping.items():

@@ -15,7 +15,7 @@ def read_wav(filename):
         data = wav_file.readframes(n_frames)
         samples = struct.unpack('<' + 'h' * (n_frames * n_channels), data)
         if n_channels == 2:
-            samples = samples[::2]  # take left channel
+            samples = samples[::2]
         return list(samples)
 
 def write_wav(filename, samples):
@@ -41,14 +41,17 @@ def main():
             name, t_str = line.split(':', 1)
             events[name] = float(t_str)
 
-    total_duration = events.get('end', 42.0) + 1.0
+    total_duration = events.get('end', 52.0) + 1.0
     total_samples = int(total_duration * SAMPLE_RATE)
     timeline = [0] * total_samples
 
     mapping = {
         'speak_waktu_1': 'demo/audio_scratch_id/waktu.wav',
         'speak_waktu_2': 'demo/audio_scratch_id/waktu.wav',
-        'speak_darurat': 'demo/audio_scratch_id/darurat.wav',
+        'speak_emergency_id': 'demo/audio_scratch_id/emergency_id.wav',
+        'speak_emergency_en': 'demo/audio_scratch_id/emergency_en.wav',
+        'speak_time_id': 'demo/audio_scratch_id/waktu.wav',
+        'speak_time_en': 'demo/audio_scratch_id/time_en.wav',
         'test_voice': 'demo/audio_scratch_id/chime_test_voice_id.wav'
     }
 

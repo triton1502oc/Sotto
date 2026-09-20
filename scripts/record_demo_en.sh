@@ -10,26 +10,39 @@ $ADB shell settings put global hide_error_dialogs 1
 $ADB shell settings put secure accessibility_button_mode 0
 $ADB shell settings put secure accessibility_enabled 0
 
-# Set English preferences
+# Set English preferences with dual-language enabled
 cat << 'EOF' > /tmp/sotto_locale_prefs_en.xml
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?><map><string name="selected_language">en</string></map>
+EOF
+
+cat << 'EOF' > /tmp/sotto_voice_prefs_en.xml
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <boolean name="show_language_switcher" value="true" />
+    <string name="secondary_language">id</string>
+    <boolean name="attention_chime" value="false" />
+    <float name="speech_rate" value="1.0" />
+    <float name="speech_pitch" value="1.0" />
+</map>
 EOF
 
 cat << 'EOF' > /tmp/sotto_prefs_en.xml
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
 <map>
     <boolean name="v2_migrated" value="true" />
-    <string name="saved_phrases">[{&quot;text&quot;:&quot;I cannot speak right now. Please read my screen.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:true,&quot;category&quot;:&quot;Emergency&quot;},{&quot;text&quot;:&quot;Please give me time.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Needs&quot;},{&quot;text&quot;:&quot;I need a quiet space.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Needs&quot;},{&quot;text&quot;:&quot;I need to leave now.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Needs&quot;},{&quot;text&quot;:&quot;Yes, please.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Social&quot;},{&quot;text&quot;:&quot;No, thank you.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Social&quot;},{&quot;text&quot;:&quot;Thank you.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Social&quot;},{&quot;text&quot;:&quot;Hello.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;General&quot;},{&quot;text&quot;:&quot;Please repeat that.&quot;,&quot;language&quot;:&quot;auto&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;General&quot;}]</string>
+    <string name="saved_phrases">[{&quot;text&quot;:&quot;I cannot speak right now. Please read my screen.&quot;,&quot;spokenText&quot;:&quot;Saya tidak bisa bicara sekarang. Tolong baca layar saya.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:true,&quot;category&quot;:&quot;Emergency&quot;},{&quot;text&quot;:&quot;Please give me time.&quot;,&quot;spokenText&quot;:&quot;Tolong beri saya waktu.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Needs&quot;},{&quot;text&quot;:&quot;I need a quiet space.&quot;,&quot;spokenText&quot;:&quot;Saya butuh tempat tenang.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Needs&quot;},{&quot;text&quot;:&quot;I need to leave now.&quot;,&quot;spokenText&quot;:&quot;Saya harus pergi sekarang.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Needs&quot;},{&quot;text&quot;:&quot;Yes, please.&quot;,&quot;spokenText&quot;:&quot;Ya, silakan.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Social&quot;},{&quot;text&quot;:&quot;No, thank you.&quot;,&quot;spokenText&quot;:&quot;Tidak, terima kasih.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Social&quot;},{&quot;text&quot;:&quot;Thank you.&quot;,&quot;spokenText&quot;:&quot;Terima kasih.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;Social&quot;},{&quot;text&quot;:&quot;Hello.&quot;,&quot;spokenText&quot;:&quot;Halo.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;General&quot;},{&quot;text&quot;:&quot;Please repeat that.&quot;,&quot;spokenText&quot;:&quot;Tolong ulangi.&quot;,&quot;spokenLanguage&quot;:&quot;id&quot;,&quot;language&quot;:&quot;en&quot;,&quot;isEmergency&quot;:false,&quot;category&quot;:&quot;General&quot;}]</string>
 </map>
 EOF
 
 $ADB push /tmp/sotto_locale_prefs_en.xml /data/local/tmp/sotto_locale_prefs.xml
+$ADB push /tmp/sotto_voice_prefs_en.xml /data/local/tmp/sotto_voice_prefs.xml
 $ADB push /tmp/sotto_prefs_en.xml /data/local/tmp/sotto_prefs.xml
 
 $ADB shell "run-as com.amh.sotto cp /data/local/tmp/sotto_locale_prefs.xml /data/data/com.amh.sotto/shared_prefs/sotto_locale_prefs.xml"
+$ADB shell "run-as com.amh.sotto cp /data/local/tmp/sotto_voice_prefs.xml /data/data/com.amh.sotto/shared_prefs/sotto_voice_prefs.xml"
 $ADB shell "run-as com.amh.sotto cp /data/local/tmp/sotto_prefs.xml /data/data/com.amh.sotto/shared_prefs/sotto_prefs.xml"
 
-# Generate English audio clips
+# Generate English and dual-language audio clips
 python3 scripts/generate_audio.py
 
 # Clean existing video on device
@@ -43,7 +56,7 @@ $ADB shell am start -n com.amh.sotto/.MainActivity
 sleep 2.5
 
 echo "Starting screen recording (720x1600 @ 4Mbps)..."
-$ADB shell "screenrecord --size 720x1600 --bit-rate 4000000 --time-limit 48 /sdcard/sotto_demo_en.mp4" &
+$ADB shell "screenrecord --size 720x1600 --bit-rate 4000000 --time-limit 180 /sdcard/sotto_demo_en.mp4" &
 REC_PID=$!
 sleep 1.0
 
