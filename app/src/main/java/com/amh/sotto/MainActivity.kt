@@ -123,9 +123,11 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             recreate()
                         },
                         onSpeak = { phrase ->
-                            val textToSpeak = if (!phrase.spokenText.isNullOrBlank()) phrase.spokenText else phrase.text
-                            val langToUse = if (!phrase.spokenText.isNullOrBlank()) phrase.spokenLanguage else phrase.language
-                            speakUtterance(textToSpeak, langToUse)
+                            if (latestVoiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()) {
+                                speakUtterance(phrase.spokenText, phrase.spokenLanguage)
+                            } else {
+                                speakUtterance(phrase.text, phrase.language)
+                            }
                         },
                         onSpeakText = { text, lang ->
                             speakUtterance(text, lang)
@@ -601,11 +603,7 @@ fun SottoApp(
                                         onSpeakText(phrase.text, phrase.language)
                                     }
                                 } else {
-                                    if (!phrase.spokenText.isNullOrBlank()) {
-                                        onSpeakText(phrase.spokenText, phrase.spokenLanguage)
-                                    } else {
-                                        onSpeak(phrase)
-                                    }
+                                    onSpeak(phrase)
                                 }
                             },
                             onLongClick = { expandedPhrase = phrase }
@@ -654,7 +652,7 @@ fun SottoApp(
                                     color = Color(0xFFFFE0B2),
                                     lineHeight = 24.sp
                                 )
-                                if (!phrase.spokenText.isNullOrBlank()) {
+                                if (voiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -684,10 +682,10 @@ fun SottoApp(
                                     style = MaterialTheme.typography.titleMedium,
                                     textAlign = TextAlign.Center,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = if (!phrase.spokenText.isNullOrBlank()) 3 else 4,
+                                    maxLines = if (voiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()) 3 else 4,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                if (!phrase.spokenText.isNullOrBlank()) {
+                                if (voiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()) {
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
@@ -737,7 +735,7 @@ fun SottoApp(
     // Modal Dialog for viewing/speaking giant text
     expandedPhrase?.let { phrase ->
         val isEmergency = phrase.isEmergency
-        val hasSpokenText = !phrase.spokenText.isNullOrBlank()
+        val hasSpokenText = voiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()
         Dialog(
             onDismissRequest = { expandedPhrase = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -1046,135 +1044,137 @@ fun SottoApp(
                         minLines = 2
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    if (voiceSettings.showLanguageSwitcher) {
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                    // Expandable Alternate Spoken Text
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { isSpokenTextExpanded = !isSpokenTextExpanded }
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                        // Expandable Alternate Spoken Text
                         Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { isSpokenTextExpanded = !isSpokenTextExpanded }
+                                .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("🗣️", fontSize = 14.sp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text("🗣️", fontSize = 14.sp)
+                                Text(
+                                    text = stringResource(R.string.label_spoken_text),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             Text(
-                                text = stringResource(R.string.label_spoken_text),
-                                style = MaterialTheme.typography.bodyMedium,
+                                text = if (isSpokenTextExpanded) "▲" else "▼",
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
-                        Text(
-                            text = if (isSpokenTextExpanded) "▲" else "▼",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
 
-                    if (isSpokenTextExpanded) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.label_spoken_language) + ": ${LocaleHelper.getLanguageDisplayName(voiceSettings.secondaryLanguage)}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                modifier = Modifier.weight(1f, fill = false),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            OutlinedButton(
-                                onClick = {
-                                    if (textValue.isNotBlank() && !isTranslating && !isModelDownloading) {
-                                        translationError = null
-                                        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                                        val sourceLang = LocaleHelper.resolvePhraseLocale(LocaleHelper.LANG_AUTO, textValue, effectiveLang).language
-                                        val targetLang = voiceSettings.secondaryLanguage
-                                        TranslationHelper.isModelDownloaded(targetLang) { isDownloaded ->
-                                            if (isDownloaded) {
-                                                executeTranslation(targetLang, sourceLang)
-                                            } else {
-                                                showModelDownloadConfirmDialog = true
+                        if (isSpokenTextExpanded) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.label_spoken_language) + ": ${LocaleHelper.getLanguageDisplayName(voiceSettings.secondaryLanguage)}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    modifier = Modifier.weight(1f, fill = false),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                OutlinedButton(
+                                    onClick = {
+                                        if (textValue.isNotBlank() && !isTranslating && !isModelDownloading) {
+                                            translationError = null
+                                            val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                                            val sourceLang = LocaleHelper.resolvePhraseLocale(LocaleHelper.LANG_AUTO, textValue, effectiveLang).language
+                                            val targetLang = voiceSettings.secondaryLanguage
+                                            TranslationHelper.isModelDownloaded(targetLang) { isDownloaded ->
+                                                if (isDownloaded) {
+                                                    executeTranslation(targetLang, sourceLang)
+                                                } else {
+                                                    showModelDownloadConfirmDialog = true
+                                                }
                                             }
                                         }
+                                    },
+                                    enabled = textValue.isNotBlank() && !isTranslating && !isModelDownloading,
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                ) {
+                                    if (isTranslating || isModelDownloading) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(14.dp),
+                                            strokeWidth = 2.dp,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = if (isModelDownloading) stringResource(R.string.status_downloading_model) else stringResource(R.string.status_translating),
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "🌐 " + stringResource(R.string.action_auto_translate),
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
                                     }
-                                },
-                                enabled = textValue.isNotBlank() && !isTranslating && !isModelDownloading,
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
-                            ) {
-                                if (isTranslating || isModelDownloading) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(14.dp),
-                                        strokeWidth = 2.dp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = if (isModelDownloading) stringResource(R.string.status_downloading_model) else stringResource(R.string.status_translating),
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                } else {
-                                    Text(
-                                        text = "🌐 " + stringResource(R.string.action_auto_translate),
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
                                 }
                             }
-                        }
 
-                        if (translationError != null) {
-                            Text(
-                                text = translationError!!,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFFEF5350),
-                                modifier = Modifier.padding(vertical = 2.dp)
+                            if (translationError != null) {
+                                Text(
+                                    text = translationError!!,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFFEF5350),
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                )
+                            }
+
+                            OutlinedTextField(
+                                value = spokenTextValue,
+                                onValueChange = { spokenTextValue = it },
+                                placeholder = {
+                                    Text(
+                                        stringResource(R.string.hint_spoken_text),
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    )
+                                },
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            val targetLang = if (spokenLangValue != LocaleHelper.LANG_AUTO) spokenLangValue else voiceSettings.secondaryLanguage
+                                            val langTag = LocaleHelper.getLocaleForLanguage(targetLang).toLanguageTag()
+                                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                                putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+                                                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+                                                putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
+                                            }
+                                            try {
+                                                spokenSpeechLauncher.launch(intent)
+                                            } catch (e: Exception) {
+                                                // Ignore if speech recognizer not present
+                                            }
+                                        }
+                                    ) {
+                                        Text("🎤", fontSize = 20.sp)
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = false,
+                                minLines = 2
                             )
                         }
-
-                        OutlinedTextField(
-                            value = spokenTextValue,
-                            onValueChange = { spokenTextValue = it },
-                            placeholder = {
-                                Text(
-                                    stringResource(R.string.hint_spoken_text),
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                )
-                            },
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = {
-                                        val targetLang = if (spokenLangValue != LocaleHelper.LANG_AUTO) spokenLangValue else voiceSettings.secondaryLanguage
-                                        val langTag = LocaleHelper.getLocaleForLanguage(targetLang).toLanguageTag()
-                                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
-                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-                                            putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                                        }
-                                        try {
-                                            spokenSpeechLauncher.launch(intent)
-                                        } catch (e: Exception) {
-                                            // Ignore if speech recognizer not present
-                                        }
-                                    }
-                                ) {
-                                    Text("🎤", fontSize = 20.sp)
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = false,
-                            minLines = 2
-                        )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -1230,8 +1230,8 @@ fun SottoApp(
                         val isEmergency = selectedCat == Phrase.CATEGORY_EMERGENCY
                         val newPhrase = Phrase(
                             text = textValue.trim(),
-                            spokenText = spokenTextValue.trim().takeIf { it.isNotBlank() },
-                            spokenLanguage = spokenLangValue.takeIf { spokenTextValue.isNotBlank() },
+                            spokenText = if (voiceSettings.showLanguageSwitcher) spokenTextValue.trim().takeIf { it.isNotBlank() } else phraseToEdit?.spokenText,
+                            spokenLanguage = if (voiceSettings.showLanguageSwitcher) spokenLangValue.takeIf { spokenTextValue.isNotBlank() } else phraseToEdit?.spokenLanguage,
                             language = LocaleHelper.LANG_AUTO,
                             isEmergency = isEmergency,
                             category = selectedCat
