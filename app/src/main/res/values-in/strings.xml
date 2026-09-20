@@ -5,6 +5,7 @@
     <string name="action_done">Selesai</string>
     <string name="action_edit_list">Ubah Daftar</string>
     <string name="action_voice">Suara</string>
+    <string name="action_settings">Pengaturan</string>
     <string name="action_save">Simpan</string>
     <string name="action_delete">Hapus</string>
     <string name="action_cancel">Batal</string>

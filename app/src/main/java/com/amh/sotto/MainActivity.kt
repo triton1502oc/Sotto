@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -367,8 +368,12 @@ fun SottoApp(
                             }
                         }
                         if (isEditMode) {
-                            TextButton(onClick = { showVoiceDialog = true }) {
-                                Text(stringResource(R.string.action_voice), color = MaterialTheme.colorScheme.primary)
+                            IconButton(onClick = { showVoiceDialog = true }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_settings),
+                                    contentDescription = stringResource(R.string.action_settings),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                             Spacer(modifier = Modifier.width(4.dp))
                         }
