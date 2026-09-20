@@ -11,6 +11,10 @@ Ready-to-use metadata, descriptions, graphics specifications, and policy questio
 * **App Name:** `Sotto` *(5 / 30 characters)*
 * **Short Description:**  
   `Dignified AAC speech communication for autistic & speech-impaired users.` *(71 / 80 characters)*
+* **Preview Video (YouTube URL):**
+  - **Default / English:** `https://www.youtube.com/watch?v=xpPbsiT7jks`
+  - **Indonesian (`id-ID`):** `https://www.youtube.com/watch?v=UBBUd36im48`  
+  *(Note: Enter the standard `https://www.youtube.com/watch?v=...` format; Play Console may reject `/shorts/` URLs).*
 
 ### Full Description *(Markdown & Plain Text compliant, ~1,800 / 4,000 characters)*
 ```text
@@ -44,9 +48,9 @@ Optionally sound a gentle chime and vibration before speaking to politely captur
 • Configurable Voice & Speed
 Tailor your speech output to your comfort. Adjust speech rate (speed) and pitch with live preview.
  
-• Fully Customizable
-Toggle "Edit List" when you want to add new phrases, edit existing text, delete phrases safely, or drag-and-drop cards to rearrange their order.
- 
+• Dual-Language Speech & On-Device Auto-Translate
+Display cards in one language while speaking in another (e.g., English card text read aloud in Indonesian). Includes one-tap on-device auto-translation with zero cloud text transmission and dual-language speak controls in fullscreen view.
+
 • 100% Offline & Private
 Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay entirely on your local device.
 ```
@@ -60,6 +64,7 @@ Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay
 | **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | ✅ Ready: [`play_store_icon_512.png`](../assets/play_store_icon_512.png) |
 | **Feature Graphic** | 1024 x 500 px | 24-bit PNG / JPEG | ✅ Ready: [`play_store_feature_graphic.png`](../assets/play_store_feature_graphic.png) |
 | **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 2 Ready: [`screenshot.png`](../assets/screenshot.png) (Main phrase view), [`screenshot_voice_settings.png`](../assets/screenshot_voice_settings.png) (Voice & Language Settings) |
+| **Preview Video** | YouTube URL | YouTube link (`watch?v=`) | ✅ Ready: [English](https://www.youtube.com/watch?v=xpPbsiT7jks) / [Indonesian](https://www.youtube.com/watch?v=UBBUd36im48) |
 
 ---
 

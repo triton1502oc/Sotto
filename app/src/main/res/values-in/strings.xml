@@ -86,4 +86,19 @@
         <item>Halo.</item>
         <item>Tolong ulangi.</item>
     </string-array>
+
+    <!-- Dual-Language & Alternate Speech -->
+    <string name="label_spoken_text">Teks ucapan alternatif (opsional)</string>
+    <string name="hint_spoken_text">Apa yang diucapkan (misal terjemahan atau pelafalan)</string>
+    <string name="label_spoken_language">Bahasa ucapan</string>
+    <string name="label_dual_language_section">Bicara Dua Bahasa</string>
+    <string name="label_show_lang_switcher">Tampilkan pengalih bahasa di beranda</string>
+    <string name="label_show_lang_switcher_desc">Menambahkan tombol pengalih di bilah atas untuk mengganti bahasa ucapan</string>
+    <string name="label_secondary_language">Bahasa ucapan kedua</string>
+    <string name="action_speak_primary">Bicara (%1$s)</string>
+    <string name="action_speak_secondary">Bicara (%1$s)</string>
+    <string name="cd_alternate_speech">Memiliki ucapan alternatif</string>
+    <string name="action_auto_translate">Terjemahkan otomatis</string>
+    <string name="status_translating">Menerjemahkan…</string>
+    <string name="error_translation_failed">Gagal menerjemahkan. Periksa koneksi internet untuk mengunduh model bahasa.</string>
 </resources>

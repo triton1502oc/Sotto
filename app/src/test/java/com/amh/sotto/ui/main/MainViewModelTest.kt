@@ -56,9 +56,44 @@ class MainViewModelTest {
     }
 
     @Test
+    fun `addPhrase with spokenText and spokenLanguage saves correctly`() {
+        val bilingualPhrase = Phrase(
+            text = "Thank you",
+            spokenText = "Terima kasih",
+            spokenLanguage = "id",
+            category = Phrase.CATEGORY_SOCIAL
+        )
+        viewModel.addPhrase(bilingualPhrase)
+
+        val expected = listOf(
+            Phrase("Phrase 1", "auto"),
+            Phrase("Phrase 2", "en"),
+            Phrase("Phrase 3", "id"),
+            bilingualPhrase
+        )
+        assertEquals(expected, viewModel.phrases.value)
+        verify { repository.savePhrases(expected) }
+    }
+
+    @Test
     fun `editPhrase updates existing phrase and saves to repository`() {
         val oldPhrase = Phrase("Phrase 2", "en")
         val updatedPhrase = Phrase("Updated Phrase 2", "id")
+        viewModel.editPhrase(oldPhrase, updatedPhrase)
+
+        val expected = listOf(
+            Phrase("Phrase 1", "auto"),
+            updatedPhrase,
+            Phrase("Phrase 3", "id")
+        )
+        assertEquals(expected, viewModel.phrases.value)
+        verify { repository.savePhrases(expected) }
+    }
+
+    @Test
+    fun `editPhrase updates phrase with spokenText`() {
+        val oldPhrase = Phrase("Phrase 2", "en")
+        val updatedPhrase = Phrase("Where is the restroom?", spokenText = "Di mana kamar mandi?", spokenLanguage = "id")
         viewModel.editPhrase(oldPhrase, updatedPhrase)
 
         val expected = listOf(

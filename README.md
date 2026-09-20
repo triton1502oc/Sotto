@@ -6,6 +6,12 @@
   <img src="assets/screenshot.png" alt="Sotto Interface" width="300"/>
 </p>
 
+<p align="center">
+  🎬 <b>Watch Video Demo:</b> 
+  <a href="https://www.youtube.com/watch?v=xpPbsiT7jks">English (YouTube)</a> • 
+  <a href="https://www.youtube.com/watch?v=UBBUd36im48">Indonesian (YouTube)</a>
+</p>
+
 ## Who is Sotto For?
 - **Autistic Teens & Adults**: A sensory-friendly, mature dark-neutral interface with zero pediatric clutter, designed for routine communication, sensory overload, and verbal shutdowns.
 - **Speech-Impaired Individuals**: Accessible one-touch speech synthesis for individuals living with apraxia, dysarthria, ALS, cerebral palsy, vocal chord paralysis, or recovering from a stroke (aphasia).
@@ -22,11 +28,12 @@
 - **Attention Chime**: Optional pre-speech tone and haptic alert to politely capture listener attention in noisy spaces before TTS starts.
 - **Customizable**: Toggle "Edit List" to add, edit, delete, and drag-and-drop to rearrange phrase cards.
 - **Configurable Voice & Language**: Choose your App Language from installed TTS packages. Adjust speech rate and pitch with a live "Test Voice" preview.
+- **Dual-Language Speech & On-Device Translation**: Display cards in one language (e.g. English) while speaking in another (e.g. Indonesian) with a subtle indicator (`🗣️`). Features one-tap on-device auto-translation powered by Google ML Kit (100% private, zero user text sent to the cloud) and dual-language speak controls in fullscreen view.
 - **Offline Capable**: Completely local processing with zero tracking, zero accounts, and 100% privacy.
 
 ## How to Install (For Users)
 1. On your Android phone, go to the [Releases](https://github.com/triton1502oc/Sotto/releases) page.
-2. Scroll to the latest release and download the `.apk` file (e.g., `Sotto-v1.4.0.apk`) found under "Assets".
+2. Scroll to the latest release and download the `.apk` file (e.g., `Sotto-v1.5.0.apk`) found under "Assets".
 3. Once downloaded, open the file from your notifications or using a File Manager app.
 4. Your phone may warn you about installing from "Unknown Sources". Tap "Settings" on the prompt and toggle the switch to allow your browser or file manager to install the app.
 5. Tap "Install". You're ready to use Sotto!

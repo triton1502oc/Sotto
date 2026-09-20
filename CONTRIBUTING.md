@@ -46,7 +46,41 @@ Sotto (meaning *"under one's breath"* / soft voice) is designed specifically for
 
 ---
 
-## 4. Release Process
+## 4. Release Process (Standard Pre-Release & Release Workflow)
 
-* Releases are tracked in [CHANGELOG.md](CHANGELOG.md) and published via GitHub Releases (`gh release create`).
-* Store assets and metadata are documented in [docs/PLAY_STORE_LISTING.md](docs/PLAY_STORE_LISTING.md).
+All contributors and AI agents must follow this standard checklist before releasing a new version:
+
+1. **Automated Verification**:
+   - Run unit tests:
+     ```bash
+     ./gradlew testDebugUnitTest
+     ```
+   - Run compilation check:
+     ```bash
+     ./gradlew assembleDebug
+     ```
+2. **Version Bump**:
+   - Increment `versionCode` (integer) and bump `versionName` (semver, e.g. `1.5.0`) in `app/build.gradle.kts`.
+3. **Documentation Updates**:
+   - Update [CHANGELOG.md](CHANGELOG.md) with new features, fixes, and release assets under the new version header.
+   - Update [README.md](README.md) if new features, UI capabilities, or user workflows were added, and update the release asset download link.
+   - Update [docs/PLAY_STORE_LISTING.md](docs/PLAY_STORE_LISTING.md) if user-facing store descriptions or features changed.
+4. **Build Signed Release APK**:
+   - Run:
+     ```bash
+     ./gradlew assembleRelease
+     ```
+   - Verify that the output APK is generated at `app/build/outputs/apk/release/Sotto-v<version>.apk`.
+5. **Git Commit & Tag**:
+   - Stage modified files and commit using conventional commit format:
+     ```bash
+     git commit -m "feat: v<version> - <summary>"
+     ```
+   - Push commits to main branch: `git push origin main`.
+6. **GitHub Release**:
+   - Publish the release using GitHub CLI:
+     ```bash
+     gh release create v<version> app/build/outputs/apk/release/Sotto-v<version>.apk \
+       --title "v<version>" \
+       --notes-file <release-notes-file>
+     ```

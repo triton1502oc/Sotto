@@ -14,14 +14,15 @@ Sotto is an assistive communication (AAC) application designed for autistic indi
 * **No Personal Information:** Sotto does not ask for, access, or store your name, email address, phone number, location, or any personal details.
 * **No Speech or Phrase Data Stored by Us:** All phrases, custom messages, and speech output are processed locally on your device. We never record, upload, or transmit what you say or type. 
 * **Voice Input (Speech-to-Text):** If you use the microphone feature to dictate phrases, Sotto hands this request over to your device's default Speech Recognition service (like the Google App). Depending on your device settings, this service may use an internet connection to process your voice. Sotto itself does not collect or transmit this data.
+* **On-Device Translation:** If you use the Auto-Translate feature, a translation model is downloaded once to your device via Google ML Kit. All translation processing is executed 100% locally on your device; your text is never sent to external servers or recorded.
 * **No Analytics or Tracking:** Sotto contains zero third-party tracking SDKs, no advertising networks, and no analytics frameworks.
-* **No Network Transmission by Sotto:** Sotto itself does not communicate with external servers or cloud services.
+* **No Network Transmission of User Data:** Sotto itself does not transmit any of your personal data, phrases, or speech to external servers.
 
 ## 3. Local Device Storage
 Any customizations you make—such as adding, editing, or rearranging phrases, or adjusting voice speed, pitch, and voice gender—are stored strictly on your local device using Android's private app storage (`SharedPreferences`). This data never leaves your device and is erased if you uninstall the app or clear app data.
 
 ## 4. Third-Party Services
-Sotto does not integrate with any third-party APIs or cloud services. The Text-to-Speech synthesis is handled directly by the speech engine installed on your Android operating system.
+Sotto does not integrate with any third-party analytics or cloud data services. The Text-to-Speech synthesis is handled directly by the speech engine installed on your Android operating system, and on-device translation is executed locally via Google ML Kit.
 
 ## 5. Children's Privacy
 Because Sotto collects no data whatsoever from any user, it does not collect personal information from children or adults of any age.

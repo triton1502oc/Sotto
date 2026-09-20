@@ -86,4 +86,19 @@
         <item>Hello.</item>
         <item>Please repeat that.</item>
     </string-array>
+
+    <!-- Dual-Language & Alternate Speech -->
+    <string name="label_spoken_text">Alternate spoken text (optional)</string>
+    <string name="hint_spoken_text">What to speak aloud (e.g. translation or pronunciation)</string>
+    <string name="label_spoken_language">Spoken language</string>
+    <string name="label_dual_language_section">Dual-Language Speech</string>
+    <string name="label_show_lang_switcher">Show language switcher on home</string>
+    <string name="label_show_lang_switcher_desc">Adds a toggle in the top bar to switch speech language</string>
+    <string name="label_secondary_language">Secondary speech language</string>
+    <string name="action_speak_primary">Speak (%1$s)</string>
+    <string name="action_speak_secondary">Speak (%1$s)</string>
+    <string name="cd_alternate_speech">Has alternate speech</string>
+    <string name="action_auto_translate">Auto-translate</string>
+    <string name="status_translating">Translating…</string>
+    <string name="error_translation_failed">Translation failed. Please check internet connection to download language model.</string>
 </resources>

@@ -34,6 +34,8 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getFloat("speech_pitch", 1.0f) } returns 1.0f
         every { sharedPreferences.getString("voice_name", null) } returns null
         every { sharedPreferences.getBoolean("attention_chime", false) } returns false
+        every { sharedPreferences.getBoolean("show_language_switcher", false) } returns false
+        every { sharedPreferences.getString("secondary_language", "id") } returns "id"
 
         val settings = repository.getVoiceSettings()
 
@@ -41,6 +43,8 @@ class VoiceSettingsRepositoryTest {
         assertEquals(1.0f, settings.speechPitch)
         assertEquals(null, settings.voiceName)
         assertEquals(false, settings.playAttentionChime)
+        assertEquals(false, settings.showLanguageSwitcher)
+        assertEquals("id", settings.secondaryLanguage)
     }
 
     @Test
@@ -49,6 +53,8 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getFloat("speech_pitch", 1.0f) } returns 1.2f
         every { sharedPreferences.getString("voice_name", null) } returns "en-us-x-sfg#male_1"
         every { sharedPreferences.getBoolean("attention_chime", false) } returns true
+        every { sharedPreferences.getBoolean("show_language_switcher", false) } returns true
+        every { sharedPreferences.getString("secondary_language", "id") } returns "id"
 
         val settings = repository.getVoiceSettings()
 
@@ -56,6 +62,8 @@ class VoiceSettingsRepositoryTest {
         assertEquals(1.2f, settings.speechPitch)
         assertEquals("en-us-x-sfg#male_1", settings.voiceName)
         assertEquals(true, settings.playAttentionChime)
+        assertEquals(true, settings.showLanguageSwitcher)
+        assertEquals("id", settings.secondaryLanguage)
     }
 
     @Test
@@ -64,7 +72,9 @@ class VoiceSettingsRepositoryTest {
             speechRate = 1.25f,
             speechPitch = 0.9f,
             voiceName = "en-gb-x-rjs#female_1",
-            playAttentionChime = true
+            playAttentionChime = true,
+            showLanguageSwitcher = true,
+            secondaryLanguage = "id"
         )
 
         repository.saveVoiceSettings(newSettings)
@@ -74,6 +84,8 @@ class VoiceSettingsRepositoryTest {
             editor.putFloat("speech_pitch", 0.9f)
             editor.putString("voice_name", "en-gb-x-rjs#female_1")
             editor.putBoolean("attention_chime", true)
+            editor.putBoolean("show_language_switcher", true)
+            editor.putString("secondary_language", "id")
             editor.apply()
         }
     }

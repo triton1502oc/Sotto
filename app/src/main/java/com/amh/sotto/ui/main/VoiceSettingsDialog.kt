@@ -43,6 +43,9 @@ fun VoiceSettingsDialog(
     var rate by remember { mutableFloatStateOf(currentSettings.speechRate) }
     var pitch by remember { mutableFloatStateOf(currentSettings.speechPitch) }
     var attentionChime by remember { mutableStateOf(currentSettings.playAttentionChime) }
+    var showLangSwitcher by remember { mutableStateOf(currentSettings.showLanguageSwitcher) }
+    var secondaryLang by remember { mutableStateOf(currentSettings.secondaryLanguage) }
+    var secondaryLangDropdownExpanded by remember { mutableStateOf(false) }
     var langDropdownExpanded by remember { mutableStateOf(false) }
     var langSearchQuery by remember { mutableStateOf("") }
 
@@ -51,17 +54,23 @@ fun VoiceSettingsDialog(
     fun updateSettings(
         newRate: Float = rate,
         newPitch: Float = pitch,
-        newChime: Boolean = attentionChime
+        newChime: Boolean = attentionChime,
+        newShowLangSwitcher: Boolean = showLangSwitcher,
+        newSecondaryLang: String = secondaryLang
     ) {
         rate = newRate
         pitch = newPitch
         attentionChime = newChime
+        showLangSwitcher = newShowLangSwitcher
+        secondaryLang = newSecondaryLang
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
                 speechPitch = ((newPitch * 10).roundToInt() / 10f),
                 voiceName = null,
-                playAttentionChime = newChime
+                playAttentionChime = newChime,
+                showLanguageSwitcher = newShowLangSwitcher,
+                secondaryLanguage = newSecondaryLang
             )
         )
     }
@@ -279,6 +288,127 @@ fun VoiceSettingsDialog(
                     )
                 }
 
+                // Dual-Language Speech Section
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.label_dual_language_section),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                val nextState = !showLangSwitcher
+                                updateSettings(newShowLangSwitcher = nextState)
+                            }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 16.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.label_show_lang_switcher),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.label_show_lang_switcher_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        Switch(
+                            checked = showLangSwitcher,
+                            onCheckedChange = {
+                                updateSettings(newShowLangSwitcher = it)
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            )
+                        )
+                    }
+
+                    if (showLangSwitcher) {
+                        Column(modifier = Modifier.padding(top = 4.dp)) {
+                            Text(
+                                text = stringResource(R.string.label_secondary_language),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            val secondaryLanguagesList = remember(availableLanguages) {
+                                availableLanguages.filter { it.first != LocaleHelper.LANG_SYSTEM }
+                            }
+                            val secondaryLanguageLabel = remember(secondaryLang, secondaryLanguagesList) {
+                                secondaryLanguagesList.firstOrNull { it.first == secondaryLang }?.second
+                                    ?: LocaleHelper.getLanguageDisplayName(secondaryLang)
+                            }
+
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable { secondaryLangDropdownExpanded = true },
+                                    color = MaterialTheme.colorScheme.background,
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = secondaryLanguageLabel,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "▼",
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+
+                                DropdownMenu(
+                                    expanded = secondaryLangDropdownExpanded,
+                                    onDismissRequest = { secondaryLangDropdownExpanded = false },
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.85f)
+                                        .heightIn(max = 280.dp)
+                                        .background(MaterialTheme.colorScheme.surface)
+                                ) {
+                                    secondaryLanguagesList.forEach { (code, label) ->
+                                        DropdownMenuItem(
+                                            text = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
+                                            onClick = {
+                                                updateSettings(newSecondaryLang = code)
+                                                secondaryLangDropdownExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Test Voice Button
                 OutlinedButton(
                     onClick = {
@@ -287,7 +417,9 @@ fun VoiceSettingsDialog(
                                 speechRate = ((rate * 10).roundToInt() / 10f),
                                 speechPitch = ((pitch * 10).roundToInt() / 10f),
                                 voiceName = null,
-                                playAttentionChime = attentionChime
+                                playAttentionChime = attentionChime,
+                                showLanguageSwitcher = showLangSwitcher,
+                                secondaryLanguage = secondaryLang
                             )
                         )
                     },

@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -61,6 +62,7 @@ import com.amh.sotto.ui.main.MainViewModel
 import com.amh.sotto.util.ChimePlayer
 import com.amh.sotto.ui.main.VoiceSettingsDialog
 import com.amh.sotto.util.LocaleHelper
+import com.amh.sotto.util.TranslationHelper
 import sh.calvin.reorderable.*
 import java.util.Locale
 
@@ -121,21 +123,12 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             recreate()
                         },
                         onSpeak = { phrase ->
-                            if (ttsReady) {
-                                if (latestVoiceSettings.playAttentionChime) {
-                                    playAttentionChime()
-                                }
-                                val effectiveLang = LocaleHelper.getEffectiveLanguage(this@MainActivity)
-                                val targetLocale = LocaleHelper.resolvePhraseLocale(phrase.language, phrase.text, effectiveLang)
-                                tts?.setLanguage(targetLocale)
-                                applyVoiceSettings(latestVoiceSettings, targetLocale)
-                                if (latestVoiceSettings.playAttentionChime) {
-                                    tts?.playSilentUtterance(280, TextToSpeech.QUEUE_FLUSH, null)
-                                    tts?.speak(phrase.text, TextToSpeech.QUEUE_ADD, null, null)
-                                } else {
-                                    tts?.speak(phrase.text, TextToSpeech.QUEUE_FLUSH, null, null)
-                                }
-                            }
+                            val textToSpeak = if (!phrase.spokenText.isNullOrBlank()) phrase.spokenText else phrase.text
+                            val langToUse = if (!phrase.spokenText.isNullOrBlank()) phrase.spokenLanguage else phrase.language
+                            speakUtterance(textToSpeak, langToUse)
+                        },
+                        onSpeakText = { text, lang ->
+                            speakUtterance(text, lang)
                         },
                         onAddPhrase = { viewModel.addPhrase(it) },
                         onEditPhrase = { old, new -> viewModel.editPhrase(old, new) },
@@ -165,6 +158,24 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         }
                     )
                 }
+            }
+        }
+    }
+
+    private fun speakUtterance(text: String, language: String? = null) {
+        if (ttsReady && text.isNotBlank()) {
+            if (latestVoiceSettings.playAttentionChime) {
+                playAttentionChime()
+            }
+            val effectiveLang = LocaleHelper.getEffectiveLanguage(this)
+            val targetLocale = LocaleHelper.resolvePhraseLocale(language ?: LocaleHelper.LANG_AUTO, text, effectiveLang)
+            tts?.setLanguage(targetLocale)
+            applyVoiceSettings(latestVoiceSettings, targetLocale)
+            if (latestVoiceSettings.playAttentionChime) {
+                tts?.playSilentUtterance(280, TextToSpeech.QUEUE_FLUSH, null)
+                tts?.speak(text, TextToSpeech.QUEUE_ADD, null, null)
+            } else {
+                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
             }
         }
     }
@@ -214,6 +225,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     override fun onDestroy() {
         tts?.stop()
         tts?.shutdown()
+        TranslationHelper.close()
         super.onDestroy()
     }
 }
@@ -245,6 +257,7 @@ fun SottoApp(
     currentLanguage: String,
     onLanguageChanged: (String) -> Unit,
     onSpeak: (Phrase) -> Unit,
+    onSpeakText: (String, String?) -> Unit = { _, _ -> },
     onAddPhrase: (Phrase) -> Unit,
     onEditPhrase: (Phrase, Phrase) -> Unit,
     onDeletePhrase: (Phrase) -> Unit,
@@ -257,6 +270,7 @@ fun SottoApp(
     var showVoiceDialog by rememberSaveable { mutableStateOf(false) }
     var phraseToEdit by remember { mutableStateOf<Phrase?>(null) }
     var isEditMode by rememberSaveable { mutableStateOf(false) }
+    var activeSpeechTarget by rememberSaveable { mutableStateOf("primary") }
 
     val allCategoryKey = "ALL"
     var selectedCategory by rememberSaveable { mutableStateOf(allCategoryKey) }
@@ -303,6 +317,49 @@ fun SottoApp(
                 TopAppBar(
                     title = { Text(stringResource(R.string.app_name)) },
                     actions = {
+                        if (voiceSettings.showLanguageSwitcher) {
+                            val context = LocalContext.current
+                            val primarySelected = activeSpeechTarget == "primary"
+                            val primaryLabel = LocaleHelper.getLocaleForLanguage(
+                                LocaleHelper.getEffectiveLanguage(context)
+                            ).language.uppercase(Locale.ROOT)
+                            val secondaryLabel = voiceSettings.secondaryLanguage.uppercase(Locale.ROOT)
+
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier.padding(end = 4.dp)
+                            ) {
+                                Row(modifier = Modifier.padding(2.dp)) {
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = if (primarySelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                        modifier = Modifier.clickable { activeSpeechTarget = "primary" }
+                                    ) {
+                                        Text(
+                                            text = primaryLabel,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = if (primarySelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (primarySelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = if (!primarySelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                        modifier = Modifier.clickable { activeSpeechTarget = "secondary" }
+                                    ) {
+                                        Text(
+                                            text = secondaryLabel,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = if (!primarySelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (!primarySelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                         if (isEditMode) {
                             TextButton(onClick = { showVoiceDialog = true }) {
                                 Text(stringResource(R.string.action_voice), color = MaterialTheme.colorScheme.primary)
@@ -536,7 +593,21 @@ fun SottoApp(
                             .clickable { phraseToEdit = phrase }
                     } else {
                         cardModifier.combinedClickable(
-                            onClick = { onSpeak(phrase) },
+                            onClick = {
+                                if (voiceSettings.showLanguageSwitcher) {
+                                    if (activeSpeechTarget == "secondary" && !phrase.spokenText.isNullOrBlank()) {
+                                        onSpeakText(phrase.spokenText, phrase.spokenLanguage ?: voiceSettings.secondaryLanguage)
+                                    } else {
+                                        onSpeakText(phrase.text, phrase.language)
+                                    }
+                                } else {
+                                    if (!phrase.spokenText.isNullOrBlank()) {
+                                        onSpeakText(phrase.spokenText, phrase.spokenLanguage)
+                                    } else {
+                                        onSpeak(phrase)
+                                    }
+                                }
+                            },
                             onLongClick = { expandedPhrase = phrase }
                         )
                     }
@@ -583,20 +654,61 @@ fun SottoApp(
                                     color = Color(0xFFFFE0B2),
                                     lineHeight = 24.sp
                                 )
+                                if (!phrase.spokenText.isNullOrBlank()) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text("🗣️", fontSize = 12.sp)
+                                        Text(
+                                            text = phrase.spokenText,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFFFFCC80).copy(alpha = 0.8f),
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
                             }
                         } else {
-                            Box(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
+                                    .padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
                                     text = phrase.text,
                                     style = MaterialTheme.typography.titleMedium,
                                     textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = if (!phrase.spokenText.isNullOrBlank()) 3 else 4,
+                                    overflow = TextOverflow.Ellipsis
                                 )
+                                if (!phrase.spokenText.isNullOrBlank()) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        modifier = Modifier.padding(horizontal = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "🗣️",
+                                            fontSize = 11.sp
+                                        )
+                                        Text(
+                                            text = phrase.spokenText,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -625,6 +737,7 @@ fun SottoApp(
     // Modal Dialog for viewing/speaking giant text
     expandedPhrase?.let { phrase ->
         val isEmergency = phrase.isEmergency
+        val hasSpokenText = !phrase.spokenText.isNullOrBlank()
         Dialog(
             onDismissRequest = { expandedPhrase = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -673,37 +786,120 @@ fun SottoApp(
                         }
                     }
 
-                    Text(
-                        text = phrase.text,
-                        fontSize = if (isEmergency && phrase.text.length > 60) 36.sp else 48.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        lineHeight = if (isEmergency && phrase.text.length > 60) 44.sp else 56.sp,
-                        color = if (isEmergency) Color(0xFFFFE0B2) else MaterialTheme.colorScheme.onBackground,
+                    Column(
                         modifier = Modifier
                             .weight(1f)
-                            .wrapContentHeight(Alignment.CenterVertically)
-                    )
-
-                    Button(
-                        onClick = { onSpeak(phrase) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(64.dp),
-                        colors = if (isEmergency) {
-                            ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFFB74D),
-                                contentColor = Color(0xFF1E1710)
-                            )
-                        } else {
-                            ButtonDefaults.buttonColors()
-                        }
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            stringResource(R.string.action_speak_aloud),
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
+                            text = phrase.text,
+                            fontSize = if (isEmergency && phrase.text.length > 60) 36.sp else 48.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            lineHeight = if (isEmergency && phrase.text.length > 60) 44.sp else 56.sp,
+                            color = if (isEmergency) Color(0xFFFFE0B2) else MaterialTheme.colorScheme.onBackground
                         )
+                        if (hasSpokenText) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text("🗣️", fontSize = 20.sp)
+                                    Text(
+                                        text = phrase.spokenText,
+                                        fontSize = 22.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (hasSpokenText) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = { onSpeakText(phrase.text, phrase.language) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp),
+                                colors = if (isEmergency) {
+                                    ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFFFB74D),
+                                        contentColor = Color(0xFF1E1710)
+                                    )
+                                } else {
+                                    ButtonDefaults.buttonColors()
+                                }
+                            ) {
+                                val context = LocalContext.current
+                                val targetLocale = LocaleHelper.resolvePhraseLocale(phrase.language, phrase.text, LocaleHelper.getEffectiveLanguage(context))
+                                val langLabel = targetLocale.getDisplayLanguage(targetLocale).replaceFirstChar { if (it.isLowerCase()) it.titlecase(targetLocale) else it.toString() }
+                                Text(
+                                    text = stringResource(R.string.action_speak_primary, langLabel),
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            Button(
+                                onClick = { onSpeakText(phrase.spokenText, phrase.spokenLanguage) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            ) {
+                                val context = LocalContext.current
+                                val spokenLang = phrase.spokenLanguage ?: LocaleHelper.LANG_AUTO
+                                val targetLocale = LocaleHelper.resolvePhraseLocale(spokenLang, phrase.spokenText, LocaleHelper.getEffectiveLanguage(context))
+                                val langLabel = targetLocale.getDisplayLanguage(targetLocale).replaceFirstChar { if (it.isLowerCase()) it.titlecase(targetLocale) else it.toString() }
+                                Text(
+                                    text = stringResource(R.string.action_speak_secondary, langLabel),
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    } else {
+                        Button(
+                            onClick = { onSpeak(phrase) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp),
+                            colors = if (isEmergency) {
+                                ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFFFB74D),
+                                    contentColor = Color(0xFF1E1710)
+                                )
+                            } else {
+                                ButtonDefaults.buttonColors()
+                            }
+                        ) {
+                            Text(
+                                stringResource(R.string.action_speak_aloud),
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -715,6 +911,11 @@ fun SottoApp(
         val context = LocalContext.current
         val voiceInputPrompt = stringResource(R.string.cd_voice_input)
         var textValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.text ?: "") }
+        var spokenTextValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.spokenText ?: "") }
+        var spokenLangValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.spokenLanguage ?: LocaleHelper.LANG_AUTO) }
+        var isSpokenTextExpanded by remember(phraseToEdit, showAddDialog) { mutableStateOf(!phraseToEdit?.spokenText.isNullOrBlank()) }
+        var isTranslating by remember { mutableStateOf(false) }
+        var translationError by remember { mutableStateOf<String?>(null) }
         var selectedCat by remember(phraseToEdit, showAddDialog) {
             mutableStateOf(
                 if (phraseToEdit?.isEmergency == true) Phrase.CATEGORY_EMERGENCY
@@ -730,6 +931,17 @@ fun SottoApp(
                 val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                 if (!matches.isNullOrEmpty()) {
                     textValue = if (textValue.isBlank()) matches[0] else "$textValue ${matches[0]}"
+                }
+            }
+        }
+
+        val spokenSpeechLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                if (!matches.isNullOrEmpty()) {
+                    spokenTextValue = if (spokenTextValue.isBlank()) matches[0] else "$spokenTextValue ${matches[0]}"
                 }
             }
         }
@@ -782,6 +994,143 @@ fun SottoApp(
                         singleLine = false,
                         minLines = 2
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Expandable Alternate Spoken Text
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { isSpokenTextExpanded = !isSpokenTextExpanded }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text("🗣️", fontSize = 14.sp)
+                            Text(
+                                text = stringResource(R.string.label_spoken_text),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Text(
+                            text = if (isSpokenTextExpanded) "▲" else "▼",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    if (isSpokenTextExpanded) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.label_spoken_language) + ": ${LocaleHelper.getLanguageDisplayName(voiceSettings.secondaryLanguage)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                modifier = Modifier.weight(1f, fill = false),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            OutlinedButton(
+                                onClick = {
+                                    if (textValue.isNotBlank() && !isTranslating) {
+                                        translationError = null
+                                        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                                        val sourceLang = LocaleHelper.resolvePhraseLocale(LocaleHelper.LANG_AUTO, textValue, effectiveLang).language
+                                        val targetLang = voiceSettings.secondaryLanguage
+                                        TranslationHelper.translate(
+                                            text = textValue.trim(),
+                                            sourceLangCode = sourceLang,
+                                            targetLangCode = targetLang,
+                                            onProgress = { isTranslating = it },
+                                            onSuccess = { translated ->
+                                                spokenTextValue = translated
+                                                spokenLangValue = targetLang
+                                            },
+                                            onError = {
+                                                translationError = context.getString(R.string.error_translation_failed)
+                                            }
+                                        )
+                                    }
+                                },
+                                enabled = textValue.isNotBlank() && !isTranslating,
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                if (isTranslating) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(14.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.status_translating),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                } else {
+                                    Text(
+                                        text = "🌐 " + stringResource(R.string.action_auto_translate),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                            }
+                        }
+
+                        if (translationError != null) {
+                            Text(
+                                text = translationError!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFFEF5350),
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+
+                        OutlinedTextField(
+                            value = spokenTextValue,
+                            onValueChange = { spokenTextValue = it },
+                            placeholder = {
+                                Text(
+                                    stringResource(R.string.hint_spoken_text),
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            },
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = {
+                                        val targetLang = if (spokenLangValue != LocaleHelper.LANG_AUTO) spokenLangValue else voiceSettings.secondaryLanguage
+                                        val langTag = LocaleHelper.getLocaleForLanguage(targetLang).toLanguageTag()
+                                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+                                            putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
+                                        }
+                                        try {
+                                            spokenSpeechLauncher.launch(intent)
+                                        } catch (e: Exception) {
+                                            // Ignore if speech recognizer not present
+                                        }
+                                    }
+                                ) {
+                                    Text("🎤", fontSize = 20.sp)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = false,
+                            minLines = 2
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -836,6 +1185,8 @@ fun SottoApp(
                         val isEmergency = selectedCat == Phrase.CATEGORY_EMERGENCY
                         val newPhrase = Phrase(
                             text = textValue.trim(),
+                            spokenText = spokenTextValue.trim().takeIf { it.isNotBlank() },
+                            spokenLanguage = spokenLangValue.takeIf { spokenTextValue.isNotBlank() },
                             language = LocaleHelper.LANG_AUTO,
                             isEmergency = isEmergency,
                             category = selectedCat

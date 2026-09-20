@@ -8,9 +8,11 @@ This directory contains high-definition, synchronized demo videos showcasing Sot
 ## Videos
 
 - **Indonesian Demo**: [`sotto_demo_id.mp4`](sotto_demo_id.mp4) (48s, 720×1600 @ 30fps, 4 Mbps H.264, 192 kbps AAC audio)
+  - **YouTube**: [https://www.youtube.com/watch?v=UBBUd36im48](https://www.youtube.com/watch?v=UBBUd36im48) (Shorts: [https://youtube.com/shorts/UBBUd36im48](https://youtube.com/shorts/UBBUd36im48))
   - Spoken TTS Voice: `Damayanti` (id-ID)
   - Phrases: *"Tolong beri saya waktu."*, *"Saya tidak bisa bicara sekarang. Tolong baca layar saya."*, *"Halo, ini adalah suara bicara saya."*
 - **English Demo**: [`sotto_demo_en.mp4`](sotto_demo_en.mp4) (48s, 720×1600 @ 30fps, 4 Mbps H.264, 192 kbps AAC audio)
+  - **YouTube**: [https://www.youtube.com/watch?v=xpPbsiT7jks](https://www.youtube.com/watch?v=xpPbsiT7jks) (Shorts: [https://youtube.com/shorts/xpPbsiT7jks](https://youtube.com/shorts/xpPbsiT7jks))
   - Spoken TTS Voice: `Samantha` (en-US)
   - Phrases: *"I need a moment, please."*, *"I cannot speak right now. Please read my screen."*, *"Hello, this is my speaking voice."*
 

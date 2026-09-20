@@ -84,8 +84,8 @@ object LocaleHelper {
     fun getLanguageDisplayName(code: String): String {
         if (code == LANG_SYSTEM) return "System Default"
         val locale = getLocaleForLanguage(code)
-        val nativeName = locale.getDisplayName(locale).replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
-        val englishName = locale.getDisplayName(Locale.ENGLISH).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+        val nativeName = locale.getDisplayLanguage(locale).replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
+        val englishName = locale.getDisplayLanguage(Locale.ENGLISH).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
         return if (nativeName.equals(englishName, ignoreCase = true) || englishName.isBlank()) {
             nativeName
         } else {
