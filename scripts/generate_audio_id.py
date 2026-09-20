@@ -74,16 +74,16 @@ if __name__ == '__main__':
     chime_samples = generate_chime_samples()
     write_wav('demo/audio_scratch_id/chime.wav', chime_samples)
 
-    # Indonesian clips (Damayanti)
-    tts_to_wav("Tolong beri saya waktu.", 'demo/audio_scratch_id/waktu.wav', voice='Damayanti')
-    tts_to_wav("Saya tidak bisa bicara sekarang. Tolong baca layar saya.", 'demo/audio_scratch_id/emergency_id.wav', voice='Damayanti')
-    tts_to_wav("Halo, ini adalah suara bicara saya.", 'demo/audio_scratch_id/test_voice_id.wav', voice='Damayanti')
+    # 1. Quick speak phrase
+    tts_to_wav("Tolong beri saya waktu.", 'demo/audio_scratch_id/waktu.wav')
 
-    # English clips for dual-language showcase (Samantha)
-    tts_to_wav("I cannot speak right now. Please read my screen.", 'demo/audio_scratch_id/emergency_en.wav', voice='Samantha')
-    tts_to_wav("Please give me time.", 'demo/audio_scratch_id/time_en.wav', voice='Samantha')
+    # 2. Emergency phrase
+    tts_to_wav("Saya tidak bisa bicara sekarang. Tolong baca layar saya.", 'demo/audio_scratch_id/darurat.wav')
 
-    # Attention chime + Indonesian voice test
+    # 3. Test voice phrase
+    tts_to_wav("Halo, ini adalah suara bicara saya.", 'demo/audio_scratch_id/test_voice_id.wav')
+
+    # 4. Attention chime + test voice
     chime_test = chime_samples + [0] * int(0.28 * SAMPLE_RATE) + read_wav('demo/audio_scratch_id/test_voice_id.wav')
     write_wav('demo/audio_scratch_id/chime_test_voice_id.wav', chime_test)
-    print("Indonesian and dual-language audio clips generated successfully.")
+    print("Indonesian audio clips generated successfully.")

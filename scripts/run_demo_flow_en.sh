@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-ADB="${ADB:-$(which adb 2>/dev/null || echo "${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb")}"
+ADB="$HOME/Library/Android/sdk/platform-tools/adb"
 EVENTS_FILE="demo/events.txt"
 rm -f "$EVENTS_FILE"
 
@@ -15,7 +15,7 @@ log_event() {
 
 echo "=== Scene 1: Instant Quick Speak ==="
 # Focus Quick Speak input field
-$ADB shell input tap 303 2242
+$ADB shell input tap 390 2210
 sleep 0.8
 
 # Type phrase
@@ -30,48 +30,43 @@ sleep 0.8
 
 # Tap 🔊 Speak button
 log_event "speak_moment_1"
-$ADB shell input tap 986 2243
-sleep 2.4
+$ADB shell input tap 980 2210
+sleep 2.2
 
 echo "=== Scene 2: Large Visual Presentation Mode ==="
 # Tap ⛶ Fullscreen button
-$ADB shell input tap 839 2243
+$ADB shell input tap 815 2210
 sleep 2.5
 
 # Tap Speak Aloud button in fullscreen
 log_event "speak_moment_2"
 $ADB shell input tap 540 2175
-sleep 2.4
+sleep 2.2
 
 # Dismiss fullscreen dialog
 $ADB shell input keyevent 4
 sleep 1.0
 
-echo "=== Scene 3: Category Filtering & Emergency Dual-Language ==="
+echo "=== Scene 3: Phrase Categories & Emergency ==="
 # Tap "Needs"
-$ADB shell input tap 574 305
+$ADB shell input tap 530 310
 sleep 1.8
 
 # Tap "Social"
-$ADB shell input tap 783 305
+$ADB shell input tap 720 310
 sleep 1.8
 
 # Tap "Emergency"
-$ADB shell input tap 325 305
+$ADB shell input tap 300 310
 sleep 1.8
 
 # Long-press emergency card to open full-screen emergency
-$ADB shell input swipe 540 620 540 621 800
+$ADB shell input swipe 540 580 540 580 900
 sleep 2.5
 
-# Tap Speak (English) button
-log_event "speak_emergency_en"
-$ADB shell input tap 294 2200
-sleep 3.2
-
-# Tap Speak (Indonesia) button
-log_event "speak_emergency_id"
-$ADB shell input tap 787 2200
+# Tap Speak Aloud button in emergency fullscreen
+log_event "speak_emergency"
+$ADB shell input tap 540 2175
 sleep 3.5
 
 # Dismiss emergency dialog
@@ -79,52 +74,38 @@ $ADB shell input keyevent 4
 sleep 1.0
 
 # Return to "All"
-$ADB shell input tap 107 305
+$ADB shell input tap 100 310
 sleep 1.5
 
-echo "=== Scene 4: Dual-Language TopBar Switcher & Card Taps ==="
-# Tap phrase card while EN is active -> Speaks English
-log_event "speak_time_en"
-$ADB shell input tap 281 1080
-sleep 2.4
-
-# Tap ID in top bar switcher
-$ADB shell input tap 778 147
+echo "=== Scene 4: Edit Mode & Personalization ==="
+# Tap "Edit List"
+$ADB shell input tap 870 150
 sleep 1.5
 
-# Tap phrase card again while ID is active -> Speaks Indonesian
-log_event "speak_time_id"
-$ADB shell input tap 281 1080
-sleep 2.4
-
-# Switch back to EN
-$ADB shell input tap 696 147
-sleep 1.0
+# Long-press & drag card to reorder
+$ADB shell input swipe 280 1020 800 1020 900
+sleep 2.0
 
 echo "=== Scene 5: Voice Customization & Attention Chime ==="
-# Tap "Edit List"
-$ADB shell input tap 929 147
-sleep 1.5
-
 # Tap "Voice" button in edit mode
-$ADB shell input tap 786 147
+$ADB shell input tap 720 150
 sleep 2.0
 
 # Tap "Attention chime before speaking" switch
-$ADB shell input tap 820 1340 || true
+$ADB shell input tap 820 1320 || true
 sleep 1.0
 
 # Tap "Test Voice" button
 log_event "test_voice"
-$ADB shell input tap 540 1550 || true
-sleep 3.5
+$ADB shell input tap 540 1500 || true
+sleep 3.0
 
 # Dismiss voice dialog
 $ADB shell input keyevent 4
 sleep 1.0
 
 # Tap "Done" to exit edit mode
-$ADB shell input tap 951 147
+$ADB shell input tap 870 150
 sleep 2.5
 
 log_event "end"
