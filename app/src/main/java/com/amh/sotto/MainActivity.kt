@@ -123,7 +123,10 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             recreate()
                         },
                         onSpeak = { phrase ->
-                            if (latestVoiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()) {
+                            val hasValidSpoken = latestVoiceSettings.showLanguageSwitcher &&
+                                !phrase.spokenText.isNullOrBlank() &&
+                                phrase.spokenText != LocaleHelper.LANG_AUTO
+                            if (hasValidSpoken) {
                                 speakUtterance(phrase.spokenText, phrase.spokenLanguage)
                             } else {
                                 speakUtterance(phrase.text, phrase.language)
@@ -267,6 +270,7 @@ fun SottoApp(
     onUpdateVoiceSettings: (VoiceSettings) -> Unit,
     onTestVoice: (VoiceSettings) -> Unit
 ) {
+    val context = LocalContext.current
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showVoiceDialog by rememberSaveable { mutableStateOf(false) }
@@ -438,7 +442,7 @@ fun SottoApp(
                     .navigationBarsPadding()
             ) {
                 var quickText by rememberSaveable { mutableStateOf("") }
-                val context = LocalContext.current
+                var isQuickTranslating by remember { mutableStateOf(false) }
                 val voiceInputPrompt = stringResource(R.string.cd_voice_input)
 
                 val quickSpeechLauncher = rememberLauncherForActivityResult(
@@ -449,6 +453,54 @@ fun SottoApp(
                         if (!matches.isNullOrEmpty()) {
                             quickText = if (quickText.isBlank()) matches[0] else "$quickText ${matches[0]}"
                         }
+                    }
+                }
+
+                fun handleQuickSpeak(text: String) {
+                    if (text.isBlank()) return
+                    if (voiceSettings.showLanguageSwitcher && activeSpeechTarget == "secondary") {
+                        isQuickTranslating = true
+                        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                        val sourceLang = LocaleHelper.resolvePhraseLocale(LocaleHelper.LANG_AUTO, text, effectiveLang).language
+                        val targetLang = voiceSettings.secondaryLanguage
+                        TranslationHelper.translate(
+                            text = text,
+                            sourceLangCode = sourceLang,
+                            targetLangCode = targetLang,
+                            onProgress = { isQuickTranslating = it },
+                            onSuccess = { translated ->
+                                isQuickTranslating = false
+                                onSpeakText(translated, targetLang)
+                            },
+                            onError = {
+                                isQuickTranslating = false
+                                onSpeakText(text, targetLang)
+                            }
+                        )
+                    } else {
+                        onSpeakText(text, LocaleHelper.LANG_AUTO)
+                    }
+                }
+
+                fun handleQuickFullscreen(text: String) {
+                    if (text.isBlank()) return
+                    expandedPhrase = Phrase(text = text, language = LocaleHelper.LANG_AUTO)
+                    if (voiceSettings.showLanguageSwitcher) {
+                        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                        val sourceLang = LocaleHelper.resolvePhraseLocale(LocaleHelper.LANG_AUTO, text, effectiveLang).language
+                        val targetLang = voiceSettings.secondaryLanguage
+                        TranslationHelper.translate(
+                            text = text,
+                            sourceLangCode = sourceLang,
+                            targetLangCode = targetLang,
+                            onProgress = {},
+                            onSuccess = { translated ->
+                                if (expandedPhrase?.text == text) {
+                                    expandedPhrase = expandedPhrase?.copy(spokenText = translated, spokenLanguage = targetLang)
+                                }
+                            },
+                            onError = {}
+                        )
                     }
                 }
 
@@ -506,7 +558,7 @@ fun SottoApp(
                         keyboardActions = KeyboardActions(
                             onDone = {
                                 if (quickText.isNotBlank()) {
-                                    onSpeak(Phrase(quickText.trim(), LocaleHelper.LANG_AUTO))
+                                    handleQuickSpeak(quickText.trim())
                                 }
                             }
                         ),
@@ -517,7 +569,7 @@ fun SottoApp(
                     IconButton(
                         onClick = {
                             if (quickText.isNotBlank()) {
-                                expandedPhrase = Phrase(quickText.trim(), LocaleHelper.LANG_AUTO)
+                                handleQuickFullscreen(quickText.trim())
                             }
                         },
                         enabled = quickText.isNotBlank()
@@ -533,16 +585,24 @@ fun SottoApp(
                     FilledIconButton(
                         onClick = {
                             if (quickText.isNotBlank()) {
-                                onSpeak(Phrase(quickText.trim(), LocaleHelper.LANG_AUTO))
+                                handleQuickSpeak(quickText.trim())
                             }
                         },
-                        enabled = quickText.isNotBlank(),
+                        enabled = quickText.isNotBlank() && !isQuickTranslating,
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Text("🔊", fontSize = 18.sp)
+                        if (isQuickTranslating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Text("🔊", fontSize = 18.sp)
+                        }
                     }
                 }
             }
@@ -597,8 +657,28 @@ fun SottoApp(
                         cardModifier.combinedClickable(
                             onClick = {
                                 if (voiceSettings.showLanguageSwitcher) {
-                                    if (activeSpeechTarget == "secondary" && !phrase.spokenText.isNullOrBlank()) {
-                                        onSpeakText(phrase.spokenText, phrase.spokenLanguage ?: voiceSettings.secondaryLanguage)
+                                    if (activeSpeechTarget == "secondary") {
+                                        val hasValidSpoken = !phrase.spokenText.isNullOrBlank() && phrase.spokenText != LocaleHelper.LANG_AUTO
+                                        if (hasValidSpoken) {
+                                            onSpeakText(phrase.spokenText, phrase.spokenLanguage ?: voiceSettings.secondaryLanguage)
+                                        } else {
+                                            val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                                            val sourceLang = LocaleHelper.resolvePhraseLocale(phrase.language, phrase.text, effectiveLang).language
+                                            val targetLang = voiceSettings.secondaryLanguage
+                                            TranslationHelper.translate(
+                                                text = phrase.text,
+                                                sourceLangCode = sourceLang,
+                                                targetLangCode = targetLang,
+                                                onProgress = {},
+                                                onSuccess = { translated ->
+                                                    onSpeakText(translated, targetLang)
+                                                    onEditPhrase(phrase, phrase.copy(spokenText = translated, spokenLanguage = targetLang))
+                                                },
+                                                onError = {
+                                                    onSpeakText(phrase.text, targetLang)
+                                                }
+                                            )
+                                        }
                                     } else {
                                         onSpeakText(phrase.text, phrase.language)
                                     }
@@ -652,7 +732,10 @@ fun SottoApp(
                                     color = Color(0xFFFFE0B2),
                                     lineHeight = 24.sp
                                 )
-                                if (voiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()) {
+                                val hasEmergencySpoken = voiceSettings.showLanguageSwitcher &&
+                                    !phrase.spokenText.isNullOrBlank() &&
+                                    phrase.spokenText != LocaleHelper.LANG_AUTO
+                                if (hasEmergencySpoken) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -670,6 +753,9 @@ fun SottoApp(
                                 }
                             }
                         } else {
+                            val hasCardSpoken = voiceSettings.showLanguageSwitcher &&
+                                !phrase.spokenText.isNullOrBlank() &&
+                                phrase.spokenText != LocaleHelper.LANG_AUTO
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -682,10 +768,10 @@ fun SottoApp(
                                     style = MaterialTheme.typography.titleMedium,
                                     textAlign = TextAlign.Center,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = if (voiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()) 3 else 4,
+                                    maxLines = if (hasCardSpoken) 3 else 4,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                if (voiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()) {
+                                if (hasCardSpoken) {
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
@@ -735,7 +821,30 @@ fun SottoApp(
     // Modal Dialog for viewing/speaking giant text
     expandedPhrase?.let { phrase ->
         val isEmergency = phrase.isEmergency
-        val hasSpokenText = voiceSettings.showLanguageSwitcher && !phrase.spokenText.isNullOrBlank()
+        val hasSpokenText = voiceSettings.showLanguageSwitcher &&
+            !phrase.spokenText.isNullOrBlank() &&
+            phrase.spokenText != LocaleHelper.LANG_AUTO
+
+        LaunchedEffect(phrase.text, voiceSettings.showLanguageSwitcher, voiceSettings.secondaryLanguage) {
+            if (voiceSettings.showLanguageSwitcher && (phrase.spokenText.isNullOrBlank() || phrase.spokenText == LocaleHelper.LANG_AUTO)) {
+                val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                val sourceLang = LocaleHelper.resolvePhraseLocale(phrase.language, phrase.text, effectiveLang).language
+                val targetLang = voiceSettings.secondaryLanguage
+                TranslationHelper.translate(
+                    text = phrase.text,
+                    sourceLangCode = sourceLang,
+                    targetLangCode = targetLang,
+                    onProgress = {},
+                    onSuccess = { translated ->
+                        if (expandedPhrase?.text == phrase.text) {
+                            expandedPhrase = expandedPhrase?.copy(spokenText = translated, spokenLanguage = targetLang)
+                        }
+                    },
+                    onError = {}
+                )
+            }
+        }
+
         Dialog(
             onDismissRequest = { expandedPhrase = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -842,7 +951,6 @@ fun SottoApp(
                                     ButtonDefaults.buttonColors()
                                 }
                             ) {
-                                val context = LocalContext.current
                                 val targetLocale = LocaleHelper.resolvePhraseLocale(phrase.language, phrase.text, LocaleHelper.getEffectiveLanguage(context))
                                 val langLabel = targetLocale.getDisplayLanguage(targetLocale).replaceFirstChar { if (it.isLowerCase()) it.titlecase(targetLocale) else it.toString() }
                                 Text(
@@ -855,7 +963,7 @@ fun SottoApp(
                             }
 
                             Button(
-                                onClick = { onSpeakText(phrase.spokenText, phrase.spokenLanguage) },
+                                onClick = { onSpeakText(phrase.spokenText, phrase.spokenLanguage ?: voiceSettings.secondaryLanguage) },
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp),
@@ -864,8 +972,7 @@ fun SottoApp(
                                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             ) {
-                                val context = LocalContext.current
-                                val spokenLang = phrase.spokenLanguage ?: LocaleHelper.LANG_AUTO
+                                val spokenLang = phrase.spokenLanguage?.takeIf { it != LocaleHelper.LANG_AUTO } ?: voiceSettings.secondaryLanguage
                                 val targetLocale = LocaleHelper.resolvePhraseLocale(spokenLang, phrase.spokenText, LocaleHelper.getEffectiveLanguage(context))
                                 val langLabel = targetLocale.getDisplayLanguage(targetLocale).replaceFirstChar { if (it.isLowerCase()) it.titlecase(targetLocale) else it.toString() }
                                 Text(

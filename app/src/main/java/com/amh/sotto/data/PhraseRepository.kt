@@ -9,9 +9,9 @@ import org.json.JSONObject
 
 data class Phrase(
     val text: String,
+    val language: String = LocaleHelper.LANG_AUTO,
     val spokenText: String? = null,
     val spokenLanguage: String? = null,
-    val language: String = LocaleHelper.LANG_AUTO,
     val isEmergency: Boolean = false,
     val category: String = CATEGORY_GENERAL
 ) {
@@ -86,8 +86,8 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
                 val item = jsonArray.get(i)
                 if (item is JSONObject) {
                     val text = item.optString("text", "")
-                    val spokenText = item.optString("spokenText", "").takeIf { it.isNotBlank() }
-                    val spokenLanguage = item.optString("spokenLanguage", "").takeIf { it.isNotBlank() }
+                    val spokenText = item.optString("spokenText", "").takeIf { it.isNotBlank() && it != LocaleHelper.LANG_AUTO }
+                    val spokenLanguage = item.optString("spokenLanguage", "").takeIf { it.isNotBlank() && it != LocaleHelper.LANG_AUTO }
                     val lang = item.optString("language", LocaleHelper.LANG_AUTO)
                     val isEmergency = item.optBoolean("isEmergency", false)
                     val rawCategory = item.optString("category", if (isEmergency) Phrase.CATEGORY_EMERGENCY else Phrase.CATEGORY_GENERAL)
@@ -96,9 +96,9 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
                         list.add(
                             Phrase(
                                 text = text,
+                                language = lang,
                                 spokenText = spokenText,
                                 spokenLanguage = spokenLanguage,
-                                language = lang,
                                 isEmergency = isEmergency,
                                 category = category
                             )
