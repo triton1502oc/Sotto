@@ -36,3 +36,9 @@ app/build/
 # Local AI agent configurations
 GEMINI.md
 ANTIGRAVITY.md
+
+# Demo generation intermediate artifacts
+demo/*_video.mp4
+demo/*.wav
+demo/audio_scratch*/
+demo/events*.txt
