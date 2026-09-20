@@ -915,6 +915,8 @@ fun SottoApp(
         var spokenLangValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.spokenLanguage ?: LocaleHelper.LANG_AUTO) }
         var isSpokenTextExpanded by remember(phraseToEdit, showAddDialog) { mutableStateOf(!phraseToEdit?.spokenText.isNullOrBlank()) }
         var isTranslating by remember { mutableStateOf(false) }
+        var isModelDownloading by remember { mutableStateOf(false) }
+        var showModelDownloadConfirmDialog by remember { mutableStateOf(false) }
         var translationError by remember { mutableStateOf<String?>(null) }
         var selectedCat by remember(phraseToEdit, showAddDialog) {
             mutableStateOf(
@@ -923,6 +925,55 @@ fun SottoApp(
             )
         }
         val isEditModeDialog = phraseToEdit != null
+
+        fun executeTranslation(targetLang: String, sourceLang: String) {
+            translationError = null
+            TranslationHelper.translate(
+                text = textValue.trim(),
+                sourceLangCode = sourceLang,
+                targetLangCode = targetLang,
+                onProgress = { isTranslating = it },
+                onSuccess = { translated ->
+                    spokenTextValue = translated
+                    spokenLangValue = targetLang
+                    isModelDownloading = false
+                },
+                onError = {
+                    isModelDownloading = false
+                    translationError = context.getString(R.string.error_translation_failed)
+                }
+            )
+        }
+
+        if (showModelDownloadConfirmDialog) {
+            val targetLangName = LocaleHelper.getLanguageDisplayName(voiceSettings.secondaryLanguage)
+            AlertDialog(
+                onDismissRequest = { showModelDownloadConfirmDialog = false },
+                title = { Text(stringResource(R.string.dialog_download_model_title)) },
+                text = {
+                    Text(stringResource(R.string.dialog_download_model_message, targetLangName))
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showModelDownloadConfirmDialog = false
+                            isModelDownloading = true
+                            val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                            val sourceLang = LocaleHelper.resolvePhraseLocale(LocaleHelper.LANG_AUTO, textValue, effectiveLang).language
+                            val targetLang = voiceSettings.secondaryLanguage
+                            executeTranslation(targetLang, sourceLang)
+                        }
+                    ) {
+                        Text(stringResource(R.string.action_download_and_translate))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showModelDownloadConfirmDialog = false }) {
+                        Text(stringResource(R.string.action_cancel))
+                    }
+                }
+            )
+        }
 
         val speechLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
@@ -1043,30 +1094,24 @@ fun SottoApp(
                             Spacer(modifier = Modifier.width(8.dp))
                             OutlinedButton(
                                 onClick = {
-                                    if (textValue.isNotBlank() && !isTranslating) {
+                                    if (textValue.isNotBlank() && !isTranslating && !isModelDownloading) {
                                         translationError = null
                                         val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
                                         val sourceLang = LocaleHelper.resolvePhraseLocale(LocaleHelper.LANG_AUTO, textValue, effectiveLang).language
                                         val targetLang = voiceSettings.secondaryLanguage
-                                        TranslationHelper.translate(
-                                            text = textValue.trim(),
-                                            sourceLangCode = sourceLang,
-                                            targetLangCode = targetLang,
-                                            onProgress = { isTranslating = it },
-                                            onSuccess = { translated ->
-                                                spokenTextValue = translated
-                                                spokenLangValue = targetLang
-                                            },
-                                            onError = {
-                                                translationError = context.getString(R.string.error_translation_failed)
+                                        TranslationHelper.isModelDownloaded(targetLang) { isDownloaded ->
+                                            if (isDownloaded) {
+                                                executeTranslation(targetLang, sourceLang)
+                                            } else {
+                                                showModelDownloadConfirmDialog = true
                                             }
-                                        )
+                                        }
                                     }
                                 },
-                                enabled = textValue.isNotBlank() && !isTranslating,
+                                enabled = textValue.isNotBlank() && !isTranslating && !isModelDownloading,
                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                             ) {
-                                if (isTranslating) {
+                                if (isTranslating || isModelDownloading) {
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(14.dp),
                                         strokeWidth = 2.dp,
@@ -1074,7 +1119,7 @@ fun SottoApp(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = stringResource(R.string.status_translating),
+                                        text = if (isModelDownloading) stringResource(R.string.status_downloading_model) else stringResource(R.string.status_translating),
                                         style = MaterialTheme.typography.labelMedium
                                     )
                                 } else {

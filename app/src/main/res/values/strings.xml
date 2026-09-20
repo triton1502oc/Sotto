@@ -100,5 +100,14 @@
     <string name="cd_alternate_speech">Has alternate speech</string>
     <string name="action_auto_translate">Auto-translate</string>
     <string name="status_translating">Translating…</string>
+    <string name="status_downloading_model">Downloading model (~30 MB)…</string>
     <string name="error_translation_failed">Translation failed. Please check internet connection to download language model.</string>
+    <string name="error_model_download_network">Internet connection required to download the language model. Please connect and try again.</string>
+    <string name="dialog_download_model_title">Download Language Model?</string>
+    <string name="dialog_download_model_message">Auto-translate requires a one-time download of the %1$s on-device language package (~30 MB). Once downloaded, all translations run 100%% offline and privately.</string>
+    <string name="action_download_and_translate">Download &amp; Translate</string>
+    <string name="label_language_model">Language model (%1$s)</string>
+    <string name="label_model_downloaded">Downloaded (Ready offline)</string>
+    <string name="label_model_not_downloaded">Not downloaded (~30 MB)</string>
+    <string name="action_download_model">Download</string>
 </resources>

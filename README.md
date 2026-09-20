@@ -33,7 +33,7 @@
 
 ## How to Install (For Users)
 1. On your Android phone, go to the [Releases](https://github.com/triton1502oc/Sotto/releases) page.
-2. Scroll to the latest release and download the `.apk` file (e.g., `Sotto-v1.5.0.apk`) found under "Assets".
+2. Scroll to the latest release and download the `.apk` file (e.g., `Sotto-v1.5.1.apk`) found under "Assets".
 3. Once downloaded, open the file from your notifications or using a File Manager app.
 4. Your phone may warn you about installing from "Unknown Sources". Tap "Settings" on the prompt and toggle the switch to allow your browser or file manager to install the app.
 5. Tap "Install". You're ready to use Sotto!

@@ -100,5 +100,14 @@
     <string name="cd_alternate_speech">Memiliki ucapan alternatif</string>
     <string name="action_auto_translate">Terjemahkan otomatis</string>
     <string name="status_translating">Menerjemahkan…</string>
+    <string name="status_downloading_model">Mengunduh model (~30 MB)…</string>
     <string name="error_translation_failed">Gagal menerjemahkan. Periksa koneksi internet untuk mengunduh model bahasa.</string>
+    <string name="error_model_download_network">Koneksi internet diperlukan untuk mengunduh model bahasa. Silakan hubungkan internet dan coba lagi.</string>
+    <string name="dialog_download_model_title">Unduh Model Bahasa?</string>
+    <string name="dialog_download_model_message">Terjemahan otomatis memerlukan unduhan satu kali paket bahasa %1$s (~30 MB). Setelah diunduh, semua terjemahan berjalan 100%% offline dan privat di perangkat Anda.</string>
+    <string name="action_download_and_translate">Unduh &amp; Terjemahkan</string>
+    <string name="label_language_model">Model bahasa (%1$s)</string>
+    <string name="label_model_downloaded">Sudah diunduh (Siap offline)</string>
+    <string name="label_model_not_downloaded">Belum diunduh (~30 MB)</string>
+    <string name="action_download_model">Unduh</string>
 </resources>

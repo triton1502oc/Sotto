@@ -25,6 +25,7 @@ import com.amh.sotto.R
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.util.ChimePlayer
 import com.amh.sotto.util.LocaleHelper
+import com.amh.sotto.util.TranslationHelper
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -402,6 +403,96 @@ fun VoiceSettingsDialog(
                                                 secondaryLangDropdownExpanded = false
                                             }
                                         )
+                                    }
+                                }
+                            }
+
+                            // Language Model Download Status & Action
+                            var isModelDownloaded by remember(secondaryLang) { mutableStateOf<Boolean?>(null) }
+                            var isDownloadingModel by remember { mutableStateOf(false) }
+                            var downloadError by remember { mutableStateOf<String?>(null) }
+
+                            LaunchedEffect(secondaryLang) {
+                                TranslationHelper.isModelDownloaded(secondaryLang) { downloaded ->
+                                    isModelDownloaded = downloaded
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.label_language_model, LocaleHelper.getLanguageDisplayName(secondaryLang)),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = if (isModelDownloaded == true) {
+                                                stringResource(R.string.label_model_downloaded)
+                                            } else if (isDownloadingModel) {
+                                                stringResource(R.string.status_downloading_model)
+                                            } else {
+                                                stringResource(R.string.label_model_not_downloaded)
+                                            },
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if (isModelDownloaded == true) Color(0xFF81C784) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                        if (downloadError != null) {
+                                            Text(
+                                                text = downloadError!!,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Color(0xFFEF5350)
+                                            )
+                                        }
+                                    }
+                                    if (isModelDownloaded == false) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                if (!isDownloadingModel) {
+                                                    downloadError = null
+                                                    isDownloadingModel = true
+                                                    TranslationHelper.downloadModel(
+                                                        langCode = secondaryLang,
+                                                        onProgress = { isDownloadingModel = it },
+                                                        onSuccess = {
+                                                            isDownloadingModel = false
+                                                            isModelDownloaded = true
+                                                        },
+                                                        onError = {
+                                                            isDownloadingModel = false
+                                                            downloadError = context.getString(R.string.error_model_download_network)
+                                                        }
+                                                    )
+                                                }
+                                            },
+                                            enabled = !isDownloadingModel,
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                        ) {
+                                            if (isDownloadingModel) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(12.dp),
+                                                    strokeWidth = 2.dp,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = stringResource(R.string.action_download_model),
+                                                    style = MaterialTheme.typography.labelMedium
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
