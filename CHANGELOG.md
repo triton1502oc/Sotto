@@ -3,6 +3,21 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.5.3] - 2026-09-20
+
+### Fixed
+- **Quick-Speak & Speech Cards in Dual-Language Mode**: Fixed an issue where speaking from Quick-Speak or tapping speech cards in dual-language mode uttered the literal word "auto" instead of auto-translating into the secondary language.
+- **Phrase Constructor & Positional Arguments**: Restored `language: String = LocaleHelper.LANG_AUTO` as the second constructor parameter in `Phrase`, preventing positional calls from assigning `"auto"` to `spokenText`.
+- **Legacy Storage Sanitization**: Guarded `SharedPreferencesPhraseRepository` to automatically sanitize any legacy `"auto"` entries in `spokenText` to `null`.
+- **Card Subtitles & Fullscreen Safety**: Guarded card subtitles and fullscreen modal against displaying or speaking `"auto"`.
+
+### Added
+- **On-Demand Auto-Translation for Quick-Speak & Speech Cards**: When dual-language speech is enabled and secondary language is active, Quick-Speak and un-translated speech cards now automatically translate text to the secondary language on-device using Google ML Kit before speaking.
+- **Quick-Speak Loading Feedback**: Added a subtle Material 3 progress indicator inside the Speak button while translating text.
+
+### Assets
+- `Sotto-v1.5.3.apk`: Signed release APK for Android devices.
+
 ## [v1.5.2] - 2026-09-20
 
 ### Fixed
