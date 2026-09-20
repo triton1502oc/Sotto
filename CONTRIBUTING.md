@@ -84,7 +84,8 @@ All contributors and AI agents must follow this standard checklist before releas
      ```
    - Push commits to main branch: `git push origin main`.
 6. **GitHub Release**:
-   - Publish the release using GitHub CLI:
+   - Keep release notes compact and direct: bullet points of key features/fixes without repeating the version header or duplicating native asset lists.
+   - Publish milestone releases using GitHub CLI:
      ```bash
      gh release create v<version> app/build/outputs/apk/release/Sotto-v<version>.apk \
        --title "v<version>" \
