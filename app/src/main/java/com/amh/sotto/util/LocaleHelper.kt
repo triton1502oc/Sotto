@@ -37,8 +37,20 @@ object LocaleHelper {
         }
     }
 
+    private val iso3ToIso1Map: Map<String, String> by lazy {
+        val map = mutableMapOf<String, String>()
+        for (iso2 in Locale.getISOLanguages()) {
+            try {
+                val iso3 = Locale(iso2).isO3Language.lowercase(Locale.ROOT)
+                map[iso3] = iso2
+            } catch (_: Exception) {}
+        }
+        map
+    }
+
     fun getLocaleForLanguage(languageCode: String): Locale {
-        return when (languageCode) {
+        val normalized = if (languageCode.length == 3) iso3ToIso1Map[languageCode.lowercase(Locale.ROOT)] ?: languageCode else languageCode
+        return when (normalized) {
             LANG_SYSTEM -> Locale.getDefault()
             LANG_INDONESIAN, "in" -> Locale.forLanguageTag("id-ID")
             LANG_ENGLISH -> Locale.US
@@ -77,7 +89,7 @@ object LocaleHelper {
             "hu" -> Locale.forLanguageTag("hu-HU")
             "fa" -> Locale.forLanguageTag("fa-IR")
             "sw" -> Locale.forLanguageTag("sw-KE")
-            else -> Locale.forLanguageTag(languageCode)
+            else -> Locale.forLanguageTag(normalized)
         }
     }
 
@@ -96,12 +108,14 @@ object LocaleHelper {
     fun getAvailableLanguages(ttsLocales: Set<Locale>? = null): List<Pair<String, String>> {
         val languageCodes = linkedSetOf<String>()
         
-        if (ttsLocales.isNullOrEmpty()) {
-            languageCodes.add("en")
-            languageCodes.add("id")
-        } else {
+        // Always include core Sotto languages (English & Indonesian)
+        languageCodes.add("en")
+        languageCodes.add("id")
+
+        if (!ttsLocales.isNullOrEmpty()) {
             ttsLocales.forEach { locale ->
-                val lang = locale.language
+                val rawLang = locale.language.lowercase(Locale.ROOT)
+                val lang = if (rawLang.length == 3) iso3ToIso1Map[rawLang] ?: rawLang else rawLang
                 if (lang.isNotBlank()) {
                     languageCodes.add(lang)
                 }

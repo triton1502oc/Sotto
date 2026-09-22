@@ -14,8 +14,23 @@ android {
         applicationId = "com.amh.sotto"
         minSdk = 26
         targetSdk = 36
-        versionCode = 15
-        versionName = "1.5.4"
+        versionCode = 16
+        versionName = "1.5.5"
+        androidResources.localeFilters += listOf("en", "in")
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
+    }
+
+    splits {
+        abi {
+            val isInvokingBundle = gradle.startParameter.taskNames.any { it.contains("bundle", ignoreCase = true) } ||
+                project.hasProperty("disableSplits")
+            isEnable = !isInvokingBundle
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = true
+        }
     }
 
     signingConfigs {
@@ -36,6 +51,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             val keystoreFile = rootProject.file("keystore.properties")
             if (keystoreFile.exists()) {
@@ -69,8 +85,12 @@ androidComponents {
             @Suppress("DEPRECATION")
             val out = output as com.android.build.api.variant.impl.VariantOutputImpl
             val buildType = variant.buildType ?: "debug"
-            val suffix = if (buildType == "release") "" else "-$buildType"
-            out.outputFileName = "Sotto-v${android.defaultConfig.versionName}${suffix}.apk"
+            val abi = output.filters.find {
+                it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI
+            }?.identifier
+            val abiSuffix = if (abi != null) "-$abi" else ""
+            val buildTypeSuffix = if (buildType == "release") "" else "-$buildType"
+            out.outputFileName = "Sotto-v${android.defaultConfig.versionName}${abiSuffix}${buildTypeSuffix}.apk"
         }
     }
 }

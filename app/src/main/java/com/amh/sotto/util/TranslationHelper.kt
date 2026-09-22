@@ -10,18 +10,44 @@ import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.Translator
 import com.google.mlkit.nl.translate.TranslatorOptions
 
+import java.util.Locale
+
 object TranslationHelper {
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val translators = mutableMapOf<Pair<String, String>, Translator>()
     private val modelManager = RemoteModelManager.getInstance()
 
-    fun toTranslateLanguage(code: String): String? {
-        return when (code.lowercase()) {
-            "en" -> TranslateLanguage.ENGLISH
-            "id", "in" -> TranslateLanguage.INDONESIAN
-            else -> TranslateLanguage.fromLanguageTag(code)
+    private val iso3ToIso1Map: Map<String, String> by lazy {
+        val map = mutableMapOf<String, String>()
+        for (iso2 in Locale.getISOLanguages()) {
+            try {
+                val iso3 = Locale(iso2).isO3Language.lowercase(Locale.ROOT)
+                map[iso3] = iso2
+            } catch (_: Exception) {}
         }
+        map
+    }
+
+    fun toTranslateLanguage(code: String): String? {
+        val normalized = code.lowercase(Locale.ROOT).trim()
+        when (normalized) {
+            "en", "eng" -> return TranslateLanguage.ENGLISH
+            "id", "in", "ind" -> return TranslateLanguage.INDONESIAN
+        }
+        // Direct match (e.g. "de", "it", "es")
+        val direct = TranslateLanguage.fromLanguageTag(normalized)
+        if (direct != null) return direct
+
+        // 3-letter ISO-639-2 match from TTS engines (e.g. "deu" -> "de", "ita" -> "it")
+        val fromIso3 = iso3ToIso1Map[normalized]?.let { TranslateLanguage.fromLanguageTag(it) }
+        if (fromIso3 != null) return fromIso3
+
+        // Prefix match for regional tags (e.g. "de-DE", "de_DE")
+        val basePart = normalized.substringBefore('-').substringBefore('_')
+        val fromBase = TranslateLanguage.fromLanguageTag(basePart)
+            ?: iso3ToIso1Map[basePart]?.let { TranslateLanguage.fromLanguageTag(it) }
+        return fromBase
     }
 
     /**
@@ -67,18 +93,21 @@ object TranslationHelper {
             mainHandler.post { onProgress(true) }
             modelManager.download(model, conditions)
                 .addOnSuccessListener {
+                    android.util.Log.d("TranslationHelper", "Download SUCCESS for $langCode")
                     mainHandler.post {
                         onProgress(false)
                         onSuccess()
                     }
                 }
                 .addOnFailureListener { e ->
+                    android.util.Log.e("TranslationHelper", "Download FAILED for $langCode", e)
                     mainHandler.post {
                         onProgress(false)
                         onError(e)
                     }
                 }
         } catch (t: Throwable) {
+            android.util.Log.e("TranslationHelper", "Download EXCEPTION for $langCode", t)
             mainHandler.post {
                 onProgress(false)
                 onError(if (t is Exception) t else Exception(t))
@@ -123,6 +152,7 @@ object TranslationHelper {
                             }
                         }
                         .addOnFailureListener { e ->
+                            android.util.Log.e("TranslationHelper", "Translation execution FAILED", e)
                             mainHandler.post {
                                 onProgress(false)
                                 onError(e)
@@ -130,12 +160,14 @@ object TranslationHelper {
                         }
                 }
                 .addOnFailureListener { e ->
+                    android.util.Log.e("TranslationHelper", "downloadModelIfNeeded FAILED", e)
                     mainHandler.post {
                         onProgress(false)
                         onError(e)
                     }
                 }
         } catch (t: Throwable) {
+            android.util.Log.e("TranslationHelper", "translate EXCEPTION", t)
             mainHandler.post {
                 onProgress(false)
                 onError(if (t is Exception) t else Exception(t))

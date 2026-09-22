@@ -3,6 +3,23 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.5.5] - 2026-09-22
+
+### Added
+- **Language Code Normalization**: Added normalization for 3-letter ISO-639-2 language codes (e.g. `eng`, `ind`, `deu`, `ita`) returned by system TTS engines, properly mapping them to standard ISO-639-1 tags.
+- **Regional & Base Language Resolution in Auto-Translate**: Expanded on-device translation language detection to match regional tags (e.g. `de-DE`) and 3-letter engine codes against ML Kit models.
+- **ABI Split APKs for Lightweight Sizing**: Enabled architecture-specific APK packaging (`arm64-v8a`, `armeabi-v7a`, `x86_64`) reducing APK download footprint by up to 60% (~13–18 MB), alongside universal APK and Android App Bundle (.aab) generation.
+
+### Changed
+- **Resource Optimization**: Enabled resource shrinking (`shrinkResources`) in release builds alongside R8/ProGuard minification.
+- **Language Availability**: Ensured core app languages (English and Indonesian) are always available in the voice selector even when system TTS reports empty locales.
+
+### Assets
+- `Sotto-v1.5.5.apk`: Universal release APK for all architectures.
+- `Sotto-v1.5.5-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.5.5-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.5.5-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+
 ## [v1.5.4] - 2026-09-21
 
 ### Added
