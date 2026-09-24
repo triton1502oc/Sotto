@@ -577,12 +577,11 @@ fun SottoApp(
                     }
                 }
 
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     OutlinedTextField(
                         value = quickText,
@@ -594,13 +593,17 @@ fun SottoApp(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
                         },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         singleLine = false,
                         minLines = 1,
                         maxLines = 4,
                         trailingIcon = {
                             if (quickText.isNotBlank()) {
-                                IconButton(onClick = { quickText = "" }) {
+                                val clearTextCd = stringResource(R.string.cd_clear_text)
+                                IconButton(
+                                    onClick = { quickText = "" },
+                                    modifier = Modifier.semantics { contentDescription = clearTextCd }
+                                ) {
                                     Text(
                                         "✕",
                                         fontSize = 16.sp,
@@ -623,7 +626,8 @@ fun SottoApp(
                                         } catch (e: Exception) {
                                             // Ignore if speech recognizer not present
                                         }
-                                    }
+                                    },
+                                    modifier = Modifier.semantics { contentDescription = voiceInputPrompt }
                                 ) {
                                     Text("🎤", fontSize = 18.sp)
                                 }
@@ -639,62 +643,78 @@ fun SottoApp(
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                     )
 
-                    // Save as Card Button (visible when text is entered)
-                    if (quickText.isNotBlank()) {
-                        val saveCardCd = stringResource(R.string.cd_save_as_card)
-                        IconButton(
-                            onClick = {
-                                initialAddText = quickText.trim()
-                                showAddDialog = true
-                            },
-                            modifier = Modifier.semantics { contentDescription = saveCardCd }
+                    val saveCardCd = stringResource(R.string.cd_save_as_card)
+                    val showFullscreenCd = stringResource(R.string.cd_show_fullscreen)
+                    val quickSpeakCd = stringResource(R.string.cd_quick_speak)
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                "+",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            // Fullscreen Button
+                            IconButton(
+                                onClick = {
+                                    if (quickText.isNotBlank()) {
+                                        handleQuickFullscreen(quickText.trim())
+                                    }
+                                },
+                                enabled = quickText.isNotBlank(),
+                                modifier = Modifier.semantics { contentDescription = showFullscreenCd }
+                            ) {
+                                Text(
+                                    "⛶",
+                                    fontSize = 22.sp,
+                                    color = if (quickText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                )
+                            }
+
+                            // Save as Card Button (visible when text is entered)
+                            if (quickText.isNotBlank()) {
+                                IconButton(
+                                    onClick = {
+                                        initialAddText = quickText.trim()
+                                        showAddDialog = true
+                                    },
+                                    modifier = Modifier.semantics { contentDescription = saveCardCd }
+                                ) {
+                                    Text(
+                                        "+",
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
                         }
-                    }
 
-                    // Fullscreen Button
-                    IconButton(
-                        onClick = {
-                            if (quickText.isNotBlank()) {
-                                handleQuickFullscreen(quickText.trim())
+                        // Speak Button
+                        FilledIconButton(
+                            onClick = {
+                                if (quickText.isNotBlank()) {
+                                    handleQuickSpeak(quickText.trim())
+                                }
+                            },
+                            enabled = quickText.isNotBlank() && !isQuickTranslating,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            modifier = Modifier.semantics { contentDescription = quickSpeakCd }
+                        ) {
+                            if (isQuickTranslating) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Text("🔊", fontSize = 18.sp)
                             }
-                        },
-                        enabled = quickText.isNotBlank()
-                    ) {
-                        Text(
-                            "⛶",
-                            fontSize = 22.sp,
-                            color = if (quickText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    }
-
-                    // Speak Button
-                    FilledIconButton(
-                        onClick = {
-                            if (quickText.isNotBlank()) {
-                                handleQuickSpeak(quickText.trim())
-                            }
-                        },
-                        enabled = quickText.isNotBlank() && !isQuickTranslating,
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    ) {
-                        if (isQuickTranslating) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Text("🔊", fontSize = 18.sp)
                         }
                     }
                 }

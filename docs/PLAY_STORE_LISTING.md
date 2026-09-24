@@ -102,3 +102,30 @@ When completing the Google Play **Data Safety** questionnaire:
   👉 Results in **Everyone / PEGI 3 / USK 0**.
 * **Privacy Policy URL:** Link to your repository's policy or GitHub Pages URL:  
   `https://github.com/triton1502oc/Sotto/blob/main/PRIVACY_POLICY.md`
+
+---
+
+## 5. Closed Testing & Google Group (`sotto-testers`)
+
+### Google Group Welcome Message
+*Copy and paste directly into **Google Groups > Group settings > General > Welcome message**:*
+
+```text
+Welcome to Sotto Closed Testing!
+
+To install the app and help us meet Google Play's 14-day testing requirement:
+
+1. Join the test on Google Play:
+   https://play.google.com/apps/testing/com.amh.sotto
+
+2. Download & install Sotto from Google Play (via Android or the link above).
+
+3. Keep the app installed on your device for at least 14 days and test basic features (tap cards to speak, quick-speak bar, offline speech).
+
+• App overview & README: https://github.com/triton1502oc/Sotto#readme
+• Feedback & Bug reports: Post here or open an issue at https://github.com/triton1502oc/Sotto/issues
+
+Thank you for helping us launch Sotto!
+```
+
+
