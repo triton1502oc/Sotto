@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -274,10 +276,12 @@ fun SottoApp(
     val context = LocalContext.current
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
+    var initialAddText by rememberSaveable { mutableStateOf("") }
     var showVoiceDialog by rememberSaveable { mutableStateOf(false) }
     var phraseToEdit by remember { mutableStateOf<Phrase?>(null) }
     var isEditMode by rememberSaveable { mutableStateOf(false) }
     var activeSpeechTarget by rememberSaveable { mutableStateOf("primary") }
+    var quickText by rememberSaveable { mutableStateOf("") }
 
     val allCategoryKey = "ALL"
     var selectedCategory by rememberSaveable { mutableStateOf(allCategoryKey) }
@@ -446,7 +450,6 @@ fun SottoApp(
                     .fillMaxWidth()
                     .navigationBarsPadding()
             ) {
-                var quickText by rememberSaveable { mutableStateOf("") }
                 var isQuickTranslating by remember { mutableStateOf(false) }
                 val voiceInputPrompt = stringResource(R.string.cd_voice_input)
 
@@ -513,7 +516,7 @@ fun SottoApp(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedTextField(
@@ -527,18 +530,19 @@ fun SottoApp(
                             )
                         },
                         modifier = Modifier.weight(1f),
-                        singleLine = true,
+                        singleLine = false,
+                        minLines = 1,
+                        maxLines = 4,
                         trailingIcon = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (quickText.isNotBlank()) {
-                                    IconButton(onClick = { quickText = "" }) {
-                                        Text(
-                                            "✕",
-                                            fontSize = 16.sp,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                        )
-                                    }
+                            if (quickText.isNotBlank()) {
+                                IconButton(onClick = { quickText = "" }) {
+                                    Text(
+                                        "✕",
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
                                 }
+                            } else {
                                 IconButton(
                                     onClick = {
                                         val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
@@ -569,6 +573,25 @@ fun SottoApp(
                         ),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                     )
+
+                    // Save as Card Button (visible when text is entered)
+                    if (quickText.isNotBlank()) {
+                        val saveCardCd = stringResource(R.string.cd_save_as_card)
+                        IconButton(
+                            onClick = {
+                                initialAddText = quickText.trim()
+                                showAddDialog = true
+                            },
+                            modifier = Modifier.semantics { contentDescription = saveCardCd }
+                        ) {
+                            Text(
+                                "+",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
 
                     // Fullscreen Button
                     IconButton(
@@ -1020,7 +1043,7 @@ fun SottoApp(
     if (showAddDialog || phraseToEdit != null) {
         val context = LocalContext.current
         val voiceInputPrompt = stringResource(R.string.cd_voice_input)
-        var textValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.text ?: "") }
+        var textValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.text ?: initialAddText) }
         var spokenTextValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.spokenText ?: "") }
         var spokenLangValue by remember(phraseToEdit, showAddDialog) { mutableStateOf(phraseToEdit?.spokenLanguage ?: LocaleHelper.LANG_AUTO) }
         var isSpokenTextExpanded by remember(phraseToEdit, showAddDialog) { mutableStateOf(!phraseToEdit?.spokenText.isNullOrBlank()) }
@@ -1031,7 +1054,7 @@ fun SottoApp(
         var selectedCat by remember(phraseToEdit, showAddDialog) {
             mutableStateOf(
                 if (phraseToEdit?.isEmergency == true) Phrase.CATEGORY_EMERGENCY
-                else (phraseToEdit?.category ?: Phrase.CATEGORY_GENERAL)
+                else (phraseToEdit?.category ?: if (selectedCategory != allCategoryKey && selectedCategory != Phrase.CATEGORY_EMERGENCY) selectedCategory else Phrase.CATEGORY_GENERAL)
             )
         }
         val isEditModeDialog = phraseToEdit != null
@@ -1111,6 +1134,7 @@ fun SottoApp(
             onDismissRequest = {
                 showAddDialog = false
                 phraseToEdit = null
+                initialAddText = ""
             },
             title = {
                 Text(
@@ -1352,10 +1376,14 @@ fun SottoApp(
                             onEditPhrase(phraseToEdit!!, newPhrase)
                         } else {
                             onAddPhrase(newPhrase)
+                            if (initialAddText.isNotBlank()) {
+                                quickText = ""
+                            }
                         }
                     }
                     showAddDialog = false
                     phraseToEdit = null
+                    initialAddText = ""
                 }) {
                     Text(stringResource(R.string.action_save))
                 }
@@ -1369,6 +1397,7 @@ fun SottoApp(
                             onDeletePhrase(phraseToEdit!!)
                             showAddDialog = false
                             phraseToEdit = null
+                            initialAddText = ""
                         }) {
                             Text(stringResource(R.string.action_delete), color = Color(0xFFEF5350))
                         }
@@ -1376,6 +1405,7 @@ fun SottoApp(
                     TextButton(onClick = {
                         showAddDialog = false
                         phraseToEdit = null
+                        initialAddText = ""
                     }) {
                         Text(stringResource(R.string.action_cancel))
                     }

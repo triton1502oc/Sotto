@@ -34,7 +34,7 @@ In normal mode, all administrative buttons (add, delete, reorder) are completely
 A dedicated hero card for verbal shutdowns. Long-press or tap fullscreen to display a high-contrast emergency banner explaining non-verbal episodes directly to bystanders, medical staff, or first responders.
 
 • Quick-Speak Bar
-Speak spontaneous, one-off thoughts instantly without adding them to your curated phrase board. Includes voice dictation and instant fullscreen display.
+Speak spontaneous, one-off thoughts instantly with multi-line readability. Includes instant fullscreen display, voice dictation, and one-tap card saving.
 
 • Contextual Categories
 Organize and filter phrases by situation (Emergency, Needs, Social, General) using clean, low-stimulus filter chips.
@@ -63,11 +63,11 @@ Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay
 |---|---|---|---|
 | **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | ✅ Ready: [`play_store_icon_512.png`](../assets/play_store_icon_512.png) |
 | **Feature Graphic** | 1024 x 500 px | 24-bit PNG / JPEG | ✅ Ready: [`play_store_feature_graphic.png`](../assets/play_store_feature_graphic.png) |
-| **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 2 Ready: [`screenshot.png`](../assets/screenshot.png) (Main phrase view), [`screenshot_voice_settings.png`](../assets/screenshot_voice_settings.png) (Voice & Language Settings) |
+| **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 4 Ready: [`screenshot.png`](../assets/screenshot.png) (Main phrase view), [`screenshot_fullscreen.png`](../assets/screenshot_fullscreen.png) (Emergency Bystander & Fullscreen Mode), [`screenshot_edit_phrase.png`](../assets/screenshot_edit_phrase.png) (Phrase Customization & Translation), [`screenshot_voice_settings.png`](../assets/screenshot_voice_settings.png) (Voice & Language Settings) |
 | **Preview Video** | YouTube URL | YouTube link (`watch?v=`) | ✅ Ready: [English](https://www.youtube.com/watch?v=xpPbsiT7jks) / [Indonesian](https://www.youtube.com/watch?v=UBBUd36im48) |
 
 ### Rebuilding Graphic Assets
-To automatically regenerate and format all visual assets (`screenshot.png`, `screenshot_voice_settings.png`, and `play_store_feature_graphic.png`) from the latest app build:
+To automatically regenerate and format all visual assets (`screenshot.png`, `screenshot_fullscreen.png`, `screenshot_edit_phrase.png`, `screenshot_voice_settings.png`, and `play_store_feature_graphic.png`) from the latest app build:
 ```bash
 ./scripts/update_assets.sh
 ```

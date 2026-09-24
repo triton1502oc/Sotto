@@ -25,7 +25,7 @@
 - **Low-Stimulus UI**: Dark-neutral Material 3 theme with high contrast, calm tones, and zero visual distractions.
 - **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
 - **Emergency Hero Card**: Prominent high-contrast card and fullscreen banner for non-verbal episodes and bystanders.
-- **Quick-Speak Bar**: Docked bottom bar for spontaneous speech (`🔊`), fullscreen expand (`⛶`), and voice dictation (`🎤`).
+- **Quick-Speak Bar**: Docked bottom bar for spontaneous speech (`🔊`), fullscreen expand (`⛶`), voice dictation (`🎤`), and 1-tap card creation (`+`).
 - **Contextual Categories**: Filter cards by situation (**All**, **Emergency**, **Needs**, **Social**, **General**).
 - **Instant Speech & Attention Chime**: One-tap TTS playback with optional pre-speech alert tone and haptics.
 - **High-Visibility Fullscreen**: Long-press any card to show giant text for silent, readable communication.

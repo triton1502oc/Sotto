@@ -53,6 +53,7 @@
     <string name="cd_quick_speak">Speak typed text</string>
     <string name="cd_show_fullscreen">Show in fullscreen</string>
     <string name="cd_clear_text">Clear text</string>
+    <string name="cd_save_as_card">Save as card</string>
     <string name="emergency_phrase_text">I cannot speak right now. Please read my screen.</string>
     <string name="emergency_badge">Emergency</string>
 

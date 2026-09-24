@@ -3,6 +3,22 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.5.6] - 2026-09-24
+
+### Added
+- **Multi-Line Quick-Speak View**: Typing sentences in the Quick-Speak bar now expands vertically (up to 4 lines), keeping the full sentence visible and easy to edit by tapping anywhere.
+- **Save as Card from Quick-Speak**: Added a `+` button in the Quick-Speak bar to save spontaneous phrases directly into your phrase board with one tap.
+- **Smart Dictation / Clear Toggle**: The input bar now shows voice dictation (`🎤`) when empty and smoothly switches to clear (`✕`) while typing, giving you more space for text.
+
+### Fixed
+- **Keyboard Positioning**: Fixed an issue where the Quick-Speak bar could jump to the top of the screen when opening the keyboard.
+
+### Assets
+- `Sotto-v1.5.6.apk`: Universal release APK for all architectures.
+- `Sotto-v1.5.6-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.5.6-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.5.6-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+
 ## [v1.5.5] - 2026-09-22
 
 ### Added
