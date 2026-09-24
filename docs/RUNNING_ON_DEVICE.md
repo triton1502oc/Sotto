@@ -27,6 +27,6 @@ Run from the project root:
 > [!TIP]
 > Alternatively, if using the Android CLI tool:
 > ```bash
-> android run --apks=app/build/outputs/apk/debug/app-debug.apk --activity=com.amh.sotto.MainActivity
+> android run --apks=$(ls app/build/outputs/apk/debug/Sotto*debug.apk | head -n 1) --activity=com.amh.sotto.MainActivity
 > ```
 

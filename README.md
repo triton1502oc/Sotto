@@ -45,6 +45,7 @@
 ```bash
 ./gradlew assembleDebug
 ```
+- **Language & Localization**: See [docs/LANGUAGE_AND_LOCALIZATION.md](docs/LANGUAGE_AND_LOCALIZATION.md).
 - **Device Debugging**: See [docs/RUNNING_ON_DEVICE.md](docs/RUNNING_ON_DEVICE.md).
 - **Contributing & Guidelines**: See [CONTRIBUTING.md](CONTRIBUTING.md).
 

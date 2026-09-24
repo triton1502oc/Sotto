@@ -35,6 +35,8 @@ fun VoiceSettingsDialog(
     currentSettings: VoiceSettings,
     currentLanguage: String,
     availableLanguages: List<Pair<String, String>> = remember { LocaleHelper.getAvailableLanguages() },
+    isTtsLanguageInstalled: (String) -> Boolean = { true },
+    onInstallTtsVoice: () -> Unit = {},
     onLanguageChanged: (String) -> Unit,
     onSettingsChanged: (VoiceSettings) -> Unit,
     onTestVoice: (VoiceSettings) -> Unit,
@@ -180,6 +182,32 @@ fun VoiceSettingsDialog(
                                         langDropdownExpanded = false
                                         langSearchQuery = ""
                                     }
+                                )
+                            }
+                        }
+                    }
+
+                    if (currentLanguage != LocaleHelper.LANG_SYSTEM && !isTtsLanguageInstalled(currentLanguage)) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.warn_voice_pack_missing),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFFFFA726),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            TextButton(
+                                onClick = onInstallTtsVoice,
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.action_install_voice),
+                                    style = MaterialTheme.typography.labelSmall
                                 )
                             }
                         }
@@ -492,6 +520,53 @@ fun VoiceSettingsDialog(
                                                     style = MaterialTheme.typography.labelMedium
                                                 )
                                             }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // TTS Voice Pack Status & Action
+                            val isVoicePackInstalled = isTtsLanguageInstalled(secondaryLang)
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.label_tts_voice_pack, LocaleHelper.getLanguageDisplayName(secondaryLang)),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = if (isVoicePackInstalled) {
+                                                stringResource(R.string.label_voice_pack_installed)
+                                            } else {
+                                                stringResource(R.string.label_voice_pack_missing)
+                                            },
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if (isVoicePackInstalled) Color(0xFF81C784) else Color(0xFFFFA726)
+                                        )
+                                    }
+                                    if (!isVoicePackInstalled) {
+                                        OutlinedButton(
+                                            onClick = onInstallTtsVoice,
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.action_install_voice),
+                                                style = MaterialTheme.typography.labelMedium
+                                            )
                                         }
                                     }
                                 }

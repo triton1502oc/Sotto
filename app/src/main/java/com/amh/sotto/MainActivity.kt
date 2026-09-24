@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
@@ -163,9 +164,52 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                                     tts?.speak(testPhrase, TextToSpeech.QUEUE_FLUSH, null, null)
                                 }
                             }
-                        }
+                        },
+                        isTtsLanguageInstalled = { isTtsVoiceInstalled(it) },
+                        onInstallTtsVoice = { openTtsInstallSettings() }
                     )
                 }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (ttsReady) {
+            val installedLocales = tts?.voices?.filter { voice ->
+                !voice.features.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)
+            }?.map { it.locale }?.toSet()
+            availableTtsLanguages = installedLocales ?: tts?.availableLanguages ?: emptySet()
+        }
+    }
+
+    private fun isTtsVoiceInstalled(langCode: String): Boolean {
+        if (!ttsReady || tts == null) return false
+        val targetLocale = LocaleHelper.getLocaleForLanguage(langCode)
+        val targetLang = targetLocale.language.lowercase(Locale.ROOT)
+        val hasMatchingInstalledVoice = availableTtsLanguages.any {
+            val l = it.language.lowercase(Locale.ROOT)
+            l == targetLang ||
+            (targetLang == "id" && l == "in") ||
+            (targetLang == "in" && l == "id")
+        }
+        if (hasMatchingInstalledVoice) return true
+
+        val avail = tts?.isLanguageAvailable(targetLocale) ?: TextToSpeech.LANG_NOT_SUPPORTED
+        return avail >= TextToSpeech.LANG_AVAILABLE
+    }
+
+    private fun openTtsInstallSettings() {
+        try {
+            val intent = Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+            startActivity(intent)
+        } catch (_: Exception) {
+            try {
+                startActivity(Intent("com.android.settings.TTS_SETTINGS"))
+            } catch (_: Exception) {
+                try {
+                    startActivity(Intent(Settings.ACTION_SETTINGS))
+                } catch (_: Exception) {}
             }
         }
     }
@@ -193,11 +237,30 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun applyVoiceSettings(settings: VoiceSettings, targetLocale: Locale? = null) {
-        if (settings.voiceName != null) {
-            val targetVoice = tts?.voices?.firstOrNull { it.name == settings.voiceName }
-            if (targetVoice != null && (targetLocale == null || targetVoice.locale.language.equals(targetLocale.language, ignoreCase = true))) {
-                tts?.setVoice(targetVoice)
+        if (targetLocale != null) {
+            val isTargetVoiceMatching = settings.voiceName?.let { name ->
+                val voice = tts?.voices?.firstOrNull { it.name == name }
+                if (voice != null && (voice.locale.language.equals(targetLocale.language, ignoreCase = true) ||
+                    (targetLocale.language == "id" && voice.locale.language.equals("in", ignoreCase = true)) ||
+                    (targetLocale.language == "in" && voice.locale.language.equals("id", ignoreCase = true)))) {
+                    tts?.setVoice(voice)
+                    true
+                } else false
+            } ?: false
+
+            if (!isTargetVoiceMatching) {
+                val localeVoice = tts?.voices?.firstOrNull { voice ->
+                    val langMatch = voice.locale.language.equals(targetLocale.language, ignoreCase = true) ||
+                        (targetLocale.language == "id" && voice.locale.language.equals("in", ignoreCase = true)) ||
+                        (targetLocale.language == "in" && voice.locale.language.equals("id", ignoreCase = true))
+                    langMatch && !voice.features.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)
+                }
+                if (localeVoice != null) {
+                    tts?.setVoice(localeVoice)
+                }
             }
+        } else if (settings.voiceName != null) {
+            tts?.voices?.firstOrNull { it.name == settings.voiceName }?.let { tts?.setVoice(it) }
         }
 
         tts?.setSpeechRate(settings.speechRate)
@@ -271,7 +334,9 @@ fun SottoApp(
     onDeletePhrase: (Phrase) -> Unit,
     onMovePhrase: (Phrase, Phrase) -> Unit,
     onUpdateVoiceSettings: (VoiceSettings) -> Unit,
-    onTestVoice: (VoiceSettings) -> Unit
+    onTestVoice: (VoiceSettings) -> Unit,
+    isTtsLanguageInstalled: (String) -> Boolean = { true },
+    onInstallTtsVoice: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
@@ -839,6 +904,8 @@ fun SottoApp(
             currentSettings = voiceSettings,
             currentLanguage = currentLanguage,
             availableLanguages = availableLanguages,
+            isTtsLanguageInstalled = isTtsLanguageInstalled,
+            onInstallTtsVoice = onInstallTtsVoice,
             onLanguageChanged = onLanguageChanged,
             onSettingsChanged = onUpdateVoiceSettings,
             onTestVoice = onTestVoice,

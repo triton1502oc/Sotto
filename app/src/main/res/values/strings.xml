@@ -112,4 +112,9 @@
     <string name="label_model_downloaded">Downloaded (Ready offline)</string>
     <string name="label_model_not_downloaded">Not downloaded (~30 MB)</string>
     <string name="action_download_model">Download</string>
+    <string name="label_tts_voice_pack">TTS voice pack (%1$s)</string>
+    <string name="label_voice_pack_installed">Installed (Ready)</string>
+    <string name="label_voice_pack_missing">Not installed</string>
+    <string name="action_install_voice">Install</string>
+    <string name="warn_voice_pack_missing">Voice data not installed on device. May speak with a fallback accent.</string>
 </resources>

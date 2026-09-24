@@ -13,13 +13,6 @@ cd "$PROJECT_ROOT"
 echo "=== 1. Building Latest Debug APK ==="
 ./gradlew assembleDebug
 
-APK_PATH="$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)"
-if [ -z "$APK_PATH" ]; then
-    echo "Error: No debug APK found in app/build/outputs/apk/debug/"
-    exit 1
-fi
-echo "Using APK: $APK_PATH"
-
 echo "=== 2. Checking Connected Device / Emulator ==="
 EMULATOR_STARTED=0
 DEVICE_ID="$($ADB devices | grep -E "emulator-|device\b" | grep -v "devices" | awk '{print $1}' | head -n 1 || true)"
@@ -36,6 +29,27 @@ if [ -z "$DEVICE_ID" ]; then
     EMULATOR_STARTED=1
 fi
 echo "Target device: $DEVICE_ID"
+
+echo "Waiting for device to complete boot..."
+while [ "$($ADB -s "$DEVICE_ID" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" != "1" ]; do
+    sleep 1
+done
+
+# Ensure device screen is on and keyguard dismissed
+$ADB -s "$DEVICE_ID" shell input keyevent 224 || true
+$ADB -s "$DEVICE_ID" shell wm dismiss-keyguard || true
+$ADB -s "$DEVICE_ID" shell input keyevent 82 || true
+
+# Select the appropriate APK matching the device ABI
+DEVICE_ABI="$($ADB -s "$DEVICE_ID" shell getprop ro.product.cpu.abi 2>/dev/null | tr -d '\r' || true)"
+APK_PATH="$(find app/build/outputs/apk/debug -name "*${DEVICE_ABI}*debug.apk" | head -n 1)"
+if [ -z "$APK_PATH" ] || [ ! -f "$APK_PATH" ]; then
+    APK_PATH="$(find app/build/outputs/apk/debug -name "*debug.apk" ! -name "*-arm*" ! -name "*-x86*" | head -n 1)"
+fi
+if [ -z "$APK_PATH" ] || [ ! -f "$APK_PATH" ]; then
+    APK_PATH="$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)"
+fi
+echo "Using APK ($DEVICE_ABI): $APK_PATH"
 
 echo "=== 3. Configuring Clean Environment & Seeding Preferences ==="
 $ADB -s "$DEVICE_ID" shell settings put system show_touches 0
@@ -79,27 +93,28 @@ echo "=== 4. Capturing Main Screen Screenshot ==="
 $ADB -s "$DEVICE_ID" shell am force-stop com.amh.sotto
 sleep 1
 $ADB -s "$DEVICE_ID" shell am start -n com.amh.sotto/.MainActivity
-sleep 3
+# Wait 5s for cold start and TTS initialization badge to clear
+sleep 5
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_main_screen.png
 
 echo "=== 5. Capturing Fullscreen Emergency Screenshot ==="
-# Long-press the emergency card
-$ADB -s "$DEVICE_ID" shell input swipe 540 600 540 600 1500
+# Long-press the emergency card (center: 540, 550)
+$ADB -s "$DEVICE_ID" shell input swipe 540 550 540 550 1200
 sleep 2.0
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_fullscreen.png
-# Dismiss fullscreen dialog
-$ADB -s "$DEVICE_ID" shell input keyevent 4
+# Dismiss fullscreen dialog via '✕' close button at (954, 193)
+$ADB -s "$DEVICE_ID" shell input tap 954 193
 sleep 1.0
 
 echo "=== 6. Capturing Edit Phrase Dialog Screenshot ==="
-# Tap "Edit List"
-$ADB -s "$DEVICE_ID" shell input tap 870 150
+# Tap "Edit List" in top bar (center: 929, 145)
+$ADB -s "$DEVICE_ID" shell input tap 929 145
 sleep 1.5
-# Tap second card ("I need a quiet space.") to edit
-$ADB -s "$DEVICE_ID" shell input tap 800 1000
+# Tap second card ("I need a quiet space.") to edit (center: 799, 1014)
+$ADB -s "$DEVICE_ID" shell input tap 799 1014
 sleep 1.5
-# Tap "Alternate spoken text" to expand it
-$ADB -s "$DEVICE_ID" shell input tap 400 1150
+# Tap "Alternate spoken text" to expand it (center: 400, 1060)
+$ADB -s "$DEVICE_ID" shell input tap 400 1060
 sleep 1.0
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_edit_phrase.png
 # Dismiss edit dialog
@@ -107,15 +122,15 @@ $ADB -s "$DEVICE_ID" shell input keyevent 4
 sleep 1.0
 
 echo "=== 7. Capturing Voice & Language Settings Screenshot ==="
-# Tap Settings gear icon (already in edit mode)
-$ADB -s "$DEVICE_ID" shell input tap 802 148
+# Tap Settings gear icon (already in edit mode, center: 788, 147)
+$ADB -s "$DEVICE_ID" shell input tap 788 147
 sleep 2.0
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_voice_settings.png
 # Dismiss settings dialog
 $ADB -s "$DEVICE_ID" shell input keyevent 4
 sleep 1.0
-# Tap "Done" to exit edit mode
-$ADB -s "$DEVICE_ID" shell input tap 870 150
+# Tap "Done" to exit edit mode (center: 929, 145)
+$ADB -s "$DEVICE_ID" shell input tap 929 145
 sleep 1.0
 
 echo "=== 8. Processing and Formatting Assets ==="

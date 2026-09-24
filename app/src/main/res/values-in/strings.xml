@@ -112,4 +112,9 @@
     <string name="label_model_downloaded">Sudah diunduh (Siap offline)</string>
     <string name="label_model_not_downloaded">Belum diunduh (~30 MB)</string>
     <string name="action_download_model">Unduh</string>
+    <string name="label_tts_voice_pack">Paket suara TTS (%1$s)</string>
+    <string name="label_voice_pack_installed">Terinstal (Siap)</string>
+    <string name="label_voice_pack_missing">Belum terinstal</string>
+    <string name="action_install_voice">Instal</string>
+    <string name="warn_voice_pack_missing">Data suara belum terinstal di perangkat. Ucapan mungkin menggunakan aksen fallback.</string>
 </resources>
