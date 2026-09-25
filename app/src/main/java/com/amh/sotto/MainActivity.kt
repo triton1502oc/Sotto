@@ -67,6 +67,12 @@ import com.amh.sotto.util.ChimePlayer
 import com.amh.sotto.ui.main.VoiceSettingsDialog
 import com.amh.sotto.util.LocaleHelper
 import com.amh.sotto.util.TranslationHelper
+import com.amh.sotto.ui.conversation.TwoWayConversationDialog
+import com.amh.sotto.util.SpeechRecognitionHelper
+import android.Manifest
+import android.content.pm.PackageManager
+import android.speech.SpeechRecognizer
+import androidx.core.content.ContextCompat
 import sh.calvin.reorderable.*
 import java.util.Locale
 
@@ -348,6 +354,92 @@ fun SottoApp(
     var activeSpeechTarget by rememberSaveable { mutableStateOf("primary") }
     var quickText by rememberSaveable { mutableStateOf("") }
 
+    var showTwoWayDialog by rememberSaveable { mutableStateOf(false) }
+    var isListeningTwoWay by remember { mutableStateOf(false) }
+    var liveSpokenTextTwoWay by remember { mutableStateOf("") }
+    var showAudioRationaleDialog by rememberSaveable { mutableStateOf(false) }
+
+    val speechHelper = remember { SpeechRecognitionHelper(context) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            speechHelper.destroy()
+        }
+    }
+
+    val twoWaySpeechLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            if (!matches.isNullOrEmpty()) {
+                liveSpokenTextTwoWay = matches[0]
+            }
+        }
+        isListeningTwoWay = false
+    }
+
+    val listenModePrompt = stringResource(R.string.listen_mode_hint)
+    fun launchSystemSpeechFallback() {
+        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+        val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+            putExtra(RecognizerIntent.EXTRA_PROMPT, listenModePrompt)
+        }
+        try {
+            twoWaySpeechLauncher.launch(intent)
+        } catch (_: Exception) {}
+    }
+
+    fun startListeningWithPermission() {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            if (!speechHelper.isAvailable()) {
+                launchSystemSpeechFallback()
+                return
+            }
+            val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+            val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
+            isListeningTwoWay = true
+            liveSpokenTextTwoWay = ""
+            speechHelper.startListening(
+                locale = locale,
+                onPartialResult = { partial ->
+                    liveSpokenTextTwoWay = partial
+                },
+                onFinalResult = { final ->
+                    liveSpokenTextTwoWay = final
+                    isListeningTwoWay = false
+                },
+                onError = { errorCode ->
+                    isListeningTwoWay = false
+                    if (errorCode != SpeechRecognizer.ERROR_NO_MATCH && errorCode != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+                        launchSystemSpeechFallback()
+                    }
+                }
+            )
+        } else {
+            showAudioRationaleDialog = true
+        }
+    }
+
+    val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            startListeningWithPermission()
+        } else {
+            isListeningTwoWay = false
+        }
+    }
+
+    fun stopTwoWayListening() {
+        isListeningTwoWay = false
+        speechHelper.stopListening()
+    }
+
     val allCategoryKey = "ALL"
     var selectedCategory by rememberSaveable { mutableStateOf(allCategoryKey) }
 
@@ -357,6 +449,7 @@ fun SottoApp(
             Phrase.CATEGORY_EMERGENCY to R.string.category_emergency,
             Phrase.CATEGORY_NEEDS to R.string.category_needs,
             Phrase.CATEGORY_SOCIAL to R.string.category_social,
+            Phrase.CATEGORY_CARE to R.string.category_care,
             Phrase.CATEGORY_GENERAL to R.string.category_general
         )
     }
@@ -436,24 +529,55 @@ fun SottoApp(
                                 }
                             }
                         }
-                        if (isEditMode) {
-                            IconButton(onClick = { showVoiceDialog = true }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_settings),
-                                    contentDescription = stringResource(R.string.action_settings),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(4.dp))
+                        val listenModeCd = stringResource(R.string.cd_listen_mode)
+                        IconButton(
+                            onClick = { showTwoWayDialog = true },
+                            modifier = Modifier.semantics { contentDescription = listenModeCd }
+                        ) {
+                            Text("👂", fontSize = 20.sp)
                         }
-                        TextButton(onClick = { isEditMode = !isEditMode }) {
-                            Text(
-                                text = if (isEditMode) stringResource(R.string.action_done) else stringResource(R.string.action_edit_list),
-                                color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
+
+                        // Voice & App Settings (Always visible)
+                        IconButton(onClick = { showVoiceDialog = true }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_settings),
+                                contentDescription = stringResource(R.string.action_settings),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+
+                        // Edit List / Done Pill Button
+                        Surface(
+                            onClick = { isEditMode = !isEditMode },
+                            shape = RoundedCornerShape(18.dp),
+                            color = if (isEditMode) Color(0xFF2E7D32).copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant,
+                            border = BorderStroke(
+                                1.dp,
+                                if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outlineVariant
+                            ),
+                            modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = if (isEditMode) "✓" else "✏️",
+                                    fontSize = 13.sp,
+                                    color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = if (isEditMode) stringResource(R.string.action_done) else stringResource(R.string.action_edit_list),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
                         if (!ttsReady) {
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Surface(
                                 color = Color(0xFFFFC107),
                                 shape = RoundedCornerShape(8.dp)
@@ -466,7 +590,6 @@ fun SottoApp(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.width(16.dp))
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background,
@@ -514,6 +637,7 @@ fun SottoApp(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
+                    .imePadding()
             ) {
                 var isQuickTranslating by remember { mutableStateOf(false) }
                 val voiceInputPrompt = stringResource(R.string.cd_voice_input)
@@ -930,6 +1054,48 @@ fun SottoApp(
             onSettingsChanged = onUpdateVoiceSettings,
             onTestVoice = onTestVoice,
             onDismiss = { showVoiceDialog = false }
+        )
+    }
+
+    // Audio Permission Rationale Dialog
+    if (showAudioRationaleDialog) {
+        AlertDialog(
+            onDismissRequest = { showAudioRationaleDialog = false },
+            title = { Text(stringResource(R.string.permission_audio_title)) },
+            text = { Text(stringResource(R.string.permission_audio_desc)) },
+            confirmButton = {
+                Button(onClick = {
+                    showAudioRationaleDialog = false
+                    recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                }) {
+                    Text(stringResource(R.string.action_allow))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAudioRationaleDialog = false }) {
+                    Text(stringResource(R.string.action_not_now))
+                }
+            }
+        )
+    }
+
+    // Two-Way Caregiver & Receptive Communication Mode Dialog
+    if (showTwoWayDialog) {
+        TwoWayConversationDialog(
+            allPhrases = phrases,
+            isListening = isListeningTwoWay,
+            liveSpokenText = liveSpokenTextTwoWay,
+            onStartListening = { startListeningWithPermission() },
+            onStopListening = { stopTwoWayListening() },
+            onClearText = { liveSpokenTextTwoWay = "" },
+            onSpeakResponse = { ttsText ->
+                onSpeakText(ttsText, LocaleHelper.LANG_AUTO)
+            },
+            onDismiss = {
+                stopTwoWayListening()
+                liveSpokenTextTwoWay = ""
+                showTwoWayDialog = false
+            }
         )
     }
 
@@ -1418,31 +1584,49 @@ fun SottoApp(
                         Phrase.CATEGORY_EMERGENCY to R.string.category_emergency
                     )
 
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        dialogCategories.forEach { (catKey, strRes) ->
-                            val isSelected = selectedCat == catKey
-                            val isEmergencyCat = catKey == Phrase.CATEGORY_EMERGENCY
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { selectedCat = catKey },
-                                label = {
-                                    Text(
-                                        text = if (isEmergencyCat) "🚨 " + stringResource(strRes) else stringResource(strRes),
-                                        fontSize = 11.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        dialogCategories.chunked(2).forEach { rowCategories ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                rowCategories.forEach { (catKey, strRes) ->
+                                    val isSelected = selectedCat == catKey
+                                    val isEmergencyCat = catKey == Phrase.CATEGORY_EMERGENCY
+                                    FilterChip(
+                                        modifier = Modifier.weight(1f),
+                                        selected = isSelected,
+                                        onClick = { selectedCat = catKey },
+                                        leadingIcon = if (isEmergencyCat) {
+                                            {
+                                                Text(
+                                                    text = "🚨",
+                                                    fontSize = 12.sp
+                                                )
+                                            }
+                                        } else null,
+                                        label = {
+                                            Text(
+                                                text = stringResource(strRes),
+                                                fontSize = 12.sp,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = if (isEmergencyCat) Color(0xFF4E342E) else MaterialTheme.colorScheme.surfaceVariant,
+                                            selectedLabelColor = if (isEmergencyCat) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface
+                                        ),
+                                        border = if (isEmergencyCat && isSelected) {
+                                            BorderStroke(1.dp, Color(0xFFFFB74D))
+                                        } else null
                                     )
-                                },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = if (isEmergencyCat) Color(0xFF4E342E) else MaterialTheme.colorScheme.surfaceVariant,
-                                    selectedLabelColor = if (isEmergencyCat) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface
-                                ),
-                                border = if (isEmergencyCat && isSelected) {
-                                    BorderStroke(1.dp, Color(0xFFFFB74D))
-                                } else null
-                            )
+                                }
+                            }
                         }
                     }
                 }

@@ -20,6 +20,7 @@ data class Phrase(
         const val CATEGORY_EMERGENCY = "Emergency"
         const val CATEGORY_NEEDS = "Needs"
         const val CATEGORY_SOCIAL = "Social"
+        const val CATEGORY_CARE = "Care"
     }
 }
 
@@ -32,6 +33,7 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
     private val prefs: SharedPreferences = context.getSharedPreferences("sotto_prefs", Context.MODE_PRIVATE)
     private val KEY_PHRASES = "saved_phrases"
     private val KEY_V2_MIGRATED = "v2_migrated"
+    private val KEY_CARE_MIGRATED = "care_migrated"
 
     private val fallbackPhrases = listOf(
         // Emergency
@@ -44,6 +46,12 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
         Phrase("Yes, please.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_SOCIAL),
         Phrase("No, thank you.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_SOCIAL),
         Phrase("Thank you.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_SOCIAL),
+        // Care
+        Phrase("Are you in pain?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("Do you need water or food?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("Do you need the restroom?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("Are you feeling cold or warm?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("Do you want to rest or sleep?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
         // General
         Phrase("Hello.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_GENERAL),
         Phrase("Please repeat that.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_GENERAL)
@@ -60,10 +68,17 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
             val social = context.resources.getStringArray(R.array.default_phrases_social).map {
                 Phrase(text = it, language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_SOCIAL)
             }
+            val care = try {
+                context.resources.getStringArray(R.array.default_phrases_care).map {
+                    Phrase(text = it, language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_CARE)
+                }
+            } catch (e: Exception) {
+                emptyList()
+            }
             val general = context.resources.getStringArray(R.array.default_phrases_general).map {
                 Phrase(text = it, language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_GENERAL)
             }
-            val all = emergency + needs + social + general
+            val all = emergency + needs + social + care + general
             if (all.isNotEmpty()) all else fallbackPhrases
         } catch (e: Exception) {
             fallbackPhrases
@@ -119,6 +134,17 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
                     }
                 }
                 prefs.edit().putBoolean(KEY_V2_MIGRATED, true).apply()
+                savePhrases(list)
+            }
+
+            // One-time upgrade: Add Care category default cards if not present
+            val isCareMigrated = prefs.getBoolean(KEY_CARE_MIGRATED, false)
+            if (!isCareMigrated) {
+                if (list.none { it.category == Phrase.CATEGORY_CARE }) {
+                    val defaultCare = getDefaultPhrases().filter { it.category == Phrase.CATEGORY_CARE }
+                    list.addAll(defaultCare)
+                }
+                prefs.edit().putBoolean(KEY_CARE_MIGRATED, true).apply()
                 savePhrases(list)
             }
 

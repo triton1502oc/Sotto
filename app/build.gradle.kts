@@ -14,8 +14,8 @@ android {
         applicationId = "com.amh.sotto"
         minSdk = 26
         targetSdk = 36
-        versionCode = 17
-        versionName = "1.5.6"
+        versionCode = 18
+        versionName = "1.5.7"
         androidResources.localeFilters += listOf("en", "in")
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")

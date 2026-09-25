@@ -63,6 +63,7 @@
     <string name="category_emergency">Darurat</string>
     <string name="category_needs">Kebutuhan</string>
     <string name="category_social">Sosial</string>
+    <string name="category_care">Perawatan</string>
     <string name="category_general">Umum</string>
     <string name="label_attention_chime">Nada perhatian sebelum bicara</string>
     <string name="label_attention_chime_desc">Membunyikan nada singkat untuk menarik perhatian sebelum bicara</string>
@@ -82,6 +83,14 @@
         <item>Ya, silakan.</item>
         <item>Tidak, terima kasih.</item>
         <item>Terima kasih.</item>
+    </string-array>
+
+    <string-array name="default_phrases_care">
+        <item>Apakah merasa sakit?</item>
+        <item>Apakah butuh minum atau makan?</item>
+        <item>Apakah perlu ke kamar mandi?</item>
+        <item>Apakah merasa dingin atau panas?</item>
+        <item>Apakah ingin istirahat atau tidur?</item>
     </string-array>
 
     <string-array name="default_phrases_general">
@@ -117,4 +126,35 @@
     <string name="label_voice_pack_missing">Belum terinstal</string>
     <string name="action_install_voice">Instal</string>
     <string name="warn_voice_pack_missing">Data suara belum terinstal di perangkat. Ucapan mungkin menggunakan aksen fallback.</string>
+
+    <!-- Two-Way Caregiver & Receptive Communication Mode -->
+    <string name="action_listen_mode">Dengar &amp; Baca</string>
+    <string name="cd_listen_mode">Buka mode Dengar dan Baca untuk pendamping</string>
+    <string name="listen_mode_title">Dengar &amp; Baca</string>
+    <string name="listen_mode_hint">Ketuk mikrofon untuk bicara…</string>
+    <string name="listen_mode_listening">Mendengarkan…</string>
+    <string name="listen_mode_tap_to_stop">Ketuk mikrofon untuk berhenti</string>
+    <string name="action_caregiver_prompts">Pertanyaan</string>
+    <string name="cd_flip_screen">Putar layar 180 derajat</string>
+    <string name="action_flip">Putar</string>
+    <string name="action_flip_back">Kembali</string>
+    <string name="action_open_cards">Kartu</string>
+    <string name="action_clear">Hapus</string>
+    <string name="action_read_aloud">Bacakan</string>
+    <string name="hint_no_phrases">Tidak ada frasa dalam kategori ini</string>
+
+    <!-- Response Buttons -->
+    <string name="response_yes">Ya</string>
+    <string name="response_no">Tidak</string>
+    <string name="response_repeat">Ulangi</string>
+    <string name="response_wait">Tunggu</string>
+    <string name="response_tts_repeat">Tolong ulangi perkataan Anda.</string>
+    <string name="response_tts_wait">Tolong beri saya waktu sebentar.</string>
+    <string name="replied_indicator">Menjawab: %1$s</string>
+
+    <!-- Microphone Permission Rationale -->
+    <string name="permission_audio_title">Akses Mikrofon</string>
+    <string name="permission_audio_desc">Sotto menggunakan mikrofon hanya untuk mentranskripsikan ucapan di perangkat secara langsung. Audio Anda tidak pernah disimpan atau dikirim ke server.</string>
+    <string name="action_allow">Izinkan</string>
+    <string name="action_not_now">Nanti Saja</string>
 </resources>

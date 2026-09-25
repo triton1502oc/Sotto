@@ -63,6 +63,7 @@
     <string name="category_emergency">Emergency</string>
     <string name="category_needs">Needs</string>
     <string name="category_social">Social</string>
+    <string name="category_care">Care</string>
     <string name="category_general">General</string>
     <string name="label_attention_chime">Attention chime before speaking</string>
     <string name="label_attention_chime_desc">Plays a brief chime to alert listeners before speaking</string>
@@ -82,6 +83,14 @@
         <item>Yes, please.</item>
         <item>No, thank you.</item>
         <item>Thank you.</item>
+    </string-array>
+
+    <string-array name="default_phrases_care">
+        <item>Are you in pain?</item>
+        <item>Do you need water or food?</item>
+        <item>Do you need the restroom?</item>
+        <item>Are you feeling cold or warm?</item>
+        <item>Do you want to rest or sleep?</item>
     </string-array>
 
     <string-array name="default_phrases_general">
@@ -117,4 +126,35 @@
     <string name="label_voice_pack_missing">Not installed</string>
     <string name="action_install_voice">Install</string>
     <string name="warn_voice_pack_missing">Voice data not installed on device. May speak with a fallback accent.</string>
+
+    <!-- Two-Way Caregiver & Receptive Communication Mode -->
+    <string name="action_listen_mode">Listen &amp; Read</string>
+    <string name="cd_listen_mode">Open Listen and Read mode for caregivers</string>
+    <string name="listen_mode_title">Listen &amp; Read</string>
+    <string name="listen_mode_hint">Tap mic to speak to user…</string>
+    <string name="listen_mode_listening">Listening…</string>
+    <string name="listen_mode_tap_to_stop">Tap mic to stop</string>
+    <string name="action_caregiver_prompts">Questions</string>
+    <string name="cd_flip_screen">Flip screen 180 degrees</string>
+    <string name="action_flip">Flip</string>
+    <string name="action_flip_back">Flip Back</string>
+    <string name="action_open_cards">Cards</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_read_aloud">Read Aloud</string>
+    <string name="hint_no_phrases">No phrases in this category</string>
+
+    <!-- Response Buttons -->
+    <string name="response_yes">Yes</string>
+    <string name="response_no">No</string>
+    <string name="response_repeat">Repeat</string>
+    <string name="response_wait">Wait</string>
+    <string name="response_tts_repeat">Please repeat that.</string>
+    <string name="response_tts_wait">Please give me a moment.</string>
+    <string name="replied_indicator">Replied: %1$s</string>
+
+    <!-- Microphone Permission Rationale -->
+    <string name="permission_audio_title">Microphone Access</string>
+    <string name="permission_audio_desc">Sotto uses the microphone only to transcribe speech on your device in real time. Your audio is never recorded, stored, or sent to any server.</string>
+    <string name="action_allow">Allow</string>
+    <string name="action_not_now">Not Now</string>
 </resources>

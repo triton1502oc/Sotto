@@ -33,6 +33,9 @@ In normal mode, all administrative buttons (add, delete, reorder) are completely
 • Emergency Bystander Mode
 A dedicated hero card for verbal shutdowns. Long-press or tap fullscreen to display a high-contrast emergency banner explaining non-verbal episodes directly to bystanders, medical staff, or first responders.
 
+• Two-Way Caregiver Mode & 180° Face-to-Face Flip
+A dedicated receptive mode allowing caregivers, family, and medical staff to speak or select questions. The screen flips 180° so the conversational partner sitting opposite can read the text and tap dignified one-touch responses (Yes, No, Repeat, Wait) with instant voice confirmation.
+
 • Quick-Speak Bar
 Speak spontaneous, one-off thoughts instantly with multi-line readability. Includes instant fullscreen display, voice dictation, and one-tap card saving.
 

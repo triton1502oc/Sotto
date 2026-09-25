@@ -107,8 +107,8 @@ $ADB -s "$DEVICE_ID" shell input tap 954 193
 sleep 1.0
 
 echo "=== 6. Capturing Edit Phrase Dialog Screenshot ==="
-# Tap "Edit List" in top bar (center: 929, 145)
-$ADB -s "$DEVICE_ID" shell input tap 929 145
+# Tap "Edit List" in top bar (center: 860, 145)
+$ADB -s "$DEVICE_ID" shell input tap 860 145
 sleep 1.5
 # Tap second card ("I need a quiet space.") to edit (center: 799, 1014)
 $ADB -s "$DEVICE_ID" shell input tap 799 1014
@@ -122,15 +122,15 @@ $ADB -s "$DEVICE_ID" shell input keyevent 4
 sleep 1.0
 
 echo "=== 7. Capturing Voice & Language Settings Screenshot ==="
-# Tap Settings gear icon (already in edit mode, center: 788, 147)
-$ADB -s "$DEVICE_ID" shell input tap 788 147
+# Tap Settings gear icon (permanent top bar icon, center: 680, 145)
+$ADB -s "$DEVICE_ID" shell input tap 680 145
 sleep 2.0
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_voice_settings.png
 # Dismiss settings dialog
 $ADB -s "$DEVICE_ID" shell input keyevent 4
 sleep 1.0
-# Tap "Done" to exit edit mode (center: 929, 145)
-$ADB -s "$DEVICE_ID" shell input tap 929 145
+# Tap "Done" to exit edit mode (center: 880, 145)
+$ADB -s "$DEVICE_ID" shell input tap 880 145
 sleep 1.0
 
 echo "=== 8. Processing and Formatting Assets ==="

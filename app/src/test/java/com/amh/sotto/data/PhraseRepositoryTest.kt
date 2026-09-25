@@ -69,4 +69,16 @@ class PhraseRepositoryTest {
         assertTrue(emergencyPhrase.isEmergency)
         assertEquals(Phrase.CATEGORY_EMERGENCY, emergencyPhrase.category)
     }
+
+    @Test
+    fun `Phrase care category sets category correctly`() {
+        val carePhrase = Phrase(
+            text = "Are you in pain?",
+            language = LocaleHelper.LANG_AUTO,
+            isEmergency = false,
+            category = Phrase.CATEGORY_CARE
+        )
+        assertFalse(carePhrase.isEmergency)
+        assertEquals(Phrase.CATEGORY_CARE, carePhrase.category)
+    }
 }

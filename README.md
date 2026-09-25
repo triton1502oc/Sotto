@@ -25,6 +25,7 @@
 - **Low-Stimulus UI**: Dark-neutral Material 3 theme with high contrast, calm tones, and zero visual distractions.
 - **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
 - **Emergency Hero Card**: Prominent high-contrast card and fullscreen banner for non-verbal episodes and bystanders.
+- **Two-Way Caregiver Receptive Mode**: Dedicated receptive HUD (`👂`) with real-time speech dictation, question bank, Read Aloud (`🔊`), 180° face-to-face screen flip (`🔄 Flip`), and 4 dignified rapid-response buttons (`Yes`, `No`, `Repeat`, `Wait`).
 - **Quick-Speak Bar**: Docked bottom bar for spontaneous speech (`🔊`), fullscreen expand (`⛶`), voice dictation (`🎤`), and 1-tap card creation (`+`).
 - **Contextual Categories**: Filter cards by situation (**All**, **Emergency**, **Needs**, **Social**, **General**).
 - **Instant Speech & Attention Chime**: One-tap TTS playback with optional pre-speech alert tone and haptics.
@@ -41,10 +42,11 @@
 2. Open the downloaded file (allow "Install Unknown Apps" if prompted by Android).
 3. Tap **Install** and launch Sotto.
 
-### For Developers
+### For Developers & Documentation
 ```bash
 ./gradlew assembleDebug
 ```
+- **Caregiver & User Guide**: See [docs/CAREGIVER_GUIDE.md](docs/CAREGIVER_GUIDE.md).
 - **Language & Localization**: See [docs/LANGUAGE_AND_LOCALIZATION.md](docs/LANGUAGE_AND_LOCALIZATION.md).
 - **Device Debugging**: See [docs/RUNNING_ON_DEVICE.md](docs/RUNNING_ON_DEVICE.md).
 - **Contributing & Guidelines**: See [CONTRIBUTING.md](CONTRIBUTING.md).
