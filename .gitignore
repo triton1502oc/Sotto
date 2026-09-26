@@ -26,6 +26,10 @@ keystore.properties
 # Android & Google service credentials
 *google-services.json
 *credentials.json
+*client_secrets*.json
+*client_secret*.json
+*token*.json
+*.pickle
 
 # Environment & local secrets
 *.env

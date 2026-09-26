@@ -59,7 +59,7 @@ def read_wav(filename):
         data = wav_file.readframes(n_frames)
         samples = struct.unpack('<' + 'h' * (n_frames * n_channels), data)
         if n_channels == 2:
-            samples = samples[::2]
+            samples = samples[::2]  # take left channel
         return list(samples)
 
 def tts_to_wav(text, out_wav, voice='Damayanti'):
@@ -75,15 +75,21 @@ if __name__ == '__main__':
     write_wav('demo/audio_scratch_id/chime.wav', chime_samples)
 
     # 1. Quick speak phrase
-    tts_to_wav("Tolong beri saya waktu.", 'demo/audio_scratch_id/waktu.wav')
+    tts_to_wav("Tolong beri saya waktu.", 'demo/audio_scratch_id/waktu.wav', voice='Damayanti')
 
-    # 2. Emergency phrase
-    tts_to_wav("Saya tidak bisa bicara sekarang. Tolong baca layar saya.", 'demo/audio_scratch_id/darurat.wav')
+    # 2. Emergency dual-language phrases
+    tts_to_wav("Saya tidak bisa bicara sekarang. Tolong baca layar saya.", 'demo/audio_scratch_id/darurat_id.wav', voice='Damayanti')
+    tts_to_wav("I cannot speak right now. Please read my screen.", 'demo/audio_scratch_id/darurat_en.wav', voice='Samantha')
 
-    # 3. Test voice phrase
-    tts_to_wav("Halo, ini adalah suara bicara saya.", 'demo/audio_scratch_id/test_voice_id.wav')
+    # 3. Two-Way Caregiver rapid response
+    tts_to_wav("Ya.", 'demo/audio_scratch_id/caregiver_ya.wav', voice='Damayanti')
 
-    # 4. Attention chime + test voice
+    # 4. Dual-language phrase card
+    tts_to_wav("Please give me time.", 'demo/audio_scratch_id/time_en.wav', voice='Samantha')
+
+    # 5. Attention chime + Indonesian voice test
+    tts_to_wav("Halo, ini adalah suara bicara saya.", 'demo/audio_scratch_id/test_voice_id.wav', voice='Damayanti')
     chime_test = chime_samples + [0] * int(0.28 * SAMPLE_RATE) + read_wav('demo/audio_scratch_id/test_voice_id.wav')
     write_wav('demo/audio_scratch_id/chime_test_voice_id.wav', chime_test)
+
     print("Indonesian audio clips generated successfully.")

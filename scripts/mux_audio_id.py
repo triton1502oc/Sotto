@@ -41,14 +41,16 @@ def main():
             name, t_str = line.split(':', 1)
             events[name] = float(t_str)
 
-    total_duration = events.get('end', 42.0) + 1.0
+    total_duration = events.get('end', 52.0) + 1.0
     total_samples = int(total_duration * SAMPLE_RATE)
     timeline = [0] * total_samples
 
     mapping = {
-        'speak_waktu_1': 'demo/audio_scratch_id/waktu.wav',
-        'speak_waktu_2': 'demo/audio_scratch_id/waktu.wav',
-        'speak_darurat': 'demo/audio_scratch_id/darurat.wav',
+        'speak_waktu': 'demo/audio_scratch_id/waktu.wav',
+        'speak_darurat_id': 'demo/audio_scratch_id/darurat_id.wav',
+        'speak_darurat_en': 'demo/audio_scratch_id/darurat_en.wav',
+        'speak_caregiver_ya': 'demo/audio_scratch_id/caregiver_ya.wav',
+        'speak_time_en': 'demo/audio_scratch_id/time_en.wav',
         'test_voice': 'demo/audio_scratch_id/chime_test_voice_id.wav'
     }
 

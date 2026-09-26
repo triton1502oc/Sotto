@@ -12,8 +12,8 @@ Ready-to-use metadata, descriptions, graphics specifications, and policy questio
 * **Short Description:**  
   `Dignified AAC speech communication for autistic & speech-impaired users.` *(71 / 80 characters)*
 * **Preview Video (YouTube URL):**
-  - **Default / English:** `https://www.youtube.com/watch?v=xpPbsiT7jks`
-  - **Indonesian (`id-ID`):** `https://www.youtube.com/watch?v=UBBUd36im48`  
+  - **Default / English:** `https://www.youtube.com/watch?v=UKZu5ZsdORg`
+  - **Indonesian (`id-ID`):** `https://www.youtube.com/watch?v=4CvpJkjaz-k`  
   *(Note: Enter the standard `https://www.youtube.com/watch?v=...` format; Play Console may reject `/shorts/` URLs).*
 
 ### Full Description *(Markdown & Plain Text compliant, ~1,800 / 4,000 characters)*
@@ -67,7 +67,7 @@ Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay
 | **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | ✅ Ready: [`play_store_icon_512.png`](../assets/play_store_icon_512.png) |
 | **Feature Graphic** | 1024 x 500 px | 24-bit PNG / JPEG | ✅ Ready: [`play_store_feature_graphic.png`](../assets/play_store_feature_graphic.png) |
 | **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 4 Ready: [`screenshot.png`](../assets/screenshot.png) (Main phrase view), [`screenshot_fullscreen.png`](../assets/screenshot_fullscreen.png) (Emergency Bystander & Fullscreen Mode), [`screenshot_edit_phrase.png`](../assets/screenshot_edit_phrase.png) (Phrase Customization & Translation), [`screenshot_voice_settings.png`](../assets/screenshot_voice_settings.png) (Voice & Language Settings) |
-| **Preview Video** | YouTube URL | YouTube link (`watch?v=`) | ✅ Ready: [English](https://www.youtube.com/watch?v=xpPbsiT7jks) / [Indonesian](https://www.youtube.com/watch?v=UBBUd36im48) |
+| **Preview Video** | YouTube URL | YouTube link (`watch?v=`) | ✅ Ready: [English](https://www.youtube.com/watch?v=UKZu5ZsdORg) / [Indonesian](https://www.youtube.com/watch?v=4CvpJkjaz-k) |
 
 ### Rebuilding Graphic Assets
 To automatically regenerate and format all visual assets (`screenshot.png`, `screenshot_fullscreen.png`, `screenshot_edit_phrase.png`, `screenshot_voice_settings.png`, and `play_store_feature_graphic.png`) from the latest app build:
