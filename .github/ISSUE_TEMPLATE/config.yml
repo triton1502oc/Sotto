@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability Reporting
+    url: https://github.com/triton1502oc/Sotto/security
+    about: Please report security vulnerabilities privately via GitHub Security Advisories.
+  - name: Caregiver & User Guide
+    url: https://github.com/triton1502oc/Sotto/blob/main/docs/CAREGIVER_GUIDE.md
+    about: Check the guide for instructions on using Sotto, configuring TTS, and managing phrases.

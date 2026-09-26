@@ -1,0 +1,41 @@
+name: Feature Request / Suggestion
+description: Propose a new feature, workflow improvement, or accessibility enhancement for Sotto
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an idea to make Sotto better! Sotto is built on strict design principles: dignified, mature UI, low-stimulation, high contrast, and 100% offline privacy.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Communication Need
+      description: What challenge, communication friction, or user need does this feature address?
+      placeholder: Describe the situation or communication gap...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature or change you would like to see in Sotto.
+      placeholder: Detailed description of how the feature should behave and look...
+    validations:
+      required: true
+  - type: textarea
+    id: low-stimulus-impact
+    attributes:
+      label: Low-Stimulus & Accessibility Considerations
+      description: How does this proposal uphold Sotto's low-stimulation, distraction-free, and dignified UI philosophy?
+      placeholder: How does it avoid visual clutter or unnecessary cognitive load?
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative designs, workarounds, or complementary solutions you have considered.
+      placeholder: Describe alternatives...
+    validations:
+      required: false
