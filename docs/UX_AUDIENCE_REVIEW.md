@@ -6,6 +6,38 @@ Phone-first audit against [`.cursor/skills/sotto-aac-audience`](../.cursor/skill
 **Status:** Review only — no app code changes in this PR.  
 **Date:** 2026-09-26
 
+## Mockups (Today vs Proposed)
+
+Phone-first Critical/High proposals. Source HTML: [mocks/sotto-ux-critical-high.html](mocks/sotto-ux-critical-high.html).
+
+### Overview
+
+![Overview of all Critical/High mockups](mocks/00-overview.png)
+
+### Speak board
+
+BOARD-01, BOARD-02, BOARD-03 / EMER-02, BOARD-04
+
+![Speak board today vs proposed](mocks/01-speak-board.png)
+
+### Emergency fullscreen
+
+EMER-01, EMER-03, EMER-04, EMER-05
+
+![Emergency fullscreen today vs proposed](mocks/02-emergency-fullscreen.png)
+
+### Caregiver Flip
+
+CARE-01, CARE-02, CARE-03, CARE-04, CARE-06
+
+![Caregiver Flip today vs proposed](mocks/03-caregiver-flip.png)
+
+### Privacy and sensory claims
+
+SYS-01, SYS-02, SYS-03, SYS-04
+
+![Privacy claims today vs proposed](mocks/04-privacy-claims.png)
+
 ## Verdict
 
 Sotto already hits the hard parts of adult AAC well: dark-neutral speak surface, true one-tap TTS, Edit-gated admin, honest emergency copy, Flip split chrome, chime off by default, no analytics SDKs.
