@@ -781,20 +781,31 @@ fun SottoApp(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Fullscreen Button
-                            IconButton(
-                                onClick = {
-                                    if (quickText.isNotBlank()) {
-                                        handleQuickFullscreen(quickText.trim())
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text(showFullscreenCd)
                                     }
                                 },
-                                enabled = quickText.isNotBlank(),
-                                modifier = Modifier.semantics { contentDescription = showFullscreenCd }
+                                state = rememberTooltipState()
                             ) {
-                                Text(
-                                    "⛶",
-                                    fontSize = 22.sp,
-                                    color = if (quickText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                )
+                                IconButton(
+                                    onClick = {
+                                        if (quickText.isNotBlank()) {
+                                            handleQuickFullscreen(quickText.trim())
+                                        }
+                                    },
+                                    enabled = quickText.isNotBlank(),
+                                    modifier = Modifier.semantics { contentDescription = showFullscreenCd }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_fullscreen),
+                                        contentDescription = showFullscreenCd,
+                                        modifier = Modifier.size(22.dp),
+                                        tint = if (quickText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    )
+                                }
                             }
 
                             // Save as Card Button (visible when text is entered)
