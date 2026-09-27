@@ -33,17 +33,40 @@ android {
         }
     }
 
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties().apply {
+        if (keystorePropertiesFile.exists()) {
+            FileInputStream(keystorePropertiesFile).use { load(it) }
+        }
+    }
+
+    val releaseStoreFilePath = System.getenv("KEYSTORE_FILE")
+        ?: System.getenv("KEYSTORE_PATH")
+        ?: keystoreProperties.getProperty("storeFile")
+    val releaseStorePassword = System.getenv("STORE_PASSWORD")
+        ?: keystoreProperties.getProperty("storePassword")
+    val releaseKeyAlias = System.getenv("KEY_ALIAS")
+        ?: keystoreProperties.getProperty("keyAlias")
+    val releaseKeyPassword = System.getenv("KEY_PASSWORD")
+        ?: keystoreProperties.getProperty("keyPassword")
+
+    val releaseStoreFile = releaseStoreFilePath?.let { path ->
+        val fileInApp = file(path)
+        if (fileInApp.exists()) fileInApp else rootProject.file(path)
+    }
+
+    val isReleaseSigningConfigured = releaseStoreFile?.exists() == true &&
+        !releaseStorePassword.isNullOrBlank() &&
+        !releaseKeyAlias.isNullOrBlank() &&
+        !releaseKeyPassword.isNullOrBlank()
+
     signingConfigs {
         create("release") {
-            val keystoreFile = rootProject.file("keystore.properties")
-            if (keystoreFile.exists()) {
-                val properties = Properties().apply {
-                    FileInputStream(keystoreFile).use { load(it) }
-                }
-                storeFile = file(properties.getProperty("storeFile"))
-                storePassword = properties.getProperty("storePassword")
-                keyAlias = properties.getProperty("keyAlias")
-                keyPassword = properties.getProperty("keyPassword")
+            if (isReleaseSigningConfigured) {
+                storeFile = releaseStoreFile
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
             }
         }
     }
@@ -53,10 +76,12 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            val keystoreFile = rootProject.file("keystore.properties")
-            if (keystoreFile.exists()) {
+            if (isReleaseSigningConfigured) {
                 signingConfig = signingConfigs.getByName("release")
+            } else if (System.getenv("REQUIRE_RELEASE_SIGNING") == "true") {
+                throw GradleException("Release signing is required (REQUIRE_RELEASE_SIGNING=true) but release signing credentials are not configured or keystore file does not exist.")
             } else {
+                logger.warn("Warning: Release signing not configured. Falling back to debug signing config.")
                 signingConfig = signingConfigs.getByName("debug")
             }
             ndk {
