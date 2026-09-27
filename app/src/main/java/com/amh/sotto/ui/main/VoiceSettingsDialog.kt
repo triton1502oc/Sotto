@@ -40,6 +40,8 @@ fun VoiceSettingsDialog(
     onLanguageChanged: (String) -> Unit,
     onSettingsChanged: (VoiceSettings) -> Unit,
     onTestVoice: (VoiceSettings) -> Unit,
+    onExportPhrases: () -> Unit = {},
+    onImportPhrases: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -571,6 +573,53 @@ fun VoiceSettingsDialog(
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                // Phrase Library Backup Section
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.label_backup_section),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(R.string.label_backup_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onExportPhrases,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                        ) {
+                            Text("↑ ", fontSize = 14.sp)
+                            Text(
+                                text = stringResource(R.string.action_export_phrases),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = onImportPhrases,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                        ) {
+                            Text("↓ ", fontSize = 14.sp)
+                            Text(
+                                text = stringResource(R.string.action_import_phrases),
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                     }
                 }

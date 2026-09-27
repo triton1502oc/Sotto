@@ -174,4 +174,19 @@
     <string name="permission_audio_desc">Sotto menggunakan mikrofon hanya untuk mentranskripsikan ucapan di perangkat secara langsung. Audio Anda tidak pernah disimpan atau dikirim ke server.</string>
     <string name="action_allow">Izinkan</string>
     <string name="action_not_now">Nanti Saja</string>
+
+    <!-- Phrase Backup & Restore -->
+    <string name="label_backup_section">Cadangan &amp; Pemulihan Frasa</string>
+    <string name="label_backup_desc">Ekspor frasa dan kategori Anda ke berkas JSON atau pulihkan dari cadangan.</string>
+    <string name="action_export_phrases">Ekspor Frasa</string>
+    <string name="action_import_phrases">Impor Frasa</string>
+    <string name="dialog_import_title">Impor Frasa</string>
+    <string name="dialog_import_summary">Ditemukan %1$d frasa dan %2$d kategori dalam berkas cadangan.\n\nPilih cara impor:</string>
+    <string name="action_import_merge">Gabungkan (Pertahankan Saat Ini)</string>
+    <string name="action_import_replace">Gantikan Daftar Frasa</string>
+    <string name="dialog_import_replace_confirm">Gantikan daftar frasa Anda saat ini dengan cadangan? Frasa kustom saat ini yang tidak ada di cadangan akan digantikan.</string>
+    <string name="msg_export_success">Berhasil mengekspor %1$d frasa</string>
+    <string name="msg_import_success">Berhasil mengimpor %1$d frasa</string>
+    <string name="error_export_failed">Gagal mengekspor frasa: %1$s</string>
+    <string name="error_import_failed">Gagal mengimpor frasa. Pastikan berkas adalah JSON cadangan Sotto yang valid.</string>
 </resources>

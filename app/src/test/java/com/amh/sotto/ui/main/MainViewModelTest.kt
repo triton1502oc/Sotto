@@ -4,6 +4,7 @@ import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.data.VoiceSettingsRepository
+import com.amh.sotto.util.BackupData
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -249,5 +250,49 @@ class MainViewModelTest {
         assertEquals(second, newOrder[0])
         assertEquals(first, newOrder[1])
         verify { repository.saveCategories(newOrder) }
+    }
+
+    @Test
+    fun `exportBackup returns non-empty JSON string of current phrases and categories`() {
+        val json = viewModel.exportBackup()
+        assertTrue(json.contains("\"version\": 1"))
+        assertTrue(json.contains("Phrase 1"))
+    }
+
+    @Test
+    fun `importBackup with merge adds new phrases and categories without deleting existing ones`() {
+        val backup = BackupData(
+            version = 1,
+            categories = listOf("Work", Phrase.CATEGORY_GENERAL),
+            phrases = listOf(
+                Phrase("Phrase 1", "auto"), // duplicate
+                Phrase("New Phrase in Work", category = "Work")
+            )
+        )
+
+        val result = viewModel.importBackup(backup, replace = false)
+        assertEquals(4, result.phraseCount)
+        assertTrue(viewModel.phrases.value.any { it.text == "New Phrase in Work" })
+        assertTrue(viewModel.categories.value.contains("Work"))
+        verify { repository.savePhrases(any()) }
+        verify { repository.saveCategories(any()) }
+    }
+
+    @Test
+    fun `importBackup with replace overwrites phrases and categories`() {
+        val backup = BackupData(
+            version = 1,
+            categories = listOf(Phrase.CATEGORY_EMERGENCY, "Work", Phrase.CATEGORY_GENERAL),
+            phrases = listOf(
+                Phrase("Only this phrase", category = "Work")
+            )
+        )
+
+        val result = viewModel.importBackup(backup, replace = true)
+        assertEquals(1, result.phraseCount)
+        assertEquals("Only this phrase", viewModel.phrases.value[0].text)
+        assertFalse(viewModel.phrases.value.any { it.text == "Phrase 1" })
+        verify { repository.savePhrases(any()) }
+        verify { repository.saveCategories(any()) }
     }
 }

@@ -5,6 +5,9 @@ import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.data.VoiceSettingsRepository
+import com.amh.sotto.util.BackupData
+import com.amh.sotto.util.ImportResult
+import com.amh.sotto.util.PhraseBackupHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -164,5 +167,22 @@ class MainViewModel(
     fun updateVoiceSettings(newSettings: VoiceSettings) {
         _voiceSettings.value = newSettings
         voiceSettingsRepository.saveVoiceSettings(newSettings)
+    }
+
+    fun exportBackup(): String {
+        return PhraseBackupHelper.exportToJson(_phrases.value, _categories.value)
+    }
+
+    fun importBackup(backupData: BackupData, replace: Boolean): ImportResult {
+        val (newPhrases, newCategories) = if (replace) {
+            PhraseBackupHelper.replaceData(_phrases.value, backupData)
+        } else {
+            PhraseBackupHelper.mergeData(_phrases.value, _categories.value, backupData)
+        }
+        _phrases.value = newPhrases
+        _categories.value = newCategories
+        repository.savePhrases(newPhrases)
+        repository.saveCategories(newCategories)
+        return ImportResult(phraseCount = newPhrases.size, categoryCount = newCategories.size)
     }
 }

@@ -76,6 +76,13 @@ import android.content.pm.PackageManager
 import android.speech.SpeechRecognizer
 import androidx.core.content.ContextCompat
 import sh.calvin.reorderable.*
+import android.widget.Toast
+import com.amh.sotto.ui.main.ImportBackupDialog
+import com.amh.sotto.util.BackupData
+import com.amh.sotto.util.ImportResult
+import com.amh.sotto.util.PhraseBackupHelper
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
@@ -184,7 +191,9 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             }
                         },
                         isTtsLanguageInstalled = { isTtsVoiceInstalled(it) },
-                        onInstallTtsVoice = { openTtsInstallSettings() }
+                        onInstallTtsVoice = { openTtsInstallSettings() },
+                        onExportBackup = { viewModel.exportBackup() },
+                        onImportBackup = { backup, replace -> viewModel.importBackup(backup, replace) }
                     )
                 }
             }
@@ -363,7 +372,9 @@ fun SottoApp(
     customCategories: List<String> = emptyList(),
     onAddCustomCategory: (String) -> Boolean = { false },
     onRenameCustomCategory: (String, String) -> Boolean = { _, _ -> false },
-    onDeleteCustomCategory: (String) -> Boolean = { false }
+    onDeleteCustomCategory: (String) -> Boolean = { false },
+    onExportBackup: () -> String = { "" },
+    onImportBackup: (BackupData, Boolean) -> ImportResult = { _, _ -> ImportResult(0, 0) }
 ) {
     val context = LocalContext.current
     val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
@@ -458,6 +469,55 @@ fun SottoApp(
             startListeningWithPermission()
         } else {
             isListeningTwoWay = false
+        }
+    }
+
+    var pendingBackupData by remember { mutableStateOf<BackupData?>(null) }
+    val exportSuccessTemplate = stringResource(R.string.msg_export_success)
+    val exportErrorTemplate = stringResource(R.string.error_export_failed)
+    val importSuccessTemplate = stringResource(R.string.msg_import_success)
+    val importErrorMsg = stringResource(R.string.error_import_failed)
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            try {
+                val json = onExportBackup()
+                context.contentResolver.openOutputStream(uri)?.use { output ->
+                    output.write(json.toByteArray(Charsets.UTF_8))
+                }
+                Toast.makeText(
+                    context,
+                    String.format(Locale.getDefault(), exportSuccessTemplate, phrases.size),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    context,
+                    String.format(Locale.getDefault(), exportErrorTemplate, e.localizedMessage ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                val json = context.contentResolver.openInputStream(uri)?.use { input ->
+                    input.bufferedReader(Charsets.UTF_8).readText()
+                }
+                if (!json.isNullOrBlank()) {
+                    pendingBackupData = PhraseBackupHelper.parseBackupJson(json)
+                } else {
+                    Toast.makeText(context, importErrorMsg, Toast.LENGTH_LONG).show()
+                }
+            } catch (_: Exception) {
+                Toast.makeText(context, importErrorMsg, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -1190,7 +1250,40 @@ fun SottoApp(
             onLanguageChanged = onLanguageChanged,
             onSettingsChanged = onUpdateVoiceSettings,
             onTestVoice = onTestVoice,
+            onExportPhrases = {
+                val dateStr = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
+                exportLauncher.launch("sotto_backup_$dateStr.json")
+            },
+            onImportPhrases = {
+                importLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
+            },
             onDismiss = { showVoiceDialog = false }
+        )
+    }
+
+    // Import Backup Confirmation Dialog
+    pendingBackupData?.let { backup ->
+        ImportBackupDialog(
+            backupData = backup,
+            onMerge = {
+                val result = onImportBackup(backup, false)
+                pendingBackupData = null
+                Toast.makeText(
+                    context,
+                    String.format(Locale.getDefault(), importSuccessTemplate, result.phraseCount),
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            onReplace = {
+                val result = onImportBackup(backup, true)
+                pendingBackupData = null
+                Toast.makeText(
+                    context,
+                    String.format(Locale.getDefault(), importSuccessTemplate, result.phraseCount),
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            onDismiss = { pendingBackupData = null }
         )
     }
 
