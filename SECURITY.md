@@ -21,7 +21,7 @@ We provide security updates and patches for the following versions:
 
 Sotto is engineered with a zero-trust, privacy-first model:
 - **100% Offline Execution**: Sotto does not transmit speech cards, audio, or user text to external servers.
-- **Local Data Storage**: All phrase libraries and category presets reside strictly on-device in SQLite (Room) and encrypted/local Android DataStore.
+- **Local Data Storage**: All phrase libraries, category presets, and voice settings reside strictly on-device in Android `SharedPreferences` (`Context.MODE_PRIVATE`), serialized as JSON via `org.json`. This storage is sandboxed to the app's private data directory and is not accessible to other apps.
 - **Zero Third-Party SDKs**: No analytics, behavioral trackers, advertising networks, or remote telemetry SDKs are included in the build.
 - **On-Device Translation**: Translation models (ML Kit) run locally on-device once downloaded.
 
