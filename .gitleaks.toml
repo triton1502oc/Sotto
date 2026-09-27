@@ -22,3 +22,16 @@ keywords = [
     "storePassword",
     "storeFile"
 ]
+[rules.allowlist]
+description = "Allow gradle signing configuration and release workflow"
+paths = [
+    '''app/build\.gradle\.kts''',
+    '''\.github/workflows/release\.yml'''
+]
+
+[[allowlists]]
+description = "Global allowlist for build and workflow files"
+paths = [
+    '''app/build\.gradle\.kts''',
+    '''\.github/workflows/release\.yml'''
+]

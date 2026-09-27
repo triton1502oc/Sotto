@@ -42,13 +42,13 @@ android {
 
     val releaseStoreFilePath = System.getenv("KEYSTORE_FILE")
         ?: System.getenv("KEYSTORE_PATH")
-        ?: keystoreProperties.getProperty("storeFile")
+        ?: keystoreProperties.getProperty("storeFile") // gitleaks:allow
     val releaseStorePassword = System.getenv("STORE_PASSWORD")
-        ?: keystoreProperties.getProperty("storePassword")
+        ?: keystoreProperties.getProperty("storePassword") // gitleaks:allow
     val releaseKeyAlias = System.getenv("KEY_ALIAS")
-        ?: keystoreProperties.getProperty("keyAlias")
+        ?: keystoreProperties.getProperty("keyAlias") // gitleaks:allow
     val releaseKeyPassword = System.getenv("KEY_PASSWORD")
-        ?: keystoreProperties.getProperty("keyPassword")
+        ?: keystoreProperties.getProperty("keyPassword") // gitleaks:allow
 
     val releaseStoreFile = releaseStoreFilePath?.let { path ->
         val fileInApp = file(path)
@@ -63,10 +63,10 @@ android {
     signingConfigs {
         create("release") {
             if (isReleaseSigningConfigured) {
-                storeFile = releaseStoreFile
-                storePassword = releaseStorePassword
-                keyAlias = releaseKeyAlias
-                keyPassword = releaseKeyPassword
+                storeFile = releaseStoreFile // gitleaks:allow
+                storePassword = releaseStorePassword // gitleaks:allow
+                keyAlias = releaseKeyAlias // gitleaks:allow
+                keyPassword = releaseKeyPassword // gitleaks:allow
             }
         }
     }
