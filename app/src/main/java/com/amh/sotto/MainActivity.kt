@@ -685,29 +685,31 @@ fun SottoApp(
                         )
                     }
 
-                    item {
-                        FilterChip(
-                            selected = false,
-                            onClick = { showAddCategoryDialog = true },
-                            leadingIcon = {
-                                Text(
-                                    "+",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = stringResource(R.string.action_add_category),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            colors = FilterChipDefaults.filterChipColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            ),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                        )
+                    if (isEditMode) {
+                        item {
+                            FilterChip(
+                                selected = false,
+                                onClick = { showAddCategoryDialog = true },
+                                leadingIcon = {
+                                    Text(
+                                        "+",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                label = {
+                                    Text(
+                                        text = stringResource(R.string.action_add_category),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                ),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                            )
+                        }
                     }
                 }
             }
