@@ -8,6 +8,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -153,5 +155,57 @@ class MainViewModelTest {
 
         assertEquals(newSettings, viewModel.voiceSettings.value)
         verify { voiceSettingsRepository.saveVoiceSettings(newSettings) }
+    }
+
+    @Test
+    fun `addCustomCategory adds valid category and saves to repository`() {
+        val result = viewModel.addCustomCategory("Food")
+        assertTrue(result)
+        assertEquals(listOf("Food"), viewModel.customCategories.value)
+        verify { repository.saveCustomCategories(listOf("Food")) }
+    }
+
+    @Test
+    fun `addCustomCategory rejects blank, duplicate, or system category names`() {
+        assertFalse(viewModel.addCustomCategory(""))
+        assertFalse(viewModel.addCustomCategory("   "))
+        assertFalse(viewModel.addCustomCategory("Emergency"))
+        assertFalse(viewModel.addCustomCategory("care"))
+        assertFalse(viewModel.addCustomCategory("ALL"))
+        assertFalse(viewModel.addCustomCategory("General"))
+
+        assertTrue(viewModel.addCustomCategory("Food"))
+        assertFalse(viewModel.addCustomCategory("food"))
+        assertFalse(viewModel.addCustomCategory("Food"))
+    }
+
+    @Test
+    fun `renameCustomCategory renames category and updates affected phrases`() {
+        viewModel.addCustomCategory("Food")
+        val phraseInFood = Phrase("I want noodles", "en", category = "Food")
+        viewModel.addPhrase(phraseInFood)
+
+        val result = viewModel.renameCustomCategory("Food", "Meals")
+        assertTrue(result)
+        assertEquals(listOf("Meals"), viewModel.customCategories.value)
+
+        val updatedPhrase = viewModel.phrases.value.find { it.text == "I want noodles" }
+        assertEquals("Meals", updatedPhrase?.category)
+        verify { repository.saveCustomCategories(listOf("Meals")) }
+    }
+
+    @Test
+    fun `deleteCustomCategory removes category and safely moves phrases to General`() {
+        viewModel.addCustomCategory("Food")
+        val phraseInFood = Phrase("I want noodles", "en", category = "Food")
+        viewModel.addPhrase(phraseInFood)
+
+        val result = viewModel.deleteCustomCategory("Food")
+        assertTrue(result)
+        assertTrue(viewModel.customCategories.value.isEmpty())
+
+        val movedPhrase = viewModel.phrases.value.find { it.text == "I want noodles" }
+        assertEquals(Phrase.CATEGORY_GENERAL, movedPhrase?.category)
+        verify { repository.saveCustomCategories(emptyList()) }
     }
 }

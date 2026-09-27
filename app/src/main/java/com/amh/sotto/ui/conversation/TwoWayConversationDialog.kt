@@ -57,6 +57,7 @@ fun TwoWayConversationDialog(
     onStopListening: () -> Unit,
     onClearText: () -> Unit = {},
     onSpeakResponse: (spokenText: String) -> Unit,
+    customCategories: List<String> = emptyList(),
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -523,6 +524,19 @@ fun TwoWayConversationDialog(
                                 label = {
                                     Text(
                                         text = stringResource(strRes),
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            )
+                        }
+                        items(customCategories) { catName ->
+                            val isSelected = selectedPromptCategory == catName
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { selectedPromptCategory = catName },
+                                label = {
+                                    Text(
+                                        text = catName,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                     )
                                 }

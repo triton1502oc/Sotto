@@ -16,12 +16,71 @@ class MainViewModel(
     private val _phrases = MutableStateFlow<List<Phrase>>(emptyList())
     val phrases: StateFlow<List<Phrase>> = _phrases.asStateFlow()
 
+    private val _customCategories = MutableStateFlow<List<String>>(emptyList())
+    val customCategories: StateFlow<List<String>> = _customCategories.asStateFlow()
+
     private val _voiceSettings = MutableStateFlow(VoiceSettings())
     val voiceSettings: StateFlow<VoiceSettings> = _voiceSettings.asStateFlow()
 
     init {
         _phrases.value = repository.getPhrases()
+        _customCategories.value = repository.getCustomCategories()
         _voiceSettings.value = voiceSettingsRepository.getVoiceSettings()
+    }
+
+    fun addCustomCategory(name: String): Boolean {
+        val trimmed = name.trim()
+        if (trimmed.isBlank() || Phrase.isSystemCategory(trimmed)) return false
+        val current = _customCategories.value.toMutableList()
+        if (current.any { it.equals(trimmed, ignoreCase = true) }) return false
+        current.add(trimmed)
+        _customCategories.value = current
+        repository.saveCustomCategories(current)
+        return true
+    }
+
+    fun renameCustomCategory(oldName: String, newName: String): Boolean {
+        val trimmedNew = newName.trim()
+        if (trimmedNew.isBlank() || Phrase.isSystemCategory(trimmedNew)) return false
+        val current = _customCategories.value.toMutableList()
+        val index = current.indexOfFirst { it.equals(oldName, ignoreCase = true) }
+        if (index == -1) return false
+        if (current.any { it.equals(trimmedNew, ignoreCase = true) && !it.equals(oldName, ignoreCase = true) }) return false
+
+        current[index] = trimmedNew
+        _customCategories.value = current
+        repository.saveCustomCategories(current)
+
+        val updatedPhrases = _phrases.value.map { phrase ->
+            if (phrase.category.equals(oldName, ignoreCase = true)) {
+                phrase.copy(category = trimmedNew)
+            } else {
+                phrase
+            }
+        }
+        _phrases.value = updatedPhrases
+        repository.savePhrases(updatedPhrases)
+        return true
+    }
+
+    fun deleteCustomCategory(name: String): Boolean {
+        if (Phrase.isSystemCategory(name)) return false
+        val current = _customCategories.value.toMutableList()
+        val removed = current.removeAll { it.equals(name, ignoreCase = true) }
+        if (!removed) return false
+        _customCategories.value = current
+        repository.saveCustomCategories(current)
+
+        val updatedPhrases = _phrases.value.map { phrase ->
+            if (phrase.category.equals(name, ignoreCase = true)) {
+                phrase.copy(category = Phrase.CATEGORY_GENERAL)
+            } else {
+                phrase
+            }
+        }
+        _phrases.value = updatedPhrases
+        repository.savePhrases(updatedPhrases)
+        return true
     }
 
     fun addPhrase(newPhrase: Phrase) {

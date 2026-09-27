@@ -21,17 +21,33 @@ data class Phrase(
         const val CATEGORY_NEEDS = "Needs"
         const val CATEGORY_SOCIAL = "Social"
         const val CATEGORY_CARE = "Care"
+
+        val SYSTEM_CATEGORIES = listOf(
+            CATEGORY_EMERGENCY,
+            CATEGORY_NEEDS,
+            CATEGORY_SOCIAL,
+            CATEGORY_CARE,
+            CATEGORY_GENERAL
+        )
+
+        fun isSystemCategory(category: String): Boolean {
+            return category.equals("ALL", ignoreCase = true) ||
+                SYSTEM_CATEGORIES.any { it.equals(category, ignoreCase = true) }
+        }
     }
 }
 
 interface PhraseRepository {
     fun getPhrases(): List<Phrase>
     fun savePhrases(phrases: List<Phrase>)
+    fun getCustomCategories(): List<String>
+    fun saveCustomCategories(categories: List<String>)
 }
 
 class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRepository {
     private val prefs: SharedPreferences = context.getSharedPreferences("sotto_prefs", Context.MODE_PRIVATE)
     private val KEY_PHRASES = "saved_phrases"
+    private val KEY_CUSTOM_CATEGORIES = "saved_custom_categories"
     private val KEY_V2_MIGRATED = "v2_migrated"
     private val KEY_CARE_MIGRATED = "care_migrated"
 
@@ -171,5 +187,33 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
             jsonArray.put(obj)
         }
         prefs.edit().putString(KEY_PHRASES, jsonArray.toString()).apply()
+    }
+
+    override fun getCustomCategories(): List<String> {
+        val json = prefs.getString(KEY_CUSTOM_CATEGORIES, null) ?: return emptyList()
+        return try {
+            val jsonArray = JSONArray(json)
+            val list = mutableListOf<String>()
+            for (i in 0 until jsonArray.length()) {
+                val cat = jsonArray.optString(i, "").trim()
+                if (cat.isNotBlank() && !Phrase.isSystemCategory(cat) && !list.any { it.equals(cat, ignoreCase = true) }) {
+                    list.add(cat)
+                }
+            }
+            list
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override fun saveCustomCategories(categories: List<String>) {
+        val jsonArray = JSONArray()
+        categories.forEach { cat ->
+            val trimmed = cat.trim()
+            if (trimmed.isNotBlank() && !Phrase.isSystemCategory(trimmed)) {
+                jsonArray.put(trimmed)
+            }
+        }
+        prefs.edit().putString(KEY_CUSTOM_CATEGORIES, jsonArray.toString()).apply()
     }
 }

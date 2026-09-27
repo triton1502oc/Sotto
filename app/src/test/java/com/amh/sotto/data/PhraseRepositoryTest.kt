@@ -81,4 +81,23 @@ class PhraseRepositoryTest {
         assertFalse(carePhrase.isEmergency)
         assertEquals(Phrase.CATEGORY_CARE, carePhrase.category)
     }
+
+    @Test
+    fun `Phrase isSystemCategory identifies system categories and ALL correctly`() {
+        assertTrue(Phrase.isSystemCategory("ALL"))
+        assertTrue(Phrase.isSystemCategory("all"))
+        assertTrue(Phrase.isSystemCategory("Emergency"))
+        assertTrue(Phrase.isSystemCategory("emergency"))
+        assertTrue(Phrase.isSystemCategory("Care"))
+        assertTrue(Phrase.isSystemCategory("Needs"))
+        assertTrue(Phrase.isSystemCategory("Social"))
+        assertTrue(Phrase.isSystemCategory("General"))
+    }
+
+    @Test
+    fun `Phrase isSystemCategory returns false for custom category names`() {
+        assertFalse(Phrase.isSystemCategory("Food"))
+        assertFalse(Phrase.isSystemCategory("Medical"))
+        assertFalse(Phrase.isSystemCategory("Places"))
+    }
 }
