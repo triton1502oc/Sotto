@@ -66,8 +66,10 @@
     <string name="category_care">Perawatan</string>
     <string name="category_general">Umum</string>
     <string name="action_add_category">Tambah kategori</string>
+    <string name="action_manage_categories">Atur kategori</string>
     <string name="dialog_title_add_category">Kategori Baru</string>
     <string name="dialog_title_edit_category">Edit Kategori</string>
+    <string name="dialog_title_manage_categories">Kelola Kategori</string>
     <string name="dialog_title_delete_category">Hapus Kategori</string>
     <string name="dialog_message_delete_category">Hapus kategori \"%1$s\"? Semua frasa di kategori ini akan dipindahkan ke Umum.</string>
     <string name="hint_category_name">Nama kategori</string>
@@ -75,6 +77,11 @@
     <string name="error_category_reserved">Ini adalah kategori sistem yang dilindungi</string>
     <string name="action_rename_category">Ubah nama</string>
     <string name="action_delete_category">Hapus</string>
+    <string name="badge_emergency_locked">Darurat (Terkunci)</string>
+    <string name="badge_general_default">Bawaan</string>
+    <string name="cd_move_up">Pindah ke atas</string>
+    <string name="cd_move_down">Pindah ke bawah</string>
+    <string name="cd_reorder_category">Urutkan kategori</string>
     <string name="label_attention_chime">Nada perhatian sebelum bicara</string>
     <string name="label_attention_chime_desc">Membunyikan nada singkat untuk menarik perhatian sebelum bicara</string>
 

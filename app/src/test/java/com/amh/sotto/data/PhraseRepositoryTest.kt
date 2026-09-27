@@ -83,15 +83,42 @@ class PhraseRepositoryTest {
     }
 
     @Test
-    fun `Phrase isSystemCategory identifies system categories and ALL correctly`() {
+    fun `Phrase isSystemCategory identifies protected system categories and ALL correctly`() {
         assertTrue(Phrase.isSystemCategory("ALL"))
         assertTrue(Phrase.isSystemCategory("all"))
         assertTrue(Phrase.isSystemCategory("Emergency"))
         assertTrue(Phrase.isSystemCategory("emergency"))
-        assertTrue(Phrase.isSystemCategory("Care"))
-        assertTrue(Phrase.isSystemCategory("Needs"))
-        assertTrue(Phrase.isSystemCategory("Social"))
         assertTrue(Phrase.isSystemCategory("General"))
+        assertTrue(Phrase.isSystemCategory("general"))
+
+        // Demoted categories are no longer protected system categories
+        assertFalse(Phrase.isSystemCategory("Care"))
+        assertFalse(Phrase.isSystemCategory("Needs"))
+        assertFalse(Phrase.isSystemCategory("Social"))
+    }
+
+    @Test
+    fun `Phrase isUndeletableCategory protects ALL, Emergency, and General`() {
+        assertTrue(Phrase.isUndeletableCategory("ALL"))
+        assertTrue(Phrase.isUndeletableCategory("Emergency"))
+        assertTrue(Phrase.isUndeletableCategory("General"))
+
+        assertFalse(Phrase.isUndeletableCategory("Needs"))
+        assertFalse(Phrase.isUndeletableCategory("Social"))
+        assertFalse(Phrase.isUndeletableCategory("Care"))
+        assertFalse(Phrase.isUndeletableCategory("Food"))
+    }
+
+    @Test
+    fun `Phrase isUnrenamableCategory protects ALL and Emergency only`() {
+        assertTrue(Phrase.isUnrenamableCategory("ALL"))
+        assertTrue(Phrase.isUnrenamableCategory("Emergency"))
+
+        assertFalse(Phrase.isUnrenamableCategory("General"))
+        assertFalse(Phrase.isUnrenamableCategory("Needs"))
+        assertFalse(Phrase.isUnrenamableCategory("Social"))
+        assertFalse(Phrase.isUnrenamableCategory("Care"))
+        assertFalse(Phrase.isUnrenamableCategory("Food"))
     }
 
     @Test

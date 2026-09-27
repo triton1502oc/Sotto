@@ -68,6 +68,8 @@ import com.amh.sotto.ui.main.VoiceSettingsDialog
 import com.amh.sotto.util.LocaleHelper
 import com.amh.sotto.util.TranslationHelper
 import com.amh.sotto.ui.conversation.TwoWayConversationDialog
+import com.amh.sotto.ui.category.ManageCategoriesDialog
+import com.amh.sotto.ui.category.getCategoryDisplayName
 import com.amh.sotto.util.SpeechRecognitionHelper
 import android.Manifest
 import android.content.pm.PackageManager
@@ -111,7 +113,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val phrases by viewModel.phrases.collectAsState()
-                    val customCategories by viewModel.customCategories.collectAsState()
+                    val categories by viewModel.categories.collectAsState()
                     val voiceSettings by viewModel.voiceSettings.collectAsState()
 
                     LaunchedEffect(voiceSettings, ttsReady) {
@@ -154,10 +156,15 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             latestVoiceSettings = it
                             viewModel.updateVoiceSettings(it)
                         },
-                        customCategories = customCategories,
-                        onAddCustomCategory = { viewModel.addCustomCategory(it) },
-                        onRenameCustomCategory = { old, new -> viewModel.renameCustomCategory(old, new) },
-                        onDeleteCustomCategory = { viewModel.deleteCustomCategory(it) },
+                        categories = categories,
+                        onAddCategory = { viewModel.addCategory(it) },
+                        onRenameCategory = { old, new -> viewModel.renameCategory(old, new) },
+                        onDeleteCategory = { viewModel.deleteCategory(it) },
+                        onReorderCategories = { from, to -> viewModel.reorderCategories(from, to) },
+                        customCategories = categories,
+                        onAddCustomCategory = { viewModel.addCategory(it) },
+                        onRenameCustomCategory = { old, new -> viewModel.renameCategory(old, new) },
+                        onDeleteCustomCategory = { viewModel.deleteCategory(it) },
                         onTestVoice = { testSettings ->
                             if (ttsReady) {
                                 if (testSettings.playAttentionChime) {
@@ -348,12 +355,18 @@ fun SottoApp(
     onTestVoice: (VoiceSettings) -> Unit,
     isTtsLanguageInstalled: (String) -> Boolean = { true },
     onInstallTtsVoice: () -> Unit = {},
+    categories: List<String> = emptyList(),
+    onAddCategory: (String) -> Boolean = { false },
+    onRenameCategory: (String, String) -> Boolean = { _, _ -> false },
+    onDeleteCategory: (String) -> Boolean = { false },
+    onReorderCategories: (Int, Int) -> Unit = { _, _ -> },
     customCategories: List<String> = emptyList(),
     onAddCustomCategory: (String) -> Boolean = { false },
     onRenameCustomCategory: (String, String) -> Boolean = { _, _ -> false },
     onDeleteCustomCategory: (String) -> Boolean = { false }
 ) {
     val context = LocalContext.current
+    val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var initialAddText by rememberSaveable { mutableStateOf("") }
@@ -362,6 +375,7 @@ fun SottoApp(
     var isEditMode by rememberSaveable { mutableStateOf(false) }
     var activeSpeechTarget by rememberSaveable { mutableStateOf("primary") }
     var quickText by rememberSaveable { mutableStateOf("") }
+    var showManageCategoriesDialog by rememberSaveable { mutableStateOf(false) }
     var showAddCategoryDialog by rememberSaveable { mutableStateOf(false) }
     var categoryToManage by rememberSaveable { mutableStateOf<String?>(null) }
     var categoryToDeleteConfirm by rememberSaveable { mutableStateOf<String?>(null) }
@@ -617,35 +631,36 @@ fun SottoApp(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    items(systemCategories) { (catKey, strRes) ->
-                        val isSelected = selectedCategory == catKey
+                    item {
+                        val isSelected = selectedCategory == allCategoryKey
                         FilterChip(
                             selected = isSelected,
-                            onClick = { selectedCategory = catKey },
+                            onClick = { selectedCategory = allCategoryKey },
                             label = {
                                 Text(
-                                    text = stringResource(strRes),
+                                    text = stringResource(R.string.category_all),
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                 )
                             },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = if (catKey == Phrase.CATEGORY_EMERGENCY) Color(0xFF4E342E) else MaterialTheme.colorScheme.surfaceVariant,
-                                selectedLabelColor = if (catKey == Phrase.CATEGORY_EMERGENCY) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface,
+                                selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                selectedLabelColor = MaterialTheme.colorScheme.onSurface,
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            ),
-                            border = if (catKey == Phrase.CATEGORY_EMERGENCY && isSelected) {
-                                BorderStroke(1.dp, Color(0xFFFFB74D))
-                            } else null
+                            )
                         )
                     }
 
-                    items(customCategories) { catName ->
+                    items(effectiveCategories) { catName ->
                         val isSelected = selectedCategory == catName
+                        val isEmergency = catName.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true)
+                        val isProtectedFromDelete = Phrase.isUndeletableCategory(catName)
+                        val isProtectedFromRename = Phrase.isUnrenamableCategory(catName)
+
                         FilterChip(
                             selected = isSelected,
                             onClick = {
-                                if (isEditMode) {
+                                if (isEditMode && !isProtectedFromRename) {
                                     categoryToManage = catName
                                 } else {
                                     selectedCategory = catName
@@ -654,10 +669,10 @@ fun SottoApp(
                             label = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = catName,
+                                        text = getCategoryDisplayName(catName),
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                     )
-                                    if (isEditMode) {
+                                    if (isEditMode && !isProtectedFromRename) {
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = "✏️",
@@ -666,7 +681,7 @@ fun SottoApp(
                                     }
                                 }
                             },
-                            trailingIcon = if (isEditMode) {
+                            trailingIcon = if (isEditMode && !isProtectedFromDelete) {
                                 {
                                     IconButton(
                                         onClick = { categoryToDeleteConfirm = catName },
@@ -677,15 +692,42 @@ fun SottoApp(
                                 }
                             } else null,
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                selectedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                selectedContainerColor = if (isEmergency) Color(0xFF4E342E) else MaterialTheme.colorScheme.surfaceVariant,
+                                selectedLabelColor = if (isEmergency) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface,
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
+                            ),
+                            border = if (isEmergency && isSelected) {
+                                BorderStroke(1.dp, Color(0xFFFFB74D))
+                            } else null
                         )
                     }
 
                     if (isEditMode) {
+                        item {
+                            FilterChip(
+                                selected = false,
+                                onClick = { showManageCategoriesDialog = true },
+                                leadingIcon = {
+                                    Text(
+                                        "↕",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                label = {
+                                    Text(
+                                        text = stringResource(R.string.action_manage_categories),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                ),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                            )
+                        }
                         item {
                             FilterChip(
                                 selected = false,
@@ -1186,7 +1228,8 @@ fun SottoApp(
             onSpeakResponse = { ttsText ->
                 onSpeakText(ttsText, LocaleHelper.LANG_AUTO)
             },
-            customCategories = customCategories,
+            categories = effectiveCategories,
+            customCategories = effectiveCategories,
             onDismiss = {
                 stopTwoWayListening()
                 liveSpokenTextTwoWay = ""
@@ -1673,25 +1716,17 @@ fun SottoApp(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    val dialogCategories = listOf(
-                        Phrase.CATEGORY_GENERAL to R.string.category_general,
-                        Phrase.CATEGORY_NEEDS to R.string.category_needs,
-                        Phrase.CATEGORY_SOCIAL to R.string.category_social,
-                        Phrase.CATEGORY_CARE to R.string.category_care,
-                        Phrase.CATEGORY_EMERGENCY to R.string.category_emergency
-                    )
-
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        dialogCategories.forEach { (catKey, strRes) ->
-                            val isSelected = selectedCat == catKey
-                            val isEmergencyCat = catKey == Phrase.CATEGORY_EMERGENCY
+                        effectiveCategories.forEach { catName ->
+                            val isSelected = selectedCat == catName
+                            val isEmergencyCat = catName.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true)
                             FilterChip(
                                 selected = isSelected,
-                                onClick = { selectedCat = catKey },
+                                onClick = { selectedCat = catName },
                                 leadingIcon = if (isEmergencyCat) {
                                     {
                                         Text(
@@ -1702,7 +1737,7 @@ fun SottoApp(
                                 } else null,
                                 label = {
                                     Text(
-                                        text = stringResource(strRes),
+                                        text = getCategoryDisplayName(catName),
                                         fontSize = 12.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                         maxLines = 1,
@@ -1716,27 +1751,6 @@ fun SottoApp(
                                 border = if (isEmergencyCat && isSelected) {
                                     BorderStroke(1.dp, Color(0xFFFFB74D))
                                 } else null
-                            )
-                        }
-
-                        customCategories.forEach { catName ->
-                            val isSelected = selectedCat == catName
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { selectedCat = catName },
-                                label = {
-                                    Text(
-                                        text = catName,
-                                        fontSize = 12.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onSurface
-                                )
                             )
                         }
                     }
@@ -1829,15 +1843,15 @@ fun SottoApp(
                     onClick = {
                         val trimmed = catInput.trim()
                         if (trimmed.isBlank()) return@Button
-                        if (Phrase.isSystemCategory(trimmed)) {
+                        if (trimmed.equals(allCategoryKey, ignoreCase = true) || Phrase.isUnrenamableCategory(trimmed)) {
                             errorMessage = reservedError
                             return@Button
                         }
-                        if (customCategories.any { it.equals(trimmed, ignoreCase = true) }) {
+                        if (effectiveCategories.any { it.equals(trimmed, ignoreCase = true) }) {
                             errorMessage = existsError
                             return@Button
                         }
-                        if (onAddCustomCategory(trimmed)) {
+                        if (onAddCategory(trimmed) || onAddCustomCategory(trimmed)) {
                             selectedCategory = trimmed
                             showAddCategoryDialog = false
                         }
@@ -1854,7 +1868,7 @@ fun SottoApp(
         )
     }
 
-    // Edit/Manage Custom Category Dialog
+    // Edit/Manage Category Dialog
     if (categoryToManage != null) {
         val oldName = categoryToManage!!
         var catInput by rememberSaveable(oldName) { mutableStateOf(oldName) }
@@ -1892,15 +1906,15 @@ fun SottoApp(
                             categoryToManage = null
                             return@Button
                         }
-                        if (Phrase.isSystemCategory(trimmed)) {
+                        if (trimmed.equals(allCategoryKey, ignoreCase = true) || Phrase.isUnrenamableCategory(trimmed)) {
                             errorMessage = reservedError
                             return@Button
                         }
-                        if (customCategories.any { it.equals(trimmed, ignoreCase = true) && !it.equals(oldName, ignoreCase = true) }) {
+                        if (effectiveCategories.any { it.equals(trimmed, ignoreCase = true) && !it.equals(oldName, ignoreCase = true) }) {
                             errorMessage = existsError
                             return@Button
                         }
-                        if (onRenameCustomCategory(oldName, trimmed)) {
+                        if (onRenameCategory(oldName, trimmed) || onRenameCustomCategory(oldName, trimmed)) {
                             if (selectedCategory == oldName) {
                                 selectedCategory = trimmed
                             }
@@ -1913,14 +1927,16 @@ fun SottoApp(
             },
             dismissButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(
-                        onClick = {
-                            val toDelete = oldName
-                            categoryToManage = null
-                            categoryToDeleteConfirm = toDelete
+                    if (!Phrase.isUndeletableCategory(oldName)) {
+                        TextButton(
+                            onClick = {
+                                val toDelete = oldName
+                                categoryToManage = null
+                                categoryToDeleteConfirm = toDelete
+                            }
+                        ) {
+                            Text(stringResource(R.string.action_delete_category), color = Color(0xFFEF5350))
                         }
-                    ) {
-                        Text(stringResource(R.string.action_delete_category), color = Color(0xFFEF5350))
                     }
                     TextButton(onClick = { categoryToManage = null }) {
                         Text(stringResource(android.R.string.cancel))
@@ -1933,15 +1949,17 @@ fun SottoApp(
     // Delete Category Confirmation Dialog
     if (categoryToDeleteConfirm != null) {
         val targetCat = categoryToDeleteConfirm!!
+        val displayName = getCategoryDisplayName(targetCat)
         AlertDialog(
             onDismissRequest = { categoryToDeleteConfirm = null },
             title = { Text(stringResource(R.string.dialog_title_delete_category)) },
             text = {
-                Text(stringResource(R.string.dialog_message_delete_category, targetCat))
+                Text(stringResource(R.string.dialog_message_delete_category, displayName))
             },
             confirmButton = {
                 Button(
                     onClick = {
+                        onDeleteCategory(targetCat)
                         onDeleteCustomCategory(targetCat)
                         if (selectedCategory == targetCat) {
                             selectedCategory = allCategoryKey
@@ -1961,6 +1979,18 @@ fun SottoApp(
                     Text(stringResource(android.R.string.cancel))
                 }
             }
+        )
+    }
+
+    // Manage Categories Dialog (Option B)
+    if (showManageCategoriesDialog) {
+        ManageCategoriesDialog(
+            categories = effectiveCategories,
+            onDismiss = { showManageCategoriesDialog = false },
+            onReorderCategories = onReorderCategories,
+            onAddCategory = { showAddCategoryDialog = true },
+            onRenameCategory = { catName -> categoryToManage = catName },
+            onDeleteCategory = { catName -> categoryToDeleteConfirm = catName }
         )
     }
 }

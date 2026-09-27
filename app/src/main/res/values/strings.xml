@@ -66,8 +66,10 @@
     <string name="category_care">Care</string>
     <string name="category_general">General</string>
     <string name="action_add_category">Add category</string>
+    <string name="action_manage_categories">Manage categories</string>
     <string name="dialog_title_add_category">New Category</string>
     <string name="dialog_title_edit_category">Edit Category</string>
+    <string name="dialog_title_manage_categories">Manage Categories</string>
     <string name="dialog_title_delete_category">Delete Category</string>
     <string name="dialog_message_delete_category">Delete category \"%1$s\"? Any phrases in this category will be moved to General.</string>
     <string name="hint_category_name">Category name</string>
@@ -75,6 +77,11 @@
     <string name="error_category_reserved">This is a reserved system category</string>
     <string name="action_rename_category">Rename</string>
     <string name="action_delete_category">Delete</string>
+    <string name="badge_emergency_locked">Safety (Locked)</string>
+    <string name="badge_general_default">Default fallback</string>
+    <string name="cd_move_up">Move up</string>
+    <string name="cd_move_down">Move down</string>
+    <string name="cd_reorder_category">Reorder category</string>
     <string name="label_attention_chime">Attention chime before speaking</string>
     <string name="label_attention_chime_desc">Plays a brief chime to alert listeners before speaking</string>
 

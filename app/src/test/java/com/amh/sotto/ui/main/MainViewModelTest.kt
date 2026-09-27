@@ -30,6 +30,7 @@ class MainViewModelTest {
         repository = mockk(relaxed = true)
         voiceSettingsRepository = mockk(relaxed = true)
         every { repository.getPhrases() } returns initialPhrases
+        every { repository.getCategories() } returns Phrase.DEFAULT_CATEGORIES
         every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(speechRate = 1.0f, speechPitch = 1.0f)
         viewModel = MainViewModel(repository, voiceSettingsRepository)
     }
@@ -158,54 +159,95 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `addCustomCategory adds valid category and saves to repository`() {
-        val result = viewModel.addCustomCategory("Food")
+    fun `addCategory adds valid category and saves to repository`() {
+        val result = viewModel.addCategory("Food")
         assertTrue(result)
-        assertEquals(listOf("Food"), viewModel.customCategories.value)
-        verify { repository.saveCustomCategories(listOf("Food")) }
+        val expected = Phrase.DEFAULT_CATEGORIES + "Food"
+        assertEquals(expected, viewModel.categories.value)
+        verify { repository.saveCategories(expected) }
     }
 
     @Test
-    fun `addCustomCategory rejects blank, duplicate, or system category names`() {
-        assertFalse(viewModel.addCustomCategory(""))
-        assertFalse(viewModel.addCustomCategory("   "))
-        assertFalse(viewModel.addCustomCategory("Emergency"))
-        assertFalse(viewModel.addCustomCategory("care"))
-        assertFalse(viewModel.addCustomCategory("ALL"))
-        assertFalse(viewModel.addCustomCategory("General"))
+    fun `addCategory rejects blank, duplicate, or reserved category names`() {
+        assertFalse(viewModel.addCategory(""))
+        assertFalse(viewModel.addCategory("   "))
+        assertFalse(viewModel.addCategory("ALL"))
+        assertFalse(viewModel.addCategory("Emergency")) // already exists in defaults
+        assertFalse(viewModel.addCategory("Care")) // already exists in defaults
 
-        assertTrue(viewModel.addCustomCategory("Food"))
-        assertFalse(viewModel.addCustomCategory("food"))
-        assertFalse(viewModel.addCustomCategory("Food"))
+        assertTrue(viewModel.addCategory("Food"))
+        assertFalse(viewModel.addCategory("food"))
+        assertFalse(viewModel.addCategory("Food"))
     }
 
     @Test
-    fun `renameCustomCategory renames category and updates affected phrases`() {
-        viewModel.addCustomCategory("Food")
+    fun `renameCategory renames category and updates affected phrases`() {
+        viewModel.addCategory("Food")
         val phraseInFood = Phrase("I want noodles", "en", category = "Food")
         viewModel.addPhrase(phraseInFood)
 
-        val result = viewModel.renameCustomCategory("Food", "Meals")
+        val result = viewModel.renameCategory("Food", "Meals")
         assertTrue(result)
-        assertEquals(listOf("Meals"), viewModel.customCategories.value)
+        assertTrue(viewModel.categories.value.contains("Meals"))
+        assertFalse(viewModel.categories.value.contains("Food"))
 
         val updatedPhrase = viewModel.phrases.value.find { it.text == "I want noodles" }
         assertEquals("Meals", updatedPhrase?.category)
-        verify { repository.saveCustomCategories(listOf("Meals")) }
+        verify { repository.saveCategories(any()) }
     }
 
     @Test
-    fun `deleteCustomCategory removes category and safely moves phrases to General`() {
-        viewModel.addCustomCategory("Food")
+    fun `renameCategory rejects renaming Emergency or ALL`() {
+        assertFalse(viewModel.renameCategory("Emergency", "Urgent"))
+        assertFalse(viewModel.renameCategory("ALL", "Everything"))
+    }
+
+    @Test
+    fun `deleteCategory removes category and safely moves phrases to General`() {
+        viewModel.addCategory("Food")
         val phraseInFood = Phrase("I want noodles", "en", category = "Food")
         viewModel.addPhrase(phraseInFood)
 
-        val result = viewModel.deleteCustomCategory("Food")
+        val result = viewModel.deleteCategory("Food")
         assertTrue(result)
-        assertTrue(viewModel.customCategories.value.isEmpty())
+        assertFalse(viewModel.categories.value.contains("Food"))
 
         val movedPhrase = viewModel.phrases.value.find { it.text == "I want noodles" }
         assertEquals(Phrase.CATEGORY_GENERAL, movedPhrase?.category)
-        verify { repository.saveCustomCategories(emptyList()) }
+        verify { repository.saveCategories(any()) }
+    }
+
+    @Test
+    fun `deleteCategory rejects deleting Emergency or General`() {
+        assertFalse(viewModel.deleteCategory("Emergency"))
+        assertFalse(viewModel.deleteCategory("General"))
+        assertFalse(viewModel.deleteCategory("ALL"))
+    }
+
+    @Test
+    fun `deleteCategory allows deleting Care, Needs, or Social`() {
+        val carePhrase = Phrase("Are you hurting?", "en", category = Phrase.CATEGORY_CARE)
+        viewModel.addPhrase(carePhrase)
+
+        val result = viewModel.deleteCategory(Phrase.CATEGORY_CARE)
+        assertTrue(result)
+        assertFalse(viewModel.categories.value.contains(Phrase.CATEGORY_CARE))
+
+        val movedCarePhrase = viewModel.phrases.value.find { it.text == "Are you hurting?" }
+        assertEquals(Phrase.CATEGORY_GENERAL, movedCarePhrase?.category)
+    }
+
+    @Test
+    fun `reorderCategories reorders categories and saves to repository`() {
+        val initialOrder = viewModel.categories.value
+        val first = initialOrder[0]
+        val second = initialOrder[1]
+
+        viewModel.reorderCategories(0, 1)
+
+        val newOrder = viewModel.categories.value
+        assertEquals(second, newOrder[0])
+        assertEquals(first, newOrder[1])
+        verify { repository.saveCategories(newOrder) }
     }
 }

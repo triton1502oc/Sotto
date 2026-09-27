@@ -22,7 +22,7 @@ data class Phrase(
         const val CATEGORY_SOCIAL = "Social"
         const val CATEGORY_CARE = "Care"
 
-        val SYSTEM_CATEGORIES = listOf(
+        val DEFAULT_CATEGORIES = listOf(
             CATEGORY_EMERGENCY,
             CATEGORY_NEEDS,
             CATEGORY_SOCIAL,
@@ -30,9 +30,24 @@ data class Phrase(
             CATEGORY_GENERAL
         )
 
+        // Retained for backwards compatibility
+        val SYSTEM_CATEGORIES = DEFAULT_CATEGORIES
+
         fun isSystemCategory(category: String): Boolean {
             return category.equals("ALL", ignoreCase = true) ||
-                SYSTEM_CATEGORIES.any { it.equals(category, ignoreCase = true) }
+                category.equals(CATEGORY_EMERGENCY, ignoreCase = true) ||
+                category.equals(CATEGORY_GENERAL, ignoreCase = true)
+        }
+
+        fun isUndeletableCategory(category: String): Boolean {
+            return category.equals("ALL", ignoreCase = true) ||
+                category.equals(CATEGORY_EMERGENCY, ignoreCase = true) ||
+                category.equals(CATEGORY_GENERAL, ignoreCase = true)
+        }
+
+        fun isUnrenamableCategory(category: String): Boolean {
+            return category.equals("ALL", ignoreCase = true) ||
+                category.equals(CATEGORY_EMERGENCY, ignoreCase = true)
         }
     }
 }
@@ -40,6 +55,8 @@ data class Phrase(
 interface PhraseRepository {
     fun getPhrases(): List<Phrase>
     fun savePhrases(phrases: List<Phrase>)
+    fun getCategories(): List<String>
+    fun saveCategories(categories: List<String>)
     fun getCustomCategories(): List<String>
     fun saveCustomCategories(categories: List<String>)
 }
@@ -48,6 +65,7 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
     private val prefs: SharedPreferences = context.getSharedPreferences("sotto_prefs", Context.MODE_PRIVATE)
     private val KEY_PHRASES = "saved_phrases"
     private val KEY_CUSTOM_CATEGORIES = "saved_custom_categories"
+    private val KEY_CATEGORY_ORDER = "saved_category_order"
     private val KEY_V2_MIGRATED = "v2_migrated"
     private val KEY_CARE_MIGRATED = "care_migrated"
 
@@ -189,6 +207,62 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
         prefs.edit().putString(KEY_PHRASES, jsonArray.toString()).apply()
     }
 
+    override fun getCategories(): List<String> {
+        val json = prefs.getString(KEY_CATEGORY_ORDER, null)
+        if (json == null) {
+            val legacyCustom = getCustomCategories()
+            val list = Phrase.DEFAULT_CATEGORIES.toMutableList()
+            legacyCustom.forEach { custom ->
+                if (!list.any { it.equals(custom, ignoreCase = true) }) {
+                    list.add(custom)
+                }
+            }
+            saveCategories(list)
+            return list
+        }
+
+        return try {
+            val jsonArray = JSONArray(json)
+            val list = mutableListOf<String>()
+            for (i in 0 until jsonArray.length()) {
+                val cat = jsonArray.optString(i, "").trim()
+                if (cat.isNotBlank() && !cat.equals("ALL", ignoreCase = true) && !list.any { it.equals(cat, ignoreCase = true) }) {
+                    list.add(cat)
+                }
+            }
+            if (!list.any { it.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true) }) {
+                list.add(0, Phrase.CATEGORY_EMERGENCY)
+            }
+            if (!list.any { it.equals(Phrase.CATEGORY_GENERAL, ignoreCase = true) }) {
+                list.add(Phrase.CATEGORY_GENERAL)
+            }
+            list
+        } catch (e: Exception) {
+            Phrase.DEFAULT_CATEGORIES
+        }
+    }
+
+    override fun saveCategories(categories: List<String>) {
+        val jsonArray = JSONArray()
+        val cleanList = mutableListOf<String>()
+        categories.forEach { cat ->
+            val trimmed = cat.trim()
+            if (trimmed.isNotBlank() && !trimmed.equals("ALL", ignoreCase = true) && !cleanList.any { it.equals(trimmed, ignoreCase = true) }) {
+                cleanList.add(trimmed)
+                jsonArray.put(trimmed)
+            }
+        }
+        if (!cleanList.any { it.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true) }) {
+            cleanList.add(0, Phrase.CATEGORY_EMERGENCY)
+            jsonArray.put(Phrase.CATEGORY_EMERGENCY)
+        }
+        if (!cleanList.any { it.equals(Phrase.CATEGORY_GENERAL, ignoreCase = true) }) {
+            cleanList.add(Phrase.CATEGORY_GENERAL)
+            jsonArray.put(Phrase.CATEGORY_GENERAL)
+        }
+        prefs.edit().putString(KEY_CATEGORY_ORDER, jsonArray.toString()).apply()
+    }
+
     override fun getCustomCategories(): List<String> {
         val json = prefs.getString(KEY_CUSTOM_CATEGORIES, null) ?: return emptyList()
         return try {
@@ -196,7 +270,7 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
             val list = mutableListOf<String>()
             for (i in 0 until jsonArray.length()) {
                 val cat = jsonArray.optString(i, "").trim()
-                if (cat.isNotBlank() && !Phrase.isSystemCategory(cat) && !list.any { it.equals(cat, ignoreCase = true) }) {
+                if (cat.isNotBlank() && !Phrase.isUndeletableCategory(cat) && !list.any { it.equals(cat, ignoreCase = true) }) {
                     list.add(cat)
                 }
             }
@@ -210,7 +284,7 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
         val jsonArray = JSONArray()
         categories.forEach { cat ->
             val trimmed = cat.trim()
-            if (trimmed.isNotBlank() && !Phrase.isSystemCategory(trimmed)) {
+            if (trimmed.isNotBlank() && !Phrase.isUndeletableCategory(trimmed)) {
                 jsonArray.put(trimmed)
             }
         }

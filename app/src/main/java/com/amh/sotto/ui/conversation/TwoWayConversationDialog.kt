@@ -45,6 +45,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.amh.sotto.R
 import com.amh.sotto.data.Phrase
+import com.amh.sotto.ui.category.getCategoryDisplayName
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,6 +58,7 @@ fun TwoWayConversationDialog(
     onStopListening: () -> Unit,
     onClearText: () -> Unit = {},
     onSpeakResponse: (spokenText: String) -> Unit,
+    categories: List<String> = emptyList(),
     customCategories: List<String> = emptyList(),
     onDismiss: () -> Unit
 ) {
@@ -489,7 +491,14 @@ fun TwoWayConversationDialog(
 
     // Caregiver Questions Picker Dialog (Category-Filtered)
     if (showQuestionsSheet) {
-        var selectedPromptCategory by remember { mutableStateOf(Phrase.CATEGORY_CARE) }
+        val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
+        var selectedPromptCategory by remember {
+            mutableStateOf(
+                if (effectiveCategories.any { it.equals(Phrase.CATEGORY_CARE, ignoreCase = true) }) {
+                    Phrase.CATEGORY_CARE
+                } else "ALL"
+            )
+        }
         AlertDialog(
             onDismissRequest = { showQuestionsSheet = false },
             title = {
@@ -502,41 +511,33 @@ fun TwoWayConversationDialog(
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // Category Filter Chips
-                    val categoryOptions = listOf(
-                        Phrase.CATEGORY_CARE to R.string.category_care,
-                        "ALL" to R.string.category_all,
-                        Phrase.CATEGORY_NEEDS to R.string.category_needs,
-                        Phrase.CATEGORY_SOCIAL to R.string.category_social,
-                        Phrase.CATEGORY_EMERGENCY to R.string.category_emergency,
-                        Phrase.CATEGORY_GENERAL to R.string.category_general
-                    )
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        items(categoryOptions) { (catKey, strRes) ->
-                            val isSelected = selectedPromptCategory == catKey
+                        item {
+                            val isSelected = selectedPromptCategory == "ALL"
                             FilterChip(
                                 selected = isSelected,
-                                onClick = { selectedPromptCategory = catKey },
+                                onClick = { selectedPromptCategory = "ALL" },
                                 label = {
                                     Text(
-                                        text = stringResource(strRes),
+                                        text = stringResource(R.string.category_all),
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                     )
                                 }
                             )
                         }
-                        items(customCategories) { catName ->
+                        items(effectiveCategories) { catName ->
                             val isSelected = selectedPromptCategory == catName
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { selectedPromptCategory = catName },
                                 label = {
                                     Text(
-                                        text = catName,
+                                        text = getCategoryDisplayName(catName),
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                     )
                                 }
