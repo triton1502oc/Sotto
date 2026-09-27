@@ -75,8 +75,9 @@ All contributors and AI agents must follow this standard checklist before releas
    - **AI Agent Rule**: AI agents assisting with a release **must explicitly ask and remind the user to test the release APK on a device** before creating the release tag.
 3. **Version Bump**:
    - Increment `versionCode` (integer) and bump `versionName` (semver, e.g. `1.5.5`) in `app/build.gradle.kts`.
-4. **Documentation Updates**:
-   - Update [CHANGELOG.md](CHANGELOG.md) with new features, fixes, and release assets under the new version header.
+4. **Documentation & Issue Milestone Tracking**:
+   - Associate planned issues and bug fixes with the target release milestone in GitHub (e.g. `gh issue edit <id> --milestone "v<version>"`).
+   - Update [CHANGELOG.md](CHANGELOG.md) with new features, fixes, and release assets under the new version header, linking closed issues (e.g. `([#2](https://github.com/triton1502oc/Sotto/issues/2))`).
    - Update [README.md](README.md) if new features, UI capabilities, or user workflows were added, and update the release asset download link.
    - Update [docs/PLAY_STORE_LISTING.md](docs/PLAY_STORE_LISTING.md) if user-facing store descriptions or features changed.
 5. **Git Commit & Tag (Clean Release Chore)**:
@@ -100,6 +101,11 @@ All contributors and AI agents must follow this standard checklist before releas
      gh release create v<version> app/build/outputs/apk/release/Sotto-v<version>.apk \
        --title "v<version>" \
        --notes-file <release-notes-file>
+     ```
+7. **Close Release Milestone**:
+   - Once the release is published, close the corresponding GitHub Milestone:
+     ```bash
+     gh api -X PATCH repos/triton1502oc/Sotto/milestones/<number> -f state=closed
      ```
 
 ---

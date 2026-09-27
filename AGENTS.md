@@ -27,7 +27,7 @@ Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for:
 4. **Environment & Secrets**:
    Never commit keystores, signing keys, credentials, or personal paths. Rely on `JAVA_HOME` and `ANDROID_HOME`.
 5. **Release Checklist**:
-   Follow the 6-step release workflow in [CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow](CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow). Use the clean release chore format: `chore(release): prepare v<version>`.
+   Follow the 7-step release workflow in [CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow](CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow) (including GitHub Milestone tracking, issue linking in `CHANGELOG.md`, and closing milestones). Use the clean release chore format: `chore(release): prepare v<version>`.
 6. **Pre-Release Device Verification Prompt (MANDATORY)**:
    When assisting with any release, version bump, or release preparation, AI agents **MUST ALWAYS explicitly ask and remind the user to install and test the Release APK on a physical device or emulator** (`./gradlew installRelease`) before creating the git tag or pushing the release. Never tag or finalize a release without prompting the user.
 7. **Autonomous Asset Rebuilding**:
