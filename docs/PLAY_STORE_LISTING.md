@@ -39,8 +39,8 @@ A dedicated receptive mode allowing caregivers, family, and medical staff to spe
 • Quick-Speak Bar
 Speak spontaneous, one-off thoughts instantly with multi-line readability. Includes instant fullscreen display, voice dictation, and one-tap card saving.
 
-• Contextual Categories
-Organize and filter phrases by situation (Emergency, Needs, Social, General) using clean, low-stimulus filter chips.
+• Contextual Categories & Custom User Categories
+Organize and filter phrases by situation (Emergency, Needs, Social, Care, General) or create, rename, and customize your own categories with safe automatic phrase preservation.
 
 • High-Visibility Fullscreen Mode
 In noisy, crowded, or overwhelming environments, view any phrase in giant, high-contrast text across your entire screen to silently show your phone to others.

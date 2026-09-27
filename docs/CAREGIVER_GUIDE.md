@@ -32,11 +32,11 @@ Sotto (*"under one's breath"*) is designed for sensory-sensitive communication:
 
 ### A. Speaking with Cards
 - **Instant Speech**: Tap any phrase card once. Sotto vocalizes the text using your device's native offline Text-to-Speech (TTS) engine.
-- **Category Filter**: Use the top chips (`All`, `Emergency`, `Needs`, `Social`, `Care`) to filter phrases for your current situation.
+- **Category Filter**: Use the top chips (`All`, `Emergency`, `Needs`, `Social`, `Care`, `General`, or custom categories) to filter phrases for your current situation.
 
 ### B. Emergency & Non-Verbal Shutdowns
 - **Hero Card**: The top amber/gold emergency card explains your condition directly to bystanders.
-- **Fullscreen Mode**: Long-press any card (or tap the fullscreen icon `⛶` on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or first responders.
+- **Fullscreen Mode**: Long-press any card (or tap the fullscreen expand icon on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or first responders.
 
 ### C. Quick-Speak Input Bar
 - **Type Spontaneously**: Tap the bottom input bar to type any phrase. Sentences automatically expand up to 4 lines for easy editing.

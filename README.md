@@ -26,8 +26,8 @@
 - **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
 - **Emergency Hero Card**: Prominent high-contrast card and fullscreen banner for non-verbal episodes and bystanders.
 - **Two-Way Caregiver Receptive Mode**: Dedicated receptive HUD (`👂`) with real-time speech dictation, question bank, Read Aloud (`🔊`), 180° face-to-face screen flip (`🔄 Flip`), and 4 dignified rapid-response buttons (`Yes`, `No`, `Repeat`, `Wait`).
-- **Quick-Speak Bar**: Docked bottom bar for spontaneous speech (`🔊`), fullscreen expand (`⛶`), voice dictation (`🎤`), and 1-tap card creation (`+`).
-- **Contextual Categories**: Filter cards by situation (**All**, **Emergency**, **Needs**, **Social**, **General**).
+- **Quick-Speak Bar**: Docked bottom bar for spontaneous speech (`🔊`), fullscreen expand, voice dictation (`🎤`), and 1-tap card creation (`+`).
+- **Contextual & Custom Categories**: Filter cards by situation (**All**, **Emergency**, **Needs**, **Social**, **Care**, **General**), or create and manage custom categories with safe automatic card preservation.
 - **Instant Speech & Attention Chime**: One-tap TTS playback with optional pre-speech alert tone and haptics.
 - **High-Visibility Fullscreen**: Long-press any card to show giant text for silent, readable communication.
 - **Dual-Language & On-Device Translation**: Display in one language, speak in another, with 100% offline ML Kit translation.

@@ -3,6 +3,28 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.5.8] - 2026-09-27
+
+### Added
+- **Custom Category Ordering & Reorder Dialog**: Reorder categories freely via a dedicated "Manage Categories" dialog in Edit Mode, featuring drag-and-drop handles and accessible single-step reorder buttons ([#3](https://github.com/triton1502oc/Sotto/issues/3)).
+- **Custom Categories & Reduced Locked Categories**: Locked categories reduced from 5 down to 2 (`Emergency` for safety and `General` as the safe fallback). `Needs`, `Social`, and `Care` are now fully customizable (can be renamed, reordered, or deleted). Deleting any category safely reassigns all contained cards to `General` ([#3](https://github.com/triton1502oc/Sotto/issues/3)).
+- **Dynamic Category Pickers**: Updated card creation/editing dialog and Caregiver Receptive Mode questions picker with dynamic category layouts matching the user's custom category order ([#3](https://github.com/triton1502oc/Sotto/issues/3)).
+
+### Changed
+- **Refreshed App Launcher Icons & Mipmaps**: Refreshed launcher icons (`ic_launcher` / `ic_launcher_round`) across all dpi densities (`hdpi`, `mdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) featuring high-contrast speech acoustics iconography with proper adaptive background and foreground vector layers.
+- **Updated Demo Videos & Visual Assets**: Updated video demonstrations and store assets in `assets/` and `demo/` reflecting the latest launcher iconography and UI enhancements.
+- **Community Standards & Governance**: Added Code of Conduct, Security Policy, markdown issue templates, and pull request guidelines for open-source contributors.
+
+### Fixed
+- **Quick-Speak Fullscreen Icon & Affordance**: Replaced the ambiguous unicode `⛶` glyph with a crisp Material vector icon (`open_in_full`) and added an accessible Material 3 `TooltipBox`, eliminating font-dependent `[]` missing glyph box rendering ([#2](https://github.com/triton1502oc/Sotto/issues/2)).
+
+### Assets
+- `Sotto-v1.5.8.apk`: Universal release APK for all architectures.
+- `Sotto-v1.5.8-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.5.8-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.5.8-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.5.7] - 2026-09-25
 
 ### Added
