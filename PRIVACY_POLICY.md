@@ -1,35 +1,37 @@
 # Privacy Policy for Sotto
 
 ### TL;DR
-Sotto is completely private and operates 100% offline. Sotto does not collect, store, transmit, or share any personal information, usage analytics, or device identifiers.
+Sotto is built on a privacy-first, dignified foundation. Core speech synthesis and phrase management run 100% locally on your device with zero third-party tracking SDKs and zero accounts. Sotto never records, stores, or transmits your typed words, phrases, or speech recordings.
 
 ---
 
-**Last Updated:** September 18, 2026
+**Last Updated:** October 2, 2026
 
 ## 1. Overview
 Sotto is an assistive communication (AAC) application designed for autistic individuals, speech-impaired individuals, non-speaking individuals, and anyone needing text-to-speech support. Your privacy, autonomy, and security are fundamental to our design philosophy.
 
-## 2. Information We Do Not Collect
-* **No Personal Information:** Sotto does not ask for, access, or store your name, email address, phone number, location, or any personal details.
-* **No Speech or Phrase Data Stored by Us:** All phrases, custom messages, and speech output are processed locally on your device. We never record, upload, or transmit what you say or type. 
-* **Voice Input (Speech-to-Text):** If you use the microphone feature to dictate phrases, Sotto hands this request over to your device's default Speech Recognition service (like the Google App). Depending on your device settings, this service may use an internet connection to process your voice. Sotto itself does not collect or transmit this data.
-* **On-Device Translation:** If you use the Auto-Translate feature, a translation model is downloaded once to your device via Google ML Kit. All translation processing is executed 100% locally on your device; your text is never sent to external servers or recorded.
-* **No Analytics or Tracking:** Sotto contains zero third-party tracking SDKs, no advertising networks, and no analytics frameworks.
-* **No Network Transmission of User Data:** Sotto itself does not transmit any of your personal data, phrases, or speech to external servers.
+## 2. Core Offline Operations (Zero Personal Data)
+* **No Personal Accounts:** Sotto does not ask for, access, or store your name, email address, phone number, location, or any personal details.
+* **No Phrase or Speech Collection:** All phrases, custom messages, and speech output are synthesized locally on your device. We never record, upload, or transmit what you type, read, or say.
+* **Voice Input (Speech-to-Text):** When you use the microphone dictation feature, Sotto hands this request over to your device's default speech recognition engine. Sotto itself never collects or stores voice audio.
+* **On-Device Translation:** If you use the Auto-Translate feature, language models run 100% locally on your device via Google ML Kit. Your text is never transmitted to external servers.
+* **No Third-Party SDKs:** Sotto contains zero third-party advertising SDKs and zero commercial analytics tracking frameworks.
 
-## 3. Local Device Storage
-Any customizations you make—such as adding, editing, or rearranging phrases, or adjusting voice speed, pitch, and voice gender—are stored strictly on your local device using Android's private app storage (`SharedPreferences`). This data never leaves your device and is erased if you uninstall the app or clear app data.
+## 3. Optional Anonymous Usability Telemetry (Strict Opt-In)
+To help us understand interaction difficulties and improve accessibility (e.g. detecting accidental rapid double-tapping or long hesitation times), Sotto includes an optional, privacy-preserving usability monitoring engine:
 
-## 4. Third-Party Services
-Sotto does not integrate with any third-party analytics or cloud data services. The Text-to-Speech synthesis is handled directly by the speech engine installed on your Android operating system, and on-device translation is executed locally via Google ML Kit.
+* **Strictly Opt-In (Default OFF):** Usability telemetry is disabled out-of-the-box. Users are presented with a one-time, low-stimulus prompt upon install or upgrade, and can toggle it ON or OFF anytime in **Voice & Language Settings**.
+* **Zero Text or Audio Transmission:** Telemetry strictly collects only generic interaction metadata (e.g., button intent name, millisecond duration, outcome status, character length). It **NEVER** captures or transmits typed phrases, card text, or voice recordings.
+* **Anonymous Ephemeral Session IDs:** Every app session generates a random 8-character identifier that is destroyed when the app exits. No device identifiers (IMEI, Android ID, or Advertising ID) are ever accessed or tracked.
+* **Network & Storage Guardrails:** Usability events are queued in a small local sandboxed file strictly capped at 50 events (~15 KB). Events are batched and dispatched to a private developer endpoint strictly over unmetered Wi-Fi when the device has healthy battery.
+* **Instant Purge on Opt-Out:** Toggling the setting OFF immediately deletes all locally queued usability events from the device and cancels pending background tasks.
+
+## 4. Local Device Storage
+Custom phrases, categories, and voice preferences are stored strictly in private, sandboxed app storage on your device (`SharedPreferences` and app internal files). This data is completely erased if you uninstall the app or clear app data.
 
 ## 5. Children's Privacy
-Because Sotto collects no data whatsoever from any user, it does not collect personal information from children or adults of any age.
+Because Sotto does not collect personal data, it does not collect or solicit personal information from children or adults of any age.
 
-## 6. Changes to This Policy
-If we make any updates to Sotto's privacy practices, we will update this document accordingly. Since the core mission of Sotto is privacy and dignified communication, the commitment to zero data collection remains permanent.
-
-## 7. Contact
-If you have any questions or suggestions regarding this privacy policy, please contact us via our GitHub repository:  
+## 6. Contact & Open Source
+Sotto is free and open-source software licensed under GPLv3. If you have questions about our privacy practices, please contact us or inspect our source code:  
 https://github.com/triton1502oc/Sotto

@@ -189,4 +189,12 @@
     <string name="msg_import_success">Berhasil mengimpor %1$d frasa</string>
     <string name="error_export_failed">Gagal mengekspor frasa: %1$s</string>
     <string name="error_import_failed">Gagal mengimpor frasa. Pastikan berkas adalah JSON cadangan Sotto yang valid.</string>
+
+    <!-- Anonymous Usability Analytics -->
+    <string name="label_metrics_section">Analisis Kegunaan Anonim</string>
+    <string name="label_metrics_toggle">Bantu menyempurnakan Sotto</string>
+    <string name="label_metrics_desc">Membagikan durasi tombol dan latensi anonim untuk mengenali kendala penggunaan. Sama sekali tidak mengumpulkan teks, frasa, atau suara.</string>
+    <string name="dialog_metrics_optin_title">Bantu Menyempurnakan Sotto</string>
+    <string name="dialog_metrics_optin_message">Bantu kami membuat Sotto lebih mudah digunakan dengan membagikan durasi interaksi tombol dan latensi anonim. Kami tidak pernah mengumpulkan teks yang diketik, frasa, atau rekaman suara. Anda dapat mengubah ini kapan saja di Pengaturan.</string>
+    <string name="action_help_improve">Bantu Sempurnakan</string>
 </resources>

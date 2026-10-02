@@ -14,8 +14,8 @@ android {
         applicationId = "com.amh.sotto"
         minSdk = 26
         targetSdk = 36
-        versionCode = 19
-        versionName = "1.5.8"
+        versionCode = 20
+        versionName = "1.5.9"
         androidResources.localeFilters += listOf("en", "in")
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
@@ -140,6 +140,7 @@ dependencies {
   // Arch Components
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.viewmodel.compose)
+  implementation(libs.androidx.work.runtime.ktx)
 
   // Compose
   implementation(libs.androidx.compose.ui)

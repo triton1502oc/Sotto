@@ -63,6 +63,7 @@ import com.amh.sotto.data.SharedPreferencesPhraseRepository
 import com.amh.sotto.data.SharedPreferencesVoiceSettingsRepository
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.ui.main.MainViewModel
+import com.amh.sotto.util.UsabilityTracker
 import com.amh.sotto.util.ChimePlayer
 import com.amh.sotto.ui.main.VoiceSettingsDialog
 import com.amh.sotto.util.LocaleHelper
@@ -193,7 +194,9 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         isTtsLanguageInstalled = { isTtsVoiceInstalled(it) },
                         onInstallTtsVoice = { openTtsInstallSettings() },
                         onExportBackup = { viewModel.exportBackup() },
-                        onImportBackup = { backup, replace -> viewModel.importBackup(backup, replace) }
+                        onImportBackup = { backup, replace -> viewModel.importBackup(backup, replace) },
+                        shouldPromptMetrics = remember { viewModel.shouldPromptMetrics() },
+                        onMetricsPromptAnswered = { viewModel.onMetricsPromptAnswered(it) }
                     )
                 }
             }
@@ -374,11 +377,14 @@ fun SottoApp(
     onRenameCustomCategory: (String, String) -> Boolean = { _, _ -> false },
     onDeleteCustomCategory: (String) -> Boolean = { false },
     onExportBackup: () -> String = { "" },
-    onImportBackup: (BackupData, Boolean) -> ImportResult = { _, _ -> ImportResult(0, 0) }
+    onImportBackup: (BackupData, Boolean) -> ImportResult = { _, _ -> ImportResult(0, 0) },
+    shouldPromptMetrics: Boolean = false,
+    onMetricsPromptAnswered: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
     val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
+    var showMetricsOptInDialog by rememberSaveable { mutableStateOf(shouldPromptMetrics) }
     var showAddDialog by remember { mutableStateOf(false) }
     var initialAddText by rememberSaveable { mutableStateOf("") }
     var showVoiceDialog by rememberSaveable { mutableStateOf(false) }
@@ -617,7 +623,10 @@ fun SottoApp(
                         }
                         val listenModeCd = stringResource(R.string.cd_listen_mode)
                         IconButton(
-                            onClick = { showTwoWayDialog = true },
+                            onClick = {
+                                UsabilityTracker.startIntent("TwoWay")
+                                showTwoWayDialog = true
+                            },
                             modifier = Modifier.semantics { contentDescription = listenModeCd }
                         ) {
                             Text("👂", fontSize = 20.sp)
@@ -841,6 +850,7 @@ fun SottoApp(
 
                 fun handleQuickSpeak(text: String) {
                     if (text.isBlank()) return
+                    UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "completed", contextTag = "len_${text.length}")
                     if (voiceSettings.showLanguageSwitcher && activeSpeechTarget == "secondary") {
                         isQuickTranslating = true
                         val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
@@ -895,7 +905,12 @@ fun SottoApp(
                 ) {
                     OutlinedTextField(
                         value = quickText,
-                        onValueChange = { quickText = it },
+                        onValueChange = {
+                            if (quickText.isBlank() && it.isNotBlank()) {
+                                UsabilityTracker.startIntent("QuickSpeak")
+                            }
+                            quickText = it
+                        },
                         placeholder = {
                             Text(
                                 stringResource(R.string.hint_quick_speak),
@@ -911,7 +926,16 @@ fun SottoApp(
                             if (quickText.isNotBlank()) {
                                 val clearTextCd = stringResource(R.string.cd_clear_text)
                                 IconButton(
-                                    onClick = { quickText = "" },
+                                    onClick = {
+                                        UsabilityTracker.endIntent(
+                                            context,
+                                            "QuickSpeak",
+                                            outcome = "aborted",
+                                            frictionTag = "cleared_text",
+                                            contextTag = "len_${quickText.length}"
+                                        )
+                                        quickText = ""
+                                    },
                                     modifier = Modifier.semantics { contentDescription = clearTextCd }
                                 ) {
                                     Text(
@@ -1090,6 +1114,7 @@ fun SottoApp(
                     } else {
                         cardModifier.combinedClickable(
                             onClick = {
+                                UsabilityTracker.recordCardTap(context, phrase.category, phrase.text.hashCode().toString())
                                 if (voiceSettings.showLanguageSwitcher) {
                                     if (activeSpeechTarget == "secondary") {
                                         val hasValidSpoken = !phrase.spokenText.isNullOrBlank() && phrase.spokenText != LocaleHelper.LANG_AUTO
@@ -1261,6 +1286,48 @@ fun SottoApp(
         )
     }
 
+    // One-Time Install / Upgrade Usability Metrics Consent Dialog
+    if (showMetricsOptInDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showMetricsOptInDialog = false
+                onMetricsPromptAnswered(false)
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_metrics_optin_title),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.dialog_metrics_optin_message),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showMetricsOptInDialog = false
+                        onMetricsPromptAnswered(true)
+                    }
+                ) {
+                    Text(stringResource(R.string.action_help_improve))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showMetricsOptInDialog = false
+                        onMetricsPromptAnswered(false)
+                    }
+                ) {
+                    Text(stringResource(R.string.action_not_now))
+                }
+            }
+        )
+    }
+
     // Import Backup Confirmation Dialog
     pendingBackupData?.let { backup ->
         ImportBackupDialog(
@@ -1319,11 +1386,13 @@ fun SottoApp(
             onStopListening = { stopTwoWayListening() },
             onClearText = { liveSpokenTextTwoWay = "" },
             onSpeakResponse = { ttsText ->
+                UsabilityTracker.endIntent(context, "TwoWay", outcome = "completed")
                 onSpeakText(ttsText, LocaleHelper.LANG_AUTO)
             },
             categories = effectiveCategories,
             customCategories = effectiveCategories,
             onDismiss = {
+                UsabilityTracker.endIntent(context, "TwoWay", outcome = "aborted", frictionTag = "dismissed")
                 stopTwoWayListening()
                 liveSpokenTextTwoWay = ""
                 showTwoWayDialog = false

@@ -50,6 +50,7 @@ fun VoiceSettingsDialog(
     var attentionChime by remember { mutableStateOf(currentSettings.playAttentionChime) }
     var showLangSwitcher by remember { mutableStateOf(currentSettings.showLanguageSwitcher) }
     var secondaryLang by remember { mutableStateOf(currentSettings.secondaryLanguage) }
+    var shareMetrics by remember { mutableStateOf(currentSettings.shareUsabilityMetrics) }
     var secondaryLangDropdownExpanded by remember { mutableStateOf(false) }
     var langDropdownExpanded by remember { mutableStateOf(false) }
     var langSearchQuery by remember { mutableStateOf("") }
@@ -61,13 +62,15 @@ fun VoiceSettingsDialog(
         newPitch: Float = pitch,
         newChime: Boolean = attentionChime,
         newShowLangSwitcher: Boolean = showLangSwitcher,
-        newSecondaryLang: String = secondaryLang
+        newSecondaryLang: String = secondaryLang,
+        newShareMetrics: Boolean = shareMetrics
     ) {
         rate = newRate
         pitch = newPitch
         attentionChime = newChime
         showLangSwitcher = newShowLangSwitcher
         secondaryLang = newSecondaryLang
+        shareMetrics = newShareMetrics
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
@@ -75,7 +78,8 @@ fun VoiceSettingsDialog(
                 voiceName = null,
                 playAttentionChime = newChime,
                 showLanguageSwitcher = newShowLangSwitcher,
-                secondaryLanguage = newSecondaryLang
+                secondaryLanguage = newSecondaryLang,
+                shareUsabilityMetrics = newShareMetrics
             )
         )
     }
@@ -624,6 +628,60 @@ fun VoiceSettingsDialog(
                     }
                 }
 
+                // Anonymous Usability Analytics Section
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.label_metrics_section),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                val nextState = !shareMetrics
+                                updateSettings(newShareMetrics = nextState)
+                            }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 16.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.label_metrics_toggle),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.label_metrics_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        Switch(
+                            checked = shareMetrics,
+                            onCheckedChange = {
+                                updateSettings(newShareMetrics = it)
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            )
+                        )
+                    }
+                }
+
                 // Test Voice Button
                 OutlinedButton(
                     onClick = {
@@ -634,7 +692,8 @@ fun VoiceSettingsDialog(
                                 voiceName = null,
                                 playAttentionChime = attentionChime,
                                 showLanguageSwitcher = showLangSwitcher,
-                                secondaryLanguage = secondaryLang
+                                secondaryLanguage = secondaryLang,
+                                shareUsabilityMetrics = shareMetrics
                             )
                         )
                     },

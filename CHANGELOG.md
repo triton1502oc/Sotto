@@ -3,6 +3,24 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.5.9] - 2026-10-02
+
+### Added
+- **Privacy-Preserving Usability & Telemetry Engine**: Native, zero-cost interaction monitoring engine that measures accessibility hurdles, button-to-button latency, high hesitation (>10s), and rapid/rage clicking (<350ms) using a local sandboxed JSON buffer capped at 50 events (~15 KB).
+- **One-Time Install & Upgrade Consent Prompt**: One-time, low-stimulus prompt on install or new version upgrade asking users/caregivers if they want to opt in to share anonymous interaction timing, with clear and transparent zero-PII guarantees.
+- **Unmetered Wi-Fi Background Sync**: Background synchronization via Android Jetpack `WorkManager` (`UsabilitySyncWorker`) with `UNMETERED` Wi-Fi and healthy battery constraints, dispatching batched payloads to private Google Apps Script webhooks with zero cellular data drain.
+- **Instant Opt-Out Purge**: Toggling "Help improve Sotto" OFF in Voice & Language Settings immediately purges all pending local telemetry files from the device and cancels scheduled WorkManager jobs.
+
+### Changed
+- **Privacy Policy & Play Store Compliance**: Updated `PRIVACY_POLICY.md` and Play Store Data Safety guidelines to document the optional, strictly opt-in anonymous usability timing.
+
+### Assets
+- `Sotto-v1.5.9.apk`: Universal release APK for all architectures.
+- `Sotto-v1.5.9-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.5.9-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.5.9-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.5.8] - 2026-09-27
 
 ### Added

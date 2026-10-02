@@ -14,3 +14,14 @@
 -keep class com.google.android.gms.tasks.** { *; }
 -dontwarn com.google.mlkit.**
 -dontwarn com.google.android.gms.**
+
+# Keep Usability & Telemetry WorkManager Worker and Models
+-keep class * extends androidx.work.Worker { *; }
+-keep class * extends androidx.work.ListenableWorker { *; }
+-keep class * extends androidx.work.InputMerger { *; }
+-keep class * extends androidx.room.RoomDatabase { public <init>(); }
+-keep class androidx.work.impl.WorkDatabase_Impl { public <init>(); }
+-keep class androidx.work.impl.** { *; }
+-keep class com.amh.sotto.util.UsabilitySyncWorker { *; }
+-keep class com.amh.sotto.util.UsabilityTracker$UsabilityEvent { *; }
+

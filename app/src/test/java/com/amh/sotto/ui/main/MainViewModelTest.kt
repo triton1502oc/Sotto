@@ -295,4 +295,48 @@ class MainViewModelTest {
         verify { repository.savePhrases(any()) }
         verify { repository.saveCategories(any()) }
     }
+
+    @Test
+    fun `shouldPromptMetrics returns true when tracking is off and not prompted for current version`() {
+        every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(shareUsabilityMetrics = false)
+        every { voiceSettingsRepository.getLastPromptedMetricsVersion() } returns 0
+
+        val vm = MainViewModel(repository, voiceSettingsRepository)
+        assertTrue(vm.shouldPromptMetrics())
+    }
+
+    @Test
+    fun `shouldPromptMetrics returns false when already opted in`() {
+        every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(shareUsabilityMetrics = true)
+        every { voiceSettingsRepository.getLastPromptedMetricsVersion() } returns 0
+
+        val vm = MainViewModel(repository, voiceSettingsRepository)
+        assertFalse(vm.shouldPromptMetrics())
+    }
+
+    @Test
+    fun `shouldPromptMetrics returns false when already prompted for current version`() {
+        every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(shareUsabilityMetrics = false)
+        every { voiceSettingsRepository.getLastPromptedMetricsVersion() } returns com.amh.sotto.BuildConfig.VERSION_CODE
+
+        val vm = MainViewModel(repository, voiceSettingsRepository)
+        assertFalse(vm.shouldPromptMetrics())
+    }
+
+    @Test
+    fun `onMetricsPromptAnswered with optIn true saves version and enables metrics`() {
+        viewModel.onMetricsPromptAnswered(optIn = true)
+
+        verify { voiceSettingsRepository.setLastPromptedMetricsVersion(com.amh.sotto.BuildConfig.VERSION_CODE) }
+        verify { voiceSettingsRepository.saveVoiceSettings(match { it.shareUsabilityMetrics }) }
+        assertTrue(viewModel.voiceSettings.value.shareUsabilityMetrics)
+    }
+
+    @Test
+    fun `onMetricsPromptAnswered with optIn false saves version and leaves metrics disabled`() {
+        viewModel.onMetricsPromptAnswered(optIn = false)
+
+        verify { voiceSettingsRepository.setLastPromptedMetricsVersion(com.amh.sotto.BuildConfig.VERSION_CODE) }
+        assertFalse(viewModel.voiceSettings.value.shareUsabilityMetrics)
+    }
 }

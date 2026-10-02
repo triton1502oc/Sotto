@@ -31,7 +31,7 @@
 - **Instant Speech & Attention Chime**: One-tap TTS playback with optional pre-speech alert tone and haptics.
 - **High-Visibility Fullscreen**: Long-press any card to show giant text for silent, readable communication.
 - **Dual-Language & On-Device Translation**: Display in one language, speak in another, with 100% offline ML Kit translation.
-- **100% Private & Offline**: Zero analytics, zero accounts, and zero cloud data transmission.
+- **100% Private Core & Offline AAC**: Zero accounts, zero ads, and zero third-party tracking SDKs. Optional, strictly opt-in anonymous usability timing to help diagnose accessibility friction (zero text or speech collected).
 
 ---
 

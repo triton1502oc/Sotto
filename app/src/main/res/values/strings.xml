@@ -189,4 +189,12 @@
     <string name="msg_import_success">Imported %1$d phrases successfully</string>
     <string name="error_export_failed">Failed to export phrases: %1$s</string>
     <string name="error_import_failed">Failed to import phrases. Please ensure the file is a valid Sotto backup JSON.</string>
+
+    <!-- Anonymous Usability Analytics -->
+    <string name="label_metrics_section">Anonymous Usability Analytics</string>
+    <string name="label_metrics_toggle">Help improve Sotto</string>
+    <string name="label_metrics_desc">Shares anonymous interaction timings and latency to help identify usability difficulties. Strictly zero text, phrases, or speech is collected.</string>
+    <string name="dialog_metrics_optin_title">Help Improve Sotto</string>
+    <string name="dialog_metrics_optin_message">Help us make Sotto easier to use by sharing anonymous button timings and latency. We never collect typed text, phrases, or speech. You can change this anytime in Settings.</string>
+    <string name="action_help_improve">Help Improve</string>
 </resources>

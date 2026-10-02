@@ -18,12 +18,16 @@ class VoiceSettingsRepositoryTest {
 
     @Before
     fun setup() {
-        context = mockk()
-        sharedPreferences = mockk()
+        context = mockk(relaxed = true)
+        sharedPreferences = mockk(relaxed = true)
         editor = mockk(relaxed = true)
 
         every { context.getSharedPreferences("sotto_voice_prefs", Context.MODE_PRIVATE) } returns sharedPreferences
         every { sharedPreferences.edit() } returns editor
+        every { editor.putFloat(any(), any()) } returns editor
+        every { editor.putString(any(), any()) } returns editor
+        every { editor.putBoolean(any(), any()) } returns editor
+        every { editor.putInt(any(), any()) } returns editor
 
         repository = SharedPreferencesVoiceSettingsRepository(context)
     }
@@ -36,6 +40,7 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("attention_chime", false) } returns false
         every { sharedPreferences.getBoolean("show_language_switcher", false) } returns false
         every { sharedPreferences.getString("secondary_language", "id") } returns "id"
+        every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns false
 
         val settings = repository.getVoiceSettings()
 
@@ -45,6 +50,7 @@ class VoiceSettingsRepositoryTest {
         assertEquals(false, settings.playAttentionChime)
         assertEquals(false, settings.showLanguageSwitcher)
         assertEquals("id", settings.secondaryLanguage)
+        assertEquals(false, settings.shareUsabilityMetrics)
     }
 
     @Test
@@ -55,6 +61,7 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("attention_chime", false) } returns true
         every { sharedPreferences.getBoolean("show_language_switcher", false) } returns true
         every { sharedPreferences.getString("secondary_language", "id") } returns "id"
+        every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns true
 
         val settings = repository.getVoiceSettings()
 
@@ -64,6 +71,7 @@ class VoiceSettingsRepositoryTest {
         assertEquals(true, settings.playAttentionChime)
         assertEquals(true, settings.showLanguageSwitcher)
         assertEquals("id", settings.secondaryLanguage)
+        assertEquals(true, settings.shareUsabilityMetrics)
     }
 
     @Test
@@ -74,7 +82,8 @@ class VoiceSettingsRepositoryTest {
             voiceName = "en-gb-x-rjs#female_1",
             playAttentionChime = true,
             showLanguageSwitcher = true,
-            secondaryLanguage = "id"
+            secondaryLanguage = "id",
+            shareUsabilityMetrics = true
         )
 
         repository.saveVoiceSettings(newSettings)
@@ -86,7 +95,27 @@ class VoiceSettingsRepositoryTest {
             editor.putBoolean("attention_chime", true)
             editor.putBoolean("show_language_switcher", true)
             editor.putString("secondary_language", "id")
+            editor.putBoolean("share_usability_metrics", true)
+            editor.apply()
+        }
+    }
+
+    @Test
+    fun `getLastPromptedMetricsVersion returns default 0`() {
+        every { sharedPreferences.getInt("metrics_prompt_version_code", 0) } returns 0
+
+        val version = repository.getLastPromptedMetricsVersion()
+        assertEquals(0, version)
+    }
+
+    @Test
+    fun `setLastPromptedMetricsVersion saves version code`() {
+        repository.setLastPromptedMetricsVersion(19)
+
+        verify {
+            editor.putInt("metrics_prompt_version_code", 19)
             editor.apply()
         }
     }
 }
+

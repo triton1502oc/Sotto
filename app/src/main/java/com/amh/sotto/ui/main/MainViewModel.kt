@@ -169,6 +169,20 @@ class MainViewModel(
         voiceSettingsRepository.saveVoiceSettings(newSettings)
     }
 
+    fun shouldPromptMetrics(): Boolean {
+        val currentVersion = com.amh.sotto.BuildConfig.VERSION_CODE
+        val lastPrompted = voiceSettingsRepository.getLastPromptedMetricsVersion()
+        val isOptedIn = _voiceSettings.value.shareUsabilityMetrics
+        return !isOptedIn && lastPrompted < currentVersion
+    }
+
+    fun onMetricsPromptAnswered(optIn: Boolean) {
+        voiceSettingsRepository.setLastPromptedMetricsVersion(com.amh.sotto.BuildConfig.VERSION_CODE)
+        if (optIn) {
+            updateVoiceSettings(_voiceSettings.value.copy(shareUsabilityMetrics = true))
+        }
+    }
+
     fun exportBackup(): String {
         return PhraseBackupHelper.exportToJson(_phrases.value, _categories.value)
     }

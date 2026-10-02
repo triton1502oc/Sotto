@@ -14,8 +14,10 @@ kotlin = "2.3.20"
 mlkitTranslate = "17.0.3"
 nav3Core = "1.0.1"
 lifecycleViewmodelNav3 = "2.10.0"
+androidxWork = "2.10.0"
 
 [libraries]
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidxWork" }
 mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkitTranslate" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivity" }

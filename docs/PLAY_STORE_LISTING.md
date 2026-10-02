@@ -54,8 +54,8 @@ Tailor your speech output to your comfort. Adjust speech rate (speed) and pitch 
 • Dual-Language Speech & On-Device Auto-Translate
 Display cards in one language while speaking in another (e.g., English card text read aloud in Indonesian). Includes one-tap on-device auto-translation with zero cloud text transmission and dual-language speak controls in fullscreen view.
 
-• 100% Offline & Private
-Zero accounts. Zero tracking. Zero cloud uploads. Your phrases and settings stay entirely on your local device.
+• 100% Offline Core & Privacy-First
+Zero accounts. Zero ads. Zero third-party tracking frameworks. Your phrases and speech stay 100% on your device, with strictly opt-in anonymous usability timing to help diagnose accessibility friction (zero text or speech collected).
 ```
 
 ---
@@ -82,11 +82,14 @@ To automatically regenerate and format all visual assets (`screenshot.png`, `scr
 When completing the Google Play **Data Safety** questionnaire:
 
 1. **Does your app collect or share any of the required user data types?**  
-   👉 Select **No**.
-2. **Is all of the user data collected by your app encrypted in transit?**  
-   👉 Select **N/A** (no data collected).
-3. **Do you provide a way for users to request that their data be deleted?**  
-   👉 Select **Yes** (Uninstalling the app or clearing app storage deletes all local data immediately).
+   👉 Select **Yes** (Only for optional, strictly opt-in anonymous interaction timing; core app remains zero-data).
+   - **Data Types**: *App activity > App interactions* and *App info and performance > Other app performance data*.
+   - **Collection vs Sharing**: Collected = **Yes**, Shared = **No** (Zero data shared with third parties).
+   - **Encrypted in transit**: **Yes** (HTTPS).
+   - **Required or Optional**: **Optional** (Users must explicitly opt-in; default is OFF).
+   - **Purpose**: **Analytics** (Diagnosing accessibility and feature usability difficulties).
+2. **Do you provide a way for users to request that their data be deleted?**  
+   👉 Select **Yes** (Toggling the setting OFF in Settings immediately purges all queued events from the device; uninstalling deletes all local data).
 
 ---
 
