@@ -1,7 +1,7 @@
 # Sotto User & Caregiver Guide
 
 ### TL;DR
-Sotto serves a vital dual mission: a calm, low-cognitive-load **Why Finder** (`🧭`) and **Two-Way Receptive HUD** (`👂`) for caregivers, therapists, and family members to de-escalate meltdowns and find root causes through gentle yes/no branching, paired with a dignity-first AAC speech board for autistic teens and adults.
+Sotto serves a vital dual mission: a calm, low-cognitive-load **Partner Mode** (`🤝`)—combining guided **Why Finder** crisis de-escalation and a two-way receptive communication HUD—for caregivers, therapists, and family members, paired with a dignity-first AAC speech board for autistic individuals, non-speaking users, and anyone with unclear or fatigued speech.
 
 ---
 
@@ -10,20 +10,21 @@ Sotto serves a vital dual mission: a calm, low-cognitive-load **Why Finder** (`�
 Sotto (*"under one's breath"*) is designed for sensory-sensitive communication and crisis de-escalation:
 - **Zero cartoon clutter**: Clean dark-neutral palette tailored for teens and adults.
 - **Zero open-ended pressure**: When in meltdown or verbal shutdown, processing complex questions is overwhelming. Sotto reduces communication to large binary choices.
+- **Support for Unclear Speech**: Offers an instant, clear voice for individuals whose natural speech is slurred, dysarthric, or exhausted under stress.
 - **100% Offline & Private**: Audio, phrases, and crisis logs never leave your local device.
 
 ```
-                    ┌────────────────────────────┐
-                    │ SOTTO APP MODES            │
-                    ├────────────────────────────┤
-                    │                            │
-  ┌─────────────────┼────────────────────────────┴────────────────┐
-  ▼                 ▼                                             ▼
-[Why Finder]      [Two-Way Receptive Mode]            [Self-Advocacy AAC Mode]
-• Calm Yes/No     • Caregiver Speech-to-Text          • 1-Tap Phrase Cards
-• Root Cause Tree • Preset Question Bank              • Emergency Hero Card
-• 30-Day Trends   • 180° Face-to-Face Screen Flip     • Quick-Speak Bar
-• Tree Customizer • 4 Dignified Quick Replies         • Giant Fullscreen
+                      ┌────────────────────────────────────────┐
+                      │              SOTTO APP                 │
+                      ├────────────────────────────────────────┤
+                      │                                        │
+        ┌─────────────┴─────────────┐            ┌─────────────┴─────────────┐
+        ▼                           ▼            ▼                           ▼
+ 🤝 PARTNER MODE (Caregiver Hub)          🗣️ SELF-ADVOCACY (Daily AAC)
+ ├── Guided Tab: Why Finder Crisis Tree   ├── Instant 1-Tap Phrase Cards
+ ├── Talk Tab: 2-Way Receptive HUD & Mic  ├── Emergency Hero Bystander Card
+ ├── 180° Face-to-Face Screen Flip        ├── Quick-Speak Bar & Dictation
+ └── 4-Card Dignified Response Docks      └── Giant High-Contrast Fullscreen
 ```
 
 ---
@@ -36,7 +37,7 @@ When sensory overload, verbal shutdowns, or emotional meltdowns occur, asking op
 
 ### How to Use Why Finder Step-by-Step
 
-1. **Open Why Finder**: Tap the compass icon (`🧭`) in the top app bar or inside Two-Way Mode.
+1. **Open Why Finder**: Tap the Partner Mode icon (`🤝`) in the top app bar, then select the **Guided** (`🧭`) tab.
 2. **Present One Question at a Time**:
    - The screen displays a single, low-stimulus question in giant text with large touch targets:
      `[✓ YES]` / `[✕ NO]`
@@ -83,11 +84,12 @@ Every autistic individual has a unique sensory profile, communication style, and
 2. **Customize Branching Questions**:
    - Tap any area (Physical, Sensory, Emotional, Routine) to view and edit its questions.
    - Tap **`+ Add Question`** to add personalized triggers (e.g., *"Is the dog barking bothering you?"*, *"Are your socks uncomfortable?"*).
+   - Use voice dictation (`🎤`) to dictate questions hands-free, tap `✕` to clear text, and use sequence arrows to reorder questions.
    - Edit the specific root cause and action advice shown when resolved.
 3. **Add Custom Crisis Areas**:
    - Tap **`+ Add Area`** to create entirely new diagnostic domains (e.g., *"School Transitions"*, *"Medical / Therapy"*).
 4. **Reset to Defaults**:
-   - Tap **`Reset to Defaults`** anytime to restore the default research-backed crisis tree without losing your phrase cards.
+   - Tap the 3-dot overflow menu (`⋮`) and select **`Reset to Defaults`** anytime to restore the default research-backed crisis tree without losing your phrase cards.
 
 ### Sharing Trees with Therapists & Schools
 - Through **Backup & Restore v2**, you can export **Only the Why Tree** (`Backup v2: Tree only`).
@@ -96,17 +98,17 @@ Every autistic individual has a unique sensory profile, communication style, and
 
 ---
 
-## 5. Two-Way Receptive Guide (`👂`)
+## 5. Partner Mode: Talk & Guided Tabs (`🤝`)
 
-When verbal shutdowns, auditory processing delay, cognitive fatigue, or motor apraxia make conversational speech difficult, use **Two-Way Receptive Mode**.
+When verbal shutdowns, auditory processing delay, cognitive fatigue, motor apraxia, or unclear speech make conversational speech difficult, use **Partner Mode** (`🤝`).
 
 ```
 Caregiver asks question ──► Screen displays giant text ──► User taps 1 of 4 replies
-(Speech, Preset, or Type)     (Can be flipped 180°)        (Yes / No / Repeat / Wait)
+(Talk Tab or Guided Tab)     (Can be flipped 180°)        (4-Card Tactile Response Dock)
 ```
 
-### Step 1: Open Two-Way Mode
-Tap the ear icon (`👂`) in the top app bar next to the settings gear.
+### Step 1: Open Partner Mode
+Tap the handshake icon (`🤝`) in the top app bar next to the settings gear. By default, Sotto lands on the **Talk** tab for spontaneous receptive communication, with the **Guided** tab immediately accessible for crisis de-escalation.
 
 ### Step 2: Present a Question to the User
 1. **Speak Naturally (`🎤 Listen & Read`)**: Tap the mic button. Sotto transcribes your voice in real time onto the screen in giant high-contrast text. Tap the mic again (or wait) to finish.
@@ -116,7 +118,7 @@ Tap the ear icon (`👂`) in the top app bar next to the settings gear.
    - **`Social`**: Courtesy & social boundaries.
    - **`Emergency`**: Urgent safety prompts.
 3. **Type Manually (`⌨️`)**: Tap the keyboard icon to type a custom question if ambient noise is too loud for speech recognition.
-4. **Launch Why Finder Directly (`🧭`)**: If a question leads to a crisis or shutdown, tap the **`🧭 Why Finder`** shortcut button directly inside the dialog to enter guided crisis navigation immediately.
+4. **Switch to Guided De-escalation (`🧭 Guided`)**: Tap the Guided tab at the bottom to enter the structured yes/no Why Finder tree anytime distress escalates.
 
 ### Step 3: Vocalize with Read Aloud (`🔊 Read Aloud`)
 If the user has visual fatigue, reading difficulty, or is resting with eyes closed, tap **`🔊 Read Aloud`** to speak the displayed question through your phone's speaker.
@@ -139,6 +141,8 @@ The person across the table simply taps one of four large, high-contrast buttons
 | **`🔁 Repeat`** | Caregiver spoke too quickly or unclearly | *"Please repeat that."* |
 | **`⏳ Wait`** | User is processing, thinking, or needs a moment | *"Please give me a moment."* |
 
+*(In **Guided** mode, the response dock provides `Yes`, `No`, `Not sure`, and `Stop` options, or body-part and pain-intensity locators).*
+
 When tapped:
 - The app immediately vocalizes the answer through TTS.
 - A visual confirmation badge appears for 3 seconds.
@@ -148,10 +152,10 @@ When tapped:
 
 ## 6. Daily Self-Advocacy AAC Guide
 
-For autistic teens and adults expressing their own thoughts during non-crisis moments:
+For autistic teens and adults, as well as individuals with unclear, slurred, or fatigued speech expressing their own thoughts during non-crisis moments:
 
 ### A. Speaking with Cards
-- **Instant Speech**: Tap any phrase card once. Sotto vocalizes the text using your device's native offline Text-to-Speech (TTS) engine.
+- **Instant Speech**: Tap any phrase card once. Sotto vocalizes the text using your device's native offline Text-to-Speech (TTS) engine—eliminating listener misunderstandings and vocal fatigue.
 - **Category Filter**: Use the top chips (`All`, `Emergency`, `Needs`, `Social`, `Care`, `General`, or custom categories) to filter phrases for your current situation.
 
 ### B. Emergency Bystander Mode

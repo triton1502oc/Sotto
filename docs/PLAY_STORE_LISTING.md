@@ -18,9 +18,9 @@ Ready-to-use metadata, descriptions, graphics specifications, and policy questio
 
 ### Full Description *(Markdown & Plain Text compliant, ~2,800 / 4,000 characters)*
 ```text
-Sotto is a calm yes/no crisis navigation tool for caregivers, parents, and therapists to connect with autistic teens and adults during sensory overload, meltdowns, and verbal shutdowns — paired with a dignified, low-stimulation AAC speech board for daily self-expression.
+Sotto is a calm yes/no crisis navigation tool for caregivers, parents, and therapists to connect with autistic teens and adults during sensory overload, meltdowns, and verbal shutdowns — paired with a dignified, low-stimulation AAC speech board for daily self-expression and unclear speech support.
 
-Created by a father of two autistic sons (ages 22 and 15), Sotto is built around a simple reality: during a meltdown or verbal shutdown, processing complex questions or speaking is exhausting. Sotto bridges this divide with gentle binary choices and zero open-ended demands.
+Created by a father of two autistic sons (ages 22 and 15), Sotto is built around a simple reality: during a meltdown or verbal shutdown, processing complex questions or speaking is exhausting. Sotto bridges this divide with gentle binary choices, speech clarity support, and zero open-ended demands.
 
 FOR CAREGIVERS, FAMILIES & THERAPISTS:
 
@@ -31,15 +31,15 @@ When someone is experiencing sensory overload or verbal paralysis, open-ended qu
 Resolved crisis sessions are automatically logged 100% locally on your device. Review 30-day patterns to identify frequent environmental triggers, recurring peak hours, and actionable interventions. Never shared or uploaded to the cloud.
 
 • Customizable Why Tree & Safe Sharing
-Adapt questions and areas to your loved one's specific triggers. Easily export and share customized trees with teachers or speech therapists while keeping private crisis logs strictly excluded.
+Adapt questions and areas to your loved one's specific triggers using voice dictation and reordering. Easily export and share customized trees with teachers or speech therapists while keeping private crisis logs strictly excluded.
 
-• Two-Way Receptive Mode & 180° Screen Flip
-Caregivers can dictate questions or choose from common care prompts. Tap 180° Flip and place the phone on the table: the user taps one of 4 large, dignified responses (Yes, No, Repeat, Wait) with instant voice confirmation.
+• Partner Mode & 180° Screen Flip (Guided & Talk)
+Switch effortlessly between Guided Mode (Why Finder crisis inquiry) and Talk Mode (speech-to-text dictation with preset questions). Tap 180° Flip and place the phone on a table: your conversation partner taps one of 4 large, dignified responses (Yes, No, Repeat, Wait, or Not Sure/Stop in Guided mode) with instant voice confirmation.
 
-FOR AUTISTIC TEENS & ADULTS (SELF-EXPRESSION):
+FOR NON-SPEAKING & UNCLEAR VOICES (DIGNIFIED SELF-EXPRESSION):
 
-• Mature, Low-Stimulus UI
-Dark-neutral Material 3 design with calm earth tones and zero cartoon clutter. In normal communication mode, admin controls remain hidden for a zero-distraction experience.
+• Mature, Dignified Voice for Unclear or Fatigued Speech
+Whether completely non-verbal, navigating an autistic shutdown, or speaking with quiet, slurred, or dysarthric speech that listeners struggle to understand, Sotto provides a crisp, adult text-to-speech voice and high-contrast cards—free of childish cartoons and patronizing symbols.
 
 • Emergency Bystander Hero Card
 A prominent high-contrast banner for non-verbal episodes. Show fullscreen directly to bystanders, first responders, or medical personnel.
@@ -101,7 +101,7 @@ When completing the Google Play **Data Safety** questionnaire:
 ## 4. App Content & Policy Ratings
 
 * **Category:** Communication (or Tools / Health)
-* **Tags:** AAC, Assistive, Speech, Autism, Speech Impairment, Communication
+* **Tags:** AAC, Assistive, Speech, Autism, Speech Impairment, Unclear Speech, Dysarthria, Apraxia, Communication
 * **Target Audience:** Select **13–15**, **16–17**, and **18+**.  
   *(Selecting 13+ prevents your app from being categorized under the "Designed for Families" COPPA framework, avoiding unnecessary pediatric compliance scrutiny).*
 * **Content Rating (IARC):** Complete the questionnaire:

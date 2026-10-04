@@ -20,15 +20,15 @@ Sotto was created by a father to navigate overwhelming communication breakdowns 
 **Primary Mission (Crisis Navigation for Caregivers):**  
 Provide parents, caregivers, therapists, and educators with a calm, low-cognitive-load yes/no branching tool to reach loved ones during meltdowns and shutdowns, and uncover the root cause (*"Why?"*) without escalating distress.
 
-**Secondary Purpose (Dignified Self-Expression for Autistic Teens & Adults):**  
-Provide non-speaking and speech-impaired individuals with a clean, mature text-to-speech board and spontaneous quick-speak bar free of pediatric cartoons and visual clutter.
+**Secondary Purpose (Dignified Voice for Non-Speaking & Unclear Speech):**  
+Provide non-speaking individuals, those with unclear or dysfluent speech, and anyone navigating verbal fatigue with a clean, mature text-to-speech board and spontaneous quick-speak bar—free of pediatric cartoons, patronizing symbols, and visual clutter.
 
 ---
 
 ## Target Audience
 - **Caregivers, Parents, Therapists & Teachers**: Reaching loved ones during verbal shutdowns, cognitive freezes, and meltdowns; discovering root causes through structured yes/no inquiry.
 - **Autistic Teens & Adults**: Dignified self-advocacy and daily communication with high-contrast, low-stimulation phrase cards and giant fullscreen text.
-- **Non-Speaking & Speech-Impaired Individuals**: Accessible one-touch speech for motor apraxia, dysarthria, ALS, stroke recovery (aphasia), or situational speech loss.
+- **Individuals with Unclear, Fatigued, or Non-Speaking Speech**: Accessible one-touch speech for motor apraxia, dysarthria, cerebral palsy, ALS, stroke recovery (aphasia), quiet/strained voices, or situational speech loss.
 
 ---
 
@@ -37,8 +37,8 @@ Provide non-speaking and speech-impaired individuals with a clean, mature text-t
 ### 1. Crisis Navigation (Caregiver-First)
 - **Why Finder (`🧭`)**: A guided, calm yes/no branching tree designed specifically for meltdowns and verbal shutdowns. Guides caregiver and individual through physical discomfort, sensory overload, emotional overwhelm, and task friction with large binary buttons and zero open-ended demands.
 - **Private Why Log & 30-Day Trend Insights**: Automatically logs resolved crisis events locally in private app storage. Highlights top 30-day root-cause patterns and peak time-of-day triggers to help families and therapists identify recurring environmental stressors.
-- **Customizable Why Tree (`🌳`)**: Personalize branching questions and resolution steps to match your loved one's specific sensory profile and communication style. Reset to clinical defaults anytime.
-- **Two-Way Receptive Mode (`👂`)**: Real-time caregiver speech-to-text dictation, preset question bank, Read Aloud (`🔊`), and a 180° face-to-face screen flip (`🔄 Flip`) with 4 dignified one-touch reply buttons (`Yes`, `No`, `Repeat`, `Wait`).
+- **Customizable Why Tree (`🌳`)**: Personalize branching questions and resolution steps with voice dictation (`🎤`), sequence reordering, and one-tap clinical defaults reset.
+- **Partner Mode (`🤝`)**: Unified caregiver dialog featuring two synchronized modes: **Guided** (Why Finder crisis tree with 4-card response dock) and **Talk** (real-time caregiver speech-to-text dictation, preset questions, Read Aloud `🔊`, 180° face-to-face screen flip `🔄 Flip`, and 4 dignified rapid-reply buttons `Yes`, `No`, `Repeat`, `Wait`).
 
 ### 2. Dignified Self-Expression (AAC Phrase Board)
 - **Low-Stimulus UI**: Dark-neutral Material 3 theme with high contrast, calm earth tones, and zero cartoon animations or visual distractions.
