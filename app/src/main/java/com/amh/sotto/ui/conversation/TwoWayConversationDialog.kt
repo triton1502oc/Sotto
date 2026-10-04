@@ -52,7 +52,6 @@ import com.amh.sotto.data.WhyTree
 import com.amh.sotto.ui.category.getCategoryDisplayName
 import com.amh.sotto.ui.whyfinder.BodyPartSelectionGrid
 import com.amh.sotto.ui.whyfinder.IntensityScaleRow
-import com.amh.sotto.ui.whyfinder.WhyFinderActionDock
 import com.amh.sotto.ui.whyfinder.WhyFinderSession
 import com.amh.sotto.ui.whyfinder.WhyFinderState
 import com.amh.sotto.ui.whyfinder.getBodyRegionLabel
@@ -99,8 +98,6 @@ fun TwoWayConversationDialog(
     val whySession = remember { WhyFinderSession(tree) }
     val whyState = whySession.currentState
 
-    var showEditQuestionDialog by rememberSaveable { mutableStateOf(false) }
-    var editQuestionDraft by rememberSaveable { mutableStateOf("") }
     var whyLogNote by rememberSaveable { mutableStateOf("") }
     var whySessionSaved by rememberSaveable { mutableStateOf(false) }
 
@@ -238,7 +235,7 @@ fun TwoWayConversationDialog(
                         .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Top 80%: Patient area rotated 180 degrees to face the person across the table
+                    // Top: Rotated 180 degrees to face the person across the table
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -249,7 +246,6 @@ fun TwoWayConversationDialog(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
-                            // Receptive display card
                             CaregiverDisplayCard(
                                 activeTab = activeTab,
                                 whyState = whyState,
@@ -268,44 +264,30 @@ fun TwoWayConversationDialog(
                                     whyLogNote = ""
                                 },
                                 onFinish = onDismiss,
-                                onEditQuestion = {
-                                    editQuestionDraft = whyPromptText
-                                    showEditQuestionDialog = true
-                                },
-                                onPickCard = { showQuestionsSheet = true },
                                 onReadAloudPrompt = { onSpeakResponse(whyPromptText) },
-                                canStepBack = whySession.canStepBack(),
-                                onStepBack = { whySession.stepBack() },
                                 modifier = Modifier.weight(1f)
                             )
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            // Response Dock facing partner right-side-up
                             CaregiverResponseDock(
                                 activeTab = activeTab,
                                 whyState = whyState,
                                 onYes = {
                                     handleUserResponse(strYes, strYes)
-                                    whySession.answerYes()
+                                    if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerYes()
                                 },
                                 onNo = {
                                     handleUserResponse(strNo, strNo)
-                                    whySession.answerNo()
+                                    if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNo()
                                 },
-                                onRepeat = {
-                                    handleUserResponse(strRepeat, ttsRepeat)
-                                    val promptToRepeat = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
-                                    if (promptToRepeat.isNotBlank()) onSpeakResponse(promptToRepeat)
-                                },
-                                onWait = { handleUserResponse(strWait, ttsWait) },
                                 onNotSure = {
                                     handleUserResponse(strNotSure, strNotSure)
-                                    whySession.answerNotSure()
+                                    if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNotSure()
                                 },
                                 onStop = {
                                     handleUserResponse(strStop, strStop)
-                                    whySession.stop()
+                                    if (activeTab == CaregiverTab.WHY_FINDER) whySession.stop()
                                 },
                                 onSelectBodyPart = { partKey ->
                                     val label = getBodyRegionLabel(partKey, context)
@@ -320,91 +302,9 @@ fun TwoWayConversationDialog(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
                     // Bottom: Caregiver controls facing caregiver
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        AnimatedVisibility(visible = showKeyboardInput && activeTab == CaregiverTab.FREEFORM) {
-                            ManualKeyboardInputRow(
-                                text = manualInputText,
-                                onTextChange = { manualInputText = it },
-                                onSubmit = {
-                                    if (manualInputText.isNotBlank()) {
-                                        displayedText = manualInputText.trim()
-                                        manualInputText = ""
-                                        showKeyboardInput = false
-                                    }
-                                }
-                            )
-                        }
-
-                        CaregiverToolbar(
-                            activeTab = activeTab,
-                            onTabChange = { activeTab = it },
-                            hasWhyFinder = whyFinderRepository != null,
-                            isFlipped = true,
-                            onToggleFlip = { isFlipped = false },
-                            isListening = isListening,
-                            onToggleListening = {
-                                if (isListening) {
-                                    onStopListening()
-                                } else {
-                                    displayedText = ""
-                                    onClearText()
-                                    onStartListening()
-                                }
-                            },
-                            canReadAloud = activeFreeformText.isNotBlank(),
-                            onReadAloud = { onSpeakResponse(activeFreeformText) },
-                            onToggleKeyboard = { showKeyboardInput = !showKeyboardInput },
-                            onDismiss = {
-                                onStopListening()
-                                onDismiss()
-                            }
-                        )
-                    }
-                }
-            } else {
-                // ==========================================
-                // NORMAL MODE (Side-by-Side / Standard View)
-                // ==========================================
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .statusBarsPadding()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Top Action Bar
-                    CaregiverToolbar(
-                        activeTab = activeTab,
-                        onTabChange = { activeTab = it },
-                        hasWhyFinder = whyFinderRepository != null,
-                        isFlipped = false,
-                        onToggleFlip = { isFlipped = true },
-                        isListening = isListening,
-                        onToggleListening = {
-                            if (isListening) {
-                                onStopListening()
-                            } else {
-                                displayedText = ""
-                                onClearText()
-                                onStartListening()
-                            }
-                        },
-                        canReadAloud = activeFreeformText.isNotBlank(),
-                        onReadAloud = { onSpeakResponse(activeFreeformText) },
-                        onToggleKeyboard = { showKeyboardInput = !showKeyboardInput },
-                        onDismiss = {
-                            onStopListening()
-                            onDismiss()
-                        }
-                    )
-
                     AnimatedVisibility(visible = showKeyboardInput && activeTab == CaregiverTab.FREEFORM) {
                         ManualKeyboardInputRow(
                             text = manualInputText,
@@ -415,11 +315,54 @@ fun TwoWayConversationDialog(
                                     manualInputText = ""
                                     showKeyboardInput = false
                                 }
-                            }
+                            },
+                            modifier = Modifier.padding(bottom = 6.dp)
                         )
                     }
 
-                    // Middle: Receptive Display Card
+                    CaregiverBottomMenu(
+                        activeTab = activeTab,
+                        onTabChange = { activeTab = it },
+                        hasWhyFinder = whyFinderRepository != null,
+                        isFlipped = true,
+                        onToggleFlip = { isFlipped = false },
+                        canSpeakPrompt = whyPromptText.isNotBlank(),
+                        onSpeakPrompt = { onSpeakResponse(whyPromptText) },
+                        onPickCard = { showQuestionsSheet = true },
+                        canStepBack = whySession.canStepBack(),
+                        onStepBack = { whySession.stepBack() },
+                        isListening = isListening,
+                        onToggleListening = {
+                            if (isListening) {
+                                onStopListening()
+                            } else {
+                                displayedText = ""
+                                onClearText()
+                                onStartListening()
+                            }
+                        },
+                        canReadAloudFreeform = activeFreeformText.isNotBlank(),
+                        onReadAloudFreeform = { onSpeakResponse(activeFreeformText) },
+                        onToggleKeyboard = { showKeyboardInput = !showKeyboardInput },
+                        onDismiss = {
+                            onStopListening()
+                            onDismiss()
+                        }
+                    )
+                }
+            } else {
+                // ==========================================
+                // NORMAL MODE (Side-by-Side / Standard View)
+                // ==========================================
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Top: Receptive display card
                     CaregiverDisplayCard(
                         activeTab = activeTab,
                         whyState = whyState,
@@ -438,44 +381,31 @@ fun TwoWayConversationDialog(
                             whyLogNote = ""
                         },
                         onFinish = onDismiss,
-                        onEditQuestion = {
-                            editQuestionDraft = whyPromptText
-                            showEditQuestionDialog = true
-                        },
-                        onPickCard = { showQuestionsSheet = true },
                         onReadAloudPrompt = { onSpeakResponse(whyPromptText) },
-                        canStepBack = whySession.canStepBack(),
-                        onStepBack = { whySession.stepBack() },
                         modifier = Modifier
                             .weight(1f)
-                            .padding(vertical = 8.dp)
+                            .padding(bottom = 8.dp)
                     )
 
-                    // Bottom: User Response Dock
+                    // Middle: 4 Response Cards (Yes, No, Not Sure, Stop)
                     CaregiverResponseDock(
                         activeTab = activeTab,
                         whyState = whyState,
                         onYes = {
                             handleUserResponse(strYes, strYes)
-                            whySession.answerYes()
+                            if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerYes()
                         },
                         onNo = {
                             handleUserResponse(strNo, strNo)
-                            whySession.answerNo()
+                            if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNo()
                         },
-                        onRepeat = {
-                            handleUserResponse(strRepeat, ttsRepeat)
-                            val promptToRepeat = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
-                            if (promptToRepeat.isNotBlank()) onSpeakResponse(promptToRepeat)
-                        },
-                        onWait = { handleUserResponse(strWait, ttsWait) },
                         onNotSure = {
                             handleUserResponse(strNotSure, strNotSure)
-                            whySession.answerNotSure()
+                            if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNotSure()
                         },
                         onStop = {
                             handleUserResponse(strStop, strStop)
-                            whySession.stop()
+                            if (activeTab == CaregiverTab.WHY_FINDER) whySession.stop()
                         },
                         onSelectBodyPart = { partKey ->
                             val label = getBodyRegionLabel(partKey, context)
@@ -487,41 +417,57 @@ fun TwoWayConversationDialog(
                             whySession.selectIntensity(level)
                         }
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Bottom: Caregiver 2-line menu
+                    AnimatedVisibility(visible = showKeyboardInput && activeTab == CaregiverTab.FREEFORM) {
+                        ManualKeyboardInputRow(
+                            text = manualInputText,
+                            onTextChange = { manualInputText = it },
+                            onSubmit = {
+                                if (manualInputText.isNotBlank()) {
+                                    displayedText = manualInputText.trim()
+                                    manualInputText = ""
+                                    showKeyboardInput = false
+                                }
+                            },
+                            modifier = Modifier.padding(bottom = 6.dp)
+                        )
+                    }
+
+                    CaregiverBottomMenu(
+                        activeTab = activeTab,
+                        onTabChange = { activeTab = it },
+                        hasWhyFinder = whyFinderRepository != null,
+                        isFlipped = false,
+                        onToggleFlip = { isFlipped = true },
+                        canSpeakPrompt = whyPromptText.isNotBlank(),
+                        onSpeakPrompt = { onSpeakResponse(whyPromptText) },
+                        onPickCard = { showQuestionsSheet = true },
+                        canStepBack = whySession.canStepBack(),
+                        onStepBack = { whySession.stepBack() },
+                        isListening = isListening,
+                        onToggleListening = {
+                            if (isListening) {
+                                onStopListening()
+                            } else {
+                                displayedText = ""
+                                onClearText()
+                                onStartListening()
+                            }
+                        },
+                        canReadAloudFreeform = activeFreeformText.isNotBlank(),
+                        onReadAloudFreeform = { onSpeakResponse(activeFreeformText) },
+                        onToggleKeyboard = { showKeyboardInput = !showKeyboardInput },
+                        onDismiss = {
+                            onStopListening()
+                            onDismiss()
+                        }
+                    )
                 }
             }
         }
-    }
-
-    // Inline Edit Question Dialog
-    if (showEditQuestionDialog) {
-        AlertDialog(
-            onDismissRequest = { showEditQuestionDialog = false },
-            title = { Text(stringResource(R.string.action_edit_question)) },
-            text = {
-                OutlinedTextField(
-                    value = editQuestionDraft,
-                    onValueChange = { editQuestionDraft = it },
-                    placeholder = { Text(stringResource(R.string.hint_edit_question)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 4
-                )
-            },
-            confirmButton = {
-                Button(onClick = {
-                    if (editQuestionDraft.isNotBlank()) {
-                        whySession.overrideCurrentQuestion(editQuestionDraft.trim())
-                    }
-                    showEditQuestionDialog = false
-                }) {
-                    Text(stringResource(R.string.action_save))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showEditQuestionDialog = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            }
-        )
     }
 
     // Phrase Card Picker Sheet (for selecting cards in Freeform or injecting into Why Finder)
@@ -641,105 +587,181 @@ fun TwoWayConversationDialog(
 }
 
 @Composable
-private fun CaregiverToolbar(
+private fun CaregiverBottomMenu(
     activeTab: CaregiverTab,
     onTabChange: (CaregiverTab) -> Unit,
     hasWhyFinder: Boolean,
     isFlipped: Boolean,
     onToggleFlip: () -> Unit,
+    canSpeakPrompt: Boolean,
+    onSpeakPrompt: () -> Unit,
+    onPickCard: () -> Unit,
+    canStepBack: Boolean,
+    onStepBack: () -> Unit,
     isListening: Boolean,
     onToggleListening: () -> Unit,
-    canReadAloud: Boolean,
-    onReadAloud: () -> Unit,
+    canReadAloudFreeform: Boolean,
+    onReadAloudFreeform: () -> Unit,
     onToggleKeyboard: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .weight(1f, fill = false)
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Mode Switcher Tabs
-            if (hasWhyFinder) {
-                FilterChip(
-                    selected = activeTab == CaregiverTab.WHY_FINDER,
-                    onClick = { onTabChange(CaregiverTab.WHY_FINDER) },
-                    label = {
-                        Text(
-                            text = "🧭 " + stringResource(R.string.mode_why_finder),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                )
-                FilterChip(
-                    selected = activeTab == CaregiverTab.FREEFORM,
-                    onClick = { onTabChange(CaregiverTab.FREEFORM) },
-                    label = {
-                        Text(
-                            text = "🎙️ " + stringResource(R.string.mode_freeform),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                )
-            }
-
-            // 180 Flip Button
-            OutlinedButton(
-                onClick = onToggleFlip,
-                shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            // Line 1: Mode Switcher Tabs & Global Controls (Flip & Close)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = if (isFlipped) "🔄 " + stringResource(R.string.action_flip_back) else "🔄 " + stringResource(R.string.action_flip),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (activeTab == CaregiverTab.FREEFORM) {
-                val micColor by animateColorAsState(
-                    targetValue = if (isListening) Color(0xFFC62828) else MaterialTheme.colorScheme.primaryContainer,
-                    label = "micBg"
-                )
-                FilledTonalButton(
-                    onClick = onToggleListening,
-                    shape = CircleShape,
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = micColor,
-                        contentColor = if (isListening) Color.White else MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = Modifier.size(36.dp)
+                // Tabs: Guided / Mic
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(if (isListening) "⏹" else "🎤", fontSize = 15.sp)
-                }
-
-                if (canReadAloud) {
-                    IconButton(onClick = onReadAloud, modifier = Modifier.size(36.dp)) {
-                        Text("🔊", fontSize = 17.sp)
+                    if (hasWhyFinder) {
+                        FilterChip(
+                            selected = activeTab == CaregiverTab.WHY_FINDER,
+                            onClick = { onTabChange(CaregiverTab.WHY_FINDER) },
+                            label = {
+                                Text(
+                                    text = "🧭 " + stringResource(R.string.mode_why_finder),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        )
+                        FilterChip(
+                            selected = activeTab == CaregiverTab.FREEFORM,
+                            onClick = { onTabChange(CaregiverTab.FREEFORM) },
+                            label = {
+                                Text(
+                                    text = "🎙️ " + stringResource(R.string.mode_freeform),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        )
                     }
                 }
 
-                IconButton(onClick = onToggleKeyboard, modifier = Modifier.size(36.dp)) {
-                    Text("⌨️", fontSize = 17.sp)
+                // Global Controls
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = onToggleFlip,
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    ) {
+                        Text(
+                            text = if (isFlipped) "🔄 " + stringResource(R.string.action_flip_back) else "🔄 " + stringResource(R.string.action_flip),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Text("✕", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
 
-            IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
-                Text("✕", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            // Line 2: Mode Actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (activeTab == CaregiverTab.WHY_FINDER) {
+                    FilledTonalButton(
+                        onClick = onSpeakPrompt,
+                        enabled = canSpeakPrompt,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("🔊 " + stringResource(R.string.action_speak), style = MaterialTheme.typography.labelMedium)
+                    }
+
+                    OutlinedButton(
+                        onClick = onPickCard,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("📋 " + stringResource(R.string.action_cards), style = MaterialTheme.typography.labelMedium)
+                    }
+
+                    if (canStepBack) {
+                        OutlinedButton(
+                            onClick = onStepBack,
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                        ) {
+                            Text("↩️ " + stringResource(R.string.action_step_back), style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                } else {
+                    val micColor by animateColorAsState(
+                        targetValue = if (isListening) Color(0xFFC62828) else MaterialTheme.colorScheme.primaryContainer,
+                        label = "micBg"
+                    )
+                    FilledTonalButton(
+                        onClick = onToggleListening,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = micColor,
+                            contentColor = if (isListening) Color.White else MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(if (isListening) "⏹ Stop" else "🎤 Mic", style = MaterialTheme.typography.labelMedium)
+                    }
+
+                    FilledTonalButton(
+                        onClick = onReadAloudFreeform,
+                        enabled = canReadAloudFreeform,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("🔊 " + stringResource(R.string.action_speak), style = MaterialTheme.typography.labelMedium)
+                    }
+
+                    OutlinedButton(
+                        onClick = onPickCard,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("📋 " + stringResource(R.string.action_cards), style = MaterialTheme.typography.labelMedium)
+                    }
+
+                    IconButton(
+                        onClick = onToggleKeyboard,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Text("⌨️", fontSize = 16.sp)
+                    }
+                }
             }
         }
     }
@@ -757,11 +779,7 @@ private fun CaregiverDisplayCard(
     onWhyLogNoteChange: (String) -> Unit,
     onRestartWhyTree: () -> Unit,
     onFinish: () -> Unit,
-    onEditQuestion: () -> Unit,
-    onPickCard: () -> Unit,
     onReadAloudPrompt: () -> Unit,
-    canStepBack: Boolean,
-    onStepBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -868,60 +886,110 @@ private fun CaregiverDisplayCard(
                     onClick = if (prompt.isNotBlank()) onReadAloudPrompt else null
                 )
 
-                if (activeTab == CaregiverTab.WHY_FINDER) {
-                    // Why Finder prompt helper actions (Speak, Edit, Pick card, Back)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        FilledTonalButton(
-                            onClick = onReadAloudPrompt,
-                            shape = RoundedCornerShape(16.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Text("🔊 " + stringResource(R.string.action_speak), fontSize = 12.sp)
-                        }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+        }
+    }
+}
 
-                        Spacer(modifier = Modifier.width(6.dp))
+@Composable
+private fun UnifiedFourCardResponseDock(
+    onYes: () -> Unit,
+    onNo: () -> Unit,
+    onNotSure: () -> Unit,
+    onStop: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val strYes = stringResource(R.string.response_yes)
+    val strNo = stringResource(R.string.response_no)
+    val strNotSure = stringResource(R.string.why_finder_btn_not_sure)
+    val strStop = stringResource(R.string.why_finder_btn_stop)
 
-                        OutlinedButton(
-                            onClick = onEditQuestion,
-                            shape = RoundedCornerShape(16.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                        ) {
-                            Text("✏️ " + stringResource(R.string.action_edit_question), fontSize = 12.sp)
-                        }
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Row 1: YES & NO
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Button(
+                onClick = onYes,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(58.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF1B5E20),
+                    contentColor = Color(0xFFE8F5E9)
+                )
+            ) {
+                Text(
+                    text = "✓ $strYes",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-                        Spacer(modifier = Modifier.width(6.dp))
+            Button(
+                onClick = onNo,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(58.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF7F1D1D),
+                    contentColor = Color(0xFFFFEBEE)
+                )
+            ) {
+                Text(
+                    text = "✕ $strNo",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
 
-                        OutlinedButton(
-                            onClick = onPickCard,
-                            shape = RoundedCornerShape(16.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                        ) {
-                            Text("📋 " + stringResource(R.string.action_cards), fontSize = 12.sp)
-                        }
+        // Row 2: NOT SURE & STOP
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Button(
+                onClick = onNotSure,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(54.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE65100),
+                    contentColor = Color(0xFFFFF3E0)
+                )
+            ) {
+                Text(
+                    text = "? $strNotSure",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
 
-                        if (canStepBack) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            OutlinedButton(
-                                onClick = onStepBack,
-                                shape = RoundedCornerShape(16.dp),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                            ) {
-                                Text("↩️ " + stringResource(R.string.action_step_back), fontSize = 12.sp)
-                            }
-                        }
-                    }
-                } else {
-                    Box(modifier = Modifier.height(10.dp))
-                }
+            Button(
+                onClick = onStop,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(54.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF37474F),
+                    contentColor = Color(0xFFECEFF1)
+                )
+            ) {
+                Text(
+                    text = "⏹ $strStop",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
@@ -933,12 +1001,11 @@ private fun CaregiverResponseDock(
     whyState: WhyFinderState,
     onYes: () -> Unit,
     onNo: () -> Unit,
-    onRepeat: () -> Unit,
-    onWait: () -> Unit,
     onNotSure: () -> Unit,
     onStop: () -> Unit,
     onSelectBodyPart: (String) -> Unit,
-    onSelectIntensity: (Int) -> Unit
+    onSelectIntensity: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     if (activeTab == CaregiverTab.WHY_FINDER) {
         when (whyState) {
@@ -957,33 +1024,25 @@ private fun CaregiverResponseDock(
                 )
             }
             is WhyFinderState.Finished -> {
-                // Finished card has its own buttons
+                // Handled in Finished card
             }
             else -> {
-                WhyFinderActionDock(
+                UnifiedFourCardResponseDock(
                     onYes = onYes,
                     onNo = onNo,
                     onNotSure = onNotSure,
                     onStop = onStop,
-                    onRepeat = onRepeat,
-                    onWait = onWait
+                    modifier = modifier
                 )
             }
         }
     } else {
-        // Freeform mode uses 4-button dock
-        val yesTts = stringResource(R.string.response_yes)
-        val noTts = stringResource(R.string.response_no)
-        val repeatTts = stringResource(R.string.response_tts_repeat)
-        UserResponseDock(
-            onResponse = { _, tts ->
-                when (tts) {
-                    yesTts -> onYes()
-                    noTts -> onNo()
-                    repeatTts -> onRepeat()
-                    else -> onWait()
-                }
-            }
+        UnifiedFourCardResponseDock(
+            onYes = onYes,
+            onNo = onNo,
+            onNotSure = onNotSure,
+            onStop = onStop,
+            modifier = modifier
         )
     }
 }
@@ -1103,10 +1162,11 @@ private fun GiantPromptDisplay(
 private fun ManualKeyboardInputRow(
     text: String,
     onTextChange: (String) -> Unit,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1123,107 +1183,6 @@ private fun ManualKeyboardInputRow(
         )
         Button(onClick = onSubmit) {
             Text("✓")
-        }
-    }
-}
-
-@Composable
-private fun UserResponseDock(
-    onResponse: (displayText: String, ttsText: String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val strYes = stringResource(R.string.response_yes)
-    val strNo = stringResource(R.string.response_no)
-    val strRepeat = stringResource(R.string.response_repeat)
-    val strWait = stringResource(R.string.response_wait)
-
-    val ttsRepeat = stringResource(R.string.response_tts_repeat)
-    val ttsWait = stringResource(R.string.response_tts_wait)
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Row 1: YES & NO (Large primary targets)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Button(
-                onClick = { onResponse(strYes, strYes) },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(64.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1B5E20),
-                    contentColor = Color(0xFFE8F5E9)
-                )
-            ) {
-                Text(
-                    text = "✓ $strYes",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Button(
-                onClick = { onResponse(strNo, strNo) },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(64.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF7F1D1D),
-                    contentColor = Color(0xFFFFEBEE)
-                )
-            ) {
-                Text(
-                    text = "✕ $strNo",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        // Row 2: REPEAT & WAIT (Comfortable, spacious touch targets)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            FilledTonalButton(
-                onClick = { onResponse(strRepeat, ttsRepeat) },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(58.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = "🔁 $strRepeat",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            FilledTonalButton(
-                onClick = { onResponse(strWait, ttsWait) },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(58.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = "⏳ $strWait",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
-            }
         }
     }
 }
