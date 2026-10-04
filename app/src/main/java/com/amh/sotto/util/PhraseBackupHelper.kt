@@ -1,62 +1,90 @@
 package com.amh.sotto.util
 
 import com.amh.sotto.data.Phrase
+import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
+import com.amh.sotto.data.WhyLogEntry
+import com.amh.sotto.data.WhyTree
 import org.json.JSONArray
 import org.json.JSONObject
 
 data class BackupData(
-    val version: Int = 1,
+    val version: Int = 2,
     val exportedAt: Long = System.currentTimeMillis(),
     val categories: List<String> = emptyList(),
-    val phrases: List<Phrase> = emptyList()
+    val phrases: List<Phrase> = emptyList(),
+    val whyTree: WhyTree? = null,
+    val whyLog: List<WhyLogEntry>? = null
 )
 
 data class ImportResult(
     val phraseCount: Int,
-    val categoryCount: Int
+    val categoryCount: Int,
+    val treeImported: Boolean = false,
+    val logCount: Int = 0
 )
 
 object PhraseBackupHelper {
 
-    const val CURRENT_VERSION = 1
+    const val CURRENT_VERSION = 2
 
     /**
-     * Serializes phrases and category order into a human-readable JSON string.
+     * Serializes phrases, categories, and optional Why Finder tree and logs into JSON.
      */
-    fun exportToJson(phrases: List<Phrase>, categories: List<String>): String {
+    fun exportToJson(
+        phrases: List<Phrase>? = null,
+        categories: List<String>? = null,
+        whyTree: WhyTree? = null,
+        whyLog: List<WhyLogEntry>? = null
+    ): String {
         val root = JSONObject()
         root.put("version", CURRENT_VERSION)
         root.put("exportedAt", System.currentTimeMillis())
 
-        val categoriesArray = JSONArray()
-        val cleanCategories = mutableListOf<String>()
-        categories.forEach { cat ->
-            val trimmed = cat.trim()
-            if (trimmed.isNotBlank() && !trimmed.equals("ALL", ignoreCase = true) && !cleanCategories.any { it.equals(trimmed, ignoreCase = true) }) {
-                cleanCategories.add(trimmed)
-                categoriesArray.put(trimmed)
+        if (categories != null) {
+            val categoriesArray = JSONArray()
+            val cleanCategories = mutableListOf<String>()
+            categories.forEach { cat ->
+                val trimmed = cat.trim()
+                if (trimmed.isNotBlank() && !trimmed.equals("ALL", ignoreCase = true) && !cleanCategories.any { it.equals(trimmed, ignoreCase = true) }) {
+                    cleanCategories.add(trimmed)
+                    categoriesArray.put(trimmed)
+                }
             }
+            root.put("categories", categoriesArray)
         }
-        root.put("categories", categoriesArray)
 
-        val phrasesArray = JSONArray()
-        phrases.forEach { phrase ->
-            val obj = JSONObject()
-            obj.put("text", phrase.text)
-            if (!phrase.spokenText.isNullOrBlank()) {
-                obj.put("spokenText", phrase.spokenText)
+        if (phrases != null) {
+            val phrasesArray = JSONArray()
+            phrases.forEach { phrase ->
+                val obj = JSONObject()
+                obj.put("text", phrase.text)
+                if (!phrase.spokenText.isNullOrBlank()) {
+                    obj.put("spokenText", phrase.spokenText)
+                }
+                if (!phrase.spokenLanguage.isNullOrBlank()) {
+                    obj.put("spokenLanguage", phrase.spokenLanguage)
+                }
+                obj.put("language", phrase.language)
+                obj.put("isEmergency", phrase.isEmergency)
+                obj.put("category", phrase.category)
+                phrasesArray.put(obj)
             }
-            if (!phrase.spokenLanguage.isNullOrBlank()) {
-                obj.put("spokenLanguage", phrase.spokenLanguage)
-            }
-            obj.put("language", phrase.language)
-            obj.put("isEmergency", phrase.isEmergency)
-            obj.put("category", phrase.category)
-            phrasesArray.put(obj)
+            root.put("phrases", phrasesArray)
         }
-        root.put("phrases", phrasesArray)
+
+        if (whyTree != null) {
+            root.put("whyTree", WhyFinderJson.treeToJson(whyTree))
+        }
+
+        if (whyLog != null) {
+            root.put("whyLog", WhyFinderJson.logListToJson(whyLog))
+        }
 
         return root.toString(2)
+    }
+
+    fun exportToJson(phrases: List<Phrase>, categories: List<String>): String {
+        return exportToJson(phrases = phrases, categories = categories, whyTree = null, whyLog = null)
     }
 
     /**
@@ -73,6 +101,8 @@ object PhraseBackupHelper {
         val phrasesList = mutableListOf<Phrase>()
         var version = CURRENT_VERSION
         var exportedAt = System.currentTimeMillis()
+        var whyTree: WhyTree? = null
+        var whyLog: List<WhyLogEntry>? = null
 
         if (trimmed.startsWith("{")) {
             val root = JSONObject(trimmed)
@@ -93,6 +123,16 @@ object PhraseBackupHelper {
             if (phrasesArray != null) {
                 parsePhrasesArray(phrasesArray, phrasesList)
             }
+
+            val treeObj = root.optJSONObject("whyTree")
+            if (treeObj != null) {
+                whyTree = WhyFinderJson.treeFromJson(treeObj)
+            }
+
+            val logArray = root.optJSONArray("whyLog")
+            if (logArray != null) {
+                whyLog = WhyFinderJson.logListFromJson(logArray)
+            }
         } else if (trimmed.startsWith("[")) {
             val phrasesArray = JSONArray(trimmed)
             parsePhrasesArray(phrasesArray, phrasesList)
@@ -100,8 +140,8 @@ object PhraseBackupHelper {
             throw IllegalArgumentException("Unrecognized backup format")
         }
 
-        if (phrasesList.isEmpty()) {
-            throw IllegalArgumentException("No valid phrases found in backup")
+        if (phrasesList.isEmpty() && whyTree == null && whyLog == null) {
+            throw IllegalArgumentException("No valid phrases, question tree, or logs found in backup")
         }
 
         // Ensure extracted phrases have their categories represented in categoriesList
@@ -119,7 +159,9 @@ object PhraseBackupHelper {
             version = version,
             exportedAt = exportedAt,
             categories = categoriesList,
-            phrases = phrasesList
+            phrases = phrasesList,
+            whyTree = whyTree,
+            whyLog = whyLog
         )
     }
 
@@ -257,5 +299,15 @@ object PhraseBackupHelper {
         }
 
         return Pair(newPhrases, newCategories)
+    }
+
+    /**
+     * Merges imported logs with current logs, deduplicating by ID and sorting by timestamp descending.
+     */
+    fun mergeLogs(currentLogs: List<WhyLogEntry>, backupLogs: List<WhyLogEntry>): List<WhyLogEntry> {
+        val existingIds = currentLogs.map { it.id }.toSet()
+        val newEntries = backupLogs.filter { it.id !in existingIds }
+        val combined = currentLogs + newEntries
+        return combined.sortedByDescending { it.startedAt }.take(SharedPreferencesWhyFinderRepository.MAX_LOG_ENTRIES)
     }
 }

@@ -187,8 +187,18 @@
     <string name="dialog_import_replace_confirm">Gantikan daftar frasa Anda saat ini dengan cadangan? Frasa kustom saat ini yang tidak ada di cadangan akan digantikan.</string>
     <string name="msg_export_success">Berhasil mengekspor %1$d frasa</string>
     <string name="msg_import_success">Berhasil mengimpor %1$d frasa</string>
+    <string name="msg_import_tree_success">Berhasil mengimpor pohon pertanyaan</string>
     <string name="error_export_failed">Gagal mengekspor frasa: %1$s</string>
     <string name="error_import_failed">Gagal mengimpor frasa. Pastikan berkas adalah JSON cadangan Sotto yang valid.</string>
+    <string name="dialog_export_title">Ekspor Cadangan</string>
+    <string name="export_opt_phrases">Daftar Frasa (%1$d frasa)</string>
+    <string name="export_opt_why_tree">Pohon Pertanyaan Why Finder (%1$d area)</string>
+    <string name="export_opt_why_log">Catatan Why Privat (%1$d entri)</string>
+    <string name="export_why_log_warning">⚠️ Berisi riwayat krisis sensitif. Bagikan dengan hati-hati.</string>
+    <string name="dialog_import_v2_tree">Pohon Pertanyaan: %1$d area</string>
+    <string name="dialog_import_v2_log">Catatan Why: %1$d entri</string>
+    <string name="dialog_import_tree_only">Berkas cadangan ini berisi pohon pertanyaan Why Finder (%1$d area).\n\nApakah Anda ingin mengimpor pohon pertanyaan ini?</string>
+    <string name="action_import_tree">Impor Pohon Pertanyaan</string>
 
     <!-- Anonymous Usability Analytics -->
     <string name="label_metrics_section">Analisis Kegunaan Anonim</string>

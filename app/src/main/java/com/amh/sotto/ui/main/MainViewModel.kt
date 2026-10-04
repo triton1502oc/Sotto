@@ -5,6 +5,7 @@ import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.PhraseRepository
 import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.data.VoiceSettingsRepository
+import com.amh.sotto.data.WhyFinderRepository
 import com.amh.sotto.util.BackupData
 import com.amh.sotto.util.ImportResult
 import com.amh.sotto.util.PhraseBackupHelper
@@ -194,20 +195,67 @@ class MainViewModel(
         }
     }
 
-    fun exportBackup(): String {
-        return PhraseBackupHelper.exportToJson(_phrases.value, _categories.value)
+    fun exportBackup(
+        exportPhrases: Boolean = true,
+        exportTree: Boolean = false,
+        exportLog: Boolean = false,
+        whyFinderRepository: WhyFinderRepository? = null
+    ): String {
+        val phrases = if (exportPhrases) _phrases.value else null
+        val categories = if (exportPhrases) _categories.value else null
+        val tree = if (exportTree && whyFinderRepository != null) whyFinderRepository.getTree() else null
+        val log = if (exportLog && whyFinderRepository != null) whyFinderRepository.getLogs() else null
+
+        return PhraseBackupHelper.exportToJson(
+            phrases = phrases,
+            categories = categories,
+            whyTree = tree,
+            whyLog = log
+        )
     }
 
-    fun importBackup(backupData: BackupData, replace: Boolean): ImportResult {
-        val (newPhrases, newCategories) = if (replace) {
-            PhraseBackupHelper.replaceData(_phrases.value, backupData)
-        } else {
-            PhraseBackupHelper.mergeData(_phrases.value, _categories.value, backupData)
+    fun importBackup(
+        backupData: BackupData,
+        replace: Boolean,
+        whyFinderRepository: WhyFinderRepository? = null
+    ): ImportResult {
+        var newPhrases = _phrases.value
+        var newCategories = _categories.value
+        var treeImported = false
+        var logCount = 0
+
+        if (backupData.phrases.isNotEmpty()) {
+            val pair = if (replace) {
+                PhraseBackupHelper.replaceData(_phrases.value, backupData)
+            } else {
+                PhraseBackupHelper.mergeData(_phrases.value, _categories.value, backupData)
+            }
+            newPhrases = pair.first
+            newCategories = pair.second
+            _phrases.value = newPhrases
+            _categories.value = newCategories
+            repository.savePhrases(newPhrases)
+            repository.saveCategories(newCategories)
         }
-        _phrases.value = newPhrases
-        _categories.value = newCategories
-        repository.savePhrases(newPhrases)
-        repository.saveCategories(newCategories)
-        return ImportResult(phraseCount = newPhrases.size, categoryCount = newCategories.size)
+
+        if (backupData.whyTree != null && whyFinderRepository != null) {
+            whyFinderRepository.saveTree(backupData.whyTree)
+            treeImported = true
+        }
+
+        if (!backupData.whyLog.isNullOrEmpty() && whyFinderRepository != null) {
+            val currentLogs = whyFinderRepository.getLogs()
+            val mergedLogs = PhraseBackupHelper.mergeLogs(currentLogs, backupData.whyLog)
+            whyFinderRepository.clearLogs()
+            mergedLogs.reversed().forEach { whyFinderRepository.addLog(it) }
+            logCount = backupData.whyLog.size
+        }
+
+        return ImportResult(
+            phraseCount = newPhrases.size,
+            categoryCount = newCategories.size,
+            treeImported = treeImported,
+            logCount = logCount
+        )
     }
 }

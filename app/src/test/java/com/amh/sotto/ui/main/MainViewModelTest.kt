@@ -255,7 +255,7 @@ class MainViewModelTest {
     @Test
     fun `exportBackup returns non-empty JSON string of current phrases and categories`() {
         val json = viewModel.exportBackup()
-        assertTrue(json.contains("\"version\": 1"))
+        assertTrue(json.contains("\"version\": 2"))
         assertTrue(json.contains("Phrase 1"))
     }
 

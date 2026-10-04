@@ -69,6 +69,7 @@ import com.amh.sotto.ui.main.VoiceSettingsDialog
 import com.amh.sotto.util.LocaleHelper
 import com.amh.sotto.util.TranslationHelper
 import com.amh.sotto.ui.conversation.TwoWayConversationDialog
+import com.amh.sotto.data.WhyFinderRepository
 import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
 import com.amh.sotto.ui.whyfinder.WhyFinderDialog
 import com.amh.sotto.ui.whyfinder.WhyLogDialog
@@ -83,6 +84,7 @@ import androidx.core.content.ContextCompat
 import sh.calvin.reorderable.*
 import android.widget.Toast
 import com.amh.sotto.ui.main.ImportBackupDialog
+import com.amh.sotto.ui.main.ExportBackupDialog
 import com.amh.sotto.util.BackupData
 import com.amh.sotto.util.ImportResult
 import com.amh.sotto.util.PhraseBackupHelper
@@ -209,8 +211,8 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         },
                         isTtsLanguageInstalled = { isTtsVoiceInstalled(it) },
                         onInstallTtsVoice = { openTtsInstallSettings() },
-                        onExportBackup = { viewModel.exportBackup() },
-                        onImportBackup = { backup, replace -> viewModel.importBackup(backup, replace) },
+                        onExportBackup = { phrases, tree, log, repo -> viewModel.exportBackup(phrases, tree, log, repo) },
+                        onImportBackup = { backup, replace, repo -> viewModel.importBackup(backup, replace, repo) },
                         shouldPromptMetrics = remember { viewModel.shouldPromptMetrics() },
                         onMetricsPromptAnswered = { viewModel.onMetricsPromptAnswered(it) },
                         shouldPromptRole = remember { viewModel.shouldPromptRole() },
@@ -394,8 +396,8 @@ fun SottoApp(
     onAddCustomCategory: (String) -> Boolean = { false },
     onRenameCustomCategory: (String, String) -> Boolean = { _, _ -> false },
     onDeleteCustomCategory: (String) -> Boolean = { false },
-    onExportBackup: () -> String = { "" },
-    onImportBackup: (BackupData, Boolean) -> ImportResult = { _, _ -> ImportResult(0, 0) },
+    onExportBackup: (Boolean, Boolean, Boolean, WhyFinderRepository?) -> String = { _, _, _, _ -> "" },
+    onImportBackup: (BackupData, Boolean, WhyFinderRepository?) -> ImportResult = { _, _, _ -> ImportResult(0, 0) },
     shouldPromptMetrics: Boolean = false,
     onMetricsPromptAnswered: (Boolean) -> Unit = {},
     shouldPromptRole: Boolean = false,
@@ -504,6 +506,9 @@ fun SottoApp(
     }
 
     var pendingBackupData by remember { mutableStateOf<BackupData?>(null) }
+    var showExportDialog by rememberSaveable { mutableStateOf(false) }
+    var pendingExportOptions by remember { mutableStateOf(Triple(true, true, false)) }
+
     val exportSuccessTemplate = stringResource(R.string.msg_export_success)
     val exportErrorTemplate = stringResource(R.string.error_export_failed)
     val importSuccessTemplate = stringResource(R.string.msg_import_success)
@@ -514,13 +519,19 @@ fun SottoApp(
     ) { uri ->
         if (uri != null) {
             try {
-                val json = onExportBackup()
+                val json = onExportBackup(
+                    pendingExportOptions.first,
+                    pendingExportOptions.second,
+                    pendingExportOptions.third,
+                    whyFinderRepository
+                )
                 context.contentResolver.openOutputStream(uri)?.use { output ->
                     output.write(json.toByteArray(Charsets.UTF_8))
                 }
+                val count = if (pendingExportOptions.first) phrases.size else 0
                 Toast.makeText(
                     context,
-                    String.format(Locale.getDefault(), exportSuccessTemplate, phrases.size),
+                    String.format(Locale.getDefault(), exportSuccessTemplate, count),
                     Toast.LENGTH_SHORT
                 ).show()
             } catch (e: Exception) {
@@ -1310,16 +1321,31 @@ fun SottoApp(
             onLanguageChanged = onLanguageChanged,
             onSettingsChanged = onUpdateVoiceSettings,
             onTestVoice = onTestVoice,
-            onExportPhrases = {
-                val dateStr = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
-                exportLauncher.launch("sotto_backup_$dateStr.json")
-            },
+            onExportPhrases = { showExportDialog = true },
             onImportPhrases = {
                 importLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
             },
             onOpenWhyLog = { showWhyLogDialog = true },
             onOpenWhyTreeEditor = { showWhyTreeEditorDialog = true },
             onDismiss = { showVoiceDialog = false }
+        )
+    }
+
+    // Export Backup Configuration Dialog
+    if (showExportDialog) {
+        val tree = remember { whyFinderRepository.getTree() }
+        val logs = remember { whyFinderRepository.getLogs() }
+        ExportBackupDialog(
+            phraseCount = phrases.size,
+            areaCount = tree.areas.size,
+            logCount = logs.size,
+            onConfirmExport = { expPhrases, expTree, expLog ->
+                pendingExportOptions = Triple(expPhrases, expTree, expLog)
+                showExportDialog = false
+                val dateStr = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
+                exportLauncher.launch("sotto_backup_$dateStr.json")
+            },
+            onDismiss = { showExportDialog = false }
         )
     }
 
@@ -1427,22 +1453,28 @@ fun SottoApp(
         ImportBackupDialog(
             backupData = backup,
             onMerge = {
-                val result = onImportBackup(backup, false)
+                val result = onImportBackup(backup, false, whyFinderRepository)
                 pendingBackupData = null
-                Toast.makeText(
-                    context,
-                    String.format(Locale.getDefault(), importSuccessTemplate, result.phraseCount),
-                    Toast.LENGTH_SHORT
-                ).show()
+                val message = if (result.phraseCount > 0) {
+                    String.format(Locale.getDefault(), importSuccessTemplate, result.phraseCount)
+                } else if (result.treeImported) {
+                    context.getString(R.string.msg_import_tree_success)
+                } else {
+                    String.format(Locale.getDefault(), importSuccessTemplate, 0)
+                }
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             },
             onReplace = {
-                val result = onImportBackup(backup, true)
+                val result = onImportBackup(backup, true, whyFinderRepository)
                 pendingBackupData = null
-                Toast.makeText(
-                    context,
-                    String.format(Locale.getDefault(), importSuccessTemplate, result.phraseCount),
-                    Toast.LENGTH_SHORT
-                ).show()
+                val message = if (result.phraseCount > 0) {
+                    String.format(Locale.getDefault(), importSuccessTemplate, result.phraseCount)
+                } else if (result.treeImported) {
+                    context.getString(R.string.msg_import_tree_success)
+                } else {
+                    String.format(Locale.getDefault(), importSuccessTemplate, 0)
+                }
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             },
             onDismiss = { pendingBackupData = null }
         )

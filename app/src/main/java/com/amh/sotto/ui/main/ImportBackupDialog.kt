@@ -57,6 +57,44 @@ fun ImportBackupDialog(
             containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(16.dp)
         )
+    } else if (backupData.phrases.isEmpty() && backupData.whyTree != null) {
+        // Tree-only file (Therapist sharing)
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(
+                    text = stringResource(R.string.action_import_tree),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(
+                        R.string.dialog_import_tree_only,
+                        backupData.whyTree.areas.size
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = onMerge,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(stringResource(R.string.action_import_tree))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp)
+        )
     } else {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -69,15 +107,33 @@ fun ImportBackupDialog(
                 )
             },
             text = {
-                Text(
-                    text = stringResource(
-                        R.string.dialog_import_summary,
-                        backupData.phrases.size,
-                        backupData.categories.size
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = stringResource(
+                            R.string.dialog_import_summary,
+                            backupData.phrases.size,
+                            backupData.categories.size
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (backupData.whyTree != null) {
+                        Text(
+                            text = "• " + stringResource(R.string.dialog_import_v2_tree, backupData.whyTree.areas.size),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    if (!backupData.whyLog.isNullOrEmpty()) {
+                        Text(
+                            text = "• " + stringResource(R.string.dialog_import_v2_log, backupData.whyLog.size),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             },
             confirmButton = {
                 Column(
