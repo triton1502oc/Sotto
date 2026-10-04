@@ -1,5 +1,8 @@
 package com.amh.sotto.ui.whyfinder
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.amh.sotto.data.WhyArea
 import com.amh.sotto.data.WhyLogEntry
 import com.amh.sotto.data.WhyOutcome
@@ -60,12 +63,15 @@ class WhyFinderSession(
 ) {
     val sessionId: String = UUID.randomUUID().toString()
     private val recordedSteps = mutableListOf<WhyStep>()
+    private val historyStack = mutableListOf<WhyFinderState>()
 
-    var currentState: WhyFinderState = determineInitialState()
+    var currentState: WhyFinderState by mutableStateOf(determineInitialState())
         private set
 
     val steps: List<WhyStep>
         get() = recordedSteps.toList()
+
+    fun canStepBack(): Boolean = historyStack.isNotEmpty()
 
     private fun determineInitialState(): WhyFinderState {
         return if (tree.areas.isNotEmpty()) {
@@ -83,6 +89,7 @@ class WhyFinderSession(
     fun answerYes() {
         when (val state = currentState) {
             is WhyFinderState.AskingArea -> {
+                historyStack.add(state)
                 recordedSteps.add(WhyStep(questionText = state.area.question, answer = "yes"))
                 if (state.area.questions.isNotEmpty()) {
                     currentState = WhyFinderState.AskingQuestion(
@@ -91,11 +98,11 @@ class WhyFinderSession(
                         question = state.area.questions[0]
                     )
                 } else {
-                    // No detailed questions in area; advance to next area or finish
                     moveToNextArea(state.areaIndex)
                 }
             }
             is WhyFinderState.AskingQuestion -> {
+                historyStack.add(state)
                 recordedSteps.add(WhyStep(questionText = state.question.text, answer = "yes"))
                 when (state.question.type) {
                     WhyQuestionType.BODY_MAP -> {
@@ -123,6 +130,7 @@ class WhyFinderSession(
                 }
             }
             is WhyFinderState.ConfirmingCause -> {
+                historyStack.add(state)
                 val areaId = tree.areas.getOrNull(state.areaIndex)?.id
                 recordedSteps.add(WhyStep(questionText = state.causeText, answer = "yes"))
                 currentState = WhyFinderState.Finished(
@@ -155,10 +163,12 @@ class WhyFinderSession(
     private fun handleNegativeAnswer(answerKey: String) {
         when (val state = currentState) {
             is WhyFinderState.AskingArea -> {
+                historyStack.add(state)
                 recordedSteps.add(WhyStep(questionText = state.area.question, answer = answerKey))
                 moveToNextArea(state.areaIndex)
             }
             is WhyFinderState.AskingQuestion -> {
+                historyStack.add(state)
                 recordedSteps.add(WhyStep(questionText = state.question.text, answer = answerKey))
                 val area = tree.areas[state.areaIndex]
                 val nextQ = state.questionIndex + 1
@@ -173,7 +183,7 @@ class WhyFinderSession(
                 }
             }
             is WhyFinderState.ConfirmingCause -> {
-                // Caregiver asked "Is this it?" and user answered No / Not sure
+                historyStack.add(state)
                 recordedSteps.add(WhyStep(questionText = state.causeText, answer = answerKey))
                 val area = tree.areas.getOrNull(state.areaIndex)
                 val nextQ = state.questionIndex + 1
@@ -189,7 +199,7 @@ class WhyFinderSession(
             }
             is WhyFinderState.SelectingBodyPart,
             is WhyFinderState.SelectingIntensity -> {
-                // If user doesn't know or says no to body part / intensity, treat as cause confirmed without part
+                historyStack.add(state)
                 val cause = (currentState as? WhyFinderState.SelectingBodyPart)?.question?.text
                     ?: (currentState as? WhyFinderState.SelectingIntensity)?.question?.text
                     ?: ""
@@ -227,6 +237,7 @@ class WhyFinderSession(
 
     fun selectBodyPart(bodyPart: String) {
         val state = currentState as? WhyFinderState.SelectingBodyPart ?: return
+        historyStack.add(state)
         recordedSteps.add(WhyStep(questionText = "Body part: $bodyPart", answer = "selected"))
         currentState = WhyFinderState.SelectingIntensity(
             areaIndex = state.areaIndex,
@@ -239,6 +250,7 @@ class WhyFinderSession(
     fun selectIntensity(level: Int) {
         val state = currentState as? WhyFinderState.SelectingIntensity ?: return
         val clamped = level.coerceIn(1, 5)
+        historyStack.add(state)
         recordedSteps.add(WhyStep(questionText = "Intensity: $clamped/5", answer = "selected"))
         currentState = WhyFinderState.ConfirmingCause(
             areaIndex = state.areaIndex,
@@ -251,13 +263,15 @@ class WhyFinderSession(
 
     fun stop() {
         if (currentState is WhyFinderState.Finished) return
+        val state = currentState
+        historyStack.add(state)
         recordedSteps.add(WhyStep(questionText = "User tapped stop", answer = "stop"))
-        val areaId = when (val s = currentState) {
-            is WhyFinderState.AskingArea -> s.area.id
-            is WhyFinderState.AskingQuestion -> tree.areas.getOrNull(s.areaIndex)?.id
-            is WhyFinderState.SelectingBodyPart -> tree.areas.getOrNull(s.areaIndex)?.id
-            is WhyFinderState.SelectingIntensity -> tree.areas.getOrNull(s.areaIndex)?.id
-            is WhyFinderState.ConfirmingCause -> tree.areas.getOrNull(s.areaIndex)?.id
+        val areaId = when (state) {
+            is WhyFinderState.AskingArea -> state.area.id
+            is WhyFinderState.AskingQuestion -> tree.areas.getOrNull(state.areaIndex)?.id
+            is WhyFinderState.SelectingBodyPart -> tree.areas.getOrNull(state.areaIndex)?.id
+            is WhyFinderState.SelectingIntensity -> tree.areas.getOrNull(state.areaIndex)?.id
+            is WhyFinderState.ConfirmingCause -> tree.areas.getOrNull(state.areaIndex)?.id
             is WhyFinderState.Finished -> null
         }
         currentState = WhyFinderState.Finished(
@@ -267,6 +281,37 @@ class WhyFinderSession(
             startedAt = startedAt,
             endedAt = System.currentTimeMillis()
         )
+    }
+
+    fun stepBack(): Boolean {
+        if (historyStack.isEmpty()) return false
+        val prevState = historyStack.removeAt(historyStack.lastIndex)
+        if (recordedSteps.isNotEmpty()) {
+            recordedSteps.removeAt(recordedSteps.lastIndex)
+        }
+        currentState = prevState
+        return true
+    }
+
+    fun overrideCurrentQuestion(customText: String) {
+        when (val state = currentState) {
+            is WhyFinderState.AskingArea -> {
+                currentState = state.copy(area = state.area.copy(question = customText))
+            }
+            is WhyFinderState.AskingQuestion -> {
+                currentState = state.copy(question = state.question.copy(text = customText))
+            }
+            is WhyFinderState.ConfirmingCause -> {
+                currentState = state.copy(causeText = customText)
+            }
+            else -> {}
+        }
+    }
+
+    fun restart() {
+        recordedSteps.clear()
+        historyStack.clear()
+        currentState = determineInitialState()
     }
 
     fun toLogEntry(note: String? = null): WhyLogEntry? {

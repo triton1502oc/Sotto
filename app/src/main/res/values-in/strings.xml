@@ -20,12 +20,13 @@
     <string name="cd_add_phrase">Tambah frasa</string>
 
     <!-- Dialogs -->
-    <string name="dialog_voice_settings_title">Pengaturan Suara &amp; Bahasa</string>
+    <string name="dialog_voice_settings_title">Pengaturan</string>
     <string name="dialog_add_phrase_title">Tambah Frasa</string>
     <string name="dialog_edit_phrase_title">Ubah Frasa</string>
     <string name="label_phrase_text">Teks frasa</string>
 
     <!-- Voice & Language Settings -->
+    <string name="label_speech_section">Suara &amp; Pengucapan</string>
     <string name="label_language">Bahasa Aplikasi</string>
     <string name="search_language">Cari bahasa…</string>
     <string name="label_card_language">Bahasa Frasa</string>
@@ -82,8 +83,8 @@
     <string name="cd_move_up">Pindah ke atas</string>
     <string name="cd_move_down">Pindah ke bawah</string>
     <string name="cd_reorder_category">Urutkan kategori</string>
-    <string name="label_attention_chime">Nada perhatian sebelum bicara</string>
-    <string name="label_attention_chime_desc">Membunyikan nada singkat untuk menarik perhatian sebelum bicara</string>
+    <string name="label_attention_chime">Bunyi perhatian</string>
+    <string name="label_attention_chime_desc">Memutar bunyi singkat sebelum berbicara</string>
 
     <!-- Default Phrases by Category -->
     <string-array name="default_phrases_emergency">
@@ -119,9 +120,9 @@
     <string name="label_spoken_text">Teks ucapan alternatif (opsional)</string>
     <string name="hint_spoken_text">Apa yang diucapkan (misal terjemahan atau pelafalan)</string>
     <string name="label_spoken_language">Bahasa ucapan</string>
-    <string name="label_dual_language_section">Bicara Dua Bahasa</string>
-    <string name="label_show_lang_switcher">Tampilkan pengalih bahasa di beranda</string>
-    <string name="label_show_lang_switcher_desc">Menambahkan tombol pengalih di bilah atas untuk mengganti bahasa ucapan</string>
+    <string name="label_dual_language_section">Dua Bahasa</string>
+    <string name="label_show_lang_switcher">Tombol ganti bahasa di kartu</string>
+    <string name="label_show_lang_switcher_desc">Ikon bendera cepat untuk berbicara dalam bahasa kedua</string>
     <string name="label_secondary_language">Bahasa ucapan kedua</string>
     <string name="action_speak_primary">Bicara (%1$s)</string>
     <string name="action_speak_secondary">Bicara (%1$s)</string>
@@ -142,7 +143,7 @@
     <string name="label_voice_pack_installed">Terinstal (Siap)</string>
     <string name="label_voice_pack_missing">Belum terinstal</string>
     <string name="action_install_voice">Instal</string>
-    <string name="warn_voice_pack_missing">Data suara belum terinstal di perangkat. Ucapan mungkin menggunakan aksen fallback.</string>
+    <string name="warn_voice_pack_missing">Paket suara belum terpasang. Menggunakan aksen cadangan.</string>
 
     <!-- Two-Way Caregiver & Receptive Communication Mode -->
     <string name="action_listen_mode">Dengar &amp; Baca</string>
@@ -176,8 +177,8 @@
     <string name="action_not_now">Nanti Saja</string>
 
     <!-- Phrase Backup & Restore -->
-    <string name="label_backup_section">Cadangan &amp; Pemulihan Frasa</string>
-    <string name="label_backup_desc">Ekspor frasa dan kategori Anda ke berkas JSON atau pulihkan dari cadangan.</string>
+    <string name="label_backup_section">Cadangan &amp; Pemulihan</string>
+    <string name="label_backup_desc">Ekspor atau pulihkan perpustakaan frasa dan data Anda.</string>
     <string name="action_export_phrases">Ekspor Frasa</string>
     <string name="action_import_phrases">Impor Frasa</string>
     <string name="dialog_import_title">Impor Frasa</string>
@@ -201,23 +202,23 @@
     <string name="action_import_tree">Impor Pohon Pertanyaan</string>
 
     <!-- Anonymous Usability Analytics -->
-    <string name="label_metrics_section">Analisis Kegunaan Anonim</string>
+    <string name="label_metrics_section">Analisis &amp; Privasi</string>
     <string name="label_metrics_toggle">Bantu menyempurnakan Sotto</string>
-    <string name="label_metrics_desc">Membagikan durasi tombol dan latensi anonim untuk mengenali kendala penggunaan. Sama sekali tidak mengumpulkan teks, frasa, atau suara.</string>
+    <string name="label_metrics_desc">Bagikan waktu interaksi anonim untuk perbaikan aplikasi. Tidak pernah mengumpulkan teks atau suara.</string>
     <string name="dialog_metrics_optin_title">Bantu Menyempurnakan Sotto</string>
     <string name="dialog_metrics_optin_message">Bantu kami membuat Sotto lebih mudah digunakan dengan membagikan durasi interaksi tombol dan latensi anonim. Kami tidak pernah mengumpulkan teks yang diketik, frasa, atau rekaman suara. Anda dapat mengubah ini kapan saja di Pengaturan.</string>
     <string name="action_help_improve">Bantu Sempurnakan</string>
-    <string name="action_view_shared_data">Lihat Data yang Dibagikan</string>
+    <string name="action_view_shared_data">Lihat data yang dibagikan</string>
     <string name="dialog_shared_data_title">Data Telemetri yang Mengantre</string>
     <string name="dialog_shared_data_empty">Tidak ada data analisis yang sedang mengantre untuk dikirim.</string>
-    <string name="label_user_role">Peran Pengguna Utama</string>
+    <string name="label_user_role">Pengguna Utama</string>
 
     <!-- Role Prompt Dialog -->
     <string name="dialog_role_title">Untuk Siapa Sotto Digunakan?</string>
     <string name="dialog_role_desc">Beri tahu kami siapa yang paling sering menggunakan Sotto di ponsel ini agar kami dapat menyesuaikan pengalaman penggunaan:</string>
-    <string name="role_caregiver">Pengasuh / Anggota Keluarga</string>
-    <string name="role_self">Saya Sendiri (Remaja / Dewasa Autistik)</string>
-    <string name="role_professional">Profesional / Terapis / Guru</string>
+    <string name="role_caregiver">Pengasuh</string>
+    <string name="role_self">Saya Sendiri</string>
+    <string name="role_professional">Profesional</string>
     <string name="action_skip">Lewati</string>
 
     <!-- Why Finder & Caregiver Guided Tools -->
@@ -349,4 +350,12 @@
     <string name="survey_q2_opt_quick_speak">Ketik cepat (Quick-speak)</string>
     <string name="survey_q3_title">Siapa yang paling sering menggunakan Sotto?</string>
     <string name="survey_action_submit">Kirim Masukan</string>
+
+    <!-- Unified Caregiver Mode -->
+    <string name="mode_why_finder">Why Finder (Pohon Masalah)</string>
+    <string name="mode_freeform">Kustom / Mikrofon</string>
+    <string name="action_edit_question">Ubah Pertanyaan</string>
+    <string name="action_step_back">Kembali</string>
+    <string name="action_restart">Ulangi Pohon</string>
+    <string name="hint_edit_question">Ketik pertanyaan...</string>
 </resources>

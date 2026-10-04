@@ -371,7 +371,7 @@ fun WhyFinderDialog(
 }
 
 @Composable
-private fun WhyFinderActionDock(
+internal fun WhyFinderActionDock(
     onYes: () -> Unit,
     onNo: () -> Unit,
     onNotSure: () -> Unit,
@@ -500,7 +500,7 @@ private fun WhyFinderActionDock(
 }
 
 @Composable
-private fun BodyPartSelectionGrid(
+internal fun BodyPartSelectionGrid(
     onSelectPart: (String) -> Unit,
     onNotSure: () -> Unit,
     onStop: () -> Unit
@@ -571,7 +571,7 @@ private fun BodyPartSelectionGrid(
 }
 
 @Composable
-private fun IntensityScaleRow(
+internal fun IntensityScaleRow(
     onSelectLevel: (Int) -> Unit,
     onNotSure: () -> Unit,
     onStop: () -> Unit

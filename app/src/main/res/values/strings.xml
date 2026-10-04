@@ -20,12 +20,13 @@
     <string name="cd_add_phrase">Add phrase</string>
 
     <!-- Dialogs -->
-    <string name="dialog_voice_settings_title">Voice &amp; Language Settings</string>
+    <string name="dialog_voice_settings_title">Settings</string>
     <string name="dialog_add_phrase_title">Add Phrase</string>
     <string name="dialog_edit_phrase_title">Edit Phrase</string>
     <string name="label_phrase_text">Phrase text</string>
 
     <!-- Voice & Language Settings -->
+    <string name="label_speech_section">Speech &amp; Voice</string>
     <string name="label_language">App Language</string>
     <string name="search_language">Search language…</string>
     <string name="label_card_language">Card Language</string>
@@ -82,8 +83,8 @@
     <string name="cd_move_up">Move up</string>
     <string name="cd_move_down">Move down</string>
     <string name="cd_reorder_category">Reorder category</string>
-    <string name="label_attention_chime">Attention chime before speaking</string>
-    <string name="label_attention_chime_desc">Plays a brief chime to alert listeners before speaking</string>
+    <string name="label_attention_chime">Attention chime</string>
+    <string name="label_attention_chime_desc">Plays a brief chime before speaking</string>
 
     <!-- Default Phrases by Category -->
     <string-array name="default_phrases_emergency">
@@ -119,9 +120,9 @@
     <string name="label_spoken_text">Alternate spoken text (optional)</string>
     <string name="hint_spoken_text">What to speak aloud (e.g. translation or pronunciation)</string>
     <string name="label_spoken_language">Spoken language</string>
-    <string name="label_dual_language_section">Dual-Language Speech</string>
-    <string name="label_show_lang_switcher">Show language switcher on home</string>
-    <string name="label_show_lang_switcher_desc">Adds a toggle in the top bar to switch speech language</string>
+    <string name="label_dual_language_section">Dual-Language</string>
+    <string name="label_show_lang_switcher">Language switcher on cards</string>
+    <string name="label_show_lang_switcher_desc">Adds a quick-tap flag to speak cards in a secondary language</string>
     <string name="label_secondary_language">Secondary speech language</string>
     <string name="action_speak_primary">Speak (%1$s)</string>
     <string name="action_speak_secondary">Speak (%1$s)</string>
@@ -142,7 +143,7 @@
     <string name="label_voice_pack_installed">Installed (Ready)</string>
     <string name="label_voice_pack_missing">Not installed</string>
     <string name="action_install_voice">Install</string>
-    <string name="warn_voice_pack_missing">Voice data not installed on device. May speak with a fallback accent.</string>
+    <string name="warn_voice_pack_missing">Voice pack missing. May speak with a fallback accent.</string>
 
     <!-- Two-Way Caregiver & Receptive Communication Mode -->
     <string name="action_listen_mode">Listen &amp; Read</string>
@@ -176,8 +177,8 @@
     <string name="action_not_now">Not Now</string>
 
     <!-- Phrase Backup & Restore -->
-    <string name="label_backup_section">Phrase Library Backup</string>
-    <string name="label_backup_desc">Export your phrases and categories to a JSON file or restore them from a backup.</string>
+    <string name="label_backup_section">Backup &amp; Restore</string>
+    <string name="label_backup_desc">Export or restore your phrase library and settings.</string>
     <string name="action_export_phrases">Export Phrases</string>
     <string name="action_import_phrases">Import Phrases</string>
     <string name="dialog_import_title">Import Phrases</string>
@@ -201,23 +202,23 @@
     <string name="action_import_tree">Import Question Tree</string>
 
     <!-- Anonymous Usability Analytics -->
-    <string name="label_metrics_section">Anonymous Usability Analytics</string>
+    <string name="label_metrics_section">Analytics &amp; Privacy</string>
     <string name="label_metrics_toggle">Help improve Sotto</string>
-    <string name="label_metrics_desc">Shares anonymous interaction timings and latency to help identify usability difficulties. Strictly zero text, phrases, or speech is collected.</string>
+    <string name="label_metrics_desc">Share anonymous interaction timings to help improve usability. Never collects text or speech.</string>
     <string name="dialog_metrics_optin_title">Help Improve Sotto</string>
     <string name="dialog_metrics_optin_message">Help us make Sotto easier to use by sharing anonymous button timings and latency. We never collect typed text, phrases, or speech. You can change this anytime in Settings.</string>
     <string name="action_help_improve">Help Improve</string>
-    <string name="action_view_shared_data">See What Is Shared</string>
+    <string name="action_view_shared_data">View shared data</string>
     <string name="dialog_shared_data_title">Pending Telemetry Payload</string>
     <string name="dialog_shared_data_empty">No telemetry events are currently queued for upload.</string>
-    <string name="label_user_role">Primary User Role</string>
+    <string name="label_user_role">Primary User</string>
 
     <!-- Role Prompt Dialog -->
     <string name="dialog_role_title">Who is Sotto for?</string>
     <string name="dialog_role_desc">Tell us who mostly uses Sotto on this phone to help us tune the experience:</string>
-    <string name="role_caregiver">Caregiver / Family Member</string>
-    <string name="role_self">Myself (Autistic Teen / Adult)</string>
-    <string name="role_professional">Professional / Therapist / Teacher</string>
+    <string name="role_caregiver">Caregiver</string>
+    <string name="role_self">Myself</string>
+    <string name="role_professional">Professional</string>
     <string name="action_skip">Skip</string>
 
     <!-- Why Finder & Caregiver Guided Tools -->
@@ -349,4 +350,12 @@
     <string name="survey_q2_opt_quick_speak">Quick-speak typing</string>
     <string name="survey_q3_title">Who uses Sotto most in your setting?</string>
     <string name="survey_action_submit">Submit Feedback</string>
+
+    <!-- Unified Caregiver Mode -->
+    <string name="mode_why_finder">Why Finder (Tree)</string>
+    <string name="mode_freeform">Custom / Mic</string>
+    <string name="action_edit_question">Edit Question</string>
+    <string name="action_step_back">Back</string>
+    <string name="action_restart">Restart Tree</string>
+    <string name="hint_edit_question">Type question to ask...</string>
 </resources>

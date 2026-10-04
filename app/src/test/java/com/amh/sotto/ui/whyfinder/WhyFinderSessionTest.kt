@@ -149,4 +149,40 @@ class WhyFinderSessionTest {
         assertTrue(session.currentState is WhyFinderState.AskingQuestion)
         assertEquals("senses_bright", (session.currentState as WhyFinderState.AskingQuestion).question.id)
     }
+
+    @Test
+    fun `stepBack reverts to previous state and removes step`() {
+        val session = WhyFinderSession(testTree)
+        assertTrue(session.currentState is WhyFinderState.AskingArea)
+        assertEquals(false, session.canStepBack())
+
+        session.answerNo() // Moved to senses
+        assertTrue(session.canStepBack())
+        assertEquals("senses", (session.currentState as WhyFinderState.AskingArea).area.id)
+        assertEquals(1, session.steps.size)
+
+        val reverted = session.stepBack()
+        assertTrue(reverted)
+        assertEquals("body", (session.currentState as WhyFinderState.AskingArea).area.id)
+        assertEquals(0, session.steps.size)
+        assertEquals(false, session.canStepBack())
+    }
+
+    @Test
+    fun `overrideCurrentQuestion changes active question text`() {
+        val session = WhyFinderSession(testTree)
+        session.overrideCurrentQuestion("Is the room too cold?")
+        val state = session.currentState as WhyFinderState.AskingArea
+        assertEquals("Is the room too cold?", state.area.question)
+    }
+
+    @Test
+    fun `restart resets session to initial state`() {
+        val session = WhyFinderSession(testTree)
+        session.answerYes()
+        session.restart()
+        assertTrue(session.currentState is WhyFinderState.AskingArea)
+        assertEquals("body", (session.currentState as WhyFinderState.AskingArea).area.id)
+        assertEquals(0, session.steps.size)
+    }
 }

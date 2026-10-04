@@ -71,7 +71,6 @@ import com.amh.sotto.util.TranslationHelper
 import com.amh.sotto.ui.conversation.TwoWayConversationDialog
 import com.amh.sotto.data.WhyFinderRepository
 import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
-import com.amh.sotto.ui.whyfinder.WhyFinderDialog
 import com.amh.sotto.ui.whyfinder.WhyLogDialog
 import com.amh.sotto.ui.whyfinder.WhyTreeEditorDialog
 import com.amh.sotto.ui.category.ManageCategoriesDialog
@@ -438,7 +437,6 @@ fun SottoApp(
     var liveSpokenTextTwoWay by remember { mutableStateOf("") }
     var showAudioRationaleDialog by rememberSaveable { mutableStateOf(false) }
     val whyFinderRepository = remember { SharedPreferencesWhyFinderRepository(context) }
-    var showWhyFinderDialog by rememberSaveable { mutableStateOf(false) }
     var showWhyLogDialog by rememberSaveable { mutableStateOf(false) }
     var showWhyTreeEditorDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -680,16 +678,6 @@ fun SottoApp(
                             modifier = Modifier.semantics { contentDescription = listenModeCd }
                         ) {
                             Text("👂", fontSize = 20.sp)
-                        }
-
-                        val whyFinderCd = stringResource(R.string.cd_why_finder)
-                        IconButton(
-                            onClick = {
-                                showWhyFinderDialog = true
-                            },
-                            modifier = Modifier.semantics { contentDescription = whyFinderCd }
-                        ) {
-                            Text("🧭", fontSize = 20.sp)
                         }
 
                         // Voice & App Settings (Always visible)
@@ -1463,7 +1451,7 @@ fun SottoApp(
     }
 
     // 14-Day Product-Market Fit Survey Dialog
-    if (showPmfSurveyDialog && !showMetricsOptInDialog && !showRolePromptDialog && !showTwoWayDialog && !showWhyFinderDialog && pendingBackupData == null) {
+    if (showPmfSurveyDialog && !showMetricsOptInDialog && !showRolePromptDialog && !showTwoWayDialog && pendingBackupData == null) {
         PmfSurveyDialog(
             initialRole = voiceSettings.userRole,
             onDismiss = {
@@ -1553,15 +1541,6 @@ fun SottoApp(
                 liveSpokenTextTwoWay = ""
                 showTwoWayDialog = false
             }
-        )
-    }
-
-    // Why Finder Guided Yes/No Flow Dialog
-    if (showWhyFinderDialog) {
-        WhyFinderDialog(
-            repository = whyFinderRepository,
-            onSpeakText = { ttsText -> onSpeakText(ttsText, LocaleHelper.LANG_AUTO) },
-            onDismiss = { showWhyFinderDialog = false }
         )
     }
 
