@@ -197,4 +197,115 @@
     <string name="dialog_metrics_optin_title">Help Improve Sotto</string>
     <string name="dialog_metrics_optin_message">Help us make Sotto easier to use by sharing anonymous button timings and latency. We never collect typed text, phrases, or speech. You can change this anytime in Settings.</string>
     <string name="action_help_improve">Help Improve</string>
+
+    <!-- Why Finder & Caregiver Guided Tools -->
+    <string name="action_why_finder">Why Finder</string>
+    <string name="cd_why_finder">Open Why Finder to narrow down causes with yes or no questions</string>
+    <string name="why_finder_title">Why Finder</string>
+    <string name="why_finder_btn_not_sure">Not Sure</string>
+    <string name="why_finder_btn_stop">Stop</string>
+    <string name="why_finder_confirm_title">Is this what\'s wrong?</string>
+    <string name="why_finder_found_title">We found what\'s bothering you</string>
+    <string name="why_finder_not_found_title">That\'s okay. We can take a break.</string>
+    <string name="why_finder_stopped_title">Session stopped</string>
+    <string name="why_finder_body_part_prompt">Where does it hurt?</string>
+    <string name="why_finder_intensity_prompt">How much does it hurt? (1 to 5)</string>
+    <string name="why_finder_note_hint">Optional note (saved only on this device)</string>
+    <string name="action_save_log">Save &amp; Finish</string>
+    <string name="action_skip_note">Finish Without Note</string>
+    <string name="action_view_why_log">Why Log</string>
+    <string name="action_edit_why_tree">Edit Tree</string>
+    <string name="why_tree_editor_title">Edit Question Tree</string>
+    <string name="why_tree_reset_default">Reset to Defaults</string>
+    <string name="why_tree_reset_confirm">Reset the question tree to the default questions? Any customized questions will be lost.</string>
+    <string name="action_add_question">Add Question</string>
+    <string name="label_area_question">Area opening question</string>
+
+    <!-- Why Log & Patterns -->
+    <string name="why_log_title">Private Why Log</string>
+    <string name="why_log_empty">No entries in log yet</string>
+    <string name="why_log_delete_confirm">Delete this entry?</string>
+    <string name="why_log_clear_confirm">Clear all log entries? This cannot be undone.</string>
+    <string name="action_clear_all">Clear All</string>
+    <string name="why_log_patterns_title">30-Day Patterns</string>
+    <string name="why_log_top_cause">Most common cause: %1$s (%2$d×)</string>
+    <string name="why_log_top_area">Most common area: %1$s</string>
+    <string name="why_log_time_summary">Time of day: %1$s</string>
+    <string name="time_morning">Morning</string>
+    <string name="time_afternoon">Afternoon</string>
+    <string name="time_evening">Evening</string>
+    <string name="time_night">Night</string>
+
+    <!-- Body Regions -->
+    <string name="body_region_head">Head</string>
+    <string name="body_region_eyes">Eyes</string>
+    <string name="body_region_ears">Ears</string>
+    <string name="body_region_teeth">Teeth / Mouth</string>
+    <string name="body_region_throat">Throat</string>
+    <string name="body_region_chest">Chest</string>
+    <string name="body_region_stomach">Stomach</string>
+    <string name="body_region_back">Back</string>
+    <string name="body_region_arms_hands">Arms / Hands</string>
+    <string name="body_region_legs_feet">Legs / Feet</string>
+    <string name="body_region_skin">Skin</string>
+
+    <!-- Default Why Tree Area Titles & Questions -->
+    <string name="why_area_body_title">Body / Physical</string>
+    <string name="why_area_body_q">Is it something with your body or physical comfort?</string>
+    <string name="why_area_senses_title">Senses / Environment</string>
+    <string name="why_area_senses_q">Is it something around you overwhelming your senses?</string>
+    <string name="why_area_feelings_title">Feelings / Emotions</string>
+    <string name="why_area_feelings_q">Is it a strong feeling or emotion inside?</string>
+    <string name="why_area_person_title">A Person</string>
+    <string name="why_area_person_q">Is it about a person or someone\'s behavior?</string>
+    <string name="why_area_happened_title">Something Happened</string>
+    <string name="why_area_happened_q">Did something unexpected or frustrating happen earlier?</string>
+    <string name="why_area_coming_up_title">Something Coming Up</string>
+    <string name="why_area_coming_up_q">Is it worry about something that is going to happen next?</string>
+
+    <!-- Default Why Tree Questions Arrays -->
+    <string-array name="default_why_questions_body">
+        <item>Are you in pain or hurting somewhere?</item>
+        <item>Are you hungry or thirsty?</item>
+        <item>Are you feeling very tired or exhausted?</item>
+        <item>Are you feeling too cold or too hot?</item>
+        <item>Do you need the restroom?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_senses">
+        <item>Is it too loud or noisy?</item>
+        <item>Is it too bright or glaring?</item>
+        <item>Is it too crowded or too many people around?</item>
+        <item>Is there an unpleasant smell?</item>
+        <item>Are your clothes or something touching you uncomfortable?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_feelings">
+        <item>Are you feeling scared or anxious?</item>
+        <item>Are you feeling angry or frustrated?</item>
+        <item>Are you feeling sad or lonely?</item>
+        <item>Are you feeling overwhelmed or overloaded?</item>
+        <item>Are you feeling embarrassed or misunderstood?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_person">
+        <item>Is it about someone here at home or family?</item>
+        <item>Is it about someone from school, work, or day program?</item>
+        <item>Did something happen online or in a message?</item>
+        <item>Did a stranger or bystander do or say something?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_happened">
+        <item>Did a plan, schedule, or routine change?</item>
+        <item>Did something get lost, broken, or not work?</item>
+        <item>Did someone say something sharp, reprimand, or correct you?</item>
+        <item>Were you stopped from finishing something you wanted to do?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_coming_up">
+        <item>Are we going somewhere you don\'t want to go?</item>
+        <item>Is it about going to school, work, or an activity soon?</item>
+        <item>Is it about an upcoming appointment or transition?</item>
+        <item>Is there a change in tomorrow or upcoming routine?</item>
+    </string-array>
 </resources>

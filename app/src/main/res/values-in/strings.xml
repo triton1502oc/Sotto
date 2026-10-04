@@ -197,4 +197,115 @@
     <string name="dialog_metrics_optin_title">Bantu Menyempurnakan Sotto</string>
     <string name="dialog_metrics_optin_message">Bantu kami membuat Sotto lebih mudah digunakan dengan membagikan durasi interaksi tombol dan latensi anonim. Kami tidak pernah mengumpulkan teks yang diketik, frasa, atau rekaman suara. Anda dapat mengubah ini kapan saja di Pengaturan.</string>
     <string name="action_help_improve">Bantu Sempurnakan</string>
+
+    <!-- Why Finder & Caregiver Guided Tools -->
+    <string name="action_why_finder">Why Finder</string>
+    <string name="cd_why_finder">Buka Why Finder untuk mempersempit penyebab dengan pertanyaan ya atau tidak</string>
+    <string name="why_finder_title">Why Finder</string>
+    <string name="why_finder_btn_not_sure">Kurang Tahu</string>
+    <string name="why_finder_btn_stop">Berhenti</string>
+    <string name="why_finder_confirm_title">Apakah ini penyebabnya?</string>
+    <string name="why_finder_found_title">Penyebabnya sudah ditemukan</string>
+    <string name="why_finder_not_found_title">Tidak apa-apa. Kita bisa istirahat dulu.</string>
+    <string name="why_finder_stopped_title">Sesi dihentikan</string>
+    <string name="why_finder_body_part_prompt">Di bagian mana yang sakit?</string>
+    <string name="why_finder_intensity_prompt">Seberapa sakit? (Skala 1 sampai 5)</string>
+    <string name="why_finder_note_hint">Catatan opsional (hanya disimpan di perangkat ini)</string>
+    <string name="action_save_log">Simpan &amp; Selesai</string>
+    <string name="action_skip_note">Selesai Tanpa Catatan</string>
+    <string name="action_view_why_log">Catatan Why</string>
+    <string name="action_edit_why_tree">Ubah Pertanyaan</string>
+    <string name="why_tree_editor_title">Ubah Pohon Pertanyaan</string>
+    <string name="why_tree_reset_default">Kembalikan ke Bawaan</string>
+    <string name="why_tree_reset_confirm">Kembalikan daftar pertanyaan ke pengaturan awal bawaan? Pertanyaan kustom akan hilang.</string>
+    <string name="action_add_question">Tambah Pertanyaan</string>
+    <string name="label_area_question">Pertanyaan pembuka area</string>
+
+    <!-- Why Log & Patterns -->
+    <string name="why_log_title">Catatan Why Privat</string>
+    <string name="why_log_empty">Belum ada riwayat catatan</string>
+    <string name="why_log_delete_confirm">Hapus riwayat ini?</string>
+    <string name="why_log_clear_confirm">Hapus semua riwayat catatan? Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="action_clear_all">Hapus Semua</string>
+    <string name="why_log_patterns_title">Pola 30 Hari Terakhir</string>
+    <string name="why_log_top_cause">Penyebab tersering: %1$s (%2$d×)</string>
+    <string name="why_log_top_area">Area tersering: %1$s</string>
+    <string name="why_log_time_summary">Waktu kejadian: %1$s</string>
+    <string name="time_morning">Pagi</string>
+    <string name="time_afternoon">Siang/Sore</string>
+    <string name="time_evening">Malam</string>
+    <string name="time_night">Larut Malam</string>
+
+    <!-- Body Regions -->
+    <string name="body_region_head">Kepala</string>
+    <string name="body_region_eyes">Mata</string>
+    <string name="body_region_ears">Telinga</string>
+    <string name="body_region_teeth">Gigi / Mulut</string>
+    <string name="body_region_throat">Tenggorokan</string>
+    <string name="body_region_chest">Dada</string>
+    <string name="body_region_stomach">Perut</string>
+    <string name="body_region_back">Punggung</string>
+    <string name="body_region_arms_hands">Lengan / Tangan</string>
+    <string name="body_region_legs_feet">Kaki</string>
+    <string name="body_region_skin">Kulit</string>
+
+    <!-- Default Why Tree Area Titles & Questions -->
+    <string name="why_area_body_title">Fisik / Tubuh</string>
+    <string name="why_area_body_q">Apakah terkait kondisi fisik atau kenyamanan tubuh?</string>
+    <string name="why_area_senses_title">Indra / Lingkungan</string>
+    <string name="why_area_senses_q">Apakah ada sesuatu di sekitar yang mengganggu pancaindra?</string>
+    <string name="why_area_feelings_title">Perasaan / Emosi</string>
+    <string name="why_area_feelings_q">Apakah merasakan emosi atau perasaan yang kuat di dalam hati?</string>
+    <string name="why_area_person_title">Seseorang</string>
+    <string name="why_area_person_q">Apakah mengenai seseorang atau perilaku orang lain?</string>
+    <string name="why_area_happened_title">Sesuatu Terjadi</string>
+    <string name="why_area_happened_q">Apakah terjadi sesuatu yang mendadak atau mengecewakan tadi?</string>
+    <string name="why_area_coming_up_title">Akan Datang</string>
+    <string name="why_area_coming_up_q">Apakah khawatir tentang sesuatu yang akan terjadi nanti?</string>
+
+    <!-- Default Why Tree Questions Arrays -->
+    <string-array name="default_why_questions_body">
+        <item>Apakah merasa sakit di suatu bagian tubuh?</item>
+        <item>Apakah merasa lapar atau haus?</item>
+        <item>Apakah merasa sangat lelah atau mengantuk?</item>
+        <item>Apakah merasa terlalu dingin atau terlalu panas?</item>
+        <item>Apakah perlu ke kamar mandi?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_senses">
+        <item>Apakah suaranya terlalu keras atau bising?</item>
+        <item>Apakah cahayanya terlalu terang atau menyilaukan?</item>
+        <item>Apakah terlalu ramai atau terlalu banyak orang?</item>
+        <item>Apakah ada bau yang tidak menyenangkan?</item>
+        <item>Apakah pakaian atau sentuhan terasa tidak nyaman?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_feelings">
+        <item>Apakah merasa takut atau cemas?</item>
+        <item>Apakah merasa marah atau kesal?</item>
+        <item>Apakah merasa sedih atau kesepian?</item>
+        <item>Apakah merasa kewalahan atau pikiran terlalu penuh?</item>
+        <item>Apakah merasa malu atau salah dipahami?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_person">
+        <item>Apakah mengenai seseorang di rumah atau keluarga?</item>
+        <item>Apakah mengenai teman atau orang dari sekolah/tempat kerja?</item>
+        <item>Apakah ada kejadian online atau lewat pesan?</item>
+        <item>Apakah ada orang asing yang melakukan atau mengatakan sesuatu?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_happened">
+        <item>Apakah ada rencana, jadwal, atau rutinitas yang berubah?</item>
+        <item>Apakah ada barang yang hilang, rusak, atau tidak berfungsi?</item>
+        <item>Apakah ada yang berbicara ketus, memarahi, atau mengoreksi?</item>
+        <item>Apakah terhalang menyelesaikan hal yang ingin dilakukan?</item>
+    </string-array>
+
+    <string-array name="default_why_questions_coming_up">
+        <item>Apakah akan pergi ke tempat yang tidak diinginkan?</item>
+        <item>Apakah mengenai berangkat ke sekolah, kerja, atau aktivitas sebentar lagi?</item>
+        <item>Apakah mengenai janji temu atau perpindahan kegiatan nanti?</item>
+        <item>Apakah ada perubahan rutinitas besok atau yang akan datang?</item>
+    </string-array>
 </resources>
