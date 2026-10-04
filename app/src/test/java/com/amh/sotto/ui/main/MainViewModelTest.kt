@@ -339,4 +339,30 @@ class MainViewModelTest {
         verify { voiceSettingsRepository.setLastPromptedMetricsVersion(com.amh.sotto.BuildConfig.VERSION_CODE) }
         assertFalse(viewModel.voiceSettings.value.shareUsabilityMetrics)
     }
+
+    @Test
+    fun `shouldPromptRole returns true when not prompted and role is unset`() {
+        every { voiceSettingsRepository.hasPromptedRole() } returns false
+        every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(userRole = VoiceSettings.ROLE_UNSET)
+
+        val vm = MainViewModel(repository, voiceSettingsRepository)
+        assertTrue(vm.shouldPromptRole())
+    }
+
+    @Test
+    fun `shouldPromptRole returns false when already prompted`() {
+        every { voiceSettingsRepository.hasPromptedRole() } returns true
+
+        val vm = MainViewModel(repository, voiceSettingsRepository)
+        assertFalse(vm.shouldPromptRole())
+    }
+
+    @Test
+    fun `onRolePromptAnswered saves prompted state and updates role`() {
+        viewModel.onRolePromptAnswered(VoiceSettings.ROLE_CAREGIVER)
+
+        verify { voiceSettingsRepository.setPromptedRole(true) }
+        verify { voiceSettingsRepository.saveVoiceSettings(match { it.userRole == VoiceSettings.ROLE_CAREGIVER }) }
+        assertEquals(VoiceSettings.ROLE_CAREGIVER, viewModel.voiceSettings.value.userRole)
+    }
 }

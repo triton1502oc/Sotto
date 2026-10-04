@@ -197,6 +197,18 @@
     <string name="dialog_metrics_optin_title">Help Improve Sotto</string>
     <string name="dialog_metrics_optin_message">Help us make Sotto easier to use by sharing anonymous button timings and latency. We never collect typed text, phrases, or speech. You can change this anytime in Settings.</string>
     <string name="action_help_improve">Help Improve</string>
+    <string name="action_view_shared_data">See What Is Shared</string>
+    <string name="dialog_shared_data_title">Pending Telemetry Payload</string>
+    <string name="dialog_shared_data_empty">No telemetry events are currently queued for upload.</string>
+    <string name="label_user_role">Primary User Role</string>
+
+    <!-- Role Prompt Dialog -->
+    <string name="dialog_role_title">Who is Sotto for?</string>
+    <string name="dialog_role_desc">Tell us who mostly uses Sotto on this phone to help us tune the experience:</string>
+    <string name="role_caregiver">Caregiver / Family Member</string>
+    <string name="role_self">Myself (Autistic Teen / Adult)</string>
+    <string name="role_professional">Professional / Therapist / Teacher</string>
+    <string name="action_skip">Skip</string>
 
     <!-- Why Finder & Caregiver Guided Tools -->
     <string name="action_why_finder">Why Finder</string>

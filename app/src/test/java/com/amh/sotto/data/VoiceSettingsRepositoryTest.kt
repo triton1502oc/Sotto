@@ -117,5 +117,37 @@ class VoiceSettingsRepositoryTest {
             editor.apply()
         }
     }
+
+    @Test
+    fun `installId generated on opt-in and cleared on opt-out`() {
+        every { sharedPreferences.getString("telemetry_install_id", null) } returns null
+        every { editor.remove("telemetry_install_id") } returns editor
+
+        val id = repository.getOrGenerateInstallId()
+        org.junit.Assert.assertNotNull(id)
+        verify {
+            editor.putString("telemetry_install_id", any())
+            editor.apply()
+        }
+
+        repository.clearInstallId()
+        verify {
+            editor.remove("telemetry_install_id")
+            editor.apply()
+        }
+    }
+
+    @Test
+    fun `userRole getter and setter works`() {
+        every { sharedPreferences.getString("user_role", VoiceSettings.ROLE_UNSET) } returns VoiceSettings.ROLE_CAREGIVER
+
+        assertEquals(VoiceSettings.ROLE_CAREGIVER, repository.getUserRole())
+
+        repository.setUserRole(VoiceSettings.ROLE_SELF)
+        verify {
+            editor.putString("user_role", VoiceSettings.ROLE_SELF)
+            editor.apply()
+        }
+    }
 }
 

@@ -40,10 +40,14 @@ class UsabilitySyncWorker(
 
     private fun sendToGoogleSheet(events: List<UsabilityTracker.UsabilityEvent>): Boolean {
         return runCatching {
+            val repo = SharedPreferencesVoiceSettingsRepository(applicationContext)
+            val installId = repo.getInstallId() ?: repo.getOrGenerateInstallId()
             val payload = JSONObject().apply {
+                put("schema", 2)
+                put("installId", installId)
                 put("appVersion", "v${BuildConfig.VERSION_NAME}")
-                put("platform", "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
-                put("sessionId", UsabilityTracker.sessionId)
+                put("role", repo.getUserRole())
+                put("uiLang", LocaleHelper.getLanguage(applicationContext))
                 val jsonEvents = JSONArray()
                 for (e in events) {
                     jsonEvents.put(e.toJsonObject())

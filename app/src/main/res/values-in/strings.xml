@@ -197,6 +197,18 @@
     <string name="dialog_metrics_optin_title">Bantu Menyempurnakan Sotto</string>
     <string name="dialog_metrics_optin_message">Bantu kami membuat Sotto lebih mudah digunakan dengan membagikan durasi interaksi tombol dan latensi anonim. Kami tidak pernah mengumpulkan teks yang diketik, frasa, atau rekaman suara. Anda dapat mengubah ini kapan saja di Pengaturan.</string>
     <string name="action_help_improve">Bantu Sempurnakan</string>
+    <string name="action_view_shared_data">Lihat Data yang Dibagikan</string>
+    <string name="dialog_shared_data_title">Data Telemetri yang Mengantre</string>
+    <string name="dialog_shared_data_empty">Tidak ada data analisis yang sedang mengantre untuk dikirim.</string>
+    <string name="label_user_role">Peran Pengguna Utama</string>
+
+    <!-- Role Prompt Dialog -->
+    <string name="dialog_role_title">Untuk Siapa Sotto Digunakan?</string>
+    <string name="dialog_role_desc">Beri tahu kami siapa yang paling sering menggunakan Sotto di ponsel ini agar kami dapat menyesuaikan pengalaman penggunaan:</string>
+    <string name="role_caregiver">Pengasuh / Anggota Keluarga</string>
+    <string name="role_self">Saya Sendiri (Remaja / Dewasa Autistik)</string>
+    <string name="role_professional">Profesional / Terapis / Guru</string>
+    <string name="action_skip">Lewati</string>
 
     <!-- Why Finder & Caregiver Guided Tools -->
     <string name="action_why_finder">Why Finder</string>

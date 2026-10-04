@@ -11,14 +11,29 @@ data class VoiceSettings(
     val playAttentionChime: Boolean = false,
     val showLanguageSwitcher: Boolean = false,
     val secondaryLanguage: String = "id",
-    val shareUsabilityMetrics: Boolean = false
-)
+    val shareUsabilityMetrics: Boolean = false,
+    val userRole: String = ROLE_UNSET
+) {
+    companion object {
+        const val ROLE_UNSET = "unset"
+        const val ROLE_CAREGIVER = "caregiver"
+        const val ROLE_SELF = "self"
+        const val ROLE_PROFESSIONAL = "professional"
+    }
+}
 
 interface VoiceSettingsRepository {
     fun getVoiceSettings(): VoiceSettings
     fun saveVoiceSettings(settings: VoiceSettings)
     fun getLastPromptedMetricsVersion(): Int
     fun setLastPromptedMetricsVersion(versionCode: Int)
+    fun getInstallId(): String?
+    fun getOrGenerateInstallId(): String
+    fun clearInstallId()
+    fun hasPromptedRole(): Boolean
+    fun setPromptedRole(prompted: Boolean)
+    fun getUserRole(): String
+    fun setUserRole(role: String)
 }
 
 class SharedPreferencesVoiceSettingsRepository(private val context: Context) : VoiceSettingsRepository {
@@ -33,6 +48,9 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         private const val KEY_SECONDARY_LANGUAGE = "secondary_language"
         private const val KEY_SHARE_USABILITY_METRICS = "share_usability_metrics"
         private const val KEY_METRICS_PROMPT_VERSION_CODE = "metrics_prompt_version_code"
+        private const val KEY_INSTALL_ID = "telemetry_install_id"
+        private const val KEY_USER_ROLE = "user_role"
+        private const val KEY_ROLE_PROMPTED = "role_prompted"
     }
 
     override fun getVoiceSettings(): VoiceSettings {
@@ -43,6 +61,7 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         val showLanguageSwitcher = prefs.getBoolean(KEY_SHOW_LANGUAGE_SWITCHER, false)
         val secondaryLanguage = prefs.getString(KEY_SECONDARY_LANGUAGE, "id") ?: "id"
         val shareMetrics = prefs.getBoolean(KEY_SHARE_USABILITY_METRICS, false)
+        val role = prefs.getString(KEY_USER_ROLE, VoiceSettings.ROLE_UNSET) ?: VoiceSettings.ROLE_UNSET
         return VoiceSettings(
             speechRate = rate,
             speechPitch = pitch,
@@ -50,7 +69,8 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
             playAttentionChime = attentionChime,
             showLanguageSwitcher = showLanguageSwitcher,
             secondaryLanguage = secondaryLanguage,
-            shareUsabilityMetrics = shareMetrics
+            shareUsabilityMetrics = shareMetrics,
+            userRole = role
         )
     }
 
@@ -64,10 +84,13 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         editor.putBoolean(KEY_SHOW_LANGUAGE_SWITCHER, settings.showLanguageSwitcher)
         editor.putString(KEY_SECONDARY_LANGUAGE, settings.secondaryLanguage)
         editor.putBoolean(KEY_SHARE_USABILITY_METRICS, settings.shareUsabilityMetrics)
+        editor.putString(KEY_USER_ROLE, settings.userRole)
         editor.apply()
 
-        // If metrics were enabled and are now toggled OFF, immediately purge the buffer
-        if (wasMetricsEnabled && !settings.shareUsabilityMetrics) {
+        if (settings.shareUsabilityMetrics) {
+            getOrGenerateInstallId()
+        } else if (wasMetricsEnabled) {
+            clearInstallId()
             UsabilityTracker.clearBuffer(context)
         }
     }
@@ -78,5 +101,37 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
 
     override fun setLastPromptedMetricsVersion(versionCode: Int) {
         prefs.edit().putInt(KEY_METRICS_PROMPT_VERSION_CODE, versionCode).apply()
+    }
+
+    override fun getInstallId(): String? {
+        return prefs.getString(KEY_INSTALL_ID, null)
+    }
+
+    override fun getOrGenerateInstallId(): String {
+        val existing = prefs.getString(KEY_INSTALL_ID, null)
+        if (!existing.isNullOrBlank()) return existing
+        val newId = java.util.UUID.randomUUID().toString()
+        prefs.edit().putString(KEY_INSTALL_ID, newId).apply()
+        return newId
+    }
+
+    override fun clearInstallId() {
+        prefs.edit().remove(KEY_INSTALL_ID).apply()
+    }
+
+    override fun hasPromptedRole(): Boolean {
+        return prefs.getBoolean(KEY_ROLE_PROMPTED, false)
+    }
+
+    override fun setPromptedRole(prompted: Boolean) {
+        prefs.edit().putBoolean(KEY_ROLE_PROMPTED, prompted).apply()
+    }
+
+    override fun getUserRole(): String {
+        return prefs.getString(KEY_USER_ROLE, VoiceSettings.ROLE_UNSET) ?: VoiceSettings.ROLE_UNSET
+    }
+
+    override fun setUserRole(role: String) {
+        prefs.edit().putString(KEY_USER_ROLE, role).apply()
     }
 }

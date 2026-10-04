@@ -104,6 +104,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         enableEdgeToEdge()
         currentLanguage = LocaleHelper.getLanguage(this)
         tts = TextToSpeech(this, this)
+        UsabilityTracker.recordAppOpen(this)
 
         val phraseRepository = SharedPreferencesPhraseRepository(applicationContext)
         val voiceSettingsRepository = SharedPreferencesVoiceSettingsRepository(applicationContext)
@@ -156,7 +157,10 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         onSpeakText = { text, lang ->
                             speakUtterance(text, lang)
                         },
-                        onAddPhrase = { viewModel.addPhrase(it) },
+                        onAddPhrase = {
+                            viewModel.addPhrase(it)
+                            UsabilityTracker.recordActivation(this@MainActivity, "custom_phrase")
+                        },
                         onEditPhrase = { old, new -> viewModel.editPhrase(old, new) },
                         onDeletePhrase = { viewModel.deletePhrase(it) },
                         onMovePhrase = { fromPhrase, toPhrase -> viewModel.movePhrase(fromPhrase, toPhrase) },
@@ -165,12 +169,20 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             viewModel.updateVoiceSettings(it)
                         },
                         categories = categories,
-                        onAddCategory = { viewModel.addCategory(it) },
+                        onAddCategory = {
+                            val added = viewModel.addCategory(it)
+                            if (added) UsabilityTracker.recordActivation(this@MainActivity, "custom_category")
+                            added
+                        },
                         onRenameCategory = { old, new -> viewModel.renameCategory(old, new) },
                         onDeleteCategory = { viewModel.deleteCategory(it) },
                         onReorderCategories = { from, to -> viewModel.reorderCategories(from, to) },
                         customCategories = categories,
-                        onAddCustomCategory = { viewModel.addCategory(it) },
+                        onAddCustomCategory = {
+                            val added = viewModel.addCategory(it)
+                            if (added) UsabilityTracker.recordActivation(this@MainActivity, "custom_category")
+                            added
+                        },
                         onRenameCustomCategory = { old, new -> viewModel.renameCategory(old, new) },
                         onDeleteCustomCategory = { viewModel.deleteCategory(it) },
                         onTestVoice = { testSettings ->
@@ -196,7 +208,9 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         onExportBackup = { viewModel.exportBackup() },
                         onImportBackup = { backup, replace -> viewModel.importBackup(backup, replace) },
                         shouldPromptMetrics = remember { viewModel.shouldPromptMetrics() },
-                        onMetricsPromptAnswered = { viewModel.onMetricsPromptAnswered(it) }
+                        onMetricsPromptAnswered = { viewModel.onMetricsPromptAnswered(it) },
+                        shouldPromptRole = remember { viewModel.shouldPromptRole() },
+                        onRolePromptAnswered = { viewModel.onRolePromptAnswered(it) }
                     )
                 }
             }
@@ -379,12 +393,15 @@ fun SottoApp(
     onExportBackup: () -> String = { "" },
     onImportBackup: (BackupData, Boolean) -> ImportResult = { _, _ -> ImportResult(0, 0) },
     shouldPromptMetrics: Boolean = false,
-    onMetricsPromptAnswered: (Boolean) -> Unit = {}
+    onMetricsPromptAnswered: (Boolean) -> Unit = {},
+    shouldPromptRole: Boolean = false,
+    onRolePromptAnswered: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showMetricsOptInDialog by rememberSaveable { mutableStateOf(shouldPromptMetrics) }
+    var showRolePromptDialog by rememberSaveable { mutableStateOf(shouldPromptRole) }
     var showAddDialog by remember { mutableStateOf(false) }
     var initialAddText by rememberSaveable { mutableStateOf("") }
     var showVoiceDialog by rememberSaveable { mutableStateOf(false) }
@@ -1323,6 +1340,63 @@ fun SottoApp(
                     }
                 ) {
                     Text(stringResource(R.string.action_not_now))
+                }
+            }
+        )
+    }
+
+    // One-Time First-Launch Role Selection Dialog
+    if (showRolePromptDialog && !showMetricsOptInDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showRolePromptDialog = false
+                onRolePromptAnswered("")
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_role_title),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.dialog_role_desc),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    val roleOptions = listOf(
+                        VoiceSettings.ROLE_CAREGIVER to stringResource(R.string.role_caregiver),
+                        VoiceSettings.ROLE_SELF to stringResource(R.string.role_self),
+                        VoiceSettings.ROLE_PROFESSIONAL to stringResource(R.string.role_professional)
+                    )
+                    roleOptions.forEach { (roleKey, roleLabel) ->
+                        OutlinedButton(
+                            onClick = {
+                                showRolePromptDialog = false
+                                onRolePromptAnswered(roleKey)
+                                UsabilityTracker.recordRoleSet(context, roleKey)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(roleLabel, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showRolePromptDialog = false
+                        onRolePromptAnswered("")
+                    }
+                ) {
+                    Text(stringResource(R.string.action_skip))
                 }
             }
         )

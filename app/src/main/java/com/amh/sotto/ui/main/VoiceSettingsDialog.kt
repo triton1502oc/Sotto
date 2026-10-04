@@ -26,6 +26,7 @@ import com.amh.sotto.data.VoiceSettings
 import com.amh.sotto.util.ChimePlayer
 import com.amh.sotto.util.LocaleHelper
 import com.amh.sotto.util.TranslationHelper
+import com.amh.sotto.util.UsabilityTracker
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -51,6 +52,7 @@ fun VoiceSettingsDialog(
     var showLangSwitcher by remember { mutableStateOf(currentSettings.showLanguageSwitcher) }
     var secondaryLang by remember { mutableStateOf(currentSettings.secondaryLanguage) }
     var shareMetrics by remember { mutableStateOf(currentSettings.shareUsabilityMetrics) }
+    var userRole by remember { mutableStateOf(currentSettings.userRole) }
     var secondaryLangDropdownExpanded by remember { mutableStateOf(false) }
     var langDropdownExpanded by remember { mutableStateOf(false) }
     var langSearchQuery by remember { mutableStateOf("") }
@@ -63,7 +65,8 @@ fun VoiceSettingsDialog(
         newChime: Boolean = attentionChime,
         newShowLangSwitcher: Boolean = showLangSwitcher,
         newSecondaryLang: String = secondaryLang,
-        newShareMetrics: Boolean = shareMetrics
+        newShareMetrics: Boolean = shareMetrics,
+        newUserRole: String = userRole
     ) {
         rate = newRate
         pitch = newPitch
@@ -71,6 +74,7 @@ fun VoiceSettingsDialog(
         showLangSwitcher = newShowLangSwitcher
         secondaryLang = newSecondaryLang
         shareMetrics = newShareMetrics
+        userRole = newUserRole
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
@@ -79,7 +83,8 @@ fun VoiceSettingsDialog(
                 playAttentionChime = newChime,
                 showLanguageSwitcher = newShowLangSwitcher,
                 secondaryLanguage = newSecondaryLang,
-                shareUsabilityMetrics = newShareMetrics
+                shareUsabilityMetrics = newShareMetrics,
+                userRole = newUserRole
             )
         )
     }
@@ -679,6 +684,76 @@ fun VoiceSettingsDialog(
                                 checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                             )
                         )
+                    }
+
+                    if (shareMetrics) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = stringResource(R.string.label_user_role),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            val roles = listOf(
+                                VoiceSettings.ROLE_CAREGIVER to stringResource(R.string.role_caregiver),
+                                VoiceSettings.ROLE_SELF to stringResource(R.string.role_self),
+                                VoiceSettings.ROLE_PROFESSIONAL to stringResource(R.string.role_professional)
+                            )
+                            roles.forEach { (rKey, rLabel) ->
+                                val isSelected = userRole == rKey
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = {
+                                        updateSettings(newUserRole = rKey)
+                                        UsabilityTracker.recordRoleSet(context, rKey)
+                                    },
+                                    label = { Text(rLabel, fontSize = 11.sp) }
+                                )
+                            }
+                        }
+
+                        var showSharedDataDialog by remember { mutableStateOf(false) }
+                        TextButton(
+                            onClick = { showSharedDataDialog = true },
+                            modifier = Modifier.align(Alignment.End).padding(top = 2.dp)
+                        ) {
+                            Text(stringResource(R.string.action_view_shared_data), fontSize = 12.sp)
+                        }
+
+                        if (showSharedDataDialog) {
+                            val previewText = remember { UsabilityTracker.generatePreviewPayload(context) }
+                            AlertDialog(
+                                onDismissRequest = { showSharedDataDialog = false },
+                                title = { Text(stringResource(R.string.dialog_shared_data_title)) },
+                                text = {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(max = 350.dp)
+                                            .verticalScroll(rememberScrollState())
+                                    ) {
+                                        androidx.compose.foundation.text.selection.SelectionContainer {
+                                            Text(
+                                                text = previewText,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                            )
+                                        }
+                                    }
+                                },
+                                confirmButton = {
+                                    TextButton(onClick = { showSharedDataDialog = false }) {
+                                        Text(stringResource(R.string.cd_dismiss))
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
 

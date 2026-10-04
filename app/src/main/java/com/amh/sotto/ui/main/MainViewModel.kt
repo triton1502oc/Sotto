@@ -183,6 +183,17 @@ class MainViewModel(
         }
     }
 
+    fun shouldPromptRole(): Boolean {
+        return !voiceSettingsRepository.hasPromptedRole() && _voiceSettings.value.userRole == VoiceSettings.ROLE_UNSET
+    }
+
+    fun onRolePromptAnswered(role: String) {
+        voiceSettingsRepository.setPromptedRole(true)
+        if (role.isNotBlank()) {
+            updateVoiceSettings(_voiceSettings.value.copy(userRole = role))
+        }
+    }
+
     fun exportBackup(): String {
         return PhraseBackupHelper.exportToJson(_phrases.value, _categories.value)
     }

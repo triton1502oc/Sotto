@@ -10,6 +10,7 @@ import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -61,6 +62,8 @@ class UsabilityTrackerTest {
         assertEquals("completed", deserialized.outcome)
         assertEquals("none", deserialized.frictionTag)
         assertEquals("len_12", deserialized.contextTag)
+        assertEquals(event.day, deserialized.day)
+        assertEquals(event.hourBucket, deserialized.hourBucket)
     }
 
     @Test
@@ -97,8 +100,8 @@ class UsabilityTrackerTest {
     }
 
     @Test
-    fun `recordEvent enforces FIFO cap of 50 events`() {
-        for (i in 1..60) {
+    fun `recordEvent enforces FIFO cap of 500 events`() {
+        for (i in 1..510) {
             UsabilityTracker.recordEvent(
                 context,
                 UsabilityTracker.UsabilityEvent(
@@ -110,10 +113,10 @@ class UsabilityTrackerTest {
         }
 
         val pending = UsabilityTracker.getPendingEvents(context)
-        assertEquals(50, pending.size)
+        assertEquals(500, pending.size)
         // First 10 should have been discarded (FIFO)
         assertEquals("Intent_11", pending.first().intent)
-        assertEquals("Intent_60", pending.last().intent)
+        assertEquals("Intent_510", pending.last().intent)
     }
 
     @Test
@@ -174,5 +177,51 @@ class UsabilityTrackerTest {
         val json = event.toJsonObject().toString()
         assertFalse(json.contains("Private"))
         assertFalse(json.contains("12345"))
+    }
+
+    @Test
+    fun `recordWhyFinder emits correct coarse tags without recording personal text`() {
+        UsabilityTracker.recordWhyFinder(
+            context = context,
+            outcome = "found",
+            areaId = "senses",
+            depth = 3,
+            notSureCount = 1,
+            bodyPart = null,
+            intensity = null,
+            durationMs = 25000L
+        )
+
+        val pending = UsabilityTracker.getPendingEvents(context)
+        // Note: recordWhyFinder also emits an Activation event if first time
+        val whyEvent = pending.firstOrNull { it.intent == "WhyFinder" }
+        assertNotNull(whyEvent)
+        assertEquals("found", whyEvent!!.outcome)
+        assertEquals(25000L, whyEvent.durationMs)
+        assertTrue(whyEvent.contextTag.contains("area_senses_d3_ns1"))
+    }
+
+    @Test
+    fun `recordWhyLogViewed records correct count bucket`() {
+        UsabilityTracker.recordWhyLogViewed(context, 0)
+        UsabilityTracker.recordWhyLogViewed(context, 3)
+        UsabilityTracker.recordWhyLogViewed(context, 12)
+        UsabilityTracker.recordWhyLogViewed(context, 45)
+
+        val pending = UsabilityTracker.getPendingEvents(context).filter { it.intent == "WhyLogViewed" }
+        assertEquals(4, pending.size)
+        assertEquals("0", pending[0].outcome)
+        assertEquals("1_5", pending[1].outcome)
+        assertEquals("6_20", pending[2].outcome)
+        assertEquals("20_plus", pending[3].outcome)
+    }
+
+    @Test
+    fun `generatePreviewPayload formats valid schema 2 JSON`() {
+        UsabilityTracker.recordEvent(context, UsabilityTracker.UsabilityEvent("TestIntent", 100L, "completed"))
+        val preview = UsabilityTracker.generatePreviewPayload(context)
+        assertTrue(preview.contains("\"schema\": 2"))
+        assertTrue(preview.contains("\"eventsCount\": 1"))
+        assertTrue(preview.contains("\"TestIntent\""))
     }
 }
