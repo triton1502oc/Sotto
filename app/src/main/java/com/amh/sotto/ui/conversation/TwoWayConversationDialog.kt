@@ -16,6 +16,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -45,7 +47,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.amh.sotto.R
 import com.amh.sotto.data.Phrase
+import com.amh.sotto.data.WhyFinderRepository
 import com.amh.sotto.ui.category.getCategoryDisplayName
+import com.amh.sotto.ui.whyfinder.WhyFinderDialog
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +64,7 @@ fun TwoWayConversationDialog(
     onSpeakResponse: (spokenText: String) -> Unit,
     categories: List<String> = emptyList(),
     customCategories: List<String> = emptyList(),
+    whyFinderRepository: WhyFinderRepository? = null,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -67,6 +72,7 @@ fun TwoWayConversationDialog(
     var isFlipped by rememberSaveable { mutableStateOf(false) }
     var lastReply by remember { mutableStateOf<String?>(null) }
     var showQuestionsSheet by rememberSaveable { mutableStateOf(false) }
+    var showWhyFinder by rememberSaveable { mutableStateOf(false) }
     var showKeyboardInput by rememberSaveable { mutableStateOf(false) }
     var manualInputText by rememberSaveable { mutableStateOf("") }
 
@@ -204,6 +210,9 @@ fun TwoWayConversationDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(
+                                modifier = Modifier
+                                    .weight(1f, fill = false)
+                                    .horizontalScroll(rememberScrollState()),
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -231,6 +240,20 @@ fun TwoWayConversationDialog(
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
+                                }
+
+                                // Why Finder Button
+                                if (whyFinderRepository != null) {
+                                    FilledTonalButton(
+                                        onClick = { showWhyFinder = true },
+                                        shape = RoundedCornerShape(20.dp),
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = "🧭 " + stringResource(R.string.action_why_finder),
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
+                                    }
                                 }
                             }
 
@@ -317,6 +340,9 @@ fun TwoWayConversationDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -346,6 +372,20 @@ fun TwoWayConversationDialog(
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
+                            }
+
+                            // Why Finder Button
+                            if (whyFinderRepository != null) {
+                                FilledTonalButton(
+                                    onClick = { showWhyFinder = true },
+                                    shape = RoundedCornerShape(20.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text(
+                                        text = "🧭 " + stringResource(R.string.action_why_finder),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
                             }
                         }
 
@@ -604,6 +644,14 @@ fun TwoWayConversationDialog(
                     Text(stringResource(R.string.action_cancel))
                 }
             }
+        )
+    }
+
+    if (showWhyFinder && whyFinderRepository != null) {
+        WhyFinderDialog(
+            repository = whyFinderRepository,
+            onSpeakText = onSpeakResponse,
+            onDismiss = { showWhyFinder = false }
         )
     }
 }

@@ -69,6 +69,8 @@ import com.amh.sotto.ui.main.VoiceSettingsDialog
 import com.amh.sotto.util.LocaleHelper
 import com.amh.sotto.util.TranslationHelper
 import com.amh.sotto.ui.conversation.TwoWayConversationDialog
+import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
+import com.amh.sotto.ui.whyfinder.WhyFinderDialog
 import com.amh.sotto.ui.category.ManageCategoriesDialog
 import com.amh.sotto.ui.category.getCategoryDisplayName
 import com.amh.sotto.util.SpeechRecognitionHelper
@@ -418,6 +420,8 @@ fun SottoApp(
     var isListeningTwoWay by remember { mutableStateOf(false) }
     var liveSpokenTextTwoWay by remember { mutableStateOf("") }
     var showAudioRationaleDialog by rememberSaveable { mutableStateOf(false) }
+    val whyFinderRepository = remember { SharedPreferencesWhyFinderRepository(context) }
+    var showWhyFinderDialog by rememberSaveable { mutableStateOf(false) }
 
     val speechHelper = remember { SpeechRecognitionHelper(context) }
 
@@ -647,6 +651,16 @@ fun SottoApp(
                             modifier = Modifier.semantics { contentDescription = listenModeCd }
                         ) {
                             Text("👂", fontSize = 20.sp)
+                        }
+
+                        val whyFinderCd = stringResource(R.string.cd_why_finder)
+                        IconButton(
+                            onClick = {
+                                showWhyFinderDialog = true
+                            },
+                            modifier = Modifier.semantics { contentDescription = whyFinderCd }
+                        ) {
+                            Text("🧭", fontSize = 20.sp)
                         }
 
                         // Voice & App Settings (Always visible)
@@ -1465,12 +1479,22 @@ fun SottoApp(
             },
             categories = effectiveCategories,
             customCategories = effectiveCategories,
+            whyFinderRepository = whyFinderRepository,
             onDismiss = {
                 UsabilityTracker.endIntent(context, "TwoWay", outcome = "aborted", frictionTag = "dismissed")
                 stopTwoWayListening()
                 liveSpokenTextTwoWay = ""
                 showTwoWayDialog = false
             }
+        )
+    }
+
+    // Why Finder Guided Yes/No Flow Dialog
+    if (showWhyFinderDialog) {
+        WhyFinderDialog(
+            repository = whyFinderRepository,
+            onSpeakText = { ttsText -> onSpeakText(ttsText, LocaleHelper.LANG_AUTO) },
+            onDismiss = { showWhyFinderDialog = false }
         )
     }
 
