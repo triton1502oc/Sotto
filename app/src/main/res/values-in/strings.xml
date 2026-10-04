@@ -232,6 +232,8 @@
     <string name="why_tree_reset_confirm">Kembalikan daftar pertanyaan ke pengaturan awal bawaan? Pertanyaan kustom akan hilang.</string>
     <string name="action_add_question">Tambah Pertanyaan</string>
     <string name="label_area_question">Pertanyaan pembuka area</string>
+    <string name="hint_question_text">Teks pertanyaan</string>
+    <string name="confirm_delete_question">Hapus pertanyaan ini?</string>
 
     <!-- Why Log & Patterns -->
     <string name="why_log_title">Catatan Why Privat</string>

@@ -72,6 +72,7 @@ import com.amh.sotto.ui.conversation.TwoWayConversationDialog
 import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
 import com.amh.sotto.ui.whyfinder.WhyFinderDialog
 import com.amh.sotto.ui.whyfinder.WhyLogDialog
+import com.amh.sotto.ui.whyfinder.WhyTreeEditorDialog
 import com.amh.sotto.ui.category.ManageCategoriesDialog
 import com.amh.sotto.ui.category.getCategoryDisplayName
 import com.amh.sotto.util.SpeechRecognitionHelper
@@ -424,6 +425,7 @@ fun SottoApp(
     val whyFinderRepository = remember { SharedPreferencesWhyFinderRepository(context) }
     var showWhyFinderDialog by rememberSaveable { mutableStateOf(false) }
     var showWhyLogDialog by rememberSaveable { mutableStateOf(false) }
+    var showWhyTreeEditorDialog by rememberSaveable { mutableStateOf(false) }
 
     val speechHelper = remember { SpeechRecognitionHelper(context) }
 
@@ -1316,6 +1318,7 @@ fun SottoApp(
                 importLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
             },
             onOpenWhyLog = { showWhyLogDialog = true },
+            onOpenWhyTreeEditor = { showWhyTreeEditorDialog = true },
             onDismiss = { showVoiceDialog = false }
         )
     }
@@ -1506,6 +1509,14 @@ fun SottoApp(
         WhyLogDialog(
             repository = whyFinderRepository,
             onDismiss = { showWhyLogDialog = false }
+        )
+    }
+
+    // Why Tree Editor Dialog
+    if (showWhyTreeEditorDialog) {
+        WhyTreeEditorDialog(
+            repository = whyFinderRepository,
+            onDismiss = { showWhyTreeEditorDialog = false }
         )
     }
 

@@ -232,6 +232,8 @@
     <string name="why_tree_reset_confirm">Reset the question tree to the default questions? Any customized questions will be lost.</string>
     <string name="action_add_question">Add Question</string>
     <string name="label_area_question">Area opening question</string>
+    <string name="hint_question_text">Question text</string>
+    <string name="confirm_delete_question">Delete this question?</string>
 
     <!-- Why Log & Patterns -->
     <string name="why_log_title">Private Why Log</string>
