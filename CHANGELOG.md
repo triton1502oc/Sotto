@@ -3,6 +3,31 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.6.0] - 2026-10-04
+
+### Added
+- **Why Finder Guided Crisis Tree**: Step-by-step calm yes/no branching tree designed specifically for meltdowns and verbal shutdowns. Guides caregivers and individuals through physical discomfort, sensory overload, emotional overwhelm, and routine friction with large binary touch targets and zero open-ended cognitive demands ([#12](https://github.com/triton1502oc/Sotto/issues/12), [#13](https://github.com/triton1502oc/Sotto/issues/13)).
+- **Private Why Log & 30-Day Trend Insights**: Local-only crisis logging engine that tracks resolved de-escalation sessions. Automatically generates 30-day pattern insights showing category percentage shares, top specific triggers, and peak time-of-day crisis clusters to help families and therapists identify environmental stressors ([#14](https://github.com/triton1502oc/Sotto/issues/14)).
+- **Customizable Question Tree Editor**: Dedicated crisis tree customizer dialog allowing families to edit questions, add personalized triggers, create custom crisis areas, or reset to clinical defaults with one tap ([#15](https://github.com/triton1502oc/Sotto/issues/15)).
+- **Backup & Restore Format v2**: Enhanced backup engine with granular checkboxes to selectively export phrases, Why trees, and Why logs. Enables safe sharing of custom trees with therapists or schools while keeping private crisis logs strictly excluded by default ([#16](https://github.com/triton1502oc/Sotto/issues/16)).
+- **Telemetry v2 for Product-Market Fit**: Enhanced privacy-preserving usability monitoring engine featuring anonymous app-assigned install IDs, coarse temporal bucketing (day-of-week and 4-hour window), optional user role selection, 500-event local buffer, and a transparent payload preview dialog in Voice Settings ([#19](https://github.com/triton1502oc/Sotto/issues/19)).
+- **14-Day In-App Product-Market Fit Survey**: Low-stimulus Sean Ellis PMF survey prompted only after 14 days and at least 5 active days for opted-in users during calm idle states to evaluate product value and core benefits ([#20](https://github.com/triton1502oc/Sotto/issues/20)).
+
+### Changed
+- **Caregiver-First Product Positioning**: Repositioned Play Store listing, README, and documentation to lead with caregiver crisis navigation ("Calm yes/no tool for caregivers to reach autistic teens & adults in meltdowns, and find out why"), retaining mature AAC phrase cards as a secondary self-expression tool ([#17](https://github.com/triton1502oc/Sotto/issues/17)).
+- **Caregiver Guide**: Expanded `docs/CAREGIVER_GUIDE.md` with in-depth crisis navigation strategies, Why Finder walkthroughs, trend interpretation, and tree sharing instructions ([#17](https://github.com/triton1502oc/Sotto/issues/17)).
+- **Privacy Policy & Google Play Data Safety**: Updated `PRIVACY_POLICY.md`, `SECURITY.md`, and Play Store Data Safety specifications to reflect Telemetry v2, App-Assigned IDs, and private on-device crisis logging ([#21](https://github.com/triton1502oc/Sotto/issues/21)).
+
+### Fixed
+- **Phrase Hash Privacy Hardening**: Completely removed phrase text hash codes from card speech telemetry events to guarantee zero possibility of phrase reverse-engineering ([#18](https://github.com/triton1502oc/Sotto/issues/18)).
+
+### Assets
+- `Sotto-v1.6.0.apk`: Universal release APK for all architectures.
+- `Sotto-v1.6.0-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.6.0-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.6.0-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.5.9] - 2026-10-02
 
 ### Added
