@@ -34,3 +34,7 @@ Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for:
    When requested to update or rebuild screenshots and visual assets (`assets/`), execute `./scripts/update_assets.sh` directly without requiring multi-step implementation plans or step-by-step user approvals.
 8. **Issue Assignment on Close**:
    When resolving, updating, or closing a GitHub issue or ticket, if the issue is unassigned, assign it to yourself (`gh issue edit <id> --add-assignee "@me"`) before or upon closing.
+9. **Simplicity, Brevity, Safety & Security (Zero Regressions)**:
+   - **Ensure Nothing Breaks**: Guarantee backwards compatibility for existing user data (e.g., saved phrases, preferences) and verify test coverage (`./gradlew testDebugUnitTest`).
+   - **Simpler Code & Shorter Lines of Code**: Emphasize minimal abstractions, direct logic, concise Kotlin idioms, and eliminating dead code over premature architecture.
+   - **Secure Code**: Maintain 100% offline privacy guarantees (zero covert analytics/leaks), sanitize file/clipboard imports, and adhere to secure Android development standards.

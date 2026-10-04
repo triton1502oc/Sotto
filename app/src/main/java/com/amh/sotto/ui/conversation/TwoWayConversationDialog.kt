@@ -55,8 +55,6 @@ import com.amh.sotto.ui.whyfinder.IntensityScaleRow
 import com.amh.sotto.ui.whyfinder.WhyFinderActionDock
 import com.amh.sotto.ui.whyfinder.WhyFinderSession
 import com.amh.sotto.ui.whyfinder.WhyFinderState
-import com.amh.sotto.ui.whyfinder.WhyLogDialog
-import com.amh.sotto.ui.whyfinder.WhyTreeEditorDialog
 import com.amh.sotto.ui.whyfinder.getBodyRegionLabel
 import com.amh.sotto.util.UsabilityTracker
 import kotlinx.coroutines.delay
@@ -105,8 +103,6 @@ fun TwoWayConversationDialog(
     var editQuestionDraft by rememberSaveable { mutableStateOf("") }
     var whyLogNote by rememberSaveable { mutableStateOf("") }
     var whySessionSaved by rememberSaveable { mutableStateOf(false) }
-    var showWhyLogDialog by rememberSaveable { mutableStateOf(false) }
-    var showWhyTreeEditorDialog by rememberSaveable { mutableStateOf(false) }
 
     val activeFreeformText = displayedText.ifBlank { liveSpokenText }
 
@@ -156,13 +152,6 @@ fun TwoWayConversationDialog(
                 WhyOutcome.NOT_FOUND -> stringResource(R.string.why_finder_not_found_title)
                 WhyOutcome.STOPPED -> stringResource(R.string.why_finder_stopped_title)
             }
-        }
-    }
-
-    // Auto-read aloud Why Finder prompt when prompt changes
-    LaunchedEffect(whyPromptText, activeTab) {
-        if (activeTab == CaregiverTab.WHY_FINDER && whyState !is WhyFinderState.Finished && whyPromptText.isNotBlank()) {
-            onSpeakResponse(whyPromptText)
         }
     }
 
@@ -278,7 +267,7 @@ fun TwoWayConversationDialog(
                                     whySessionSaved = false
                                     whyLogNote = ""
                                 },
-                                onViewWhyLog = { showWhyLogDialog = true },
+                                onFinish = onDismiss,
                                 onEditQuestion = {
                                     editQuestionDraft = whyPromptText
                                     showEditQuestionDialog = true
@@ -358,8 +347,6 @@ fun TwoWayConversationDialog(
                             hasWhyFinder = whyFinderRepository != null,
                             isFlipped = true,
                             onToggleFlip = { isFlipped = false },
-                            onOpenLog = { showWhyLogDialog = true },
-                            onOpenTreeEditor = { showWhyTreeEditorDialog = true },
                             isListening = isListening,
                             onToggleListening = {
                                 if (isListening) {
@@ -399,8 +386,6 @@ fun TwoWayConversationDialog(
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = false,
                         onToggleFlip = { isFlipped = true },
-                        onOpenLog = { showWhyLogDialog = true },
-                        onOpenTreeEditor = { showWhyTreeEditorDialog = true },
                         isListening = isListening,
                         onToggleListening = {
                             if (isListening) {
@@ -452,7 +437,7 @@ fun TwoWayConversationDialog(
                             whySessionSaved = false
                             whyLogNote = ""
                         },
-                        onViewWhyLog = { showWhyLogDialog = true },
+                        onFinish = onDismiss,
                         onEditQuestion = {
                             editQuestionDraft = whyPromptText
                             showEditQuestionDialog = true
@@ -653,19 +638,6 @@ fun TwoWayConversationDialog(
         )
     }
 
-    if (showWhyLogDialog && whyFinderRepository != null) {
-        WhyLogDialog(
-            repository = whyFinderRepository,
-            onDismiss = { showWhyLogDialog = false }
-        )
-    }
-
-    if (showWhyTreeEditorDialog && whyFinderRepository != null) {
-        WhyTreeEditorDialog(
-            repository = whyFinderRepository,
-            onDismiss = { showWhyTreeEditorDialog = false }
-        )
-    }
 }
 
 @Composable
@@ -675,8 +647,6 @@ private fun CaregiverToolbar(
     hasWhyFinder: Boolean,
     isFlipped: Boolean,
     onToggleFlip: () -> Unit,
-    onOpenLog: () -> Unit,
-    onOpenTreeEditor: () -> Unit,
     isListening: Boolean,
     onToggleListening: () -> Unit,
     canReadAloud: Boolean,
@@ -713,7 +683,7 @@ private fun CaregiverToolbar(
                     onClick = { onTabChange(CaregiverTab.FREEFORM) },
                     label = {
                         Text(
-                            text = "💬 " + stringResource(R.string.mode_freeform),
+                            text = "🎙️ " + stringResource(R.string.mode_freeform),
                             style = MaterialTheme.typography.labelMedium
                         )
                     }
@@ -732,16 +702,6 @@ private fun CaregiverToolbar(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-            }
-
-            // Why Log & Tree Editor shortcuts
-            if (hasWhyFinder) {
-                IconButton(onClick = onOpenLog, modifier = Modifier.size(36.dp)) {
-                    Text("📋", fontSize = 17.sp)
-                }
-                IconButton(onClick = onOpenTreeEditor, modifier = Modifier.size(36.dp)) {
-                    Text("🌳", fontSize = 17.sp)
-                }
             }
         }
 
@@ -796,7 +756,7 @@ private fun CaregiverDisplayCard(
     whyLogNote: String,
     onWhyLogNoteChange: (String) -> Unit,
     onRestartWhyTree: () -> Unit,
-    onViewWhyLog: () -> Unit,
+    onFinish: () -> Unit,
     onEditQuestion: () -> Unit,
     onPickCard: () -> Unit,
     onReadAloudPrompt: () -> Unit,
@@ -884,11 +844,11 @@ private fun CaregiverDisplayCard(
                     ) {
                         Text("🔄 " + stringResource(R.string.action_restart))
                     }
-                    OutlinedButton(
-                        onClick = onViewWhyLog,
+                    Button(
+                        onClick = onFinish,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("📋 " + stringResource(R.string.action_view_why_log))
+                        Text(stringResource(R.string.action_done))
                     }
                 }
             }
@@ -904,11 +864,12 @@ private fun CaregiverDisplayCard(
                 val prompt = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
                 GiantPromptDisplay(
                     activeText = prompt,
-                    isListening = if (activeTab == CaregiverTab.FREEFORM) isListening else false
+                    isListening = if (activeTab == CaregiverTab.FREEFORM) isListening else false,
+                    onClick = if (prompt.isNotBlank()) onReadAloudPrompt else null
                 )
 
                 if (activeTab == CaregiverTab.WHY_FINDER) {
-                    // Why Finder prompt helper actions (Edit, Pick card, Read aloud, Back)
+                    // Why Finder prompt helper actions (Speak, Edit, Pick card, Back)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -916,6 +877,16 @@ private fun CaregiverDisplayCard(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        FilledTonalButton(
+                            onClick = onReadAloudPrompt,
+                            shape = RoundedCornerShape(16.dp),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text("🔊 " + stringResource(R.string.action_speak), fontSize = 12.sp)
+                        }
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
                         OutlinedButton(
                             onClick = onEditQuestion,
                             shape = RoundedCornerShape(16.dp),
@@ -933,19 +904,18 @@ private fun CaregiverDisplayCard(
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                         ) {
-                            Text("📋 " + stringResource(R.string.action_caregiver_prompts), fontSize = 12.sp)
-                        }
-
-                        Spacer(modifier = Modifier.width(6.dp))
-
-                        IconButton(onClick = onReadAloudPrompt, modifier = Modifier.size(34.dp)) {
-                            Text("🔊", fontSize = 16.sp)
+                            Text("📋 " + stringResource(R.string.action_cards), fontSize = 12.sp)
                         }
 
                         if (canStepBack) {
-                            Spacer(modifier = Modifier.width(4.dp))
-                            IconButton(onClick = onStepBack, modifier = Modifier.size(34.dp)) {
-                                Text("↩️", fontSize = 16.sp)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            OutlinedButton(
+                                onClick = onStepBack,
+                                shape = RoundedCornerShape(16.dp),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                            ) {
+                                Text("↩️ " + stringResource(R.string.action_step_back), fontSize = 12.sp)
                             }
                         }
                     }
@@ -1077,12 +1047,20 @@ private fun StatusBadge(
 @Composable
 private fun GiantPromptDisplay(
     activeText: String,
-    isListening: Boolean
+    isListening: Boolean,
+    onClick: (() -> Unit)? = null
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
+            .padding(vertical = 12.dp)
+            .then(
+                if (onClick != null && activeText.isNotBlank()) {
+                    Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(onClick = onClick)
+                } else Modifier
+            ),
         contentAlignment = Alignment.Center
     ) {
         if (activeText.isNotBlank()) {

@@ -352,10 +352,12 @@
     <string name="survey_action_submit">Submit Feedback</string>
 
     <!-- Unified Caregiver Mode -->
-    <string name="mode_why_finder">Why Finder (Tree)</string>
-    <string name="mode_freeform">Custom / Mic</string>
-    <string name="action_edit_question">Edit Question</string>
+    <string name="mode_why_finder">Guided</string>
+    <string name="mode_freeform">Mic</string>
+    <string name="action_edit_question">Edit</string>
+    <string name="action_cards">Cards</string>
+    <string name="action_speak">Speak</string>
     <string name="action_step_back">Back</string>
-    <string name="action_restart">Restart Tree</string>
+    <string name="action_restart">Restart</string>
     <string name="hint_edit_question">Type question to ask...</string>
 </resources>

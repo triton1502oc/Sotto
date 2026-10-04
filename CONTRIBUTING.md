@@ -21,6 +21,7 @@ Sotto is an assistive communication (AAC) app designed for autistic teens and ad
 - **UI**: 100% Jetpack Compose + Material 3 (no XML layouts or `findViewById`).
 - **Architecture**: Single Activity, unidirectional data flow (UDF: state flows down, events flow up).
 - **Speech Synthesis**: Native Android `TextToSpeech` tied to `ComponentActivity` lifecycle.
+- **Code Standards**: Emphasize simple, concise, and secure code with zero regressions. Prioritize readable Kotlin idioms over unnecessary abstractions, ensure 100% backwards compatibility for saved user phrases, and preserve offline privacy.
 
 ---
 

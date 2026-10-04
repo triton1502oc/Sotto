@@ -352,10 +352,12 @@
     <string name="survey_action_submit">Kirim Masukan</string>
 
     <!-- Unified Caregiver Mode -->
-    <string name="mode_why_finder">Why Finder (Pohon Masalah)</string>
-    <string name="mode_freeform">Kustom / Mikrofon</string>
-    <string name="action_edit_question">Ubah Pertanyaan</string>
+    <string name="mode_why_finder">Panduan</string>
+    <string name="mode_freeform">Mik</string>
+    <string name="action_edit_question">Ubah</string>
+    <string name="action_cards">Kartu</string>
+    <string name="action_speak">Bicara</string>
     <string name="action_step_back">Kembali</string>
-    <string name="action_restart">Ulangi Pohon</string>
+    <string name="action_restart">Ulangi</string>
     <string name="hint_edit_question">Ketik pertanyaan...</string>
 </resources>
