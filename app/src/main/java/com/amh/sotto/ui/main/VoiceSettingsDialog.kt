@@ -43,6 +43,8 @@ fun VoiceSettingsDialog(
     onTestVoice: (VoiceSettings) -> Unit,
     onExportPhrases: () -> Unit = {},
     onImportPhrases: () -> Unit = {},
+    onOpenWhyLog: () -> Unit = {},
+    onOpenWhyTreeEditor: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -582,6 +584,48 @@ fun VoiceSettingsDialog(
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                // Crisis Navigation & Why Finder Section
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "🧭 " + stringResource(R.string.why_finder_title),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onOpenWhyLog,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                        ) {
+                            Text("📋 ", fontSize = 14.sp)
+                            Text(
+                                text = stringResource(R.string.action_view_why_log),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = onOpenWhyTreeEditor,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                        ) {
+                            Text("🌳 ", fontSize = 14.sp)
+                            Text(
+                                text = stringResource(R.string.action_edit_why_tree),
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                     }
                 }

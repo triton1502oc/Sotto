@@ -51,6 +51,7 @@ fun WhyFinderDialog(
     var isFlipped by rememberSaveable { mutableStateOf(false) }
     var privateNote by rememberSaveable { mutableStateOf("") }
     var sessionSaved by rememberSaveable { mutableStateOf(false) }
+    var showWhyLog by rememberSaveable { mutableStateOf(false) }
 
     fun vibrateFeedback() {
         try {
@@ -332,6 +333,9 @@ fun WhyFinderDialog(
                         IconButton(onClick = { onSpeakText(activeDisplayPrompt) }) {
                             Text("🔊", fontSize = 18.sp)
                         }
+                        IconButton(onClick = { showWhyLog = true }) {
+                            Text("📋", fontSize = 18.sp)
+                        }
                     }
 
                     Row(
@@ -354,6 +358,13 @@ fun WhyFinderDialog(
                 }
             }
         }
+    }
+
+    if (showWhyLog) {
+        WhyLogDialog(
+            repository = repository,
+            onDismiss = { showWhyLog = false }
+        )
     }
 }
 

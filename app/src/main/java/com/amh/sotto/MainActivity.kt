@@ -71,6 +71,7 @@ import com.amh.sotto.util.TranslationHelper
 import com.amh.sotto.ui.conversation.TwoWayConversationDialog
 import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
 import com.amh.sotto.ui.whyfinder.WhyFinderDialog
+import com.amh.sotto.ui.whyfinder.WhyLogDialog
 import com.amh.sotto.ui.category.ManageCategoriesDialog
 import com.amh.sotto.ui.category.getCategoryDisplayName
 import com.amh.sotto.util.SpeechRecognitionHelper
@@ -422,6 +423,7 @@ fun SottoApp(
     var showAudioRationaleDialog by rememberSaveable { mutableStateOf(false) }
     val whyFinderRepository = remember { SharedPreferencesWhyFinderRepository(context) }
     var showWhyFinderDialog by rememberSaveable { mutableStateOf(false) }
+    var showWhyLogDialog by rememberSaveable { mutableStateOf(false) }
 
     val speechHelper = remember { SpeechRecognitionHelper(context) }
 
@@ -1313,6 +1315,7 @@ fun SottoApp(
             onImportPhrases = {
                 importLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
             },
+            onOpenWhyLog = { showWhyLogDialog = true },
             onDismiss = { showVoiceDialog = false }
         )
     }
@@ -1495,6 +1498,14 @@ fun SottoApp(
             repository = whyFinderRepository,
             onSpeakText = { ttsText -> onSpeakText(ttsText, LocaleHelper.LANG_AUTO) },
             onDismiss = { showWhyFinderDialog = false }
+        )
+    }
+
+    // Private Why Log Dialog
+    if (showWhyLogDialog) {
+        WhyLogDialog(
+            repository = whyFinderRepository,
+            onDismiss = { showWhyLogDialog = false }
         )
     }
 
