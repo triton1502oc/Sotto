@@ -85,6 +85,7 @@ import sh.calvin.reorderable.*
 import android.widget.Toast
 import com.amh.sotto.ui.main.ImportBackupDialog
 import com.amh.sotto.ui.main.ExportBackupDialog
+import com.amh.sotto.ui.main.PmfSurveyDialog
 import com.amh.sotto.util.BackupData
 import com.amh.sotto.util.ImportResult
 import com.amh.sotto.util.PhraseBackupHelper
@@ -114,6 +115,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
 
         val phraseRepository = SharedPreferencesPhraseRepository(applicationContext)
         val voiceSettingsRepository = SharedPreferencesVoiceSettingsRepository(applicationContext)
+        voiceSettingsRepository.recordActiveDay(UsabilityTracker.getTodayDate())
         val viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -216,7 +218,14 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                         shouldPromptMetrics = remember { viewModel.shouldPromptMetrics() },
                         onMetricsPromptAnswered = { viewModel.onMetricsPromptAnswered(it) },
                         shouldPromptRole = remember { viewModel.shouldPromptRole() },
-                        onRolePromptAnswered = { viewModel.onRolePromptAnswered(it) }
+                        onRolePromptAnswered = { viewModel.onRolePromptAnswered(it) },
+                        shouldPromptPmfSurvey = remember { viewModel.shouldPromptPmfSurvey() },
+                        onPmfSurveyAnswered = { score, benefit, role ->
+                            viewModel.onPmfSurveyAnswered(score, benefit, role) { s, b, r ->
+                                UsabilityTracker.recordSurvey(this@MainActivity, s, b, r)
+                            }
+                        },
+                        onPmfSurveyDismissed = { viewModel.onPmfSurveyDismissed() }
                     )
                 }
             }
@@ -401,13 +410,17 @@ fun SottoApp(
     shouldPromptMetrics: Boolean = false,
     onMetricsPromptAnswered: (Boolean) -> Unit = {},
     shouldPromptRole: Boolean = false,
-    onRolePromptAnswered: (String) -> Unit = {}
+    onRolePromptAnswered: (String) -> Unit = {},
+    shouldPromptPmfSurvey: Boolean = false,
+    onPmfSurveyAnswered: (String, String, String) -> Unit = { _, _, _ -> },
+    onPmfSurveyDismissed: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showMetricsOptInDialog by rememberSaveable { mutableStateOf(shouldPromptMetrics) }
     var showRolePromptDialog by rememberSaveable { mutableStateOf(shouldPromptRole) }
+    var showPmfSurveyDialog by rememberSaveable { mutableStateOf(shouldPromptPmfSurvey) }
     var showAddDialog by remember { mutableStateOf(false) }
     var initialAddText by rememberSaveable { mutableStateOf("") }
     var showVoiceDialog by rememberSaveable { mutableStateOf(false) }
@@ -1444,6 +1457,21 @@ fun SottoApp(
                 ) {
                     Text(stringResource(R.string.action_skip))
                 }
+            }
+        )
+    }
+
+    // 14-Day Product-Market Fit Survey Dialog
+    if (showPmfSurveyDialog && !showMetricsOptInDialog && !showRolePromptDialog && !showTwoWayDialog && !showWhyFinderDialog && pendingBackupData == null) {
+        PmfSurveyDialog(
+            initialRole = voiceSettings.userRole,
+            onDismiss = {
+                showPmfSurveyDialog = false
+                onPmfSurveyDismissed()
+            },
+            onSubmit = { score, benefit, role ->
+                showPmfSurveyDialog = false
+                onPmfSurveyAnswered(score, benefit, role)
             }
         )
     }

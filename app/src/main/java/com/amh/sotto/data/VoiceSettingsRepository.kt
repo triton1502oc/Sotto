@@ -34,6 +34,12 @@ interface VoiceSettingsRepository {
     fun setPromptedRole(prompted: Boolean)
     fun getUserRole(): String
     fun setUserRole(role: String)
+    fun getFirstInstalledAt(): Long
+    fun recordActiveDay(todayDate: String)
+    fun getActiveDayCount(): Int
+    fun hasPromptedPmfSurvey(): Boolean
+    fun setPromptedPmfSurvey(prompted: Boolean)
+    fun shouldPromptPmfSurvey(): Boolean
 }
 
 class SharedPreferencesVoiceSettingsRepository(private val context: Context) : VoiceSettingsRepository {
@@ -51,6 +57,9 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         private const val KEY_INSTALL_ID = "telemetry_install_id"
         private const val KEY_USER_ROLE = "user_role"
         private const val KEY_ROLE_PROMPTED = "role_prompted"
+        private const val KEY_FIRST_INSTALLED_AT = "first_installed_at"
+        private const val KEY_ACTIVE_DAYS = "active_days"
+        private const val KEY_PMF_SURVEY_PROMPTED = "pmf_survey_prompted"
     }
 
     override fun getVoiceSettings(): VoiceSettings {
@@ -133,5 +142,42 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
 
     override fun setUserRole(role: String) {
         prefs.edit().putString(KEY_USER_ROLE, role).apply()
+    }
+
+    override fun getFirstInstalledAt(): Long {
+        val existing = prefs.getLong(KEY_FIRST_INSTALLED_AT, 0L)
+        if (existing > 0L) return existing
+        val now = System.currentTimeMillis()
+        prefs.edit().putLong(KEY_FIRST_INSTALLED_AT, now).apply()
+        return now
+    }
+
+    override fun recordActiveDay(todayDate: String) {
+        val currentDays = prefs.getStringSet(KEY_ACTIVE_DAYS, emptySet())?.toMutableSet() ?: mutableSetOf()
+        if (!currentDays.contains(todayDate)) {
+            currentDays.add(todayDate)
+            prefs.edit().putStringSet(KEY_ACTIVE_DAYS, currentDays).apply()
+        }
+    }
+
+    override fun getActiveDayCount(): Int {
+        return prefs.getStringSet(KEY_ACTIVE_DAYS, emptySet())?.size ?: 0
+    }
+
+    override fun hasPromptedPmfSurvey(): Boolean {
+        return prefs.getBoolean(KEY_PMF_SURVEY_PROMPTED, false)
+    }
+
+    override fun setPromptedPmfSurvey(prompted: Boolean) {
+        prefs.edit().putBoolean(KEY_PMF_SURVEY_PROMPTED, prompted).apply()
+    }
+
+    override fun shouldPromptPmfSurvey(): Boolean {
+        val settings = getVoiceSettings()
+        if (!settings.shareUsabilityMetrics) return false
+        if (hasPromptedPmfSurvey()) return false
+        val installAge = System.currentTimeMillis() - getFirstInstalledAt()
+        val days14Ms = 14L * 24 * 60 * 60 * 1000L
+        return installAge >= days14Ms && getActiveDayCount() >= 5
     }
 }

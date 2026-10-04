@@ -332,4 +332,21 @@
         <item>Is it about an upcoming appointment or transition?</item>
         <item>Is there a change in tomorrow or upcoming routine?</item>
     </string-array>
+
+    <!-- Product-Market Fit Survey -->
+    <string name="survey_pmf_title">Help Shape Sotto</string>
+    <string name="survey_pmf_subtitle">A quick 30-second survey to help us understand if Sotto is truly helping.</string>
+    <string name="survey_q1_title">How would you feel if you could no longer use Sotto?</string>
+    <string name="survey_q1_opt_very">Very disappointed</string>
+    <string name="survey_q1_opt_somewhat">Somewhat disappointed</string>
+    <string name="survey_q1_opt_not">Not disappointed</string>
+    <string name="survey_q1_opt_na">N/A - I rarely or no longer use it</string>
+    <string name="survey_q2_title">What helps you the most?</string>
+    <string name="survey_q2_opt_why_finder">Why Finder (crisis narrowing)</string>
+    <string name="survey_q2_opt_caregiver_mode">Caregiver Mode (receptive yes/no)</string>
+    <string name="survey_q2_opt_phrases">Phrase cards &amp; custom categories</string>
+    <string name="survey_q2_opt_emergency">Emergency card &amp; chime</string>
+    <string name="survey_q2_opt_quick_speak">Quick-speak typing</string>
+    <string name="survey_q3_title">Who uses Sotto most in your setting?</string>
+    <string name="survey_action_submit">Submit Feedback</string>
 </resources>

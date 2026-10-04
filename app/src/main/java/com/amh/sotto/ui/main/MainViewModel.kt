@@ -195,6 +195,22 @@ class MainViewModel(
         }
     }
 
+    fun shouldPromptPmfSurvey(): Boolean {
+        return voiceSettingsRepository.shouldPromptPmfSurvey()
+    }
+
+    fun onPmfSurveyAnswered(pmfScore: String, primaryBenefit: String, role: String, onTrack: (String, String, String) -> Unit) {
+        voiceSettingsRepository.setPromptedPmfSurvey(true)
+        if (role.isNotBlank() && role != VoiceSettings.ROLE_UNSET) {
+            updateVoiceSettings(_voiceSettings.value.copy(userRole = role))
+        }
+        onTrack(pmfScore, primaryBenefit, role)
+    }
+
+    fun onPmfSurveyDismissed() {
+        voiceSettingsRepository.setPromptedPmfSurvey(true)
+    }
+
     fun exportBackup(
         exportPhrases: Boolean = true,
         exportTree: Boolean = false,

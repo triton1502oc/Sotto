@@ -149,5 +149,52 @@ class VoiceSettingsRepositoryTest {
             editor.apply()
         }
     }
+
+    @Test
+    fun `firstInstalledAt returns saved or sets current time`() {
+        every { sharedPreferences.getLong("first_installed_at", 0L) } returns 0L
+        every { editor.putLong(any(), any()) } returns editor
+
+        val time = repository.getFirstInstalledAt()
+        org.junit.Assert.assertTrue(time > 0L)
+        verify {
+            editor.putLong("first_installed_at", any())
+            editor.apply()
+        }
+    }
+
+    @Test
+    fun `recordActiveDay adds date and getActiveDayCount returns size`() {
+        val dateSet = mutableSetOf("2026-03-01", "2026-03-02")
+        every { sharedPreferences.getStringSet("active_days", emptySet()) } returns dateSet
+        every { editor.putStringSet(any(), any()) } returns editor
+
+        repository.recordActiveDay("2026-03-03")
+        verify {
+            editor.putStringSet("active_days", match { it.contains("2026-03-03") })
+            editor.apply()
+        }
+
+        assertEquals(2, repository.getActiveDayCount())
+    }
+
+    @Test
+    fun `shouldPromptPmfSurvey requires opt-in, 14 days, 5 active days, unprompted`() {
+        every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns true
+        every { sharedPreferences.getBoolean("pmf_survey_prompted", false) } returns false
+        every { sharedPreferences.getLong("first_installed_at", 0L) } returns (System.currentTimeMillis() - 15L * 86_400_000L)
+        every { sharedPreferences.getStringSet("active_days", emptySet()) } returns setOf("d1", "d2", "d3", "d4", "d5")
+
+        assertEquals(true, repository.shouldPromptPmfSurvey())
+
+        // If not opted in to metrics
+        every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns false
+        assertEquals(false, repository.shouldPromptPmfSurvey())
+
+        // If already prompted
+        every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns true
+        every { sharedPreferences.getBoolean("pmf_survey_prompted", false) } returns true
+        assertEquals(false, repository.shouldPromptPmfSurvey())
+    }
 }
 

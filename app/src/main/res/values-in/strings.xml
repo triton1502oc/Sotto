@@ -332,4 +332,21 @@
         <item>Apakah mengenai janji temu atau perpindahan kegiatan nanti?</item>
         <item>Apakah ada perubahan rutinitas besok atau yang akan datang?</item>
     </string-array>
+
+    <!-- Product-Market Fit Survey -->
+    <string name="survey_pmf_title">Bantu Menyempurnakan Sotto</string>
+    <string name="survey_pmf_subtitle">Survei singkat 30 detik untuk membantu kami mengetahui apakah Sotto benar-benar bermanfaat.</string>
+    <string name="survey_q1_title">Bagaimana perasaan Anda jika tidak bisa lagi menggunakan Sotto?</string>
+    <string name="survey_q1_opt_very">Sangat kecewa</string>
+    <string name="survey_q1_opt_somewhat">Agak kecewa</string>
+    <string name="survey_q1_opt_not">Tidak kecewa</string>
+    <string name="survey_q1_opt_na">Tidak berlaku - jarang/tidak lagi digunakan</string>
+    <string name="survey_q2_title">Fitur apa yang paling membantu?</string>
+    <string name="survey_q2_opt_why_finder">Why Finder (penyempitan krisis)</string>
+    <string name="survey_q2_opt_caregiver_mode">Mode Pengasuh (tampilan ya/tidak)</string>
+    <string name="survey_q2_opt_phrases">Kartu frasa &amp; kategori kustom</string>
+    <string name="survey_q2_opt_emergency">Kartu darurat &amp; lonceng perhatian</string>
+    <string name="survey_q2_opt_quick_speak">Ketik cepat (Quick-speak)</string>
+    <string name="survey_q3_title">Siapa yang paling sering menggunakan Sotto?</string>
+    <string name="survey_action_submit">Kirim Masukan</string>
 </resources>

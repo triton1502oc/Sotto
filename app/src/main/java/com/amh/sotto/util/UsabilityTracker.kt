@@ -273,6 +273,23 @@ object UsabilityTracker {
         )
     }
 
+    fun recordSurvey(
+        context: Context,
+        pmfScore: String,
+        primaryBenefit: String,
+        confirmedRole: String
+    ) {
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "Survey",
+                durationMs = 0L,
+                outcome = pmfScore,
+                contextTag = "benefit=${primaryBenefit};role=${confirmedRole}"
+            )
+        )
+    }
+
     fun recordEvent(context: Context, event: UsabilityEvent) {
         val repo = SharedPreferencesVoiceSettingsRepository(context)
         if (!repo.getVoiceSettings().shareUsabilityMetrics) {
