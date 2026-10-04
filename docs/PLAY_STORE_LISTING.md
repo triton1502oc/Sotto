@@ -10,52 +10,54 @@ Ready-to-use metadata, descriptions, graphics specifications, and policy questio
 ### App Details
 * **App Name:** `Sotto` *(5 / 30 characters)*
 * **Short Description:**  
-  `Dignified AAC speech communication for autistic & speech-impaired users.` *(71 / 80 characters)*
+  `Calm yes/no tool for caregivers to reach autistic teens & adults in meltdowns.` *(78 / 80 characters)*
 * **Preview Video (YouTube URL):**
   - **Default / English:** `https://www.youtube.com/watch?v=UKZu5ZsdORg`
   - **Indonesian (`id-ID`):** `https://www.youtube.com/watch?v=4CvpJkjaz-k`  
   *(Note: Enter the standard `https://www.youtube.com/watch?v=...` format; Play Console may reject `/shorts/` URLs).*
 
-### Full Description *(Markdown & Plain Text compliant, ~1,800 / 4,000 characters)*
+### Full Description *(Markdown & Plain Text compliant, ~2,800 / 4,000 characters)*
 ```text
-Sotto (meaning "under one's breath" or a soft voice) is an assistive communication (AAC) app designed for autistic teens, adults, speech-impaired individuals, and non-speaking users who need clear, dignified, and low-stimulation text-to-speech support.
+Sotto is a calm yes/no crisis navigation tool for caregivers, parents, and therapists to connect with autistic teens and adults during sensory overload, meltdowns, and verbal shutdowns — paired with a dignified, low-stimulation AAC speech board for daily self-expression.
 
-Unlike typical AAC tools designed with pediatric cartoon graphics and cluttered menus, Sotto provides a calm, mature, and predictable environment built specifically for adult communication needs.
+Created by a father of two autistic sons (ages 22 and 15), Sotto is built around a simple reality: during a meltdown or verbal shutdown, processing complex questions or speaking is exhausting. Sotto bridges this divide with gentle binary choices and zero open-ended demands.
 
-KEY FEATURES:
- 
-• Modern Low-Stimulus UI
-Dark-neutral Material 3 theme with high contrast and zero unnecessary animations or visual distractions.
- 
-• Zero-Distraction Communication Mode
-In normal mode, all administrative buttons (add, delete, reorder) are completely hidden. Tap any phrase card to speak immediately using Android's offline Text-to-Speech engine.
- 
-• Emergency Bystander Mode
-A dedicated hero card for verbal shutdowns. Long-press or tap fullscreen to display a high-contrast emergency banner explaining non-verbal episodes directly to bystanders, medical staff, or first responders.
+FOR CAREGIVERS, FAMILIES & THERAPISTS:
 
-• Two-Way Caregiver Mode & 180° Face-to-Face Flip
-A dedicated receptive mode allowing caregivers, family, and medical staff to speak or select questions. The screen flips 180° so the conversational partner sitting opposite can read the text and tap dignified one-touch responses (Yes, No, Repeat, Wait) with instant voice confirmation.
+• Why Finder (Guided Crisis Navigation)
+When someone is experiencing sensory overload or verbal paralysis, open-ended questions like "What's wrong?" can worsen distress. Why Finder provides a gentle, step-by-step yes/no branching tree (covering Physical, Sensory, Emotional, and Routine triggers) with giant buttons to calmly identify the root cause.
 
-• Quick-Speak Bar
-Speak spontaneous, one-off thoughts instantly with multi-line readability. Includes instant fullscreen display, voice dictation, and one-tap card saving.
+• Private On-Device Why Log & Pattern Trends
+Resolved crisis sessions are automatically logged 100% locally on your device. Review 30-day patterns to identify frequent environmental triggers, recurring peak hours, and actionable interventions. Never shared or uploaded to the cloud.
 
-• Contextual Categories & Custom User Categories
-Organize and filter phrases by situation (Emergency, Needs, Social, Care, General) or create, rename, and customize your own categories with safe automatic phrase preservation.
+• Customizable Why Tree & Safe Sharing
+Adapt questions and areas to your loved one's specific triggers. Easily export and share customized trees with teachers or speech therapists while keeping private crisis logs strictly excluded.
 
-• High-Visibility Fullscreen Mode
-In noisy, crowded, or overwhelming environments, view any phrase in giant, high-contrast text across your entire screen to silently show your phone to others.
+• Two-Way Receptive Mode & 180° Screen Flip
+Caregivers can dictate questions or choose from common care prompts. Tap 180° Flip and place the phone on the table: the user taps one of 4 large, dignified responses (Yes, No, Repeat, Wait) with instant voice confirmation.
 
-• Attention Chime & Haptics
-Optionally sound a gentle chime and vibration before speaking to politely capture listener attention in noisy spaces.
- 
-• Configurable Voice & Speed
-Tailor your speech output to your comfort. Adjust speech rate (speed) and pitch with live preview.
- 
+FOR AUTISTIC TEENS & ADULTS (SELF-EXPRESSION):
+
+• Mature, Low-Stimulus UI
+Dark-neutral Material 3 design with calm earth tones and zero cartoon clutter. In normal communication mode, admin controls remain hidden for a zero-distraction experience.
+
+• Emergency Bystander Hero Card
+A prominent high-contrast banner for non-verbal episodes. Show fullscreen directly to bystanders, first responders, or medical personnel.
+
+• Quick-Speak Bar & Voice Dictation
+Type spontaneous thoughts with auto-expanding multi-line text, one-tap speech, voice dictation, and one-touch card creation.
+
+• High-Visibility Giant Fullscreen
+Display any phrase across the entire display in giant text to silently communicate in loud or crowded environments.
+
+• Contextual Categories & Custom Boards
+Filter phrases by situation (Emergency, Needs, Social, Care, General) or create custom categories.
+
 • Dual-Language Speech & On-Device Auto-Translate
-Display cards in one language while speaking in another (e.g., English card text read aloud in Indonesian). Includes one-tap on-device auto-translation with zero cloud text transmission and dual-language speak controls in fullscreen view.
+Display cards in one language while speaking in another (e.g. English text read aloud in Indonesian) using 100% offline on-device translation.
 
-• 100% Offline Core & Privacy-First
-Zero accounts. Zero ads. Zero third-party tracking frameworks. Your phrases and speech stay 100% on your device, with strictly opt-in anonymous usability timing to help diagnose accessibility friction (zero text or speech collected).
+• 100% Offline Core & Privacy Guarantee
+Zero accounts. Zero ads. Zero cloud speech recording. Your phrases and private logs never leave your phone. Optional, strictly opt-in anonymous usability timing to help diagnose accessibility friction (zero text or speech collected).
 ```
 
 ---
