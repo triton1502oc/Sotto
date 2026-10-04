@@ -525,6 +525,7 @@ fun SottoApp(
     val exportSuccessTemplate = stringResource(R.string.msg_export_success)
     val exportErrorTemplate = stringResource(R.string.error_export_failed)
     val importSuccessTemplate = stringResource(R.string.msg_import_success)
+    val importTreeSuccessMsg = stringResource(R.string.msg_import_tree_success)
     val importErrorMsg = stringResource(R.string.error_import_failed)
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -1486,7 +1487,7 @@ fun SottoApp(
                 val message = if (result.phraseCount > 0) {
                     String.format(Locale.getDefault(), importSuccessTemplate, result.phraseCount)
                 } else if (result.treeImported) {
-                    context.getString(R.string.msg_import_tree_success)
+                    importTreeSuccessMsg
                 } else {
                     String.format(Locale.getDefault(), importSuccessTemplate, 0)
                 }
@@ -1498,7 +1499,7 @@ fun SottoApp(
                 val message = if (result.phraseCount > 0) {
                     String.format(Locale.getDefault(), importSuccessTemplate, result.phraseCount)
                 } else if (result.treeImported) {
-                    context.getString(R.string.msg_import_tree_success)
+                    importTreeSuccessMsg
                 } else {
                     String.format(Locale.getDefault(), importSuccessTemplate, 0)
                 }

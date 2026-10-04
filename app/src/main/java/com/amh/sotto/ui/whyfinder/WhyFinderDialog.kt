@@ -106,6 +106,8 @@ fun WhyFinderDialog(
         }
     }
 
+    val waitTtsResponse = stringResource(R.string.response_tts_wait)
+
     // Auto-read aloud when prompt changes if not in finished state
     LaunchedEffect(activeDisplayPrompt) {
         if (currentState !is WhyFinderState.Finished && activeDisplayPrompt.isNotBlank()) {
@@ -265,7 +267,7 @@ fun WhyFinderDialog(
                                     },
                                     onWait = {
                                         vibrateFeedback()
-                                        onSpeakText(context.getString(R.string.response_tts_wait))
+                                        onSpeakText(waitTtsResponse)
                                     }
                                 )
                             }
