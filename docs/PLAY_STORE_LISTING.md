@@ -82,14 +82,17 @@ To automatically regenerate and format all visual assets (`screenshot.png`, `scr
 When completing the Google Play **Data Safety** questionnaire:
 
 1. **Does your app collect or share any of the required user data types?**  
-   👉 Select **Yes** (Only for optional, strictly opt-in anonymous interaction timing; core app remains zero-data).
-   - **Data Types**: *App activity > App interactions* and *App info and performance > Other app performance data*.
-   - **Collection vs Sharing**: Collected = **Yes**, Shared = **No** (Zero data shared with third parties).
-   - **Encrypted in transit**: **Yes** (HTTPS).
+   👉 Select **Yes** (Only for optional, strictly opt-in anonymous interaction telemetry; core app remains zero-data).
+   - **Data Types**:
+     - *App activity > App interactions*: Generic UI interaction events, session duration brackets, and optional 3-question PMF survey responses. Zero phrase text or audio collected.
+     - *Device or other IDs > App-assigned ID*: A random UUID generated locally upon telemetry opt-in to correlate anonymous sessions over time. Never linked to user identity, Google account, or hardware IDs (IMEI, Android ID, Advertising ID).
+     - *App info and performance > Other app performance data*: Coarse time buckets (day-of-week and 4-hour window) and interaction outcome metrics.
+   - **Collection vs Sharing**: Collected = **Yes**, Shared = **No** (Zero data shared with third parties or external commercial entities).
+   - **Encrypted in transit**: **Yes** (HTTPS via TLS 1.3).
    - **Required or Optional**: **Optional** (Users must explicitly opt-in; default is OFF).
-   - **Purpose**: **Analytics** (Diagnosing accessibility and feature usability difficulties).
+   - **Purpose**: **Analytics** (Diagnosing accessibility friction, evaluating crisis navigation effectiveness, and measuring product-market fit).
 2. **Do you provide a way for users to request that their data be deleted?**  
-   👉 Select **Yes** (Toggling the setting OFF in Settings immediately purges all queued events from the device; uninstalling deletes all local data).
+   👉 Select **Yes** (Toggling the setting OFF in Voice & Language Settings immediately purges the app-assigned install ID and all queued events from local storage; uninstalling deletes all local app data).
 
 ---
 

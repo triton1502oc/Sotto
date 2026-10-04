@@ -25,6 +25,10 @@ Sotto is engineered with a zero-trust, privacy-first model:
 - **Zero Third-Party SDKs**: No analytics, behavioral trackers, advertising networks, or remote telemetry SDKs are included in the build.
 - **On-Device Translation**: Translation models (ML Kit) run locally on-device once downloaded.
 
+### Telemetry Ingestion Endpoint Security
+- **Untrusted Ingestion Surface**: The optional telemetry webhook endpoint is considered a public ingest point. Payloads received by the ingestion pipeline are treated strictly as untrusted input, validated against schema rules, and parsed defensively with zero dynamic code execution.
+- **Rate-Limiting & Abuse Prevention**: Ingestion pipelines enforce strict payload size limits and per-batch event caps (500 events). A dedicated authenticated and rate-limited gateway is planned as deployment scales.
+
 ---
 
 ## Reporting a Vulnerability
