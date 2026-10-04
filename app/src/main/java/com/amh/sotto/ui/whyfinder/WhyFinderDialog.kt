@@ -34,6 +34,7 @@ import com.amh.sotto.R
 import com.amh.sotto.data.BodyRegions
 import com.amh.sotto.data.WhyFinderRepository
 import com.amh.sotto.data.WhyOutcome
+import com.amh.sotto.theme.SottoColors
 import com.amh.sotto.util.UsabilityTracker
 import java.util.Locale
 
@@ -395,8 +396,8 @@ internal fun WhyFinderActionDock(
                     .height(62.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1B5E20),
-                    contentColor = Color(0xFFE8F5E9)
+                    containerColor = SottoColors.SuccessContainer,
+                    contentColor = SottoColors.SuccessText
                 )
             ) {
                 Text(
@@ -413,8 +414,8 @@ internal fun WhyFinderActionDock(
                     .height(62.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF7F1D1D),
-                    contentColor = Color(0xFFFFEBEE)
+                    containerColor = SottoColors.CrisisStopContainer,
+                    contentColor = SottoColors.CrisisStopText
                 )
             ) {
                 Text(
@@ -453,8 +454,8 @@ internal fun WhyFinderActionDock(
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF424242),
-                    contentColor = Color(0xFFEEEEEE)
+                    containerColor = SottoColors.NeutralDarkContainer,
+                    contentColor = SottoColors.NeutralDarkText
                 )
             ) {
                 Text(
@@ -562,7 +563,7 @@ internal fun BodyPartSelectionGrid(
                     .weight(1f)
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF424242))
+                colors = ButtonDefaults.buttonColors(containerColor = SottoColors.NeutralDarkContainer)
             ) {
                 Text(stringResource(R.string.why_finder_btn_stop))
             }
@@ -585,11 +586,11 @@ internal fun IntensityScaleRow(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             val colors = listOf(
-                Color(0xFF2E7D32), // 1 Mild green
-                Color(0xFF558B2F), // 2 Light green
-                Color(0xFFF9A825), // 3 Moderate yellow
-                Color(0xFFE65100), // 4 High orange
-                Color(0xFFB71C1C)  // 5 Severe red
+                SottoColors.IntensityMild,
+                SottoColors.IntensityLight,
+                SottoColors.IntensityModerate,
+                SottoColors.IntensityHigh,
+                SottoColors.IntensitySevere
             )
             for (level in 1..5) {
                 Button(
@@ -629,7 +630,7 @@ internal fun IntensityScaleRow(
                     .weight(1f)
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF424242))
+                colors = ButtonDefaults.buttonColors(containerColor = SottoColors.NeutralDarkContainer)
             ) {
                 Text(stringResource(R.string.why_finder_btn_stop))
             }

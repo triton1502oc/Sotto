@@ -88,6 +88,8 @@ import com.amh.sotto.ui.main.PmfSurveyDialog
 import com.amh.sotto.util.BackupData
 import com.amh.sotto.util.ImportResult
 import com.amh.sotto.util.PhraseBackupHelper
+import com.amh.sotto.theme.SottoAppTheme
+import com.amh.sotto.theme.SottoColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -359,21 +361,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     }
 }
 
-@Composable
-fun SottoAppTheme(content: @Composable () -> Unit) {
-    val darkColorScheme = darkColorScheme(
-        primary = Color(0xFFE0E0E0),
-        background = Color(0xFF121212),
-        surface = Color(0xFF1E1E1E),
-        onPrimary = Color(0xFF121212),
-        onBackground = Color(0xFFE0E0E0),
-        onSurface = Color(0xFFE0E0E0)
-    )
-    MaterialTheme(
-        colorScheme = darkColorScheme,
-        content = content
-    )
-}
+
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -693,10 +681,10 @@ fun SottoApp(
                         Surface(
                             onClick = { isEditMode = !isEditMode },
                             shape = RoundedCornerShape(18.dp),
-                            color = if (isEditMode) Color(0xFF2E7D32).copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant,
+                            color = if (isEditMode) SottoColors.SuccessGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant,
                             border = BorderStroke(
                                 1.dp,
-                                if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outlineVariant
+                                if (isEditMode) SottoColors.ActiveGreen else MaterialTheme.colorScheme.outlineVariant
                             ),
                             modifier = Modifier
                                 .heightIn(min = 36.dp)
@@ -710,13 +698,13 @@ fun SottoApp(
                                 Text(
                                     text = if (isEditMode) "✓" else "✏️",
                                     fontSize = 13.sp,
-                                    color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (isEditMode) SottoColors.ActiveGreen else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
                                     text = if (isEditMode) stringResource(R.string.action_done) else stringResource(R.string.action_edit_list),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (isEditMode) SottoColors.ActiveGreen else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -724,7 +712,7 @@ fun SottoApp(
                         if (!ttsReady) {
                             Spacer(modifier = Modifier.width(6.dp))
                             Surface(
-                                color = Color(0xFFFFC107),
+                                color = SottoColors.WarningAmber,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
@@ -811,13 +799,13 @@ fun SottoApp(
                                 }
                             } else null,
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = if (isEmergency) Color(0xFF4E342E) else MaterialTheme.colorScheme.surfaceVariant,
-                                selectedLabelColor = if (isEmergency) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface,
+                                selectedContainerColor = if (isEmergency) SottoColors.EmergencyChipBackground else MaterialTheme.colorScheme.surfaceVariant,
+                                selectedLabelColor = if (isEmergency) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurface,
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             ),
                             border = if (isEmergency && isSelected) {
-                                BorderStroke(1.dp, Color(0xFFFFB74D))
+                                BorderStroke(1.dp, SottoColors.EmergencyAccent)
                             } else null
                         )
                     }
@@ -1206,12 +1194,12 @@ fun SottoApp(
                             containerColor = if (isEditMode) {
                                 MaterialTheme.colorScheme.surfaceVariant
                             } else if (phrase.isEmergency) {
-                                Color(0xFF251E14)
+                                SottoColors.EmergencyCardBackground
                             } else {
                                 MaterialTheme.colorScheme.surface
                             }
                         ),
-                        border = if (phrase.isEmergency) BorderStroke(1.5.dp, Color(0xFFFFB74D)) else null
+                        border = if (phrase.isEmergency) BorderStroke(1.5.dp, SottoColors.EmergencyAccent) else null
                     ) {
                         if (phrase.isEmergency) {
                             Column(
@@ -1222,14 +1210,14 @@ fun SottoApp(
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 Surface(
-                                    color = Color(0x33FFB74D),
+                                    color = SottoColors.EmergencyTranslucent,
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
                                         text = "🚨 " + stringResource(R.string.emergency_badge),
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color(0xFFFFB74D),
+                                        color = SottoColors.EmergencyAccent,
                                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                                     )
                                 }
@@ -1238,7 +1226,7 @@ fun SottoApp(
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Medium,
                                     textAlign = TextAlign.Center,
-                                    color = Color(0xFFFFE0B2),
+                                    color = SottoColors.EmergencyText,
                                     lineHeight = 24.sp
                                 )
                                 val hasEmergencySpoken = voiceSettings.showLanguageSwitcher &&
@@ -1253,7 +1241,7 @@ fun SottoApp(
                                         Text(
                                             text = phrase.spokenText,
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFFFFCC80).copy(alpha = 0.8f),
+                                            color = SottoColors.EmergencyTextSecondary.copy(alpha = 0.8f),
                                             textAlign = TextAlign.Center,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
@@ -1595,8 +1583,8 @@ fun SottoApp(
         ) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = if (isEmergency) Color(0xFF1E1710) else MaterialTheme.colorScheme.background,
-                border = if (isEmergency) BorderStroke(2.dp, Color(0xFFFFB74D)) else null
+                color = if (isEmergency) SottoColors.EmergencyContainer else MaterialTheme.colorScheme.background,
+                border = if (isEmergency) BorderStroke(2.dp, SottoColors.EmergencyAccent) else null
             ) {
                 Column(
                     modifier = Modifier
@@ -1611,7 +1599,7 @@ fun SottoApp(
                     ) {
                         if (isEmergency) {
                             Surface(
-                                color = Color(0x33FFB74D),
+                                color = SottoColors.EmergencyTranslucent,
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.align(Alignment.Center)
                             ) {
@@ -1619,7 +1607,7 @@ fun SottoApp(
                                     text = "🚨 " + stringResource(R.string.emergency_badge),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFFFB74D),
+                                    color = SottoColors.EmergencyAccent,
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                                 )
                             }
@@ -1632,7 +1620,7 @@ fun SottoApp(
                                 text = "✕",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isEmergency) Color(0xFFFFB74D) else MaterialTheme.colorScheme.onBackground
+                                color = if (isEmergency) SottoColors.EmergencyAccent else MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -1650,7 +1638,7 @@ fun SottoApp(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             lineHeight = if (isEmergency && phrase.text.length > 60) 44.sp else 56.sp,
-                            color = if (isEmergency) Color(0xFFFFE0B2) else MaterialTheme.colorScheme.onBackground
+                            color = if (isEmergency) SottoColors.EmergencyText else MaterialTheme.colorScheme.onBackground
                         )
                         if (hasSpokenText) {
                             Surface(
@@ -1688,8 +1676,8 @@ fun SottoApp(
                                     .height(56.dp),
                                 colors = if (isEmergency) {
                                     ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFFFFB74D),
-                                        contentColor = Color(0xFF1E1710)
+                                        containerColor = SottoColors.EmergencyAccent,
+                                        contentColor = SottoColors.EmergencyContainer
                                     )
                                 } else {
                                     ButtonDefaults.buttonColors()
@@ -1736,8 +1724,8 @@ fun SottoApp(
                                 .height(64.dp),
                             colors = if (isEmergency) {
                                 ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFFFFB74D),
-                                    contentColor = Color(0xFF1E1710)
+                                    containerColor = SottoColors.EmergencyAccent,
+                                    contentColor = SottoColors.EmergencyContainer
                                 )
                             } else {
                                 ButtonDefaults.buttonColors()
@@ -1986,7 +1974,7 @@ fun SottoApp(
                                 Text(
                                     text = stringResource(translationErrorResId!!),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFFEF5350),
+                                    color = SottoColors.DestructiveRed,
                                     modifier = Modifier.padding(vertical = 2.dp)
                                 )
                             }
@@ -2069,11 +2057,11 @@ fun SottoApp(
                                     )
                                 },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = if (isEmergencyCat) Color(0xFF4E342E) else MaterialTheme.colorScheme.surfaceVariant,
-                                    selectedLabelColor = if (isEmergencyCat) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface
+                                    selectedContainerColor = if (isEmergencyCat) SottoColors.EmergencyChipBackground else MaterialTheme.colorScheme.surfaceVariant,
+                                    selectedLabelColor = if (isEmergencyCat) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurface
                                 ),
                                 border = if (isEmergencyCat && isSelected) {
-                                    BorderStroke(1.dp, Color(0xFFFFB74D))
+                                    BorderStroke(1.dp, SottoColors.EmergencyAccent)
                                 } else null
                             )
                         }
@@ -2119,7 +2107,7 @@ fun SottoApp(
                             phraseToEdit = null
                             initialAddText = ""
                         }) {
-                            Text(stringResource(R.string.action_delete), color = Color(0xFFEF5350))
+                            Text(stringResource(R.string.action_delete), color = SottoColors.DestructiveRed)
                         }
                     }
                     TextButton(onClick = {
@@ -2259,7 +2247,7 @@ fun SottoApp(
                                 categoryToDeleteConfirm = toDelete
                             }
                         ) {
-                            Text(stringResource(R.string.action_delete_category), color = Color(0xFFEF5350))
+                            Text(stringResource(R.string.action_delete_category), color = SottoColors.DestructiveRed)
                         }
                     }
                     TextButton(onClick = { categoryToManage = null }) {

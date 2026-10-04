@@ -26,6 +26,7 @@ import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
 import com.amh.sotto.data.WhyFinderRepository
 import com.amh.sotto.data.WhyLogEntry
 import com.amh.sotto.data.WhyOutcome
+import com.amh.sotto.theme.SottoColors
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -310,9 +311,9 @@ private fun WhyLogEntryCard(
     val formattedTime = remember(entry.startedAt) { dateFormat.format(Date(entry.startedAt)) }
 
     val outcomeBadge = when (entry.outcome) {
-        WhyOutcome.FOUND -> Triple("✓ Found", Color(0xFF1B5E20), Color(0xFFE8F5E9))
-        WhyOutcome.NOT_FOUND -> Triple("? Not Found", Color(0xFF5D4037), Color(0xFFEFEBE9))
-        WhyOutcome.STOPPED -> Triple("⏹ Stopped", Color(0xFF37474F), Color(0xFFECEFF1))
+        WhyOutcome.FOUND -> Triple("✓ Found", SottoColors.SuccessContainer, SottoColors.SuccessText)
+        WhyOutcome.NOT_FOUND -> Triple("? Not Found", SottoColors.NeutralNotFoundContainer, SottoColors.NeutralNotFoundText)
+        WhyOutcome.STOPPED -> Triple("⏹ Stopped", SottoColors.NeutralStoppedContainer, SottoColors.NeutralStoppedText)
     }
 
     Surface(

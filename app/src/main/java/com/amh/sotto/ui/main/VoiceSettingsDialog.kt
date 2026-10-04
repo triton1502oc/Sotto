@@ -27,6 +27,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.amh.sotto.BuildConfig
 import com.amh.sotto.R
 import com.amh.sotto.data.VoiceSettings
+import com.amh.sotto.theme.SottoColors
 import com.amh.sotto.util.ChimePlayer
 import com.amh.sotto.util.LocaleHelper
 import com.amh.sotto.util.TranslationHelper
@@ -154,7 +155,7 @@ fun VoiceSettingsDialog(
                         ) {
                             Text(
                                 text = stringResource(R.string.action_done),
-                                color = Color(0xFF4CAF50),
+                                color = SottoColors.ActiveGreen,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
                             )
@@ -262,7 +263,7 @@ fun VoiceSettingsDialog(
                                         Text(
                                             text = stringResource(R.string.warn_voice_pack_missing),
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = Color(0xFFFFA726),
+                                            color = SottoColors.WarningOrange,
                                             modifier = Modifier.weight(1f)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
@@ -584,13 +585,13 @@ fun VoiceSettingsDialog(
                                                         stringResource(R.string.label_model_not_downloaded)
                                                     },
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = if (isModelDownloaded == true) Color(0xFF81C784) else MaterialTheme.colorScheme.onSurfaceVariant
+                                                    color = if (isModelDownloaded == true) SottoColors.DownloadedGreen else MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                                 if (downloadErrorResId != null) {
                                                     Text(
                                                         text = stringResource(downloadErrorResId!!),
                                                         style = MaterialTheme.typography.labelSmall,
-                                                        color = Color(0xFFEF5350)
+                                                        color = SottoColors.DestructiveRed
                                                     )
                                                 }
                                             }
@@ -663,7 +664,7 @@ fun VoiceSettingsDialog(
                                                         stringResource(R.string.label_voice_pack_missing)
                                                     },
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = if (isVoicePackInstalled) Color(0xFF81C784) else Color(0xFFFFA726)
+                                                    color = if (isVoicePackInstalled) SottoColors.DownloadedGreen else SottoColors.WarningOrange
                                                 )
                                             }
                                             if (!isVoicePackInstalled) {

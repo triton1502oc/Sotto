@@ -47,6 +47,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.amh.sotto.R
 import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.WhyFinderRepository
+import com.amh.sotto.theme.SottoColors
 import com.amh.sotto.data.WhyOutcome
 import com.amh.sotto.data.WhyTree
 import com.amh.sotto.ui.category.getCategoryDisplayName
@@ -859,7 +860,7 @@ private fun CaregiverBottomMenu(
                     }
 
                     val micColor by animateColorAsState(
-                        targetValue = if (isListening) Color(0xFFC62828) else MaterialTheme.colorScheme.primaryContainer,
+                        targetValue = if (isListening) SottoColors.RecordingPulseRed else MaterialTheme.colorScheme.primaryContainer,
                         label = "micBg"
                     )
                     FilledTonalButton(
@@ -1044,8 +1045,8 @@ private fun UnifiedFourCardResponseDock(
                     .height(58.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1B5E20),
-                    contentColor = Color(0xFFE8F5E9)
+                    containerColor = SottoColors.SuccessContainer,
+                    contentColor = SottoColors.SuccessText
                 )
             ) {
                 Text(
@@ -1062,8 +1063,8 @@ private fun UnifiedFourCardResponseDock(
                     .height(58.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF7F1D1D),
-                    contentColor = Color(0xFFFFEBEE)
+                    containerColor = SottoColors.CrisisStopContainer,
+                    contentColor = SottoColors.CrisisStopText
                 )
             ) {
                 Text(
@@ -1086,8 +1087,8 @@ private fun UnifiedFourCardResponseDock(
                     .height(54.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE65100),
-                    contentColor = Color(0xFFFFF3E0)
+                    containerColor = SottoColors.WarningHighContainer,
+                    contentColor = SottoColors.WarningHighText
                 )
             ) {
                 Text(
@@ -1104,8 +1105,8 @@ private fun UnifiedFourCardResponseDock(
                     .height(54.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF37474F),
-                    contentColor = Color(0xFFECEFF1)
+                    containerColor = SottoColors.NeutralStoppedContainer,
+                    contentColor = SottoColors.NeutralStoppedText
                 )
             ) {
                 Text(
@@ -1183,7 +1184,7 @@ private fun StatusBadge(
     ) {
         if (lastReply != null) {
             Surface(
-                color = Color(0xFF2E7D32),
+                color = SottoColors.SuccessGreen,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
@@ -1214,7 +1215,7 @@ private fun StatusBadge(
                         .size(10.dp)
                         .scale(scale)
                         .clip(CircleShape)
-                        .background(Color(0xFFE53935))
+                        .background(SottoColors.RecordingDotRed)
                 )
                 Text(
                     text = stringResource(R.string.listen_mode_listening),

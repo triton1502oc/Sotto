@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.amh.sotto.R
 import com.amh.sotto.data.Phrase
+import com.amh.sotto.theme.SottoColors
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -80,7 +81,7 @@ fun ManageCategoriesDialog(
 
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = if (isEmergency) Color(0xFF3E2723) else MaterialTheme.colorScheme.surfaceVariant,
+                                color = if (isEmergency) SottoColors.EmergencyChipBackgroundDark else MaterialTheme.colorScheme.surfaceVariant,
                                 shadowElevation = elevation.value,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -100,7 +101,7 @@ fun ManageCategoriesDialog(
                                         Text(
                                             "☰",
                                             fontSize = 18.sp,
-                                            color = if (isEmergency) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = if (isEmergency) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
 
@@ -145,13 +146,13 @@ fun ManageCategoriesDialog(
                                             text = getCategoryDisplayName(catName),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = if (isEmergency) Color(0xFFFFCC80) else MaterialTheme.colorScheme.onSurface
+                                            color = if (isEmergency) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurface
                                         )
                                         if (isEmergency) {
                                             Text(
                                                 text = stringResource(R.string.badge_emergency_locked),
                                                 style = MaterialTheme.typography.labelSmall,
-                                                color = Color(0xFFFFB74D)
+                                                color = SottoColors.EmergencyAccent
                                             )
                                         } else if (isGeneral) {
                                             Text(
