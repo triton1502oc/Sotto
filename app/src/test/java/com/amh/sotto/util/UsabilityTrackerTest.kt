@@ -2,8 +2,11 @@ package com.amh.sotto.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.SystemClock
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -25,6 +28,9 @@ class UsabilityTrackerTest {
         context = mockk(relaxed = true)
         sharedPreferences = mockk(relaxed = true)
 
+        mockkStatic(SystemClock::class)
+        every { SystemClock.elapsedRealtime() } returns 10000L
+
         every { context.filesDir } returns tempDir
         every { context.getSharedPreferences("sotto_voice_prefs", Context.MODE_PRIVATE) } returns sharedPreferences
         // Enable tracking for functional tests
@@ -33,6 +39,7 @@ class UsabilityTrackerTest {
 
     @After
     fun teardown() {
+        unmockkStatic(SystemClock::class)
         tempDir.deleteRecursively()
     }
 
@@ -140,5 +147,32 @@ class UsabilityTrackerTest {
 
         assertFalse(File(tempDir, UsabilityTracker.BUFFER_FILE_NAME).exists())
         assertTrue(UsabilityTracker.getPendingEvents(context).isEmpty())
+    }
+
+    @Test
+    fun `categoryType correctly collapses custom categories and preserves standard categories`() {
+        assertEquals("emergency", UsabilityTracker.categoryType("Emergency", false))
+        assertEquals("emergency", UsabilityTracker.categoryType("General", true))
+        assertEquals("needs", UsabilityTracker.categoryType("Needs", false))
+        assertEquals("social", UsabilityTracker.categoryType("Social", false))
+        assertEquals("care", UsabilityTracker.categoryType("Care", false))
+        assertEquals("general", UsabilityTracker.categoryType("General", false))
+        assertEquals("custom", UsabilityTracker.categoryType("My Private Custom Category", false))
+    }
+
+    @Test
+    fun `recordCardTap emits only coarse contextTag and does not record phrase text or hash`() {
+        UsabilityTracker.recordCardTap(context, "My Private Custom Category", false, 12345)
+
+        val pending = UsabilityTracker.getPendingEvents(context)
+        assertEquals(1, pending.size)
+        val event = pending.first()
+        assertEquals("SpeakCard", event.intent)
+        assertEquals("cat_custom", event.contextTag)
+        assertFalse(event.contextTag.contains("Private"))
+        assertFalse(event.contextTag.contains("12345"))
+        val json = event.toJsonObject().toString()
+        assertFalse(json.contains("Private"))
+        assertFalse(json.contains("12345"))
     }
 }

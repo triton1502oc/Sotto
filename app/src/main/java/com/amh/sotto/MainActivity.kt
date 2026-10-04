@@ -1114,7 +1114,7 @@ fun SottoApp(
                     } else {
                         cardModifier.combinedClickable(
                             onClick = {
-                                UsabilityTracker.recordCardTap(context, phrase.category, phrase.text.hashCode().toString())
+                                UsabilityTracker.recordCardTap(context, phrase.category, phrase.isEmergency, System.identityHashCode(phrase))
                                 if (voiceSettings.showLanguageSwitcher) {
                                     if (activeSpeechTarget == "secondary") {
                                         val hasValidSpoken = !phrase.spokenText.isNullOrBlank() && phrase.spokenText != LocaleHelper.LANG_AUTO

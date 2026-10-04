@@ -7,6 +7,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.SharedPreferencesVoiceSettingsRepository
 import org.json.JSONArray
 import org.json.JSONObject
@@ -36,7 +37,7 @@ object UsabilityTracker {
     private val bufferLock = Any()
 
     private var lastTapTimestamp = 0L
-    private var lastTapTarget = ""
+    private var lastTapTarget = 0
 
     data class UsabilityEvent(
         val intent: String,
@@ -92,13 +93,27 @@ object UsabilityTracker {
         recordEvent(context, UsabilityEvent(name, duration, outcome, resolvedFriction, contextTag))
     }
 
-    fun recordCardTap(context: Context, category: String, phraseId: String) {
+    /**
+     * Maps a category to a coarse, non-identifying type. Custom category names are user-authored
+     * text and must never be transmitted, so they collapse to "custom".
+     */
+    fun categoryType(category: String, isEmergency: Boolean): String {
+        if (isEmergency || category.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true)) return "emergency"
+        val builtIn = Phrase.DEFAULT_CATEGORIES.firstOrNull { it.equals(category, ignoreCase = true) }
+        return builtIn?.lowercase(java.util.Locale.ROOT) ?: "custom"
+    }
+
+    /**
+     * Records a card tap. [localTapKey] is used only in memory to detect rapid repeated taps
+     * on the same card and is never persisted or transmitted.
+     */
+    fun recordCardTap(context: Context, category: String, isEmergency: Boolean, localTapKey: Int) {
         val now = SystemClock.elapsedRealtime()
         val interval = now - lastTapTimestamp
-        val isRapid = (phraseId == lastTapTarget && interval < RAPID_TAP_THRESHOLD_MS)
+        val isRapid = (localTapKey == lastTapTarget && interval < RAPID_TAP_THRESHOLD_MS)
 
         lastTapTimestamp = now
-        lastTapTarget = phraseId
+        lastTapTarget = localTapKey
 
         val outcome = if (isRapid) "rapid_tap" else "completed"
         val friction = if (isRapid) "rapid_clicking" else "none"
@@ -110,7 +125,7 @@ object UsabilityTracker {
                 durationMs = interval.coerceAtMost(30000L),
                 outcome = outcome,
                 frictionTag = friction,
-                contextTag = "cat_$category"
+                contextTag = "cat_${categoryType(category, isEmergency)}"
             )
         )
     }
