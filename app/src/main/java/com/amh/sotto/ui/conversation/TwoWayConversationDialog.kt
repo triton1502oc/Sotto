@@ -55,6 +55,7 @@ import com.amh.sotto.ui.whyfinder.IntensityScaleRow
 import com.amh.sotto.ui.whyfinder.WhyFinderSession
 import com.amh.sotto.ui.whyfinder.WhyFinderState
 import com.amh.sotto.ui.whyfinder.getBodyRegionLabel
+import com.amh.sotto.ui.whyfinder.getAreaDisplayName
 import com.amh.sotto.util.UsabilityTracker
 import kotlinx.coroutines.delay
 import java.util.Locale
@@ -63,6 +64,13 @@ enum class CaregiverTab {
     WHY_FINDER,
     FREEFORM
 }
+
+private data class WhyQuestionOption(
+    val text: String,
+    val isAreaHeader: Boolean,
+    val areaIndex: Int,
+    val questionIndex: Int = -1
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +91,7 @@ fun TwoWayConversationDialog(
     val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
 
     var activeTab by rememberSaveable {
-        mutableStateOf(if (whyFinderRepository != null) CaregiverTab.WHY_FINDER else CaregiverTab.FREEFORM)
+        mutableStateOf(CaregiverTab.FREEFORM)
     }
 
     var displayedText by rememberSaveable { mutableStateOf("") }
@@ -98,7 +106,6 @@ fun TwoWayConversationDialog(
     val whySession = remember { WhyFinderSession(tree) }
     val whyState = whySession.currentState
 
-    var whyLogNote by rememberSaveable { mutableStateOf("") }
     var whySessionSaved by rememberSaveable { mutableStateOf(false) }
 
     val activeFreeformText = displayedText.ifBlank { liveSpokenText }
@@ -153,9 +160,9 @@ fun TwoWayConversationDialog(
     }
 
     // Auto-save completed Why Finder session
-    fun finishAndSaveWhySession(note: String?) {
+    fun finishAndSaveWhySession() {
         if (whySessionSaved) return
-        val entry = whySession.toLogEntry(note)
+        val entry = whySession.toLogEntry(null)
         if (entry != null) {
             whyFinderRepository?.addLog(entry)
             whySessionSaved = true
@@ -174,7 +181,7 @@ fun TwoWayConversationDialog(
 
     LaunchedEffect(whyState) {
         if (whyState is WhyFinderState.Finished) {
-            finishAndSaveWhySession(whyLogNote)
+            finishAndSaveWhySession()
         }
     }
 
@@ -253,15 +260,9 @@ fun TwoWayConversationDialog(
                                 activeFreeformText = activeFreeformText,
                                 lastReply = lastReply,
                                 isListening = isListening,
-                                whyLogNote = whyLogNote,
-                                onWhyLogNoteChange = {
-                                    whyLogNote = it
-                                    finishAndSaveWhySession(it)
-                                },
                                 onRestartWhyTree = {
                                     whySession.restart()
                                     whySessionSaved = false
-                                    whyLogNote = ""
                                 },
                                 onFinish = onDismiss,
                                 onReadAloudPrompt = { onSpeakResponse(whyPromptText) },
@@ -370,15 +371,9 @@ fun TwoWayConversationDialog(
                         activeFreeformText = activeFreeformText,
                         lastReply = lastReply,
                         isListening = isListening,
-                        whyLogNote = whyLogNote,
-                        onWhyLogNoteChange = {
-                            whyLogNote = it
-                            finishAndSaveWhySession(it)
-                        },
                         onRestartWhyTree = {
                             whySession.restart()
                             whySessionSaved = false
-                            whyLogNote = ""
                         },
                         onFinish = onDismiss,
                         onReadAloudPrompt = { onSpeakResponse(whyPromptText) },
@@ -470,106 +465,221 @@ fun TwoWayConversationDialog(
         }
     }
 
-    // Phrase Card Picker Sheet (for selecting cards in Freeform or injecting into Why Finder)
+    // Card Picker Sheet (Why Tree Questions in Guided mode or Phrase Cards in Talk mode)
     if (showQuestionsSheet) {
-        var selectedPromptCategory by rememberSaveable { mutableStateOf("ALL") }
+        var selectedPromptCategory by rememberSaveable(activeTab) { mutableStateOf("ALL") }
 
         AlertDialog(
             onDismissRequest = { showQuestionsSheet = false },
             title = {
                 Text(
-                    text = stringResource(R.string.action_caregiver_prompts),
+                    text = if (activeTab == CaregiverTab.WHY_FINDER) {
+                        "🌳 " + stringResource(R.string.why_tree_editor_title)
+                    } else {
+                        stringResource(R.string.action_caregiver_prompts)
+                    },
                     style = MaterialTheme.typography.titleLarge
                 )
             },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        item {
-                            val isSelected = selectedPromptCategory == "ALL"
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { selectedPromptCategory = "ALL" },
-                                label = {
-                                    Text(
-                                        text = stringResource(R.string.category_all),
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                }
-                            )
-                        }
-                        items(effectiveCategories) { catName ->
-                            val isSelected = selectedPromptCategory == catName
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { selectedPromptCategory = catName },
-                                label = {
-                                    Text(
-                                        text = getCategoryDisplayName(catName),
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                }
-                            )
-                        }
-                    }
-
-                    val availablePhrases = remember(allPhrases, selectedPromptCategory) {
-                        if (selectedPromptCategory == "ALL") {
-                            allPhrases
-                        } else if (selectedPromptCategory == Phrase.CATEGORY_EMERGENCY) {
-                            allPhrases.filter { it.isEmergency }
-                        } else {
-                            allPhrases.filter { !it.isEmergency && it.category == selectedPromptCategory }
-                        }
-                    }
-
-                    if (availablePhrases.isEmpty()) {
-                        Box(
+                    if (activeTab == CaregiverTab.WHY_FINDER) {
+                        // Why Tree Area Categories
+                        LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
+                                .padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Text(
-                                text = stringResource(R.string.hint_no_phrases),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                            )
+                            item {
+                                val isSelected = selectedPromptCategory == "ALL"
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { selectedPromptCategory = "ALL" },
+                                    label = {
+                                        Text(
+                                            text = stringResource(R.string.category_all),
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    }
+                                )
+                            }
+                            items(tree.areas) { area ->
+                                val isSelected = selectedPromptCategory == area.id
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { selectedPromptCategory = area.id },
+                                    label = {
+                                        Text(
+                                            text = getAreaDisplayName(area.id, context),
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        val availableWhyQuestions = remember(tree, selectedPromptCategory) {
+                            if (selectedPromptCategory == "ALL") {
+                                tree.areas.flatMapIndexed { aIdx, area ->
+                                    listOf(WhyQuestionOption(area.question, isAreaHeader = true, areaIndex = aIdx)) +
+                                    area.questions.mapIndexed { qIdx, q ->
+                                        WhyQuestionOption(q.text, isAreaHeader = false, areaIndex = aIdx, questionIndex = qIdx)
+                                    }
+                                }
+                            } else {
+                                val aIdx = tree.areas.indexOfFirst { it.id == selectedPromptCategory }
+                                if (aIdx >= 0) {
+                                    val area = tree.areas[aIdx]
+                                    listOf(WhyQuestionOption(area.question, isAreaHeader = true, areaIndex = aIdx)) +
+                                    area.questions.mapIndexed { qIdx, q ->
+                                        WhyQuestionOption(q.text, isAreaHeader = false, areaIndex = aIdx, questionIndex = qIdx)
+                                    }
+                                } else {
+                                    emptyList()
+                                }
+                            }
+                        }
+
+                        if (availableWhyQuestions.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(150.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.hint_no_phrases),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 350.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(availableWhyQuestions) { option ->
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .clickable {
+                                                if (option.isAreaHeader) {
+                                                    whySession.jumpToArea(option.areaIndex)
+                                                } else {
+                                                    whySession.jumpToQuestion(option.areaIndex, option.questionIndex)
+                                                }
+                                                showQuestionsSheet = false
+                                            },
+                                        color = if (option.isAreaHeader) {
+                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                                        } else {
+                                            MaterialTheme.colorScheme.surfaceVariant
+                                        }
+                                    ) {
+                                        Text(
+                                            text = (if (option.isAreaHeader) "🏷️ " else "") + option.text,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = if (option.isAreaHeader) FontWeight.Bold else FontWeight.Medium,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                                            color = if (option.isAreaHeader) {
+                                                MaterialTheme.colorScheme.onPrimaryContainer
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     } else {
-                        LazyColumn(
+                        // Standard AAC Phrases (Talk Mode)
+                        LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = 350.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                .padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            items(availablePhrases) { phrase ->
-                                Surface(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .clickable {
-                                            if (activeTab == CaregiverTab.WHY_FINDER) {
-                                                whySession.overrideCurrentQuestion(phrase.text)
-                                            } else {
+                            item {
+                                val isSelected = selectedPromptCategory == "ALL"
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { selectedPromptCategory = "ALL" },
+                                    label = {
+                                        Text(
+                                            text = stringResource(R.string.category_all),
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    }
+                                )
+                            }
+                            items(effectiveCategories) { catName ->
+                                val isSelected = selectedPromptCategory == catName
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { selectedPromptCategory = catName },
+                                    label = {
+                                        Text(
+                                            text = getCategoryDisplayName(catName),
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        val availablePhrases = remember(allPhrases, selectedPromptCategory) {
+                            if (selectedPromptCategory == "ALL") {
+                                allPhrases
+                            } else if (selectedPromptCategory == Phrase.CATEGORY_EMERGENCY) {
+                                allPhrases.filter { it.isEmergency }
+                            } else {
+                                allPhrases.filter { !it.isEmergency && it.category == selectedPromptCategory }
+                            }
+                        }
+
+                        if (availablePhrases.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(150.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.hint_no_phrases),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 350.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(availablePhrases) { phrase ->
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .clickable {
                                                 displayedText = phrase.text
-                                            }
-                                            showQuestionsSheet = false
-                                        },
-                                    color = MaterialTheme.colorScheme.surfaceVariant
-                                ) {
-                                    Text(
-                                        text = phrase.text,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Medium,
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                                showQuestionsSheet = false
+                                            },
+                                        color = MaterialTheme.colorScheme.surfaceVariant
+                                    ) {
+                                        Text(
+                                            text = phrase.text,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -645,7 +755,7 @@ private fun CaregiverBottomMenu(
                             onClick = { onTabChange(CaregiverTab.FREEFORM) },
                             label = {
                                 Text(
-                                    text = "🎙️ " + stringResource(R.string.mode_freeform),
+                                    text = "💬 " + stringResource(R.string.mode_freeform),
                                     style = MaterialTheme.typography.labelMedium
                                 )
                             }
@@ -718,6 +828,36 @@ private fun CaregiverBottomMenu(
                         }
                     }
                 } else {
+                    FilledTonalButton(
+                        onClick = onReadAloudFreeform,
+                        enabled = canReadAloudFreeform,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "🔊 " + stringResource(R.string.action_speak),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = onPickCard,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "📋 " + stringResource(R.string.action_cards),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
                     val micColor by animateColorAsState(
                         targetValue = if (isListening) Color(0xFFC62828) else MaterialTheme.colorScheme.primaryContainer,
                         label = "micBg"
@@ -729,37 +869,30 @@ private fun CaregiverBottomMenu(
                             containerColor = micColor,
                             contentColor = if (isListening) Color.White else MaterialTheme.colorScheme.onPrimaryContainer
                         ),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(if (isListening) "⏹ Stop" else "🎤 Mic", style = MaterialTheme.typography.labelMedium)
-                    }
-
-                    FilledTonalButton(
-                        onClick = onReadAloudFreeform,
-                        enabled = canReadAloudFreeform,
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("🔊 " + stringResource(R.string.action_speak), style = MaterialTheme.typography.labelMedium)
+                        Text(
+                            text = if (isListening) "⏹ Stop" else "🎤 Mic",
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
 
                     OutlinedButton(
-                        onClick = onPickCard,
+                        onClick = onToggleKeyboard,
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("📋 " + stringResource(R.string.action_cards), style = MaterialTheme.typography.labelMedium)
-                    }
-
-                    IconButton(
-                        onClick = onToggleKeyboard,
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Text("⌨️", fontSize = 16.sp)
+                        Text(
+                            text = "⌨️ " + stringResource(R.string.action_type),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
@@ -775,8 +908,6 @@ private fun CaregiverDisplayCard(
     activeFreeformText: String,
     lastReply: String?,
     isListening: Boolean,
-    whyLogNote: String,
-    onWhyLogNoteChange: (String) -> Unit,
     onRestartWhyTree: () -> Unit,
     onFinish: () -> Unit,
     onReadAloudPrompt: () -> Unit,
@@ -840,14 +971,6 @@ private fun CaregiverDisplayCard(
                             }
                         }
                     }
-
-                    OutlinedTextField(
-                        value = whyLogNote,
-                        onValueChange = onWhyLogNoteChange,
-                        placeholder = { Text(stringResource(R.string.why_finder_note_hint), fontSize = 13.sp) },
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = 3
-                    )
                 }
 
                 Row(

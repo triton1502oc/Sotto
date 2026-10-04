@@ -1,10 +1,15 @@
 package com.amh.sotto.ui.whyfinder
 
+import android.app.Activity
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -25,6 +30,7 @@ import com.amh.sotto.data.WhyFinderRepository
 import com.amh.sotto.data.WhyQuestion
 import com.amh.sotto.data.WhyQuestionType
 import com.amh.sotto.data.WhyTree
+import com.amh.sotto.util.LocaleHelper
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,10 +46,40 @@ fun WhyTreeEditorDialog(
     }
 
     var showResetConfirm by remember { mutableStateOf(false) }
+    var showOverflowMenu by remember { mutableStateOf(false) }
     var questionToEdit by remember { mutableStateOf<WhyQuestion?>(null) }
     var showAddQuestionDialog by remember { mutableStateOf(false) }
     var editingAreaQuestion by remember { mutableStateOf<WhyArea?>(null) }
     var questionToDelete by remember { mutableStateOf<WhyQuestion?>(null) }
+
+    var activeSpeechCallback by remember { mutableStateOf<((String) -> Unit)?>(null) }
+    val speechLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            if (!matches.isNullOrEmpty()) {
+                activeSpeechCallback?.invoke(matches[0])
+            }
+        }
+        activeSpeechCallback = null
+    }
+
+    fun launchSpeech(onResult: (String) -> Unit) {
+        activeSpeechCallback = onResult
+        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+        val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+        }
+        try {
+            speechLauncher.launch(intent)
+        } catch (_: Exception) {
+            activeSpeechCallback = null
+        }
+    }
 
     val currentArea = tree.areas.firstOrNull { it.id == selectedAreaId } ?: tree.areas.firstOrNull()
 
@@ -75,7 +111,9 @@ fun WhyTreeEditorDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text(
                             text = "🌳 " + stringResource(R.string.why_tree_editor_title),
                             style = MaterialTheme.typography.titleLarge,
@@ -93,15 +131,51 @@ fun WhyTreeEditorDialog(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextButton(onClick = { showResetConfirm = true }) {
+                        TextButton(
+                            onClick = onDismiss,
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
                             Text(
-                                text = stringResource(R.string.why_tree_reset_default),
-                                color = MaterialTheme.colorScheme.error,
-                                fontSize = 13.sp
+                                text = stringResource(R.string.action_done),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
-                        IconButton(onClick = onDismiss) {
-                            Text("✕", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+
+                        Box {
+                            IconButton(
+                                onClick = { showOverflowMenu = true },
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Text(
+                                    text = "⋮",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showOverflowMenu,
+                                onDismissRequest = { showOverflowMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            stringResource(R.string.why_tree_reset_default),
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Text("↺", color = MaterialTheme.colorScheme.error, fontSize = 16.sp)
+                                    },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showResetConfirm = true
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -203,7 +277,7 @@ fun WhyTreeEditorDialog(
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(currentArea.questions, key = { it.id }) { question ->
+                        itemsIndexed(currentArea.questions, key = { _, question -> question.id }) { index, question ->
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
@@ -246,16 +320,65 @@ fun WhyTreeEditorDialog(
                                         horizontalArrangement = Arrangement.spacedBy(2.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        val isFirst = index == 0
+                                        val isLast = index == currentArea.questions.lastIndex
+
+                                        IconButton(
+                                            onClick = {
+                                                if (!isFirst) {
+                                                    val mutable = currentArea.questions.toMutableList()
+                                                    val temp = mutable[index]
+                                                    mutable[index] = mutable[index - 1]
+                                                    mutable[index - 1] = temp
+                                                    val updatedAreas = tree.areas.map {
+                                                        if (it.id == currentArea.id) it.copy(questions = mutable) else it
+                                                    }
+                                                    updateTree(tree.copy(areas = updatedAreas))
+                                                }
+                                            },
+                                            enabled = !isFirst,
+                                            modifier = Modifier.size(30.dp)
+                                        ) {
+                                            Text(
+                                                "▲",
+                                                fontSize = 11.sp,
+                                                color = if (!isFirst) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
+                                            )
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                if (!isLast) {
+                                                    val mutable = currentArea.questions.toMutableList()
+                                                    val temp = mutable[index]
+                                                    mutable[index] = mutable[index + 1]
+                                                    mutable[index + 1] = temp
+                                                    val updatedAreas = tree.areas.map {
+                                                        if (it.id == currentArea.id) it.copy(questions = mutable) else it
+                                                    }
+                                                    updateTree(tree.copy(areas = updatedAreas))
+                                                }
+                                            },
+                                            enabled = !isLast,
+                                            modifier = Modifier.size(30.dp)
+                                        ) {
+                                            Text(
+                                                "▼",
+                                                fontSize = 11.sp,
+                                                color = if (!isLast) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
+                                            )
+                                        }
+
                                         IconButton(
                                             onClick = { questionToEdit = question },
-                                            modifier = Modifier.size(32.dp)
+                                            modifier = Modifier.size(30.dp)
                                         ) {
                                             Text("✏️", fontSize = 14.sp)
                                         }
                                         if (currentArea.questions.size > 1) {
                                             IconButton(
                                                 onClick = { questionToDelete = question },
-                                                modifier = Modifier.size(32.dp)
+                                                modifier = Modifier.size(30.dp)
                                             ) {
                                                 Text("🗑️", fontSize = 14.sp)
                                             }
@@ -281,6 +404,25 @@ fun WhyTreeEditorDialog(
                     value = editText,
                     onValueChange = { editText = it },
                     label = { Text(stringResource(R.string.hint_question_text)) },
+                    trailingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (editText.isNotBlank()) {
+                                IconButton(onClick = { editText = "" }, modifier = Modifier.size(32.dp)) {
+                                    Text("✕", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                            IconButton(
+                                onClick = {
+                                    launchSpeech { spoken ->
+                                        editText = if (editText.isBlank()) spoken else "$editText $spoken"
+                                    }
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Text("🎤", fontSize = 14.sp)
+                            }
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             },
@@ -322,6 +464,25 @@ fun WhyTreeEditorDialog(
                     onValueChange = { newText = it },
                     label = { Text(stringResource(R.string.hint_question_text)) },
                     placeholder = { Text("e.g. Is your shirt too tight?") },
+                    trailingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (newText.isNotBlank()) {
+                                IconButton(onClick = { newText = "" }, modifier = Modifier.size(32.dp)) {
+                                    Text("✕", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                            IconButton(
+                                onClick = {
+                                    launchSpeech { spoken ->
+                                        newText = if (newText.isBlank()) spoken else "$newText $spoken"
+                                    }
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Text("🎤", fontSize = 14.sp)
+                            }
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             },
@@ -365,6 +526,25 @@ fun WhyTreeEditorDialog(
                     value = editOpeningText,
                     onValueChange = { editOpeningText = it },
                     label = { Text(stringResource(R.string.label_area_question)) },
+                    trailingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (editOpeningText.isNotBlank()) {
+                                IconButton(onClick = { editOpeningText = "" }, modifier = Modifier.size(32.dp)) {
+                                    Text("✕", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                            IconButton(
+                                onClick = {
+                                    launchSpeech { spoken ->
+                                        editOpeningText = if (editOpeningText.isBlank()) spoken else "$editOpeningText $spoken"
+                                    }
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Text("🎤", fontSize = 14.sp)
+                            }
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             },

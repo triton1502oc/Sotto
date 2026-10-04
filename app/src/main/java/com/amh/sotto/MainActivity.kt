@@ -677,7 +677,7 @@ fun SottoApp(
                             },
                             modifier = Modifier.semantics { contentDescription = listenModeCd }
                         ) {
-                            Text("👂", fontSize = 20.sp)
+                            Text("🤝", fontSize = 20.sp)
                         }
 
                         // Voice & App Settings (Always visible)
@@ -698,7 +698,9 @@ fun SottoApp(
                                 1.dp,
                                 if (isEditMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.outlineVariant
                             ),
-                            modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+                            modifier = Modifier
+                                .heightIn(min = 36.dp)
+                                .padding(start = 4.dp, end = 8.dp)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),

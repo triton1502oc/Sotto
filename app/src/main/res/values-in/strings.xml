@@ -3,7 +3,7 @@
 
     <!-- Actions -->
     <string name="action_done">Selesai</string>
-    <string name="action_edit_list">Ubah Daftar</string>
+    <string name="action_edit_list">Ubah</string>
     <string name="action_voice">Suara</string>
     <string name="action_settings">Pengaturan</string>
     <string name="action_save">Simpan</string>
@@ -145,10 +145,10 @@
     <string name="action_install_voice">Instal</string>
     <string name="warn_voice_pack_missing">Paket suara belum terpasang. Menggunakan aksen cadangan.</string>
 
-    <!-- Two-Way Caregiver & Receptive Communication Mode -->
-    <string name="action_listen_mode">Dengar &amp; Baca</string>
-    <string name="cd_listen_mode">Buka mode Dengar dan Baca untuk pendamping</string>
-    <string name="listen_mode_title">Dengar &amp; Baca</string>
+    <!-- Two-Way Partner & Receptive Communication Mode -->
+    <string name="action_listen_mode">Partner</string>
+    <string name="cd_listen_mode">Buka mode Partner untuk partner komunikasi</string>
+    <string name="listen_mode_title">Mode Partner</string>
     <string name="listen_mode_hint">Ketuk mikrofon untuk bicara…</string>
     <string name="listen_mode_listening">Mendengarkan…</string>
     <string name="listen_mode_tap_to_stop">Ketuk mikrofon untuk berhenti</string>
@@ -353,11 +353,12 @@
 
     <!-- Unified Caregiver Mode -->
     <string name="mode_why_finder">Panduan</string>
-    <string name="mode_freeform">Mik</string>
+    <string name="mode_freeform">Bicara</string>
     <string name="action_edit_question">Ubah</string>
     <string name="action_cards">Kartu</string>
     <string name="action_speak">Bicara</string>
     <string name="action_step_back">Kembali</string>
     <string name="action_restart">Ulangi</string>
+    <string name="action_type">Ketik</string>
     <string name="hint_edit_question">Ketik pertanyaan...</string>
 </resources>

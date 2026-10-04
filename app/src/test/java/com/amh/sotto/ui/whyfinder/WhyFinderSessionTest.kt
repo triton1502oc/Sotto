@@ -177,6 +177,31 @@ class WhyFinderSessionTest {
     }
 
     @Test
+    fun `jumpToArea jumps to specified area and supports stepBack`() {
+        val session = WhyFinderSession(testTree)
+        session.jumpToArea(1)
+        val state = session.currentState as WhyFinderState.AskingArea
+        assertEquals("senses", state.area.id)
+        assertTrue(session.canStepBack())
+
+        val reverted = session.stepBack()
+        assertTrue(reverted)
+        assertEquals("body", (session.currentState as WhyFinderState.AskingArea).area.id)
+    }
+
+    @Test
+    fun `jumpToQuestion jumps directly to question in area and can answer`() {
+        val session = WhyFinderSession(testTree)
+        session.jumpToQuestion(1, 0) // senses_loud
+        val state = session.currentState as WhyFinderState.AskingQuestion
+        assertEquals("senses_loud", state.question.id)
+
+        session.answerYes()
+        val confirmState = session.currentState as WhyFinderState.ConfirmingCause
+        assertEquals("Is it too loud?", confirmState.causeText)
+    }
+
+    @Test
     fun `restart resets session to initial state`() {
         val session = WhyFinderSession(testTree)
         session.answerYes()

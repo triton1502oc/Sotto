@@ -293,6 +293,26 @@ class WhyFinderSession(
         return true
     }
 
+    fun jumpToArea(areaIndex: Int) {
+        val area = tree.areas.getOrNull(areaIndex) ?: return
+        historyStack.add(currentState)
+        currentState = WhyFinderState.AskingArea(
+            areaIndex = areaIndex,
+            area = area
+        )
+    }
+
+    fun jumpToQuestion(areaIndex: Int, questionIndex: Int) {
+        val area = tree.areas.getOrNull(areaIndex) ?: return
+        val question = area.questions.getOrNull(questionIndex) ?: return
+        historyStack.add(currentState)
+        currentState = WhyFinderState.AskingQuestion(
+            areaIndex = areaIndex,
+            questionIndex = questionIndex,
+            question = question
+        )
+    }
+
     fun overrideCurrentQuestion(customText: String) {
         when (val state = currentState) {
             is WhyFinderState.AskingArea -> {
