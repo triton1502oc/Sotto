@@ -10,12 +10,12 @@ SR = 44100
 DURATION = 56.0
 OUT = "demo/sotto_google_play_soundtrack.wav"
 TMP = "/tmp/sotto_play_audio"
-NARRATOR = ("en-US-AvaNeural", "-6%", "-2Hz")   # calm, warm
+NARRATOR = ("en-US-ChristopherNeural", "-2%", "-3Hz")   # deep, resonant baritone
 APP_VOICE = ("en-US-AndrewNeural", "+0%", "+0Hz")  # distinct "device" voice
 
 # (start_sec, voice, text) — starts align with scene boundaries in render_google_play_video.py
 CUES = [
-    (0.8, NARRATOR, "When a meltdown hits, even a simple question can feel like too much. "
+    (0.6, NARRATOR, "When a meltdown hits, even a simple question can feel like too much. "
                     "Sotto was made for those moments."),
     (9.2, NARRATOR, "Instead of asking, “What's wrong?”, Why Finder offers one gentle yes-or-no question at a time, "
                     "so you can find the cause together, calmly."),
@@ -25,7 +25,7 @@ CUES = [
     (31.0, NARRATOR, "Day to day, it's a clean, grown-up speech board. No cartoons."),
     (37.6, APP_VOICE, "I need a moment, please."),
     (42.0, NARRATOR, "And it all stays on the device. No accounts. No ads. No tracking."),
-    (51.4, NARRATOR, "Sotto. A calm voice, when words are hard."),
+    (50.8, NARRATOR, "Sotto. A calm voice, when words are hard."),
 ]
 
 

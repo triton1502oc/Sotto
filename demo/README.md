@@ -9,7 +9,7 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 
 | Video | Format | Primary Lang | Audio / Voice | Specs | File |
 |---|---|---|---|---|---|
-| **Google Play Preview (Master)** | 16:9 Landscape | `en-US` | Neural Ava + Andrew + Ambient Bed + Chime | 1920×1080 @ 30fps, ~56s | [`sotto_google_play_preview.mp4`](sotto_google_play_preview.mp4) |
+| **Google Play Preview (Master)** | 16:9 Landscape | `en-US` | Neural Baritone Christopher + Andrew + Ambient Bed + Chime | 1920×1080 @ 30fps, ~56s | [`sotto_google_play_preview.mp4`](sotto_google_play_preview.mp4) |
 | **English Device Demo** | 9:20 Portrait | `en-US` | Samantha | 720×1600 @ 30fps, ~54s | [`sotto_demo_en.mp4`](sotto_demo_en.mp4) |
 | **Indonesian Device Demo** | 9:20 Portrait | `id-ID` | Damayanti | 720×1600 @ 30fps, ~54s | [`sotto_demo_id.mp4`](sotto_demo_id.mp4) |
 

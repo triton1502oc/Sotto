@@ -18,7 +18,7 @@ Features:
   * Private Why Log with 30-day patterns (assets/screenshot_whylog.png)
 - Kinetic typography callouts, animated glowing badges, and feature highlights
 - Muted autoplay accessibility with synchronized bottom subtitle pill
-- Neural TTS narration (Ava / Andrew) + Attention Chime + low-stimulus ambient pad
+- Neural TTS narration (Christopher Baritone / Andrew) + Attention Chime + low-stimulus ambient pad
 - High-performance multiprocessing renderer + hardware H.264 / AAC encoder
 """
 
