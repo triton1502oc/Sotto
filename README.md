@@ -17,8 +17,8 @@
 ## Origin & Mission
 Sotto was created by a father to navigate overwhelming communication breakdowns and meltdowns with his autistic sons (ages 22 and 15). When sensory overload strikes, speaking, reading long sentences, or processing complex questions becomes exhausting or impossible.
 
-**Primary Mission (Crisis Navigation for Caregivers):**  
-Provide parents, caregivers, therapists, and educators with a calm, low-cognitive-load yes/no branching tool to reach loved ones during meltdowns and shutdowns, and uncover the root cause (*"Why?"*) without escalating distress.
+**Primary Mission (Crisis Navigation for Caregivers & Families):**  
+Provide parents, siblings, family members, caregivers, therapists, and educators with a calm, low-cognitive-load yes/no branching tool to reach loved ones during meltdowns and shutdowns, and uncover the root cause (*"Why?"*) without escalating distress.
 
 **Secondary Purpose (Dignified Voice for Non-Speaking & Unclear Speech):**  
 Provide non-speaking individuals, those with unclear or dysfluent speech, and anyone navigating verbal fatigue with a clean, mature text-to-speech board and spontaneous quick-speak bar—free of pediatric cartoons, patronizing symbols, and visual clutter.
@@ -26,7 +26,7 @@ Provide non-speaking individuals, those with unclear or dysfluent speech, and an
 ---
 
 ## Target Audience
-- **Caregivers, Parents, Therapists & Teachers**: Reaching loved ones during verbal shutdowns, cognitive freezes, and meltdowns; discovering root causes through structured yes/no inquiry.
+- **Parents, Siblings, Family, Caregivers, Therapists & Teachers**: Reaching loved ones during verbal shutdowns, cognitive freezes, and meltdowns; discovering root causes through structured yes/no inquiry.
 - **Autistic Teens & Adults**: Dignified self-advocacy and daily communication with high-contrast, low-stimulation phrase cards and giant fullscreen text.
 - **Individuals with Unclear, Fatigued, or Non-Speaking Speech**: Accessible one-touch speech for motor apraxia, dysarthria, cerebral palsy, ALS, stroke recovery (aphasia), quiet/strained voices, or situational speech loss.
 
@@ -58,7 +58,24 @@ Provide non-speaking individuals, those with unclear or dysfluent speech, and an
 
 ## Installation
 
-### For Users
+### Option 1: Google Play Beta (Closed Testing)
+Receive automatic background updates through Google Play:
+
+1. **Join the Testers Group**:  
+   Join with the Google account used on your Android device:  
+   👉 [**Join Sotto Testers Group**](https://groups.google.com/g/sotto-testers) *(tap "Join group")*
+2. **Opt In & Download**:  
+   After joining the group, opt in and install via Google Play:  
+   👉 [**Join on Android (Play Store)**](https://play.google.com/store/apps/details?id=com.amh.sotto) or [**Join on the Web**](https://play.google.com/apps/testing/com.amh.sotto)
+3. Tap **"Become a tester"**, then install Sotto directly from Google Play.
+
+> **Tip**: If Google Play shows *"App not available"*, ensure you are signed into the Play Store with the same Google account that joined the Google Group.
+
+---
+
+### Option 2: Direct APK Download (Offline / Sideload)
+For offline devices, deGoogled systems, or quick testing without a Google account:
+
 1. Download the latest `.apk` from [Releases](https://github.com/triton1502oc/Sotto/releases).
 2. Open the downloaded file (allow "Install Unknown Apps" if prompted by Android).
 3. Tap **Install** and launch Sotto.
