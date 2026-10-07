@@ -18,7 +18,7 @@
 Sotto was created by a father to navigate overwhelming communication breakdowns and meltdowns with his autistic sons (ages 22 and 15). When sensory overload strikes, speaking, reading long sentences, or processing complex questions becomes exhausting or impossible.
 
 **Primary Mission (Crisis Navigation for Caregivers & Families):**  
-Provide parents, siblings, family members, caregivers, therapists, and educators with a calm, low-cognitive-load yes/no branching tool to reach loved ones during meltdowns and shutdowns, and uncover the root cause (*"Why?"*) without escalating distress.
+Provide parents, siblings, family members, caregivers, therapists, and educators with an immediate two-way receptive triage HUD and low-cognitive-load yes/no inquiry to reach loved ones during meltdowns and shutdowns without escalating distress.
 
 **Secondary Purpose (Dignified Voice for Non-Speaking & Unclear Speech):**  
 Provide non-speaking individuals, those with unclear or dysfluent speech, and anyone navigating verbal fatigue with a clean, mature text-to-speech board and spontaneous quick-speak bar—free of pediatric cartoons, patronizing symbols, and visual clutter.
@@ -26,7 +26,7 @@ Provide non-speaking individuals, those with unclear or dysfluent speech, and an
 ---
 
 ## Target Audience
-- **Parents, Siblings, Family, Caregivers, Therapists & Teachers**: Reaching loved ones during verbal shutdowns, cognitive freezes, and meltdowns; discovering root causes through structured yes/no inquiry.
+- **Parents, Siblings, Family, Caregivers, Therapists & Teachers**: Reaching loved ones during verbal shutdowns, cognitive freezes, and meltdowns with immediate 1-tap de-escalation; discovering hidden root causes through structured inquiry.
 - **Autistic Teens & Adults**: Dignified self-advocacy and daily communication with high-contrast, low-stimulation phrase cards and giant fullscreen text.
 - **Individuals with Unclear, Fatigued, or Non-Speaking Speech**: Accessible one-touch speech for motor apraxia, dysarthria, cerebral palsy, ALS, stroke recovery (aphasia), quiet/strained voices, or situational speech loss.
 
@@ -34,11 +34,11 @@ Provide non-speaking individuals, those with unclear or dysfluent speech, and an
 
 ## Key Features
 
-### 1. Crisis Navigation (Caregiver-First)
-- **Why Finder (`🧭`)**: A guided, calm yes/no branching tree designed specifically for meltdowns and verbal shutdowns. Guides caregiver and individual through physical discomfort, sensory overload, emotional overwhelm, and task friction with large binary buttons and zero open-ended demands.
+### 1. Emergency Triage & Crisis Navigation (Caregiver-First)
+- **Two-Way Speak HUD & 180° Flip (`🤝`)**: Immediate emergency de-escalation for acute meltdowns and verbal shutdowns. Caregivers speak naturally or pick urgent preset prompts, flip the display 180° on a table, and the individual responds with one tap (`Yes`, `No`, `Not sure`, `Stop`) with instant voice confirmation. Zero demand fatigue or cognitive load.
+- **Why Finder Diagnostic Tree (`🧭`)**: A guided, low-stimulus yes/no branching tree to uncover hidden root causes (acute physical pain, body part location, sensory overload, routine disruption) when triggers are unclear or during post-crisis recovery.
 - **Private Why Log & 30-Day Trend Insights**: Automatically logs resolved crisis events locally in private app storage. Highlights top 30-day root-cause patterns and peak time-of-day triggers to help families and therapists identify recurring environmental stressors.
 - **Customizable Why Tree (`🌳`)**: Personalize branching questions and resolution steps with voice dictation (`🎤`), sequence reordering, and one-tap clinical defaults reset.
-- **Partner Mode (`🤝`)**: Unified caregiver dialog featuring two synchronized modes: **Guided** (Why Finder crisis tree with 4-card response dock) and **Talk** (real-time caregiver speech-to-text dictation, preset questions, Read Aloud `🔊`, 180° face-to-face screen flip `🔄 Flip`, and 4 dignified rapid-reply buttons `Yes`, `No`, `Repeat`, `Wait`).
 
 ### 2. Dignified Self-Expression (AAC Phrase Board)
 - **Low-Stimulus UI**: Dark-neutral Material 3 theme with high contrast, calm earth tones, and zero cartoon animations or visual distractions.

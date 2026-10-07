@@ -24,17 +24,17 @@ Created by a father of two autistic sons (ages 22 and 15), Sotto is built around
 
 FOR CAREGIVERS, FAMILIES & THERAPISTS:
 
-• Why Finder (Guided Crisis Navigation)
-When someone is experiencing sensory overload or verbal paralysis, open-ended questions like "What's wrong?" can worsen distress. Why Finder provides a gentle, step-by-step yes/no branching tree (covering Physical, Sensory, Emotional, and Routine triggers) with giant buttons to calmly identify the root cause.
+• Two-Way Speak HUD & 180° Tabletop Flip (Immediate Emergency Triage)
+During acute sensory overload or verbal shutdowns, processing complex questions or branching trees worsens distress. Caregivers can speak naturally or pick an urgent prompt, flip the phone 180° face-to-face on a table, and let their loved one tap giant, dignified response targets (Yes, No, Not sure, Stop) with instant voice confirmation. Zero cognitive load.
+
+• Why Finder (Guided Root-Cause Discovery Tree)
+When the source of distress is unknown, Why Finder provides a gentle, step-by-step yes/no branching tree to systematically uncover hidden physical pain (with body part & intensity locator), sensory overload, emotional fatigue, or routine disruption without open-ended interrogation.
 
 • Private On-Device Why Log & Pattern Trends
 Resolved crisis sessions are automatically logged 100% locally on your device. Review 30-day patterns to identify frequent environmental triggers, recurring peak hours, and actionable interventions. Never shared or uploaded to the cloud.
 
 • Customizable Why Tree & Safe Sharing
 Adapt questions and areas to your loved one's specific triggers using voice dictation and reordering. Easily export and share customized trees with teachers or speech therapists while keeping private crisis logs strictly excluded.
-
-• Partner Mode & 180° Screen Flip (Guided & Talk)
-Switch effortlessly between Guided Mode (Why Finder crisis inquiry) and Talk Mode (speech-to-text dictation with preset questions). Tap 180° Flip and place the phone on a table: your conversation partner taps one of 4 large, dignified responses (Yes, No, Repeat, Wait, or Not Sure/Stop in Guided mode) with instant voice confirmation.
 
 FOR NON-SPEAKING & UNCLEAR VOICES (DIGNIFIED SELF-EXPRESSION):
 

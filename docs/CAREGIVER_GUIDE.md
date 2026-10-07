@@ -1,7 +1,7 @@
 # Sotto User & Caregiver Guide
 
 ### TL;DR
-Sotto serves a vital dual mission: a calm, low-cognitive-load **Partner Mode** (`🤝`)—combining guided **Why Finder** crisis de-escalation and a two-way receptive communication HUD—for caregivers, therapists, and family members, paired with a dignity-first AAC speech board for autistic individuals, non-speaking users, and anyone with unclear or fatigued speech.
+Sotto serves a vital dual mission: a calm, low-cognitive-load **Partner Mode** (`🤝`)—combining an immediate two-way receptive emergency triage HUD and guided **Why Finder** root-cause investigation—for caregivers, therapists, and family members, paired with a dignity-first AAC speech board for autistic individuals, non-speaking users, and anyone with unclear or fatigued speech.
 
 ---
 
@@ -21,47 +21,80 @@ Sotto (*"under one's breath"*) is designed for sensory-sensitive communication a
         ┌─────────────┴─────────────┐            ┌─────────────┴─────────────┐
         ▼                           ▼            ▼                           ▼
  🤝 PARTNER MODE (Caregiver Hub)          🗣️ SELF-ADVOCACY (Daily AAC)
- ├── Guided Tab: Why Finder Crisis Tree   ├── Instant 1-Tap Phrase Cards
- ├── Talk Tab: 2-Way Receptive HUD & Mic  ├── Emergency Hero Bystander Card
- ├── 180° Face-to-Face Screen Flip        ├── Quick-Speak Bar & Dictation
- └── 4-Card Dignified Response Docks      └── Giant High-Contrast Fullscreen
+ ├── Talk Tab: Emergency Triage HUD & Mic ├── Instant 1-Tap Phrase Cards
+ ├── 180° Face-to-Face Screen Flip        ├── Emergency Hero Bystander Card
+ ├── 4-Card Dignified Response Docks      ├── Quick-Speak Bar & Dictation
+ └── Guided Tab: Root-Cause Decision Tree └── Giant High-Contrast Fullscreen
 ```
 
 ---
 
-## 2. Why Finder: Crisis Navigation During Meltdowns (`🧭`)
+## 2. Partner Mode: Immediate Emergency Triage (`🤝`)
 
-When sensory overload, verbal shutdowns, or emotional meltdowns occur, asking open-ended questions (*"What's wrong?", "Why are you upset?", "Where does it hurt?"*) can intensify distress and cause total communication lockup.
+When sensory overload, verbal shutdowns, cognitive freezes, or acute panic occur, processing multi-step questions causes **demand fatigue** and worsens distress. **Two-Way Partner Mode (Talk / Speak tab)** is Sotto's primary front-line tool for immediate crisis triage and de-escalation.
 
-**Why Finder** provides a structured, gentle yes/no decision tree designed to find the underlying cause with the lowest possible cognitive load.
+```
+Caregiver asks 1 direct question ──► Giant text on screen ──► Individual taps 1 of 4 replies
+(Voice Dictation or Preset Card)      (Can be flipped 180°)     (Large 1-Tap Tactile Dock)
+```
 
-### How to Use Why Finder Step-by-Step
+> [!IMPORTANT]
+> **Clinical Rule of Thumb: Speak vs. Guided**
+> - **During Peak Meltdown or Acute Crisis**: Use **Talk / Speak (`💬`)**. Ask one direct question (*"Do you want to leave?"*, *"Is it too loud?"*). Do not make an overwhelmed person navigate a multi-level tree.
+> - **When Trigger is Unknown or After Calming Down**: Use **Guided (`🧭`)**. Methodically investigate physical pain, body regions, sensory triggers, or routine changes.
 
-1. **Open Why Finder**: Tap the Partner Mode icon (`🤝`) in the top app bar, then select the **Guided** (`🧭`) tab.
+### How to Use Talk Mode During an Emergency Step-by-Step
+
+1. **Open Partner Mode**: Tap the handshake icon (`🤝`) in the top app bar. Sotto lands directly on the **Talk** tab.
+2. **Present One Urgent Question**:
+   - **Speak Naturally (`🎤 Mic`)**: Tap the mic button. Sotto transcribes your voice in real time into giant high-contrast text. Tap again or pause to finish.
+   - **Preset Emergency Cards (`📋 Questions`)**: Tap Questions to pick instant emergency and comfort checks (*"Are you in pain?"*, *"Do you need water?"*, *"I need a quiet space."*).
+   - **Type Manually (`⌨️ Type`)**: Type directly if ambient noise is too loud for speech recognition.
+3. **Vocalize with Read Aloud (`🔊 Speak`)**:
+   - If the individual has their eyes closed or head down, tap **`🔊 Speak`** to vocalize the prompt through the phone's speaker.
+4. **Face-to-Face 180° Flip (`🔄 Flip`)**:
+   - Rest the phone on a table or between you and tap **`🔄 Flip`**.
+   - The question text and the 4 response buttons flip upside down (facing the person across from you right-side up), while the caregiver controls remain facing you.
+5. **Dignified 4-Button Rapid Response**:
+   - The individual taps one large, high-contrast button:
+     - `✓ Yes` • `✕ No` • `? Not sure` • `⏹ Stop`
+   - Instant offline TTS voice confirmation plays aloud, haptic feedback pulses on the phone, and a visual confirmation badge appears.
+
+---
+
+## 3. Why Finder: Guided Root-Cause Discovery Tree (`🧭`)
+
+When the immediate crisis is stabilized—or when an individual is showing signs of distress but the underlying cause is unknown (e.g. subtle physical discomfort, clothing texture, or routine friction)—switch to **Guided Mode (`🧭`)**.
+
+**Why Finder** provides a structured, gentle yes/no decision tree designed to uncover root causes without open-ended interrogation.
+
+### How to Use Guided Mode Step-by-Step
+
+1. **Switch to Guided**: Tap the **Guided** (`🧭`) tab in the bottom bar of Partner Mode.
 2. **Present One Question at a Time**:
-   - The screen displays a single, low-stimulus question in giant text with large touch targets:
-     `[✓ YES]` / `[✕ NO]`
+   - The screen displays a single, low-stimulus question in giant text:
+     `[✓ YES]` / `[✕ NO]` / `[? NOT SURE]` / `[⏹ STOP]`
    - The individual can tap, point, or nod for the caregiver to tap.
 3. **Four Core Investigation Branches**:
-   - **Physical / Body**: Checks for acute pain, nausea, hunger, dehydration, restroom need, sensory discomfort from temperature, or medication timing.
+   - **Physical / Body**: Checks for acute pain, nausea, hunger, dehydration, restroom need, sensory discomfort from temperature, or medication timing. Includes visual **Body Part Selection** and **1–5 Pain Intensity Scale**.
    - **Sensory Overload**: Checks for loud noises, bright lighting, crowds/proximity, visual chaos, irritating clothing/textures, or overwhelming smells.
    - **Emotional / Social Overwhelm**: Checks for demand fatigue, anger, sadness, anxiety, or the urgent need for solitary space.
    - **Routine & Task Friction**: Checks for unexpected schedule changes, transition shock, confusion over instructions, or physical fatigue.
 4. **Resolution & Immediate Action Plan**:
    - Once a root cause is confirmed, Why Finder displays clear, concrete action steps (e.g., *"Offer quiet solitary space and dim lighting"*, *"Check temperature and offer cold water"*, *"Pause current task and remove pressure"*).
-   - Tap **`🔊 Read Aloud`** to vocalize the soothing resolution so the individual knows they have been heard and understood.
+   - Tap **`🔊 Speak`** to vocalize the soothing resolution so the individual knows they have been heard and understood.
 5. **Automatic On-Device Logging**:
    - Every resolved session is automatically logged to your private Why Log to help identify recurring patterns over time.
-   - If the individual needs to exit at any time, tap **`✕`** — there is zero penalty or pressure.
+   - If the individual needs to exit at any time, tap **`⏹ Stop`** or **`✕`** — there is zero penalty or pressure.
 
 ---
 
-## 3. Private Why Log & 30-Day Trend Insights (`📋`)
+## 4. Private Why Log & 30-Day Trend Insights (`📋`)
 
 Meltdowns rarely happen without environmental triggers. The **Private Why Log** helps families and therapists understand patterns without relying on memory during stressful moments.
 
 ### Viewing Logs & Trends
-- Tap **`📋 Log`** inside Why Finder, inside Two-Way Mode, or from the top app bar.
+- Tap **`📋 Log`** inside Voice & Language Settings or from Why Finder.
 - **30-Day Pattern Insights**:
   - **Category Breakdown**: See percentage shares across Sensory, Physical, Emotional, and Routine triggers (e.g. *55% Sensory Overload, 25% Physical*).
   - **Top Specific Triggers**: Identify the most frequent culprits (e.g. *"Loud noise or crowded space"*).
@@ -75,12 +108,12 @@ Meltdowns rarely happen without environmental triggers. The **Private Why Log** 
 
 ---
 
-## 4. Customizing the Crisis Tree (`🌳`)
+## 5. Customizing the Crisis Tree (`🌳`)
 
 Every autistic individual has a unique sensory profile, communication style, and set of comfort measures.
 
 ### Using the Why Tree Editor
-1. Tap **`🌳 Edit Tree`** from Why Finder or Voice & Language Settings.
+1. Tap **`🌳 Edit Tree`** from Voice & Language Settings or inside Partner Mode.
 2. **Customize Branching Questions**:
    - Tap any area (Physical, Sensory, Emotional, Routine) to view and edit its questions.
    - Tap **`+ Add Question`** to add personalized triggers (e.g., *"Is the dog barking bothering you?"*, *"Are your socks uncomfortable?"*).
@@ -95,58 +128,6 @@ Every autistic individual has a unique sensory profile, communication style, and
 - Through **Backup & Restore v2**, you can export **Only the Why Tree** (`Backup v2: Tree only`).
 - Send the JSON file to your child's speech therapist, special education teacher, or aide.
 - When they import it on their device, Sotto updates the crisis navigation tree to match your family's customized questions while keeping all private logs and personal notes completely unshared.
-
----
-
-## 5. Partner Mode: Talk & Guided Tabs (`🤝`)
-
-When verbal shutdowns, auditory processing delay, cognitive fatigue, motor apraxia, or unclear speech make conversational speech difficult, use **Partner Mode** (`🤝`).
-
-```
-Caregiver asks question ──► Screen displays giant text ──► User taps 1 of 4 replies
-(Talk Tab or Guided Tab)     (Can be flipped 180°)        (4-Card Tactile Response Dock)
-```
-
-### Step 1: Open Partner Mode
-Tap the handshake icon (`🤝`) in the top app bar next to the settings gear. By default, Sotto lands on the **Talk** tab for spontaneous receptive communication, with the **Guided** tab immediately accessible for crisis de-escalation.
-
-### Step 2: Present a Question to the User
-1. **Speak Naturally (`🎤 Listen & Read`)**: Tap the mic button. Sotto transcribes your voice in real time onto the screen in giant high-contrast text. Tap the mic again (or wait) to finish.
-2. **Choose Preset Prompts (`📋 Questions`)**: Tap the Questions button to browse categorized prompts:
-   - **`Care`**: Basic medical & comfort checks (*"Are you in pain?"*, *"Do you need water or food?"*, *"Do you need the restroom?"*).
-   - **`Needs`**: Environmental adjustments (*"I need a quiet space."*, *"Please give me time."*).
-   - **`Social`**: Courtesy & social boundaries.
-   - **`Emergency`**: Urgent safety prompts.
-3. **Type Manually (`⌨️`)**: Tap the keyboard icon to type a custom question if ambient noise is too loud for speech recognition.
-4. **Switch to Guided De-escalation (`🧭 Guided`)**: Tap the Guided tab at the bottom to enter the structured yes/no Why Finder tree anytime distress escalates.
-
-### Step 3: Vocalize with Read Aloud (`🔊 Read Aloud`)
-If the user has visual fatigue, reading difficulty, or is resting with eyes closed, tap **`🔊 Read Aloud`** to speak the displayed question through your phone's speaker.
-
-### Step 4: Face-to-Face 180° Flip (`🔄 Flip`)
-When sitting across from someone (at a table, bedside, or desk):
-1. Tap **`🔄 Flip`**.
-2. Rest the phone on the table between you.
-3. **What happens**:
-   - The question text and the 4 response buttons flip upside down (facing the person across from you right-side up).
-   - The caregiver toolbar stays upright facing you at the bottom.
-
-### Step 5: Dignified 4-Button Rapid Response
-The person across the table simply taps one of four large, high-contrast buttons:
-
-| Button | Nuance & Purpose | Spoken Audio (TTS) |
-| :--- | :--- | :--- |
-| **`✓ Yes`** | Affirmative response | *"Yes"* |
-| **`✕ No`** | Negative response | *"No"* |
-| **`🔁 Repeat`** | Caregiver spoke too quickly or unclearly | *"Please repeat that."* |
-| **`⏳ Wait`** | User is processing, thinking, or needs a moment | *"Please give me a moment."* |
-
-*(In **Guided** mode, the response dock provides `Yes`, `No`, `Not sure`, and `Stop` options, or body-part and pain-intensity locators).*
-
-When tapped:
-- The app immediately vocalizes the answer through TTS.
-- A visual confirmation badge appears for 3 seconds.
-- The caregiver's phone vibrates briefly with haptic confirmation.
 
 ---
 
