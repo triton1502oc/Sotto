@@ -76,6 +76,9 @@ cat << 'EOF' > /tmp/sotto_voice_prefs_en.xml
     <string name="secondary_language">id</string>
     <boolean name="show_language_switcher" value="true" />
     <boolean name="attention_chime" value="false" />
+    <boolean name="role_prompted" value="true" />
+    <string name="user_role">self</string>
+    <int name="metrics_prompt_version_code" value="9999" />
 </map>
 EOF
 
@@ -92,8 +95,8 @@ $ADB -s "$DEVICE_ID" shell "run-as com.amh.sotto cp /data/local/tmp/sotto_voice_
 echo "=== 4. Capturing Main Screen Screenshot ==="
 $ADB -s "$DEVICE_ID" shell am force-stop com.amh.sotto
 sleep 1
-$ADB -s "$DEVICE_ID" shell am start -n com.amh.sotto/.MainActivity
-# Wait 5s for cold start and TTS initialization badge to clear
+$ADB -s "$DEVICE_ID" shell am start -W -n com.amh.sotto/.MainActivity
+# Wait 5s for Compose render and TTS initialization badge to clear
 sleep 5
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_main_screen.png
 
@@ -102,19 +105,19 @@ echo "=== 5. Capturing Fullscreen Emergency Screenshot ==="
 $ADB -s "$DEVICE_ID" shell input swipe 540 550 540 550 1200
 sleep 2.0
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_fullscreen.png
-# Dismiss fullscreen dialog via '✕' close button at (954, 193)
-$ADB -s "$DEVICE_ID" shell input tap 954 193
+# Dismiss fullscreen dialog
+$ADB -s "$DEVICE_ID" shell input keyevent 4
 sleep 1.0
 
 echo "=== 6. Capturing Edit Phrase Dialog Screenshot ==="
-# Tap "Edit List" in top bar (center: 860, 145)
-$ADB -s "$DEVICE_ID" shell input tap 860 145
+# Tap "Edit" in top bar (center: 890, 145)
+$ADB -s "$DEVICE_ID" shell input tap 890 145
 sleep 1.5
 # Tap second card ("I need a quiet space.") to edit (center: 799, 1014)
 $ADB -s "$DEVICE_ID" shell input tap 799 1014
 sleep 1.5
-# Tap "Alternate spoken text" to expand it (center: 400, 1060)
-$ADB -s "$DEVICE_ID" shell input tap 400 1060
+# Tap "Alternate spoken text" to expand it (center: 400, 1070)
+$ADB -s "$DEVICE_ID" shell input tap 400 1070
 sleep 1.0
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_edit_phrase.png
 # Dismiss edit dialog
@@ -122,28 +125,41 @@ $ADB -s "$DEVICE_ID" shell input keyevent 4
 sleep 1.0
 
 echo "=== 7. Capturing Voice & Language Settings Screenshot ==="
-# Tap Settings gear icon (permanent top bar icon, center: 680, 145)
-$ADB -s "$DEVICE_ID" shell input tap 680 145
+# Tap Settings gear icon (permanent top bar icon, center: 735, 145)
+$ADB -s "$DEVICE_ID" shell input tap 735 145
 sleep 2.0
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_voice_settings.png
 # Dismiss settings dialog
 $ADB -s "$DEVICE_ID" shell input keyevent 4
 sleep 1.0
-# Tap "Done" to exit edit mode (center: 880, 145)
-$ADB -s "$DEVICE_ID" shell input tap 880 145
+# Tap "Done" to exit edit mode (center: 890, 145)
+$ADB -s "$DEVICE_ID" shell input tap 890 145
 sleep 1.0
 
-echo "=== 8. Processing and Formatting Assets ==="
+echo "=== 8. Capturing Partner Mode (Guided Crisis Navigation) Screenshot ==="
+# Tap Partner handshake icon (top bar icon, center: 620, 145)
+$ADB -s "$DEVICE_ID" shell input tap 620 145
+sleep 1.5
+# Tap "Guided" mode in bottom control bar (center: 180, 2030)
+$ADB -s "$DEVICE_ID" shell input tap 180 2030
+sleep 1.5
+$ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_partner_mode.png
+# Dismiss Partner dialog
+$ADB -s "$DEVICE_ID" shell input keyevent 4
+sleep 1.0
+
+echo "=== 9. Processing and Formatting Assets ==="
 python3 - << 'PYEOF'
 import os
 from PIL import Image, ImageDraw
 
 crop_box = (0, 65, 1080, 65 + 2280)
 
-# 1. Process 4 phone screenshots (528x1024 RGB)
+# 1. Process 5 phone screenshots (528x1024 RGB)
 screens = [
     ('raw_main_screen.png', 'assets/screenshot.png'),
     ('raw_fullscreen.png', 'assets/screenshot_fullscreen.png'),
+    ('raw_partner_mode.png', 'assets/screenshot_partner_mode.png'),
     ('raw_edit_phrase.png', 'assets/screenshot_edit_phrase.png'),
     ('raw_voice_settings.png', 'assets/screenshot_voice_settings.png'),
 ]
@@ -156,21 +172,13 @@ for raw_name, out_name in screens:
         screen.save(out_name)
         print(f"Updated {out_name} (528x1024 RGB)")
 
-# 2. Process play_store_feature_graphic.png
-if os.path.exists('assets/play_store_feature_graphic.png'):
-    fg = Image.open('assets/play_store_feature_graphic.png').convert('RGBA')
-    raw_for_mockup = Image.open('/tmp/raw_main_screen.png').convert('RGBA')
-    raw_mockup_cropped = raw_for_mockup.crop((0, 20, 1080, 2390)).resize((222, 475), Image.Resampling.LANCZOS)
-    mask = Image.new('L', (222, 475), 0)
-    draw = ImageDraw.Draw(mask)
-    draw.rounded_rectangle([(0, 0), (222, 475)], radius=22, fill=255)
-    fg.paste(raw_mockup_cropped, (711, 21, 933, 496), mask)
-    fg.save('assets/play_store_feature_graphic.png')
-    print("Updated assets/play_store_feature_graphic.png (1024x500 RGBA)")
 PYEOF
 
+# 2. Process play_store_feature_graphic.png with updated product positioning
+python3 scripts/generate_feature_graphic.py guided
+
 if [ "$EMULATOR_STARTED" -eq 1 ]; then
-    echo "=== 9. Stopping Emulator ==="
+    echo "=== 10. Stopping Emulator ==="
     if command -v android &>/dev/null; then
         android emulator stop "$DEVICE_ID" || true
     else
@@ -179,7 +187,7 @@ if [ "$EMULATOR_STARTED" -eq 1 ]; then
 fi
 
 # Cleanup temp files
-rm -f /tmp/raw_main_screen.png /tmp/raw_fullscreen.png /tmp/raw_edit_phrase.png /tmp/raw_voice_settings.png /tmp/sotto_locale_prefs_en.xml /tmp/sotto_prefs_en.xml /tmp/sotto_voice_prefs_en.xml
+rm -f /tmp/raw_main_screen.png /tmp/raw_fullscreen.png /tmp/raw_partner_mode.png /tmp/raw_edit_phrase.png /tmp/raw_voice_settings.png /tmp/sotto_locale_prefs_en.xml /tmp/sotto_prefs_en.xml /tmp/sotto_voice_prefs_en.xml
 
 echo "=== Visual assets successfully updated! ==="
 file assets/*.png

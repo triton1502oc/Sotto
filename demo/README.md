@@ -7,12 +7,13 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 
 ## Demo Videos
 
-| Video | Primary Lang | Secondary Lang | Primary Voice | Watch | File |
+| Video | Format | Primary Lang | Audio / Voice | Specs | File |
 |---|---|---|---|---|---|
-| **English Demo** | `en-US` | `id-ID` | Samantha | [YouTube](https://www.youtube.com/watch?v=UKZu5ZsdORg) ([Shorts](https://youtube.com/shorts/UKZu5ZsdORg)) | [`sotto_demo_en.mp4`](sotto_demo_en.mp4) |
-| **Indonesian Demo** | `id-ID` | `en-US` | Damayanti | [YouTube](https://www.youtube.com/watch?v=4CvpJkjaz-k) ([Shorts](https://youtube.com/shorts/4CvpJkjaz-k)) | [`sotto_demo_id.mp4`](sotto_demo_id.mp4) |
+| **Google Play Preview (Master)** | 16:9 Landscape | `en-US` | Neural Ava + Andrew + Ambient Bed + Chime | 1920×1080 @ 30fps, ~56s | [`sotto_google_play_preview.mp4`](sotto_google_play_preview.mp4) |
+| **English Device Demo** | 9:20 Portrait | `en-US` | Samantha | 720×1600 @ 30fps, ~54s | [`sotto_demo_en.mp4`](sotto_demo_en.mp4) |
+| **Indonesian Device Demo** | 9:20 Portrait | `id-ID` | Damayanti | 720×1600 @ 30fps, ~54s | [`sotto_demo_id.mp4`](sotto_demo_id.mp4) |
 
-*Specs: ~54s, 720×1600 @ 30fps, H.264 / AAC 192 kbps.*
+*Links: English [YouTube](https://www.youtube.com/watch?v=UKZu5ZsdORg) ([Shorts](https://youtube.com/shorts/UKZu5ZsdORg)) • Indonesian [YouTube](https://www.youtube.com/watch?v=4CvpJkjaz-k) ([Shorts](https://youtube.com/shorts/4CvpJkjaz-k))*
 
 ---
 
@@ -35,10 +36,15 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 
 ### Commands
 ```bash
-# Record English Demo
+# Render Google Play Store Preview Video (16:9 1080p Motion Graphics)
+pip install edge-tts                        # neural narration (internet needed at build time only)
+python3 scripts/build_play_soundtrack.py    # -> demo/sotto_google_play_soundtrack.wav
+python3 scripts/render_google_play_video.py
+
+# Record English Device Demo
 ./scripts/record_demo_en.sh
 
-# Record Indonesian Demo
+# Record Indonesian Device Demo
 ./scripts/record_demo_id.sh
 ```
 
