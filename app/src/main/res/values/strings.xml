@@ -168,6 +168,8 @@
     <string name="response_wait">Wait</string>
     <string name="response_tts_repeat">Please repeat that.</string>
     <string name="response_tts_wait">Please give me a moment.</string>
+    <string name="response_all_good">All good</string>
+    <string name="response_tts_all_good">All good, thank you.</string>
     <string name="replied_indicator">Replied: %1$s</string>
 
     <!-- Microphone Permission Rationale -->

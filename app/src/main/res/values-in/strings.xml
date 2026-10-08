@@ -168,6 +168,8 @@
     <string name="response_wait">Tunggu</string>
     <string name="response_tts_repeat">Tolong ulangi perkataan Anda.</string>
     <string name="response_tts_wait">Tolong beri saya waktu sebentar.</string>
+    <string name="response_all_good">Semua baik</string>
+    <string name="response_tts_all_good">Semuanya baik-baik saja, terima kasih.</string>
     <string name="replied_indicator">Menjawab: %1$s</string>
 
     <!-- Microphone Permission Rationale -->

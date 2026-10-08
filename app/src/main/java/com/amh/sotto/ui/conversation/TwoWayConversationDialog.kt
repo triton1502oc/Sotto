@@ -219,6 +219,13 @@ fun TwoWayConversationDialog(
     val strStop = stringResource(R.string.why_finder_btn_stop)
     val ttsRepeat = stringResource(R.string.response_tts_repeat)
     val ttsWait = stringResource(R.string.response_tts_wait)
+    val strAllGood = stringResource(R.string.response_all_good)
+    val ttsAllGood = stringResource(R.string.response_tts_all_good)
+
+    val handleNeutralExit = {
+        handleUserResponse(strAllGood, ttsAllGood)
+        onDismiss()
+    }
 
     Dialog(
         onDismissRequest = {
@@ -291,6 +298,7 @@ fun TwoWayConversationDialog(
                                     handleUserResponse(strStop, strStop)
                                     if (activeTab == CaregiverTab.WHY_FINDER) whySession.stop()
                                 },
+                                onNeutralExit = handleNeutralExit,
                                 onSelectBodyPart = { partKey ->
                                     val label = getBodyRegionLabel(partKey, context)
                                     handleUserResponse(label, label)
@@ -403,6 +411,7 @@ fun TwoWayConversationDialog(
                             handleUserResponse(strStop, strStop)
                             if (activeTab == CaregiverTab.WHY_FINDER) whySession.stop()
                         },
+                        onNeutralExit = handleNeutralExit,
                         onSelectBodyPart = { partKey ->
                             val label = getBodyRegionLabel(partKey, context)
                             handleUserResponse(label, label)
@@ -1022,12 +1031,14 @@ private fun UnifiedFourCardResponseDock(
     onNo: () -> Unit,
     onNotSure: () -> Unit,
     onStop: () -> Unit,
+    onNeutralExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val strYes = stringResource(R.string.response_yes)
     val strNo = stringResource(R.string.response_no)
     val strNotSure = stringResource(R.string.why_finder_btn_not_sure)
     val strStop = stringResource(R.string.why_finder_btn_stop)
+    val strAllGood = stringResource(R.string.response_all_good)
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -1116,6 +1127,25 @@ private fun UnifiedFourCardResponseDock(
                 )
             }
         }
+
+        // Row 3: All Good (Quick Neutral Response & Graceful Exit)
+        Button(
+            onClick = onNeutralExit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        ) {
+            Text(
+                text = "✓ $strAllGood",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
     }
 }
 
@@ -1127,6 +1157,7 @@ private fun CaregiverResponseDock(
     onNo: () -> Unit,
     onNotSure: () -> Unit,
     onStop: () -> Unit,
+    onNeutralExit: () -> Unit,
     onSelectBodyPart: (String) -> Unit,
     onSelectIntensity: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -1156,6 +1187,7 @@ private fun CaregiverResponseDock(
                     onNo = onNo,
                     onNotSure = onNotSure,
                     onStop = onStop,
+                    onNeutralExit = onNeutralExit,
                     modifier = modifier
                 )
             }
@@ -1166,6 +1198,7 @@ private fun CaregiverResponseDock(
             onNo = onNo,
             onNotSure = onNotSure,
             onStop = onStop,
+            onNeutralExit = onNeutralExit,
             modifier = modifier
         )
     }
