@@ -302,9 +302,9 @@ fun SottoApp(
         )
     }
 
-    val filteredPhrases = remember(phrases, selectedCategory) {
+    val filteredPhrases = remember(phrases, selectedCategory, voiceSettings.showSafetyCards) {
         if (selectedCategory == allCategoryKey) {
-            phrases
+            if (voiceSettings.showSafetyCards) phrases else phrases.filter { !it.isEmergency }
         } else if (selectedCategory == Phrase.CATEGORY_EMERGENCY) {
             phrases.filter { it.isEmergency }
         } else {
@@ -451,6 +451,10 @@ fun SottoApp(
                 )
 
                 // Category Filter Chips
+                val mainBarCategories = remember(effectiveCategories) {
+                    effectiveCategories.filter { !it.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true) }
+                }
+
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -478,9 +482,8 @@ fun SottoApp(
                         )
                     }
 
-                    items(effectiveCategories) { catName ->
+                    items(mainBarCategories) { catName ->
                         val isSelected = selectedCategory == catName
-                        val isEmergency = catName.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true)
                         val isProtectedFromDelete = Phrase.isUndeletableCategory(catName)
                         val isProtectedFromRename = Phrase.isUnrenamableCategory(catName)
 
@@ -519,14 +522,11 @@ fun SottoApp(
                                 }
                             } else null,
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = if (isEmergency) SottoColors.EmergencyChipBackground else MaterialTheme.colorScheme.surfaceVariant,
-                                selectedLabelColor = if (isEmergency) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurface,
+                                selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                selectedLabelColor = MaterialTheme.colorScheme.onSurface,
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            ),
-                            border = if (isEmergency && isSelected) {
-                                BorderStroke(1.dp, SottoColors.EmergencyAccent)
-                            } else null
+                            )
                         )
                     }
 
@@ -936,7 +936,7 @@ fun SottoApp(
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
-                                        text = "🚨 " + stringResource(R.string.emergency_badge),
+                                        text = "🛡️ " + stringResource(R.string.emergency_badge),
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.SemiBold,
                                         color = SottoColors.EmergencyAccent,
@@ -1339,7 +1339,7 @@ fun SottoApp(
                                 modifier = Modifier.align(Alignment.Center)
                             ) {
                                 Text(
-                                    text = "🚨 " + stringResource(R.string.emergency_badge),
+                                    text = "🛡️ " + stringResource(R.string.emergency_badge),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = SottoColors.EmergencyAccent,
@@ -1777,7 +1777,7 @@ fun SottoApp(
                                 leadingIcon = if (isEmergencyCat) {
                                     {
                                         Text(
-                                            text = "🚨",
+                                            text = "🛡️",
                                             fontSize = 12.sp
                                         )
                                     }

@@ -41,6 +41,8 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("show_language_switcher", false) } returns false
         every { sharedPreferences.getString("secondary_language", "id") } returns "id"
         every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns false
+        every { sharedPreferences.getString("app_theme", VoiceSettings.THEME_CHARCOAL) } returns VoiceSettings.THEME_CHARCOAL
+        every { sharedPreferences.getBoolean("show_safety_cards", true) } returns true
 
         val settings = repository.getVoiceSettings()
 
@@ -51,6 +53,8 @@ class VoiceSettingsRepositoryTest {
         assertEquals(false, settings.showLanguageSwitcher)
         assertEquals("id", settings.secondaryLanguage)
         assertEquals(false, settings.shareUsabilityMetrics)
+        assertEquals(VoiceSettings.THEME_CHARCOAL, settings.appTheme)
+        assertEquals(true, settings.showSafetyCards)
     }
 
     @Test
@@ -62,6 +66,8 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("show_language_switcher", false) } returns true
         every { sharedPreferences.getString("secondary_language", "id") } returns "id"
         every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns true
+        every { sharedPreferences.getString("app_theme", VoiceSettings.THEME_CHARCOAL) } returns VoiceSettings.THEME_WARM_AMBER
+        every { sharedPreferences.getBoolean("show_safety_cards", true) } returns false
 
         val settings = repository.getVoiceSettings()
 
@@ -72,6 +78,8 @@ class VoiceSettingsRepositoryTest {
         assertEquals(true, settings.showLanguageSwitcher)
         assertEquals("id", settings.secondaryLanguage)
         assertEquals(true, settings.shareUsabilityMetrics)
+        assertEquals(VoiceSettings.THEME_WARM_AMBER, settings.appTheme)
+        assertEquals(false, settings.showSafetyCards)
     }
 
     @Test
@@ -83,7 +91,9 @@ class VoiceSettingsRepositoryTest {
             playAttentionChime = true,
             showLanguageSwitcher = true,
             secondaryLanguage = "id",
-            shareUsabilityMetrics = true
+            shareUsabilityMetrics = true,
+            appTheme = VoiceSettings.THEME_SLATE_NAVY,
+            showSafetyCards = false
         )
 
         repository.saveVoiceSettings(newSettings)
@@ -96,6 +106,8 @@ class VoiceSettingsRepositoryTest {
             editor.putBoolean("show_language_switcher", true)
             editor.putString("secondary_language", "id")
             editor.putBoolean("share_usability_metrics", true)
+            editor.putString("app_theme", VoiceSettings.THEME_SLATE_NAVY)
+            editor.putBoolean("show_safety_cards", false)
             editor.apply()
         }
     }

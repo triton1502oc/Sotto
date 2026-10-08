@@ -38,3 +38,5 @@ Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for:
    - **Ensure Nothing Breaks**: Guarantee backwards compatibility for existing user data (e.g., saved phrases, preferences) and verify test coverage (`./gradlew testDebugUnitTest`).
    - **Simpler Code & Shorter Lines of Code**: Emphasize minimal abstractions, direct logic, concise Kotlin idioms, and eliminating dead code over premature architecture.
    - **Secure Code**: Maintain 100% offline privacy guarantees (zero covert analytics/leaks), sanitize file/clipboard imports, and adhere to secure Android development standards.
+10. **Telemetry for New Features**:
+    Every newly added user-facing feature or configurable capability MUST include corresponding privacy-preserving, opt-in telemetry via `UsabilityTracker` (e.g., activation marker, anonymous usage count, or state snapshot). Telemetry must strictly remain anonymous, zero PII/content, and gated behind user consent (`shareUsabilityMetrics`).

@@ -22,6 +22,7 @@ Sotto is an assistive communication (AAC) app designed for autistic teens and ad
 - **Architecture**: Single Activity, unidirectional data flow (UDF: state flows down, events flow up).
 - **Speech Synthesis**: Native Android `TextToSpeech` tied to `ComponentActivity` lifecycle (must be initialized and shut down in step with Activity lifecycle; an activity-owned helper is acceptable, but never hold it in a `ViewModel` or at application scope).
 - **Code Standards**: Emphasize simple, concise, and secure code with zero regressions. Prioritize readable Kotlin idioms over unnecessary abstractions, ensure 100% backwards compatibility for saved user phrases, and preserve offline privacy.
+- **Telemetry for New Features**: Every newly added user-facing feature or preference must integrate privacy-preserving, opt-in telemetry into `UsabilityTracker` (activation key, anonymous interaction event, or `SettingsState` snapshot) while strictly upholding 100% opt-in, zero-PII guarantees.
 
 ---
 

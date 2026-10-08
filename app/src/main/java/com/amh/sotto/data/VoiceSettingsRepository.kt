@@ -12,13 +12,21 @@ data class VoiceSettings(
     val showLanguageSwitcher: Boolean = false,
     val secondaryLanguage: String = "id",
     val shareUsabilityMetrics: Boolean = false,
-    val userRole: String = ROLE_UNSET
+    val userRole: String = ROLE_UNSET,
+    val appTheme: String = THEME_CHARCOAL,
+    val showSafetyCards: Boolean = true
 ) {
     companion object {
         const val ROLE_UNSET = "unset"
         const val ROLE_CAREGIVER = "caregiver"
         const val ROLE_SELF = "self"
         const val ROLE_PROFESSIONAL = "professional"
+
+        const val THEME_CHARCOAL = "charcoal"
+        const val THEME_OLED_BLACK = "oled_black"
+        const val THEME_WARM_AMBER = "warm_amber"
+        const val THEME_SLATE_NAVY = "slate_navy"
+        const val THEME_SOFT_PARCHMENT = "soft_parchment"
     }
 }
 
@@ -60,6 +68,8 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         private const val KEY_FIRST_INSTALLED_AT = "first_installed_at"
         private const val KEY_ACTIVE_DAYS = "active_days"
         private const val KEY_PMF_SURVEY_PROMPTED = "pmf_survey_prompted"
+        private const val KEY_APP_THEME = "app_theme"
+        private const val KEY_SHOW_SAFETY_CARDS = "show_safety_cards"
     }
 
     override fun getVoiceSettings(): VoiceSettings {
@@ -71,6 +81,9 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         val secondaryLanguage = prefs.getString(KEY_SECONDARY_LANGUAGE, "id") ?: "id"
         val shareMetrics = prefs.getBoolean(KEY_SHARE_USABILITY_METRICS, false)
         val role = prefs.getString(KEY_USER_ROLE, VoiceSettings.ROLE_UNSET) ?: VoiceSettings.ROLE_UNSET
+        val rawTheme = prefs.getString(KEY_APP_THEME, VoiceSettings.THEME_CHARCOAL)
+        val theme = if (rawTheme.isNullOrBlank()) VoiceSettings.THEME_CHARCOAL else rawTheme
+        val safetyCards = prefs.getBoolean(KEY_SHOW_SAFETY_CARDS, true)
         return VoiceSettings(
             speechRate = rate,
             speechPitch = pitch,
@@ -79,7 +92,9 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
             showLanguageSwitcher = showLanguageSwitcher,
             secondaryLanguage = secondaryLanguage,
             shareUsabilityMetrics = shareMetrics,
-            userRole = role
+            userRole = role,
+            appTheme = theme,
+            showSafetyCards = safetyCards
         )
     }
 
@@ -94,6 +109,8 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         editor.putString(KEY_SECONDARY_LANGUAGE, settings.secondaryLanguage)
         editor.putBoolean(KEY_SHARE_USABILITY_METRICS, settings.shareUsabilityMetrics)
         editor.putString(KEY_USER_ROLE, settings.userRole)
+        editor.putString(KEY_APP_THEME, settings.appTheme)
+        editor.putBoolean(KEY_SHOW_SAFETY_CARDS, settings.showSafetyCards)
         editor.apply()
 
         if (settings.shareUsabilityMetrics) {

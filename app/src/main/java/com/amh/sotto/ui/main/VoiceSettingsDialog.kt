@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -60,6 +61,8 @@ fun VoiceSettingsDialog(
     var secondaryLang by remember { mutableStateOf(currentSettings.secondaryLanguage) }
     var shareMetrics by remember { mutableStateOf(currentSettings.shareUsabilityMetrics) }
     var userRole by remember { mutableStateOf(currentSettings.userRole) }
+    var appTheme by remember { mutableStateOf(currentSettings.appTheme) }
+    var showSafetyCards by remember { mutableStateOf(currentSettings.showSafetyCards) }
     var secondaryLangDropdownExpanded by remember { mutableStateOf(false) }
     var langDropdownExpanded by remember { mutableStateOf(false) }
     var langSearchQuery by remember { mutableStateOf("") }
@@ -73,7 +76,9 @@ fun VoiceSettingsDialog(
         newShowLangSwitcher: Boolean = showLangSwitcher,
         newSecondaryLang: String = secondaryLang,
         newShareMetrics: Boolean = shareMetrics,
-        newUserRole: String = userRole
+        newUserRole: String = userRole,
+        newAppTheme: String = appTheme,
+        newShowSafetyCards: Boolean = showSafetyCards
     ) {
         rate = newRate
         pitch = newPitch
@@ -82,6 +87,8 @@ fun VoiceSettingsDialog(
         secondaryLang = newSecondaryLang
         shareMetrics = newShareMetrics
         userRole = newUserRole
+        appTheme = newAppTheme
+        showSafetyCards = newShowSafetyCards
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
@@ -91,7 +98,9 @@ fun VoiceSettingsDialog(
                 showLanguageSwitcher = newShowLangSwitcher,
                 secondaryLanguage = newSecondaryLang,
                 shareUsabilityMetrics = newShareMetrics,
-                userRole = newUserRole
+                userRole = newUserRole,
+                appTheme = newAppTheme,
+                showSafetyCards = newShowSafetyCards
             )
         )
     }
@@ -416,7 +425,9 @@ fun VoiceSettingsDialog(
                                             showLanguageSwitcher = showLangSwitcher,
                                             secondaryLanguage = secondaryLang,
                                             shareUsabilityMetrics = shareMetrics,
-                                            userRole = userRole
+                                            userRole = userRole,
+                                            appTheme = appTheme,
+                                            showSafetyCards = showSafetyCards
                                         )
                                     )
                                 },
@@ -427,6 +438,149 @@ fun VoiceSettingsDialog(
                                 )
                             ) {
                                 Text("🔊  " + stringResource(R.string.action_test_voice))
+                            }
+                        }
+
+                        // Section 2: Appearance
+                        SettingsCard {
+                            SettingsSectionHeader(
+                                icon = "🎨",
+                                title = stringResource(R.string.label_appearance_section)
+                            )
+
+                            val themes = listOf(
+                                VoiceSettings.THEME_CHARCOAL to Pair(R.string.theme_charcoal, R.string.theme_charcoal_desc),
+                                VoiceSettings.THEME_OLED_BLACK to Pair(R.string.theme_oled_black, R.string.theme_oled_black_desc),
+                                VoiceSettings.THEME_WARM_AMBER to Pair(R.string.theme_warm_amber, R.string.theme_warm_amber_desc),
+                                VoiceSettings.THEME_SLATE_NAVY to Pair(R.string.theme_slate_navy, R.string.theme_slate_navy_desc),
+                                VoiceSettings.THEME_SOFT_PARCHMENT to Pair(R.string.theme_soft_parchment, R.string.theme_soft_parchment_desc)
+                            )
+
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                themes.forEach { (themeKey, strings) ->
+                                    val (nameRes, descRes) = strings
+                                    val isSelected = appTheme == themeKey
+
+                                    val (previewBg, previewSurface, previewBorder) = when (themeKey) {
+                                        VoiceSettings.THEME_OLED_BLACK -> Triple(Color(0xFF000000), Color(0xFFFFFFFF), Color(0xFF333333))
+                                        VoiceSettings.THEME_WARM_AMBER -> Triple(Color(0xFF191512), Color(0xFFD4A373), Color(0xFF483C34))
+                                        VoiceSettings.THEME_SLATE_NAVY -> Triple(Color(0xFF0F141C), Color(0xFF8FA8C8), Color(0xFF2B3A50))
+                                        VoiceSettings.THEME_SOFT_PARCHMENT -> Triple(Color(0xFFF5F2EB), Color(0xFF1A1A1A), Color(0xFFCCC5B8))
+                                        else -> Triple(Color(0xFF121212), Color(0xFFE0E0E0), Color(0xFF424242))
+                                    }
+
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .clickable {
+                                                updateSettings(newAppTheme = themeKey)
+                                                UsabilityTracker.recordThemeSelected(context, themeKey)
+                                            },
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface,
+                                        border = BorderStroke(
+                                            width = if (isSelected) 2.dp else 1.dp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                        )
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(28.dp)
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(previewBg)
+                                                    .border(1.dp, previewBorder, RoundedCornerShape(8.dp)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(10.dp)
+                                                        .clip(RoundedCornerShape(3.dp))
+                                                        .background(previewSurface)
+                                                )
+                                            }
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = stringResource(nameRes),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = stringResource(descRes),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+
+                                            if (isSelected) {
+                                                Text(
+                                                    text = "✓",
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Section 3: Safety & Bystander
+                        SettingsCard {
+                            SettingsSectionHeader(
+                                icon = "🛡️",
+                                title = stringResource(R.string.label_safety_section)
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        val nextState = !showSafetyCards
+                                        updateSettings(newShowSafetyCards = nextState)
+                                    }
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 12.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.label_show_safety_cards),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.label_show_safety_cards_desc),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Switch(
+                                    checked = showSafetyCards,
+                                    onCheckedChange = {
+                                        updateSettings(newShowSafetyCards = it)
+                                    },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                    )
+                                )
                             }
                         }
 

@@ -56,12 +56,14 @@
     <string name="cd_clear_text">Hapus teks</string>
     <string name="cd_save_as_card">Simpan sebagai kartu</string>
     <string name="emergency_phrase_text">Saya tidak bisa bicara sekarang. Tolong baca layar saya.</string>
-    <string name="emergency_badge">Darurat</string>
+    <string name="emergency_contact_phrase_text">Tolong hubungi kontak darurat saya: [Nomor Telepon]</string>
+    <string name="emergency_area_phrase_text">Saya tinggal di sekitar [Area / Lingkungan]. Tolong hubungi kontak saya.</string>
+    <string name="emergency_badge">Keselamatan</string>
 
     <!-- Categories & Attention Chime (Phase 2) -->
     <string name="label_category">Kategori</string>
     <string name="category_all">Semua</string>
-    <string name="category_emergency">Darurat</string>
+    <string name="category_emergency">Keselamatan</string>
     <string name="category_needs">Kebutuhan</string>
     <string name="category_social">Sosial</string>
     <string name="category_care">Perawatan</string>
@@ -78,7 +80,7 @@
     <string name="error_category_reserved">Ini adalah kategori sistem yang dilindungi</string>
     <string name="action_rename_category">Ubah nama</string>
     <string name="action_delete_category">Hapus</string>
-    <string name="badge_emergency_locked">Darurat (Terkunci)</string>
+    <string name="badge_emergency_locked">Keselamatan (Terkunci)</string>
     <string name="badge_general_default">Bawaan</string>
     <string name="cd_move_up">Pindah ke atas</string>
     <string name="cd_move_down">Pindah ke bawah</string>
@@ -89,6 +91,8 @@
     <!-- Default Phrases by Category -->
     <string-array name="default_phrases_emergency">
         <item>Saya tidak bisa bicara sekarang. Tolong baca layar saya.</item>
+        <item>Tolong hubungi kontak darurat saya: [Nomor Telepon]</item>
+        <item>Saya tinggal di sekitar [Area / Lingkungan]. Tolong hubungi kontak saya.</item>
     </string-array>
 
     <string-array name="default_phrases_needs">
@@ -348,7 +352,7 @@
     <string name="survey_q2_opt_why_finder">Why Finder (penyempitan krisis)</string>
     <string name="survey_q2_opt_caregiver_mode">Mode Pengasuh (tampilan ya/tidak)</string>
     <string name="survey_q2_opt_phrases">Kartu frasa &amp; kategori kustom</string>
-    <string name="survey_q2_opt_emergency">Kartu darurat &amp; lonceng perhatian</string>
+    <string name="survey_q2_opt_emergency">Kartu keselamatan &amp; lonceng perhatian</string>
     <string name="survey_q2_opt_quick_speak">Ketik cepat (Quick-speak)</string>
     <string name="survey_q3_title">Siapa yang paling sering menggunakan Sotto?</string>
     <string name="survey_action_submit">Kirim Masukan</string>
@@ -363,4 +367,22 @@
     <string name="action_restart">Ulangi</string>
     <string name="action_type">Ketik</string>
     <string name="hint_edit_question">Ketik pertanyaan...</string>
+
+    <!-- Appearance & Themes -->
+    <string name="label_appearance_section">Tampilan</string>
+    <string name="theme_charcoal">Charcoal</string>
+    <string name="theme_charcoal_desc">Gelap seimbang rendah stimulus</string>
+    <string name="theme_oled_black">OLED Hitam</string>
+    <string name="theme_oled_black_desc">Hitam pekat, kontras maksimal</string>
+    <string name="theme_warm_amber">Amber Hangat</string>
+    <string name="theme_warm_amber_desc">Rendah cahaya biru, teduh</string>
+    <string name="theme_slate_navy">Biru Slate</string>
+    <string name="theme_slate_navy_desc">Slate sejuk, fokus tenang</string>
+    <string name="theme_soft_parchment">Kertas Lembut</string>
+    <string name="theme_soft_parchment_desc">Terang lembut, anti silau</string>
+
+    <!-- Safety & Bystander Settings -->
+    <string name="label_safety_section">Keselamatan &amp; Penolong</string>
+    <string name="label_show_safety_cards">Tampilkan kartu Keselamatan di Beranda</string>
+    <string name="label_show_safety_cards_desc">Tampilkan kartu keselamatan dan kontak di bagian atas kisi frasa Semua</string>
 </resources>

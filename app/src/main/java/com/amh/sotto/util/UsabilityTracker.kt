@@ -216,6 +216,17 @@ object UsabilityTracker {
         )
     }
 
+    fun recordThemeSelected(context: Context, theme: String) {
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "ThemeSelected",
+                durationMs = 0L,
+                outcome = theme
+            )
+        )
+    }
+
     fun recordActivation(context: Context, activationKey: String) {
         val prefs = context.getSharedPreferences("sotto_activations", Context.MODE_PRIVATE)
         if (!prefs.getBoolean(activationKey, false)) {
@@ -403,6 +414,7 @@ object UsabilityTracker {
             customPhraseCount in 6..20 -> "6_20"
             else -> "20_plus"
         }
+        val safety = if (settings.showSafetyCards) 1 else 0
 
         recordEvent(
             context,
@@ -410,7 +422,7 @@ object UsabilityTracker {
                 intent = "SettingsState",
                 durationMs = 0L,
                 outcome = "active",
-                contextTag = "chime=${chime};bi=${bilingual};sec=${secLang};rate=${rateBucket};cust=${customBucket}"
+                contextTag = "chime=${chime};bi=${bilingual};sec=${secLang};rate=${rateBucket};cust=${customBucket};theme=${settings.appTheme};safety_cards_visible=${safety}"
             )
         )
     }

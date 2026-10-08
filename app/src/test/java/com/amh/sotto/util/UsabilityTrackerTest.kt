@@ -245,7 +245,9 @@ class UsabilityTrackerTest {
             speechRate = 0.8f,
             playAttentionChime = true,
             showLanguageSwitcher = true,
-            secondaryLanguage = "id"
+            secondaryLanguage = "id",
+            appTheme = com.amh.sotto.data.VoiceSettings.THEME_WARM_AMBER,
+            showSafetyCards = true
         )
         UsabilityTracker.recordSettingsState(context, settings, 7)
 
@@ -258,6 +260,17 @@ class UsabilityTrackerTest {
         assertTrue(event.contextTag.contains("sec=id"))
         assertTrue(event.contextTag.contains("rate=slow"))
         assertTrue(event.contextTag.contains("cust=6_20"))
+        assertTrue(event.contextTag.contains("theme=warm_amber"))
+        assertTrue(event.contextTag.contains("safety_cards_visible=1"))
+    }
+
+    @Test
+    fun `recordThemeSelected records ThemeSelected event`() {
+        UsabilityTracker.recordThemeSelected(context, "slate_navy")
+
+        val pending = UsabilityTracker.getPendingEvents(context).filter { it.intent == "ThemeSelected" }
+        assertEquals(1, pending.size)
+        assertEquals("slate_navy", pending.first().outcome)
     }
 
     @Test

@@ -11,7 +11,7 @@ object SottoColors {
     val DarkSurface = Color(0xFF1E1E1E)
     val TextPrimary = Color(0xFFE0E0E0)
 
-    // Emergency / Crisis tokens
+    // Emergency / Safety tokens
     val EmergencyAccent = Color(0xFFFFB74D) // Amber accent, borders, primary emergency buttons
     val EmergencyContainer = Color(0xFF1E1710) // Dark warm container for emergency cards
     val EmergencyText = Color(0xFFFFE0B2) // Light amber text
@@ -20,6 +20,16 @@ object SottoColors {
     val EmergencyChipBackgroundDark = Color(0xFF3E2723)
     val EmergencyCardBackground = Color(0xFF251E14) // Dark card surface for emergency list items
     val EmergencyTranslucent = Color(0x33FFB74D)
+
+    // Safety semantic aliases
+    val SafetyAccent = EmergencyAccent
+    val SafetyContainer = EmergencyContainer
+    val SafetyText = EmergencyText
+    val SafetyTextSecondary = EmergencyTextSecondary
+    val SafetyChipBackground = EmergencyChipBackground
+    val SafetyChipBackgroundDark = EmergencyChipBackgroundDark
+    val SafetyCardBackground = EmergencyCardBackground
+    val SafetyTranslucent = EmergencyTranslucent
 
     // Status: Destructive / Danger / Deletion
     val DestructiveRed = Color(0xFFEF5350) // Delete buttons, error text
@@ -55,4 +65,52 @@ object SottoColors {
     val IntensityModerate = Color(0xFFF9A825)
     val IntensityHigh = Color(0xFFE65100)
     val IntensitySevere = Color(0xFFB71C1C)
+}
+
+/**
+ * Curated sensory-minded theme palettes.
+ */
+object SottoPalettes {
+    // Charcoal (Default Dark)
+    val CharcoalBackground = Color(0xFF121212)
+    val CharcoalSurface = Color(0xFF1E1E1E)
+    val CharcoalSurfaceVariant = Color(0xFF2A2A2A)
+    val CharcoalTextPrimary = Color(0xFFE0E0E0)
+    val CharcoalTextSecondary = Color(0xFFAAAAAA)
+    val CharcoalOutlineVariant = Color(0xFF424242)
+
+    // OLED Pure Black
+    val OledBlackBackground = Color(0xFF000000)
+    val OledBlackSurface = Color(0xFF121212)
+    val OledBlackSurfaceVariant = Color(0xFF1E1E1E)
+    val OledBlackTextPrimary = Color(0xFFFFFFFF)
+    val OledBlackTextSecondary = Color(0xFFB0B0B0)
+    val OledBlackOutlineVariant = Color(0xFF333333)
+
+    // Warm Amber / Low Strain (Dark Sepia)
+    val WarmAmberBackground = Color(0xFF191512)
+    val WarmAmberSurface = Color(0xFF241E1A)
+    val WarmAmberSurfaceVariant = Color(0xFF322A24)
+    val WarmAmberTextPrimary = Color(0xFFEAE0D5)
+    val WarmAmberTextSecondary = Color(0xFFBFAFA0)
+    val WarmAmberAccent = Color(0xFFD4A373)
+    val WarmAmberOutlineVariant = Color(0xFF483C34)
+
+    // Slate Navy
+    val SlateNavyBackground = Color(0xFF0F141C)
+    val SlateNavySurface = Color(0xFF161E2A)
+    val SlateNavySurfaceVariant = Color(0xFF202A3A)
+    val SlateNavyTextPrimary = Color(0xFFDEE3EB)
+    val SlateNavyTextSecondary = Color(0xFFA8B4C4)
+    val SlateNavyAccent = Color(0xFF8FA8C8)
+    val SlateNavyOutlineVariant = Color(0xFF2B3A50)
+
+    // Soft Parchment (Daylight / Anti-Halation)
+    val SoftParchmentBackground = Color(0xFFF5F2EB)
+    val SoftParchmentSurface = Color(0xFFEAE5DB)
+    val SoftParchmentSurfaceVariant = Color(0xFFDFD9CE)
+    val SoftParchmentTextPrimary = Color(0xFF1A1A1A)
+    val SoftParchmentTextSecondary = Color(0xFF5A5752)
+    val SoftParchmentAccent = Color(0xFF4A463F)
+    val SoftParchmentOutlineVariant = Color(0xFFCCC5B8)
 }

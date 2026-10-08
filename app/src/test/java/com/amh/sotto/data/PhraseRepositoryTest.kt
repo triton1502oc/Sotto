@@ -127,4 +127,31 @@ class PhraseRepositoryTest {
         assertFalse(Phrase.isSystemCategory("Medical"))
         assertFalse(Phrase.isSystemCategory("Places"))
     }
+
+    @Test
+    fun `Phrase CATEGORY_SAFETY alias matches CATEGORY_EMERGENCY and is protected`() {
+        assertEquals(Phrase.CATEGORY_EMERGENCY, Phrase.CATEGORY_SAFETY)
+        assertTrue(Phrase.isSystemCategory(Phrase.CATEGORY_SAFETY))
+        assertTrue(Phrase.isUndeletableCategory(Phrase.CATEGORY_SAFETY))
+        assertTrue(Phrase.isUnrenamableCategory(Phrase.CATEGORY_SAFETY))
+    }
+
+    @Test
+    fun `Safety templates are valid emergency phrases`() {
+        val contactPhrase = Phrase(
+            text = "Please call my emergency contact: [Phone Number]",
+            isEmergency = true,
+            category = Phrase.CATEGORY_SAFETY
+        )
+        val areaPhrase = Phrase(
+            text = "I live around [Area / Neighborhood]. Please call my contact.",
+            isEmergency = true,
+            category = Phrase.CATEGORY_SAFETY
+        )
+
+        assertTrue(contactPhrase.isEmergency)
+        assertEquals(Phrase.CATEGORY_EMERGENCY, contactPhrase.category)
+        assertTrue(areaPhrase.isEmergency)
+        assertEquals(Phrase.CATEGORY_EMERGENCY, areaPhrase.category)
+    }
 }

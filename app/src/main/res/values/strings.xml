@@ -56,12 +56,14 @@
     <string name="cd_clear_text">Clear text</string>
     <string name="cd_save_as_card">Save as card</string>
     <string name="emergency_phrase_text">I cannot speak right now. Please read my screen.</string>
-    <string name="emergency_badge">Emergency</string>
+    <string name="emergency_contact_phrase_text">Please call my emergency contact: [Phone Number]</string>
+    <string name="emergency_area_phrase_text">I live around [Area / Neighborhood]. Please call my contact.</string>
+    <string name="emergency_badge">Safety</string>
 
     <!-- Categories & Attention Chime (Phase 2) -->
     <string name="label_category">Category</string>
     <string name="category_all">All</string>
-    <string name="category_emergency">Emergency</string>
+    <string name="category_emergency">Safety</string>
     <string name="category_needs">Needs</string>
     <string name="category_social">Social</string>
     <string name="category_care">Care</string>
@@ -89,6 +91,8 @@
     <!-- Default Phrases by Category -->
     <string-array name="default_phrases_emergency">
         <item>I cannot speak right now. Please read my screen.</item>
+        <item>Please call my emergency contact: [Phone Number]</item>
+        <item>I live around [Area / Neighborhood]. Please call my contact.</item>
     </string-array>
 
     <string-array name="default_phrases_needs">
@@ -348,7 +352,7 @@
     <string name="survey_q2_opt_why_finder">Why Finder (crisis narrowing)</string>
     <string name="survey_q2_opt_caregiver_mode">Caregiver Mode (receptive yes/no)</string>
     <string name="survey_q2_opt_phrases">Phrase cards &amp; custom categories</string>
-    <string name="survey_q2_opt_emergency">Emergency card &amp; chime</string>
+    <string name="survey_q2_opt_emergency">Safety cards &amp; chime</string>
     <string name="survey_q2_opt_quick_speak">Quick-speak typing</string>
     <string name="survey_q3_title">Who uses Sotto most in your setting?</string>
     <string name="survey_action_submit">Submit Feedback</string>
@@ -363,4 +367,22 @@
     <string name="action_restart">Restart</string>
     <string name="action_type">Type</string>
     <string name="hint_edit_question">Type question to ask...</string>
+
+    <!-- Appearance & Themes -->
+    <string name="label_appearance_section">Appearance</string>
+    <string name="theme_charcoal">Charcoal</string>
+    <string name="theme_charcoal_desc">Balanced low-stimulus dark</string>
+    <string name="theme_oled_black">OLED Black</string>
+    <string name="theme_oled_black_desc">Pure black, maximum contrast</string>
+    <string name="theme_warm_amber">Warm Amber</string>
+    <string name="theme_warm_amber_desc">Low blue light, reduced strain</string>
+    <string name="theme_slate_navy">Slate Navy</string>
+    <string name="theme_slate_navy_desc">Cool slate, calm focus</string>
+    <string name="theme_soft_parchment">Soft Parchment</string>
+    <string name="theme_soft_parchment_desc">Daylight reading, anti-halation</string>
+
+    <!-- Safety & Bystander Settings -->
+    <string name="label_safety_section">Safety &amp; Bystander</string>
+    <string name="label_show_safety_cards">Show Safety cards on Home</string>
+    <string name="label_show_safety_cards_desc">Display safety and contact cards at the top of the All phrases grid</string>
 </resources>

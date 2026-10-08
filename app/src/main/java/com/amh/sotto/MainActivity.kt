@@ -126,14 +126,15 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         })[MainViewModel::class.java]
 
         setContent {
-            SottoAppTheme {
+            val phrases by viewModel.phrases.collectAsState()
+            val categories by viewModel.categories.collectAsState()
+            val voiceSettings by viewModel.voiceSettings.collectAsState()
+
+            SottoAppTheme(appTheme = voiceSettings.appTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val phrases by viewModel.phrases.collectAsState()
-                    val categories by viewModel.categories.collectAsState()
-                    val voiceSettings by viewModel.voiceSettings.collectAsState()
 
                     LaunchedEffect(voiceSettings, ttsReady) {
                         latestVoiceSettings = voiceSettings
