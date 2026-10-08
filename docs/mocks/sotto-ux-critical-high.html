@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Sotto UX Critical/High Mocks</title>
+<style>
+    #sotto-ux-mocks {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --card: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #9a9a9a;
+      --amber: #ffb74d;
+      --amber-bg: #251e14;
+      --line: #333;
+      --accent: #cfcfcf;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--text);
+    }
+    #sotto-ux-mocks * { box-sizing: border-box; }
+    #sotto-ux-mocks .stack { display: flex; flex-direction: column; gap: 28px; }
+    #sotto-ux-mocks h2 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    #sotto-ux-mocks .ids {
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    #sotto-ux-mocks .pair {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+    #sotto-ux-mocks .col-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0 0 8px;
+      letter-spacing: 0.02em;
+    }
+    #sotto-ux-mocks .phone {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 10px 10px 12px;
+      max-width: 280px;
+      width: 100%;
+    }
+    #sotto-ux-mocks .bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      min-height: 28px;
+    }
+    #sotto-ux-mocks .title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-right: auto;
+    }
+    #sotto-ux-mocks .chip-row {
+      display: flex;
+      gap: 6px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    #sotto-ux-mocks .chip {
+      flex: 0 0 auto;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #2c2c2c;
+      color: var(--muted);
+      font-size: 11px;
+      border: 1px solid transparent;
+    }
+    #sotto-ux-mocks .chip.on {
+      background: #3a3a3a;
+      color: var(--text);
+      border-color: #555;
+    }
+    #sotto-ux-mocks .chip.emeron {
+      background: #3a2e1a;
+      color: var(--amber);
+      border-color: var(--amber);
+    }
+    #sotto-ux-mocks .hero {
+      background: var(--amber-bg);
+      border: 1.5px solid var(--amber);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    #sotto-ux-mocks .hero .badge {
+      font-size: 10px;
+      color: var(--amber);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    #sotto-ux-mocks .hero .body {
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--text);
+    }
+    #sotto-ux-mocks .hero.big .body {
+      font-size: 15px;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+    #sotto-ux-mocks .hero-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    #sotto-ux-mocks .btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: default;
+      color: #111;
+      background: var(--amber);
+    }
+    #sotto-ux-mocks .btn.ghost {
+      background: transparent;
+      color: var(--amber);
+      border: 1px solid var(--amber);
+    }
+    #sotto-ux-mocks .btn.neutral {
+      background: #3a3a3a;
+      color: var(--text);
+    }
+    #sotto-ux-mocks .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    #sotto-ux-mocks .card {
+      background: var(--card);
+      border-radius: 10px;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.25;
+      color: var(--text);
+    }
+    #sotto-ux-mocks .card.warn {
+      outline: 1px dashed #c62828;
+      outline-offset: -2px;
+    }
+    #sotto-ux-mocks .icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: #333;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--muted);
+    }
+    #sotto-ux-mocks .icon.hot {
+      background: #3a3a20;
+      color: var(--amber);
+      font-size: 12px;
+    }
+    #sotto-ux-mocks .pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      font-size: 10px;
+      color: var(--text);
+    }
+    #sotto-ux-mocks .pill.loud {
+      background: #3a3a3a;
+      border-color: #888;
+    }
+    #sotto-ux-mocks .qs {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    #sotto-ux-mocks .qs input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 8px;
+    }
+    #sotto-ux-mocks .qs .plus {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #444;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    #sotto-ux-mocks .fs {
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: var(--amber-bg);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--amber);
+    }
+    #sotto-ux-mocks .fs .giant {
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 500;
+      text-align: center;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #sotto-ux-mocks .fs .dock {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    #sotto-ux-mocks .fs .speak {
+      background: var(--amber);
+      color: #111;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    #sotto-ux-mocks .fs .speak.sec {
+      background: transparent;
+      border: 1px solid var(--amber);
+      color: var(--amber);
+      padding: 8px;
+    }
+    #sotto-ux-mocks .care {
+      min-height: 240px;
+      background: var(--bg);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #sotto-ux-mocks .flip-user {
+      transform: rotate(180deg);
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 10px;
+      flex: 1;
+    }
+    #sotto-ux-mocks .prompt {
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    #sotto-ux-mocks .replies {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    #sotto-ux-mocks .reply {
+      border-radius: 8px;
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 500;
+      background: #3a3a3a;
+      color: var(--text);
+    }
+    #sotto-ux-mocks .reply.primary {
+      background: #bdbdbd;
+      color: #111;
+      padding: 14px 6px;
+      font-size: 13px;
+    }
+    #sotto-ux-mocks .reply.secondary {
+      background: #2f2f2f;
+      color: var(--muted);
+      font-size: 10px;
+      padding: 8px 4px;
+    }
+    #sotto-ux-mocks .reply.equal {
+      background: #3a3a3a;
+      color: var(--text);
+      padding: 12px 6px;
+      font-size: 12px;
+    }
+    #sotto-ux-mocks .cg-bar {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #sotto-ux-mocks .cg-btn {
+      height: 24px;
+      min-width: 24px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      font-size: 9px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #sotto-ux-mocks .cg-btn.big {
+      height: 36px;
+      min-width: 36px;
+      font-size: 11px;
+      color: var(--text);
+    }
+    #sotto-ux-mocks .status {
+      font-size: 11px;
+      color: var(--amber);
+      text-align: center;
+      padding: 4px;
+      background: #2a2418;
+      border-radius: 6px;
+    }
+    #sotto-ux-mocks .privacy {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--text);
+      max-width: 280px;
+    }
+    #sotto-ux-mocks .privacy .bad {
+      color: #ef9a9a;
+      text-decoration: line-through;
+    }
+    #sotto-ux-mocks .privacy .good {
+      color: #c8e6c9;
+    }
+    #sotto-ux-mocks .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+<style>
+html,body{margin:0;padding:0;background:#0a0a0a}
+body{padding:24px}
+.mock-panel{margin-bottom:32px;padding:16px;background:#111;border-radius:12px}
+#sotto-ux-mocks{max-width:720px;margin:0 auto}
+</style>
+</head>
+<body>
+<section id="sotto-ux-mocks">
+<div id="mock-speak" class="mock-panel"><div>
+      <h2>Speak board: role clarity, quieter chrome, sticky emergency</h2>
+      <p class="ids">BOARD-01, BOARD-02, BOARD-03 / EMER-02, BOARD-04, BOARD-08</p>
+      <div class="pair">
+        <div>
+          <p class="col-label">Today</p>
+          <div class="phone" aria-label="Current speak board">
+            <div class="bar">
+              <span class="title">Sotto</span>
+              <span class="pill">EN|ID</span>
+              <span class="icon hot">ear</span>
+              <span class="icon">set</span>
+              <span class="pill loud">Edit List</span>
+            </div>
+            <div class="chip-row">
+              <span class="chip">All</span>
+              <span class="chip">Emergency</span>
+              <span class="chip on">Needs</span>
+              <span class="chip">Care</span>
+            </div>
+            <div class="grid2">
+              <div class="card warn">Are you in pain?</div>
+              <div class="card warn">Do you need water?</div>
+              <div class="card">Please give me time.</div>
+              <div class="card">I need a quiet space.</div>
+            </div>
+            <div class="qs">
+              <input readonly value="I need…" aria-label="Quick speak">
+              <span class="plus" title="Save as card">+</span>
+              <span class="icon">spk</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="col-label">Proposed</p>
+          <div class="phone" aria-label="Proposed speak board">
+            <div class="bar">
+              <span class="title">Sotto</span>
+              <span class="icon">···</span>
+              <span class="pill">Edit</span>
+            </div>
+            <div class="chip-row">
+              <span class="chip on">All</span>
+              <span class="chip emeron">Emergency</span>
+              <span class="chip">Needs</span>
+              <span class="chip">Social</span>
+            </div>
+            <div class="hero big">
+              <div class="badge">Non-speaking</div>
+              <div class="body">I cannot speak right now. Please read my screen.</div>
+              <div class="hero-actions">
+                <span class="btn">Show screen</span>
+                <span class="btn ghost">Speak</span>
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="card">I am in pain.</div>
+              <div class="card">I need water.</div>
+              <div class="card">Please give me time.</div>
+              <div class="card">I need a quiet space.</div>
+            </div>
+            <div class="qs">
+              <input readonly value="Type to speak…" aria-label="Quick speak">
+              <span class="icon">spk</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+<div id="mock-emergency" class="mock-panel"><div>
+      <h2>Emergency fullscreen: silent by default</h2>
+      <p class="ids">EMER-01, EMER-03, EMER-04, EMER-05</p>
+      <div class="pair">
+        <div>
+          <p class="col-label">Today</p>
+          <div class="phone" aria-label="Current emergency fullscreen">
+            <div class="fs">
+              <div class="badge" style="color:var(--amber);font-size:10px;">Emergency</div>
+              <div class="giant">I cannot speak right now. Please read my screen.</div>
+              <div class="dock">
+                <div class="speak">Speak Aloud</div>
+                <div class="speak" style="opacity:.7">Speak EN · Speak ID</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="col-label">Proposed</p>
+          <div class="phone" aria-label="Proposed silent emergency fullscreen">
+            <div class="fs">
+              <div class="badge" style="color:var(--amber);font-size:10px;">Please read</div>
+              <div class="giant">I cannot speak right now. Please read my screen.</div>
+              <div class="dock">
+                <div class="status">Screen stays on</div>
+                <div class="speak sec">Speak if needed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+<div id="mock-caregiver" class="mock-panel"><div>
+      <h2>Caregiver Flip: equal replies, larger chrome, upright status</h2>
+      <p class="ids">CARE-01, CARE-02, CARE-03, CARE-04, CARE-06</p>
+      <div class="pair">
+        <div>
+          <p class="col-label">Today</p>
+          <div class="phone" aria-label="Current Flip mode">
+            <div class="care">
+              <div class="flip-user">
+                <div class="prompt">Are you in pain?</div>
+                <div class="replies">
+                  <div class="reply primary">Yes</div>
+                  <div class="reply primary">No</div>
+                  <div class="reply secondary">Repeat</div>
+                  <div class="reply secondary">Wait</div>
+                </div>
+              </div>
+              <div class="cg-bar">
+                <span class="cg-btn">Flip</span>
+                <span class="cg-btn">Q</span>
+                <span class="cg-btn">mic</span>
+                <span class="cg-btn">read</span>
+                <span class="cg-btn">kb</span>
+                <span class="cg-btn">x</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="col-label">Proposed</p>
+          <div class="phone" aria-label="Proposed Flip mode">
+            <div class="care">
+              <div class="flip-user">
+                <div class="prompt">Are you in pain?</div>
+                <div class="replies">
+                  <div class="reply equal">Yes</div>
+                  <div class="reply equal">No</div>
+                  <div class="reply equal">Repeat</div>
+                  <div class="reply equal">Wait</div>
+                </div>
+              </div>
+              <div class="status">Replied: Wait</div>
+              <div class="cg-bar">
+                <span class="cg-btn big">Flip</span>
+                <span class="cg-btn big">Questions</span>
+                <span class="cg-btn big">Mic</span>
+                <span class="cg-btn big">Read</span>
+                <span class="cg-btn big">Type</span>
+                <span class="cg-btn big">Close</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+<div id="mock-privacy" class="mock-panel"><div>
+      <h2>Privacy and sensory claims</h2>
+      <p class="ids">SYS-01, SYS-02, SYS-03, SYS-04</p>
+      <div class="pair">
+        <div>
+          <p class="col-label">Today (overclaim risk)</p>
+          <div class="privacy" aria-label="Current privacy messaging">
+            <p class="bad">100% offline. Zero cloud uploads. Audio never sent to any server.</p>
+            <p style="color:var(--muted);margin:8px 0 0;font-size:11px;">Meanwhile: allowBackup may sync SharedPreferences; STT uses system recognizer; chime can bypass silent mode.</p>
+          </div>
+        </div>
+        <div>
+          <p class="col-label">Proposed</p>
+          <div class="privacy" aria-label="Proposed privacy messaging">
+            <p class="good">Private by design: no accounts, no analytics. Phrases stay on this device. Optional one-time translation model download. Speech recognition uses the system service (may use network). Cloud backup of phrases disabled.</p>
+            <p style="color:var(--muted);margin:8px 0 0;font-size:11px;">Attention chime stays off by default and respects silent / Do Not Disturb when enabled.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>
