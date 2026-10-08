@@ -164,19 +164,33 @@ class UsabilityTrackerTest {
     }
 
     @Test
-    fun `recordCardTap emits only coarse contextTag and does not record phrase text or hash`() {
+    fun `recordCardTap aggregates routine taps into summary event`() {
         UsabilityTracker.recordCardTap(context, "My Private Custom Category", false, 12345)
+        UsabilityTracker.recordCardTap(context, "Needs", false, 67890)
 
         val pending = UsabilityTracker.getPendingEvents(context)
         assertEquals(1, pending.size)
         val event = pending.first()
-        assertEquals("SpeakCard", event.intent)
-        assertEquals("cat_custom", event.contextTag)
+        assertEquals("CardTapsSummary", event.intent)
+        assertTrue(event.contextTag.contains("custom=1"))
+        assertTrue(event.contextTag.contains("needs=1"))
         assertFalse(event.contextTag.contains("Private"))
         assertFalse(event.contextTag.contains("12345"))
-        val json = event.toJsonObject().toString()
-        assertFalse(json.contains("Private"))
-        assertFalse(json.contains("12345"))
+    }
+
+    @Test
+    fun `recordCardTap emits rapid tap immediately when clicking rapidly`() {
+        UsabilityTracker.recordCardTap(context, "Social", false, 123)
+        // Same target within threshold
+        every { SystemClock.elapsedRealtime() } returns 10100L
+        UsabilityTracker.recordCardTap(context, "Social", false, 123)
+
+        val pending = UsabilityTracker.getPendingEvents(context)
+        val rapidEvent = pending.firstOrNull { it.intent == "SpeakCard" }
+        assertNotNull(rapidEvent)
+        assertEquals("rapid_tap", rapidEvent!!.outcome)
+        assertEquals("rapid_clicking", rapidEvent.frictionTag)
+        assertEquals("cat_social", rapidEvent.contextTag)
     }
 
     @Test
@@ -217,11 +231,71 @@ class UsabilityTrackerTest {
     }
 
     @Test
-    fun `generatePreviewPayload formats valid schema 2 JSON`() {
+    fun `generatePreviewPayload formats valid schema 3 JSON`() {
         UsabilityTracker.recordEvent(context, UsabilityTracker.UsabilityEvent("TestIntent", 100L, "completed"))
         val preview = UsabilityTracker.generatePreviewPayload(context)
-        assertTrue(preview.contains("\"schema\": 2"))
+        assertTrue(preview.contains("\"schema\": 3"))
         assertTrue(preview.contains("\"eventsCount\": 1"))
         assertTrue(preview.contains("\"TestIntent\""))
+    }
+
+    @Test
+    fun `recordSettingsState records coarse adoption tags`() {
+        val settings = com.amh.sotto.data.VoiceSettings(
+            speechRate = 0.8f,
+            playAttentionChime = true,
+            showLanguageSwitcher = true,
+            secondaryLanguage = "id"
+        )
+        UsabilityTracker.recordSettingsState(context, settings, 7)
+
+        val pending = UsabilityTracker.getPendingEvents(context).filter { it.intent == "SettingsState" }
+        assertEquals(1, pending.size)
+        val event = pending.first()
+        assertEquals("active", event.outcome)
+        assertTrue(event.contextTag.contains("chime=1"))
+        assertTrue(event.contextTag.contains("bi=1"))
+        assertTrue(event.contextTag.contains("sec=id"))
+        assertTrue(event.contextTag.contains("rate=slow"))
+        assertTrue(event.contextTag.contains("cust=6_20"))
+    }
+
+    @Test
+    fun `QuickSpeak intent concludes with saved_as_card and does not duplicate abort on clear`() {
+        UsabilityTracker.startIntent("QuickSpeak")
+        UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "saved_as_card", contextTag = "len_10")
+        // Subsequent clear text should not emit a second event because intent is no longer active
+        UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "aborted", frictionTag = "cleared_text")
+
+        val pending = UsabilityTracker.getPendingEvents(context).filter { it.intent == "QuickSpeak" }
+        assertEquals(1, pending.size)
+        assertEquals("saved_as_card", pending.first().outcome)
+    }
+
+    @Test
+    fun `QuickSpeak intent concludes with shown_fullscreen and does not duplicate abort on clear`() {
+        UsabilityTracker.startIntent("QuickSpeak")
+        UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "shown_fullscreen", contextTag = "len_15")
+        UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "aborted", frictionTag = "cleared_text")
+
+        val pending = UsabilityTracker.getPendingEvents(context).filter { it.intent == "QuickSpeak" }
+        assertEquals(1, pending.size)
+        assertEquals("shown_fullscreen", pending.first().outcome)
+    }
+
+    @Test
+    fun `event json array tuple serialization round-trip`() {
+        val event = UsabilityTracker.UsabilityEvent(
+            intent = "TwoWay",
+            durationMs = 4200L,
+            outcome = "completed",
+            frictionTag = "none",
+            contextTag = "neutral_exit",
+            day = "2026-10-08",
+            hourBucket = 2
+        )
+        val array = event.toJsonArray()
+        val deserialized = UsabilityTracker.UsabilityEvent.fromJsonArray(array)
+        assertEquals(event, deserialized)
     }
 }

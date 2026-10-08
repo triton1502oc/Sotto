@@ -10,6 +10,7 @@ import androidx.work.WorkManager
 import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.SharedPreferencesVoiceSettingsRepository
 import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
+import com.amh.sotto.data.VoiceSettings
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -72,6 +73,16 @@ object UsabilityTracker {
             put("hourBucket", hourBucket)
         }
 
+        fun toJsonArray(): JSONArray = JSONArray().apply {
+            put(intent)
+            put(durationMs)
+            put(outcome)
+            put(frictionTag)
+            put(contextTag)
+            put(day)
+            put(hourBucket)
+        }
+
         companion object {
             fun fromJsonObject(json: JSONObject): UsabilityEvent = UsabilityEvent(
                 intent = json.optString("intent", ""),
@@ -82,12 +93,30 @@ object UsabilityTracker {
                 day = json.optString("day", getTodayDate()),
                 hourBucket = json.optInt("hourBucket", getCurrentHourBucket())
             )
+
+            fun fromJsonArray(arr: JSONArray): UsabilityEvent = UsabilityEvent(
+                intent = arr.optString(0, ""),
+                durationMs = arr.optLong(1, 0L),
+                outcome = arr.optString(2, ""),
+                frictionTag = arr.optString(3, "none"),
+                contextTag = arr.optString(4, ""),
+                day = arr.optString(5, getTodayDate()),
+                hourBucket = arr.optInt(6, getCurrentHourBucket())
+            )
+
+            fun fromJson(item: Any): UsabilityEvent = when (item) {
+                is JSONArray -> fromJsonArray(item)
+                is JSONObject -> fromJsonObject(item)
+                else -> UsabilityEvent("", 0L, "")
+            }
         }
     }
 
     fun startIntent(name: String) {
         activeIntents[name] = SystemClock.elapsedRealtime()
     }
+
+    fun hasActiveIntent(name: String): Boolean = activeIntents.containsKey(name)
 
     fun endIntent(
         context: Context,
@@ -96,12 +125,8 @@ object UsabilityTracker {
         frictionTag: String = "none",
         contextTag: String = ""
     ) {
-        val startTime = activeIntents.remove(name)
-        val duration = if (startTime != null) {
-            (SystemClock.elapsedRealtime() - startTime).coerceAtLeast(0L)
-        } else {
-            0L
-        }
+        val startTime = activeIntents.remove(name) ?: return
+        val duration = (SystemClock.elapsedRealtime() - startTime).coerceAtLeast(0L)
 
         // Flag high hesitation if duration exceeds threshold and no specific friction was set
         val resolvedFriction = if (frictionTag == "none" && duration >= HESITATION_THRESHOLD_MS) {
@@ -126,6 +151,8 @@ object UsabilityTracker {
     /**
      * Records a card tap. [localTapKey] is used only in memory to detect rapid repeated taps
      * on the same card and is never persisted or transmitted.
+     * Routine taps (frictionTag == "none") are aggregated into periodic summary counters.
+     * Rapid repeated taps (frictionTag == "rapid_clicking") are recorded immediately.
      */
     fun recordCardTap(context: Context, category: String, isEmergency: Boolean, localTapKey: Int) {
         val now = SystemClock.elapsedRealtime()
@@ -135,19 +162,22 @@ object UsabilityTracker {
         lastTapTimestamp = now
         lastTapTarget = localTapKey
 
-        val outcome = if (isRapid) "rapid_tap" else "completed"
-        val friction = if (isRapid) "rapid_clicking" else "none"
+        val catType = categoryType(category, isEmergency)
 
-        recordEvent(
-            context,
-            UsabilityEvent(
-                intent = "SpeakCard",
-                durationMs = interval.coerceAtMost(30000L),
-                outcome = outcome,
-                frictionTag = friction,
-                contextTag = "cat_${categoryType(category, isEmergency)}"
+        if (isRapid) {
+            recordEvent(
+                context,
+                UsabilityEvent(
+                    intent = "SpeakCard",
+                    durationMs = interval.coerceAtMost(30000L),
+                    outcome = "rapid_tap",
+                    frictionTag = "rapid_clicking",
+                    contextTag = "cat_$catType"
+                )
             )
-        )
+        } else {
+            recordAggregatedTap(context, catType)
+        }
     }
 
     /**
@@ -290,6 +320,113 @@ object UsabilityTracker {
         )
     }
 
+    private val inMemoryTapCounts = ConcurrentHashMap<String, Int>()
+    private var inMemoryAggDay: String? = null
+    private var inMemoryAggHour: Int = -1
+
+    private fun recordAggregatedTap(context: Context, catType: String) {
+        val repo = SharedPreferencesVoiceSettingsRepository(context)
+        if (!repo.getVoiceSettings().shareUsabilityMetrics) return
+
+        synchronized(bufferLock) {
+            val today = getTodayDate()
+            val currentHour = getCurrentHourBucket()
+
+            if (inMemoryAggDay != null && (inMemoryAggDay != today || inMemoryAggHour != currentHour)) {
+                flushAggregatedTapsLocked(context)
+            }
+
+            inMemoryAggDay = today
+            inMemoryAggHour = currentHour
+            inMemoryTapCounts[catType] = (inMemoryTapCounts[catType] ?: 0) + 1
+        }
+    }
+
+    fun flushAggregatedTaps(context: Context) {
+        synchronized(bufferLock) {
+            flushAggregatedTapsLocked(context)
+        }
+    }
+
+    private fun flushAggregatedTapsLocked(context: Context) {
+        val storedDay = inMemoryAggDay ?: return
+        val storedHour = inMemoryAggHour
+        if (storedHour == -1) return
+
+        val categories = listOf("emergency", "needs", "social", "care", "general", "custom")
+        val nonZeroTags = mutableListOf<String>()
+        for (cat in categories) {
+            val count = inMemoryTapCounts[cat] ?: 0
+            if (count > 0) {
+                nonZeroTags.add("$cat=$count")
+            }
+        }
+
+        inMemoryTapCounts.clear()
+        inMemoryAggDay = null
+        inMemoryAggHour = -1
+
+        if (nonZeroTags.isNotEmpty()) {
+            val summaryEvent = UsabilityEvent(
+                intent = "CardTapsSummary",
+                durationMs = 0L,
+                outcome = "completed",
+                frictionTag = "none",
+                contextTag = nonZeroTags.joinToString(";"),
+                day = storedDay,
+                hourBucket = storedHour
+            )
+            recordEventInternal(context, summaryEvent)
+        }
+    }
+
+    fun recordSettingsState(
+        context: Context,
+        settings: VoiceSettings,
+        customPhraseCount: Int
+    ) {
+        val chime = if (settings.playAttentionChime) 1 else 0
+        val bilingual = if (settings.showLanguageSwitcher) 1 else 0
+        val secLang = if (settings.showLanguageSwitcher && settings.secondaryLanguage.isNotBlank()) {
+            settings.secondaryLanguage
+        } else {
+            "none"
+        }
+        val rateBucket = when {
+            settings.speechRate < 0.9f -> "slow"
+            settings.speechRate > 1.1f -> "fast"
+            else -> "normal"
+        }
+        val customBucket = when {
+            customPhraseCount == 0 -> "0"
+            customPhraseCount in 1..5 -> "1_5"
+            customPhraseCount in 6..20 -> "6_20"
+            else -> "20_plus"
+        }
+
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "SettingsState",
+                durationMs = 0L,
+                outcome = "active",
+                contextTag = "chime=${chime};bi=${bilingual};sec=${secLang};rate=${rateBucket};cust=${customBucket}"
+            )
+        )
+    }
+
+    private fun recordEventInternal(context: Context, event: UsabilityEvent) {
+        val file = getBufferFile(context)
+        val currentList = readEventsFromFile(file).toMutableList()
+
+        if (currentList.size >= MAX_BUFFER_SIZE) {
+            // Drop oldest elements to respect maximum cap
+            currentList.removeAt(0)
+        }
+        currentList.add(event)
+        writeEventsToFile(file, currentList)
+    }
+
     fun recordEvent(context: Context, event: UsabilityEvent) {
         val repo = SharedPreferencesVoiceSettingsRepository(context)
         if (!repo.getVoiceSettings().shareUsabilityMetrics) {
@@ -297,15 +434,7 @@ object UsabilityTracker {
         }
 
         synchronized(bufferLock) {
-            val file = getBufferFile(context)
-            val currentList = readEventsFromFile(file).toMutableList()
-
-            if (currentList.size >= MAX_BUFFER_SIZE) {
-                // Drop oldest elements to respect maximum cap
-                currentList.removeAt(0)
-            }
-            currentList.add(event)
-            writeEventsToFile(file, currentList)
+            recordEventInternal(context, event)
         }
 
         // Schedule unmetered Wi-Fi sync
@@ -319,13 +448,13 @@ object UsabilityTracker {
         val events = getPendingEvents(context)
 
         val root = JSONObject().apply {
-            put("schema", 2)
+            put("schema", 3)
             put("installId", installId)
             put("role", role)
             put("uiLang", LocaleHelper.getLanguage(context))
             put("eventsCount", events.size)
             val jsonEvents = JSONArray()
-            events.forEach { jsonEvents.put(it.toJsonObject()) }
+            events.forEach { jsonEvents.put(it.toJsonArray()) }
             put("events", jsonEvents)
         }
         return root.toString(2)
@@ -352,6 +481,7 @@ object UsabilityTracker {
 
     fun getPendingEvents(context: Context): List<UsabilityEvent> {
         synchronized(bufferLock) {
+            flushAggregatedTapsLocked(context)
             val file = getBufferFile(context)
             return readEventsFromFile(file)
         }
@@ -375,6 +505,9 @@ object UsabilityTracker {
     fun clearBuffer(context: Context) {
         synchronized(bufferLock) {
             getBufferFile(context).delete()
+            inMemoryTapCounts.clear()
+            inMemoryAggDay = null
+            inMemoryAggHour = -1
         }
         runCatching {
             WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME_SYNC)
@@ -392,7 +525,8 @@ object UsabilityTracker {
             val jsonArray = JSONArray(jsonStr)
             val result = ArrayList<UsabilityEvent>(jsonArray.length())
             for (i in 0 until jsonArray.length()) {
-                result.add(UsabilityEvent.fromJsonObject(jsonArray.getJSONObject(i)))
+                val item = jsonArray.get(i)
+                result.add(UsabilityEvent.fromJson(item))
             }
             result
         }.getOrDefault(emptyList())
@@ -402,7 +536,7 @@ object UsabilityTracker {
         runCatching {
             val jsonArray = JSONArray()
             for (e in events) {
-                jsonArray.put(e.toJsonObject())
+                jsonArray.put(e.toJsonArray())
             }
             file.writeText(jsonArray.toString())
         }

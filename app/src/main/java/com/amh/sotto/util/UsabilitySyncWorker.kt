@@ -43,14 +43,14 @@ class UsabilitySyncWorker(
             val repo = SharedPreferencesVoiceSettingsRepository(applicationContext)
             val installId = repo.getInstallId() ?: repo.getOrGenerateInstallId()
             val payload = JSONObject().apply {
-                put("schema", 2)
+                put("schema", 3)
                 put("installId", installId)
                 put("appVersion", "v${BuildConfig.VERSION_NAME}")
                 put("role", repo.getUserRole())
                 put("uiLang", LocaleHelper.getLanguage(applicationContext))
                 val jsonEvents = JSONArray()
                 for (e in events) {
-                    jsonEvents.put(e.toJsonObject())
+                    jsonEvents.put(e.toJsonArray())
                 }
                 put("events", jsonEvents)
             }
