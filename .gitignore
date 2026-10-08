@@ -46,3 +46,7 @@ demo/*_video.mp4
 demo/*.wav
 demo/audio_scratch*/
 demo/events*.txt
+
+# Local scratch & analysis data
+.local/
+
