@@ -3,6 +3,29 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.6.1] - 2026-10-09
+
+### Added
+- **Sensory-Minded Color Themes**: Curated sensory-friendly color palettes accessible from Voice & Language Settings (`Appearance` section) to accommodate neurodivergent needs, photophobia, and astigmatism halation while upholding WCAG 2.1 AAA contrast: **Charcoal** (default low-stimulus dark neutral), **OLED Pure Black** (maximum contrast and power efficiency), **Warm Amber / Low Strain** (low blue light dark sepia), **Slate Navy** (calm focus), and **Soft Parchment** (anti-halation muted daylight). Safety semantics remain invariant and distinct across all themes ([#27](https://github.com/triton1502oc/Sotto/issues/27)).
+- **Dignified Safety System & Personal Safety Card Templates**: Reframed the emergency system into a dignified, low-stimulus **Safety** system (`🛡️ Safety`). Added personal safety phrase templates for caregiver phone numbers and general neighborhood/locality orientation to protect user residential privacy. Added a "Show Safety Cards on Home" toggle in Settings to allow freeing 100% of the Home grid for everyday communication ([#28](https://github.com/triton1502oc/Sotto/issues/28)).
+- **Two-Way HUD Quick Neutral Response & Graceful Exit**: Added a quick neutral response and graceful exit options to the Two-Way Receptive Mode HUD, and streamlined caregiver triage controls ([#23](https://github.com/triton1502oc/Sotto/issues/23)).
+- **Telemetry Schema v3 & Tap Event Aggregation**: Optimized privacy-preserving usability tracking with schema v3, aggregating routine tap events to minimize payload size and device overhead, alongside privacy-preserving intent and back press navigation tracking and Settings adoption snapshots ([#24](https://github.com/triton1502oc/Sotto/issues/24), [#25](https://github.com/triton1502oc/Sotto/issues/25), [#26](https://github.com/triton1502oc/Sotto/issues/26)).
+
+### Changed
+- **Architecture Refactoring (SottoApp Extraction)**: Extracted the monolithic `SottoApp` composable (~2,000 LOC) out of `MainActivity.kt` into `ui/main/SottoApp.kt`, reducing `MainActivity` to a lean ~360 LOC focused strictly on Activity lifecycle, TTS management, and ViewModel wiring ([#8](https://github.com/triton1502oc/Sotto/issues/8)).
+- **Category Bar Streamlining**: Removed the redundant Safety filter chip from the main screen's horizontal category bar to reduce visual clutter, while keeping Safety manageable in Edit Mode ([#28](https://github.com/triton1502oc/Sotto/issues/28)).
+- **Refreshed Visual Assets & Demo Video**: Updated the Google Play Store preview video with warm, resonant baritone narration (`en-US-ChristopherNeural`), ambient soundtrack, and attention chime. Regenerated Play Store screenshots and feature graphic reflecting the new Safety badge and sensory color themes.
+
+### Fixed
+- **QuickSpeak Intent & Navigation Reliability**: Fixed QuickSpeak intent handling and back button navigation flow ([#22](https://github.com/triton1502oc/Sotto/issues/22)).
+
+### Assets
+- `Sotto-v1.6.1.apk`: Universal release APK for all architectures.
+- `Sotto-v1.6.1-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.6.1-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.6.1-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.6.0] - 2026-10-04
 
 ### Added
