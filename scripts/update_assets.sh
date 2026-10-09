@@ -15,10 +15,10 @@ echo "=== 1. Building Latest Debug APK ==="
 
 echo "=== 2. Checking Connected Device / Emulator ==="
 EMULATOR_STARTED=0
-DEVICE_ID="$($ADB devices | grep -E "emulator-|device\b" | grep -v "devices" | awk '{print $1}' | head -n 1 || true)"
+DEVICE_ID="$($ADB devices | grep "emulator-" | awk '{print $1}' | head -n 1 || true)"
 
 if [ -z "$DEVICE_ID" ]; then
-    echo "No running emulator or device found. Starting 'medium_phone' emulator..."
+    echo "No running emulator found. Starting 'medium_phone' emulator..."
     if command -v android &>/dev/null; then
         android emulator start medium_phone
     else
@@ -64,7 +64,7 @@ cat << 'EOF' > /tmp/sotto_prefs_en.xml
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
 <map>
     <boolean name="v2_migrated" value="true" />
-    <string name="saved_phrases">[{"text":"I cannot speak right now. Please read my screen.","language":"auto","isEmergency":true,"category":"Emergency"},{"text":"Please give me time.","language":"auto","isEmergency":false,"category":"Needs"},{"text":"I need a quiet space.","language":"auto","isEmergency":false,"category":"Needs"},{"text":"I need to leave now.","language":"auto","isEmergency":false,"category":"Needs"},{"text":"Yes, please.","language":"auto","isEmergency":false,"category":"Social"},{"text":"No, thank you.","language":"auto","isEmergency":false,"category":"Social"},{"text":"Thank you.","language":"auto","isEmergency":false,"category":"Social"},{"text":"Hello.","language":"auto","isEmergency":false,"category":"General"},{"text":"Please repeat that.","language":"auto","isEmergency":false,"category":"General"}]</string>
+    <string name="saved_phrases">[{"text":"I live around [Area/Neighborhood], please call my emergency contact: [phone number]","language":"auto","isEmergency":true,"category":"Emergency"},{"text":"Please give me time.","language":"auto","isEmergency":false,"category":"Needs"},{"text":"I need a quiet space.","language":"auto","isEmergency":false,"category":"Needs"},{"text":"I need to leave now.","language":"auto","isEmergency":false,"category":"Needs"},{"text":"Yes, please.","language":"auto","isEmergency":false,"category":"Social"},{"text":"No, thank you.","language":"auto","isEmergency":false,"category":"Social"},{"text":"Thank you.","language":"auto","isEmergency":false,"category":"Social"},{"text":"Hello.","language":"auto","isEmergency":false,"category":"General"},{"text":"Please repeat that.","language":"auto","isEmergency":false,"category":"General"}]</string>
 </map>
 EOF
 
