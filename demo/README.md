@@ -1,7 +1,7 @@
 # Sotto Demo Videos
 
 ### TL;DR
-High-definition demo videos and reproduction scripts showcasing Sotto's flagship assistive communication features—including **Two-Way Caregiver Receptive Mode** (180° face-to-face screen flip and rapid responses), **Dual-Language Speech** (`[ EN | ID ]` switching & bilingual emergency buttons), **Two-Tier Quick-Speak Bar**, **Emergency Bystander Hero Card**, and the **Two-Tone Attention Chime**—in both English and Indonesian.
+High-definition demo videos and reproduction scripts showcasing Sotto's flagship assistive communication features—including **Two-Way Caregiver Receptive Mode** (180° face-to-face screen flip and rapid responses), **Dual-Language Speech** (`[ EN | ID ]` switching & bilingual emergency buttons), **Two-Tier Quick-Speak Bar**, **Safety Bystander Hero Card**, and the **Two-Tone Attention Chime**—in both English and Indonesian.
 
 ---
 
@@ -20,7 +20,7 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 ## Featured Capabilities
 
 1. **Modern Two-Tier Quick-Speak Bar**: Spontaneous text input, instant speech playback (`🔊`), and large-card fullscreen modal (`⛶`).
-2. **Emergency Bystander Mode & Dual-Language**: Category filtering and emergency hero card with bilingual one-touch speech buttons.
+2. **Safety Bystander Mode & Dual-Language**: Category filtering and safety hero card with bilingual one-touch speech buttons.
 3. **Two-Way Caregiver Receptive Mode**: Dedicated receptive HUD (`👂`), caregiver question prompt bank (`📋`), 180° face-to-face screen flip (`🔄 Flip`), and dignified rapid-response buttons (`✓ Yes` / `✕ No` / `🔁 Repeat` / `⏳ Wait`) with instant voice confirmation.
 4. **Dual-Language TopBar Switcher**: Instant switching between primary and secondary speech languages with offline ML Kit translation.
 5. **Voice Customization & Attention Chime**: Two-tone pre-speech alert chime (D5 587.33 Hz + A5 880.00 Hz) and configurable speech rate/pitch.

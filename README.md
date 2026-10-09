@@ -43,9 +43,9 @@ Provide non-speaking individuals, those with unclear or dysfluent speech, and an
 ### 2. Dignified Self-Expression (AAC Phrase Board)
 - **Low-Stimulus UI**: Dark-neutral Material 3 theme with high contrast, calm earth tones, and zero cartoon animations or visual distractions.
 - **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
-- **Emergency Bystander Card**: Prominent high-contrast card and fullscreen banner for non-verbal episodes and medical personnel.
+- **Safety Bystander Card**: Prominent high-contrast card and fullscreen banner for non-verbal episodes, local contacts, and medical personnel.
 - **Quick-Speak Bar**: Docked bottom bar for spontaneous speech (`🔊`), fullscreen expand, voice dictation (`🎤`), and 1-tap card creation (`+`).
-- **Contextual & Custom Categories**: Filter cards by situation (**Emergency**, **Needs**, **Social**, **Care**, **General**), or customize your own categories.
+- **Contextual & Custom Categories**: Filter cards by situation (**Safety**, **Needs**, **Social**, **Care**, **General**), or customize your own categories.
 - **High-Visibility Fullscreen**: Long-press any card to show giant text for silent, readable communication in loud spaces.
 - **Dual-Language & On-Device Translation**: Display cards in one language while speaking in another, with 100% offline ML Kit models.
 
@@ -82,7 +82,6 @@ For offline devices, deGoogled systems, or quick testing without a Google accoun
 
 ### For Developers & Documentation
 ```bash
-export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home" PATH="$JAVA_HOME/bin:$PATH"
 ./gradlew assembleDebug
 ```
 - **Caregiver & User Guide**: See [docs/CAREGIVER_GUIDE.md](docs/CAREGIVER_GUIDE.md).

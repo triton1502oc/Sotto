@@ -41,8 +41,8 @@ FOR NON-SPEAKING & UNCLEAR VOICES (DIGNIFIED SELF-EXPRESSION):
 • Mature, Dignified Voice for Unclear or Fatigued Speech
 Whether completely non-verbal, navigating an autistic shutdown, or speaking with quiet, slurred, or dysarthric speech that listeners struggle to understand, Sotto provides a crisp, adult text-to-speech voice and high-contrast cards—free of childish cartoons and patronizing symbols.
 
-• Emergency Bystander Hero Card
-A prominent high-contrast banner for non-verbal episodes. Show fullscreen directly to bystanders, first responders, or medical personnel.
+• Safety & Bystander Hero Card
+A prominent high-contrast banner for non-verbal episodes, local contacts, or medical personnel. Show fullscreen directly to bystanders or first responders.
 
 • Quick-Speak Bar & Voice Dictation
 Type spontaneous thoughts with auto-expanding multi-line text, one-tap speech, voice dictation, and one-touch card creation.
@@ -51,7 +51,7 @@ Type spontaneous thoughts with auto-expanding multi-line text, one-tap speech, v
 Display any phrase across the entire display in giant text to silently communicate in loud or crowded environments.
 
 • Contextual Categories & Custom Boards
-Filter phrases by situation (Emergency, Needs, Social, Care, General) or create custom categories.
+Filter phrases by situation (Safety, Needs, Social, Care, General) or create custom categories.
 
 • Dual-Language Speech & On-Device Auto-Translate
 Display cards in one language while speaking in another (e.g. English text read aloud in Indonesian) using 100% offline on-device translation.

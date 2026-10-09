@@ -22,7 +22,7 @@ Sotto (*"under one's breath"*) is designed for sensory-sensitive communication a
         ▼                           ▼            ▼                           ▼
  🤝 PARTNER MODE (Caregiver Hub)          🗣️ SELF-ADVOCACY (Daily AAC)
  ├── Talk Tab: Emergency Triage HUD & Mic ├── Instant 1-Tap Phrase Cards
- ├── 180° Face-to-Face Screen Flip        ├── Emergency Hero Bystander Card
+ ├── 180° Face-to-Face Screen Flip        ├── Safety Bystander Hero Card
  ├── 4-Card Dignified Response Docks      ├── Quick-Speak Bar & Dictation
  └── Guided Tab: Root-Cause Decision Tree └── Giant High-Contrast Fullscreen
 ```
@@ -48,7 +48,7 @@ Caregiver asks 1 direct question ──► Giant text on screen ──► Indivi
 1. **Open Partner Mode**: Tap the handshake icon (`🤝`) in the top app bar. Sotto lands directly on the **Talk** tab.
 2. **Present One Urgent Question**:
    - **Speak Naturally (`🎤 Mic`)**: Tap the mic button. Sotto transcribes your voice in real time into giant high-contrast text. Tap again or pause to finish.
-   - **Preset Emergency Cards (`📋 Questions`)**: Tap Questions to pick instant emergency and comfort checks (*"Are you in pain?"*, *"Do you need water?"*, *"I need a quiet space."*).
+   - **Preset Check-in Cards (`📋 Questions`)**: Tap Questions to pick instant comfort and triage checks (*"Are you in pain?"*, *"Do you need water?"*, *"I need a quiet space."*).
    - **Type Manually (`⌨️ Type`)**: Type directly if ambient noise is too loud for speech recognition.
 3. **Vocalize with Read Aloud (`🔊 Speak`)**:
    - If the individual has their eyes closed or head down, tap **`🔊 Speak`** to vocalize the prompt through the phone's speaker.
@@ -137,11 +137,11 @@ For autistic teens and adults, as well as individuals with unclear, slurred, or 
 
 ### A. Speaking with Cards
 - **Instant Speech**: Tap any phrase card once. Sotto vocalizes the text using your device's native offline Text-to-Speech (TTS) engine—eliminating listener misunderstandings and vocal fatigue.
-- **Category Filter**: Use the top chips (`All`, `Emergency`, `Needs`, `Social`, `Care`, `General`, or custom categories) to filter phrases for your current situation.
+- **Category Filter**: Use the top chips (`All`, `Safety`, `Needs`, `Social`, `Care`, `General`, or custom categories) to filter phrases for your current situation.
 
-### B. Emergency Bystander Mode
-- **Hero Card**: The prominent amber/gold emergency card explains non-verbal episodes directly to bystanders.
-- **Fullscreen Mode**: Long-press any card (or tap fullscreen on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or first responders.
+### B. Safety Bystander Mode
+- **Hero Card**: The prominent amber/gold safety card displays your local area and emergency contact directly to bystanders or first responders.
+- **Fullscreen Mode**: Long-press any card (or tap fullscreen on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or medical personnel.
 
 ### C. Quick-Speak Input Bar
 - **Type Spontaneously**: Tap the bottom input bar to type any phrase. Sentences automatically expand up to 4 lines for easy editing.
@@ -157,12 +157,13 @@ For autistic teens and adults, as well as individuals with unclear, slurred, or 
 1. Tap **`[✏️ Edit List]`** in the top right.
 2. The button transforms to **`[✓ Done]`** and a floating **`+`** button appears:
    - **Add a Card**: Tap the **`+`** button at the bottom right. Enter card text, category, and optional alternative spoken text.
-   - **Edit a Card**: Tap any existing card to change its text, category, or toggle emergency status.
+   - **Edit a Card**: Tap any existing card to change its text, category, or toggle safety status.
    - **Delete a Card**: Inside the edit dialog, tap the red **Delete** button.
 3. Tap **`[✓ Done]`** when finished.
 
 ### Voice & App Settings (`⚙️`)
 Tap the gear icon (`⚙️`) in the top app bar to adjust:
+- **Sensory Color Themes**: Select comfortable visual palettes (System Default, OLED Pure Black, Soft Sage, Warm Amber, or High Contrast) to match sensory sensitivities.
 - **Speech Speed & Pitch**: Slow down speech for clarity or raise/lower voice pitch.
 - **Attention Alert Chime**: Play a polite alert chime before speaking to capture listener attention in noisy spaces.
 - **Dual-Language & On-Device Translation**: Display cards in English while speaking in Indonesian (or vice versa), powered by 100% offline ML Kit models.

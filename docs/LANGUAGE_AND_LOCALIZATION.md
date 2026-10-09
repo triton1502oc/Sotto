@@ -9,13 +9,14 @@
 
 ## 1. Default Cards (First Launch)
 
-On first run, [`SharedPreferencesPhraseRepository`](../app/src/main/java/com/amh/sotto/data/PhraseRepository.kt) saves 9 default cards to local storage from XML:
+On first run, [`SharedPreferencesPhraseRepository`](../app/src/main/java/com/amh/sotto/data/PhraseRepository.kt) saves 14 default cards to local storage from XML:
 
 | Category | English (`values/strings.xml`) | Indonesian (`values-in/strings.xml`) |
 | :--- | :--- | :--- |
-| **Emergency** (🚨 full width) | "I cannot speak right now. Please read my screen." | "Saya tidak bisa bicara sekarang. Tolong baca layar saya." |
+| **Safety** (🚨 full width) | "I live around [Area/Neighborhood], please call my emergency contact: [phone number]" | "Saya tinggal di sekitar [Area / Lingkungan], tolong hubungi kontak darurat saya: [nomor telepon]" |
 | **Needs** | 1. "I need a quiet space."<br>2. "Please give me time."<br>3. "I need to leave now." | 1. "Saya butuh tempat tenang."<br>2. "Tolong beri saya waktu."<br>3. "Saya harus pergi sekarang." |
 | **Social** | 1. "Yes, please."<br>2. "No, thank you."<br>3. "Thank you." | 1. "Ya, silakan."<br>2. "Tidak, terima kasih."<br>3. "Terima kasih." |
+| **Care** | 1. "Are you in pain?"<br>2. "Do you need water or food?"<br>3. "Do you need the restroom?"<br>4. "Are you feeling cold or warm?"<br>5. "Do you want to rest or sleep?" | 1. "Apakah Anda merasa sakit?"<br>2. "Apakah Anda butuh air atau makanan?"<br>3. "Apakah Anda perlu ke toilet?"<br>4. "Apakah Anda merasa kedinginan atau kepanasan?"<br>5. "Apakah Anda ingin istirahat atau tidur?" |
 | **General** | 1. "Hello."<br>2. "Please repeat that." | 1. "Halo."<br>2. "Tolong ulangi." |
 
 > Existing cards are never overwritten on app updates or locale changes.
@@ -48,5 +49,5 @@ There are two distinct language features in Sotto:
 
 - [`LocaleHelper.kt`](../app/src/main/java/com/amh/sotto/util/LocaleHelper.kt): Locale management and keyword-based language detection.
 - [`PhraseRepository.kt`](../app/src/main/java/com/amh/sotto/data/PhraseRepository.kt): Persistent JSON storage in `SharedPreferences`.
-- [`TranslationHelper.kt`](../app/src/main/java/com/amh/sotto/util/TranslationHelper.kt): Offline ML Kit translation.
-- [`MainActivity.kt`](../app/src/main/java/com/amh/sotto/MainActivity.kt): TTS routing, top bar toggle, and card actions.
+- [`SottoApp.kt`](../app/src/main/java/com/amh/sotto/ui/main/SottoApp.kt): Main UI composable, top bar toggle, and card actions.
+- [`MainActivity.kt`](../app/src/main/java/com/amh/sotto/MainActivity.kt): Activity lifecycle and TTS engine hosting.
