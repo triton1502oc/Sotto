@@ -55,9 +55,7 @@
     <string name="cd_show_fullscreen">Tampilkan layar penuh</string>
     <string name="cd_clear_text">Hapus teks</string>
     <string name="cd_save_as_card">Simpan sebagai kartu</string>
-    <string name="emergency_phrase_text">Saya tidak bisa bicara sekarang. Tolong baca layar saya.</string>
-    <string name="emergency_contact_phrase_text">Tolong hubungi kontak darurat saya: [Nomor Telepon]</string>
-    <string name="emergency_area_phrase_text">Saya tinggal di sekitar [Area / Lingkungan]. Tolong hubungi kontak saya.</string>
+    <string name="emergency_phrase_text">Saya tinggal di sekitar [Area / Lingkungan], tolong hubungi kontak darurat saya: [nomor telepon]</string>
     <string name="emergency_badge">Keselamatan</string>
 
     <!-- Categories & Attention Chime (Phase 2) -->
@@ -90,9 +88,7 @@
 
     <!-- Default Phrases by Category -->
     <string-array name="default_phrases_emergency">
-        <item>Saya tidak bisa bicara sekarang. Tolong baca layar saya.</item>
-        <item>Tolong hubungi kontak darurat saya: [Nomor Telepon]</item>
-        <item>Saya tinggal di sekitar [Area / Lingkungan]. Tolong hubungi kontak saya.</item>
+        <item>Saya tinggal di sekitar [Area / Lingkungan], tolong hubungi kontak darurat saya: [nomor telepon]</item>
     </string-array>
 
     <string-array name="default_phrases_needs">
@@ -172,8 +168,6 @@
     <string name="response_wait">Tunggu</string>
     <string name="response_tts_repeat">Tolong ulangi perkataan Anda.</string>
     <string name="response_tts_wait">Tolong beri saya waktu sebentar.</string>
-    <string name="response_all_good">Semua baik</string>
-    <string name="response_tts_all_good">Semuanya baik-baik saja, terima kasih.</string>
     <string name="replied_indicator">Menjawab: %1$s</string>
 
     <!-- Microphone Permission Rationale -->

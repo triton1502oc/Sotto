@@ -72,13 +72,11 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
     private val KEY_CATEGORY_ORDER = "saved_category_order"
     private val KEY_V2_MIGRATED = "v2_migrated"
     private val KEY_CARE_MIGRATED = "care_migrated"
-    private val KEY_SAFETY_TEMPLATES_MIGRATED = "safety_templates_migrated"
+    private val KEY_SAFETY_CONSOLIDATED_MIGRATED = "safety_consolidated_migrated"
 
     private val fallbackPhrases = listOf(
         // Safety
-        Phrase("I cannot speak right now. Please read my screen.", LocaleHelper.LANG_AUTO, isEmergency = true, category = Phrase.CATEGORY_EMERGENCY),
-        Phrase("Please call my emergency contact: [Phone Number]", LocaleHelper.LANG_AUTO, isEmergency = true, category = Phrase.CATEGORY_EMERGENCY),
-        Phrase("I live around [Area / Neighborhood]. Please call my contact.", LocaleHelper.LANG_AUTO, isEmergency = true, category = Phrase.CATEGORY_EMERGENCY),
+        Phrase("I live around [Area/Neighborhood], please call my emergency contact: [phone number]", LocaleHelper.LANG_AUTO, isEmergency = true, category = Phrase.CATEGORY_EMERGENCY),
         // Needs
         Phrase("I need a quiet space.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_NEEDS),
         Phrase("Please give me time.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_NEEDS),
@@ -189,21 +187,32 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
                 savePhrases(list)
             }
 
-            // One-time upgrade: Add new Safety contact/area templates if missing
-            val isSafetyMigrated = prefs.getBoolean(KEY_SAFETY_TEMPLATES_MIGRATED, false)
-            if (!isSafetyMigrated) {
-                val emergencyDefaults = getDefaultPhrases().filter { it.isEmergency }
-                val existingTexts = list.map { it.text }.toSet()
-                val missingDefaults = emergencyDefaults.filter { it.text !in existingTexts }
-                if (missingDefaults.isNotEmpty()) {
-                    val lastEmergencyIndex = list.indexOfLast { it.isEmergency }
-                    if (lastEmergencyIndex != -1) {
-                        list.addAll(lastEmergencyIndex + 1, missingDefaults)
-                    } else {
-                        list.addAll(0, missingDefaults)
+            // One-time upgrade: Consolidate default Safety cards into single contact/area card
+            val isSafetyConsolidated = prefs.getBoolean(KEY_SAFETY_CONSOLIDATED_MIGRATED, false)
+            if (!isSafetyConsolidated) {
+                val oldDefaultSafetyTexts = setOf(
+                    "I cannot speak right now. Please read my screen.",
+                    "Please call my emergency contact: [Phone Number]",
+                    "I live around [Area / Neighborhood]. Please call my contact.",
+                    "Saya tidak bisa bicara sekarang. Tolong baca layar saya.",
+                    "Tolong hubungi kontak darurat saya: [Nomor Telepon]",
+                    "Saya tinggal di sekitar [Area / Lingkungan]. Tolong hubungi kontak saya."
+                )
+                val newSafetyDefault = getDefaultPhrases().firstOrNull { it.isEmergency }
+                if (newSafetyDefault != null) {
+                    val hadOldDefaults = list.any { it.isEmergency && it.text in oldDefaultSafetyTexts }
+                    if (hadOldDefaults) {
+                        val firstEmergencyIdx = list.indexOfFirst { it.isEmergency }
+                        list.removeAll { it.isEmergency && it.text in oldDefaultSafetyTexts }
+                        val insertIdx = if (firstEmergencyIdx in 0..list.size) firstEmergencyIdx else 0
+                        if (list.none { it.isEmergency }) {
+                            list.add(insertIdx, newSafetyDefault)
+                        }
+                    } else if (list.none { it.isEmergency }) {
+                        list.add(0, newSafetyDefault)
                     }
                 }
-                prefs.edit().putBoolean(KEY_SAFETY_TEMPLATES_MIGRATED, true).apply()
+                prefs.edit().putBoolean(KEY_SAFETY_CONSOLIDATED_MIGRATED, true).apply()
                 savePhrases(list)
             }
 

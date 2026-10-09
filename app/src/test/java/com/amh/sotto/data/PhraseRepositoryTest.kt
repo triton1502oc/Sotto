@@ -137,21 +137,14 @@ class PhraseRepositoryTest {
     }
 
     @Test
-    fun `Safety templates are valid emergency phrases`() {
-        val contactPhrase = Phrase(
-            text = "Please call my emergency contact: [Phone Number]",
-            isEmergency = true,
-            category = Phrase.CATEGORY_SAFETY
-        )
-        val areaPhrase = Phrase(
-            text = "I live around [Area / Neighborhood]. Please call my contact.",
+    fun `Safety default template is valid emergency phrase`() {
+        val safetyPhrase = Phrase(
+            text = "I live around [Area/Neighborhood], please call my emergency contact: [phone number]",
             isEmergency = true,
             category = Phrase.CATEGORY_SAFETY
         )
 
-        assertTrue(contactPhrase.isEmergency)
-        assertEquals(Phrase.CATEGORY_EMERGENCY, contactPhrase.category)
-        assertTrue(areaPhrase.isEmergency)
-        assertEquals(Phrase.CATEGORY_EMERGENCY, areaPhrase.category)
+        assertTrue(safetyPhrase.isEmergency)
+        assertEquals(Phrase.CATEGORY_EMERGENCY, safetyPhrase.category)
     }
 }

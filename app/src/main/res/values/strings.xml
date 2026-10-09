@@ -55,9 +55,7 @@
     <string name="cd_show_fullscreen">Show in fullscreen</string>
     <string name="cd_clear_text">Clear text</string>
     <string name="cd_save_as_card">Save as card</string>
-    <string name="emergency_phrase_text">I cannot speak right now. Please read my screen.</string>
-    <string name="emergency_contact_phrase_text">Please call my emergency contact: [Phone Number]</string>
-    <string name="emergency_area_phrase_text">I live around [Area / Neighborhood]. Please call my contact.</string>
+    <string name="emergency_phrase_text">I live around [Area/Neighborhood], please call my emergency contact: [phone number]</string>
     <string name="emergency_badge">Safety</string>
 
     <!-- Categories & Attention Chime (Phase 2) -->
@@ -90,9 +88,7 @@
 
     <!-- Default Phrases by Category -->
     <string-array name="default_phrases_emergency">
-        <item>I cannot speak right now. Please read my screen.</item>
-        <item>Please call my emergency contact: [Phone Number]</item>
-        <item>I live around [Area / Neighborhood]. Please call my contact.</item>
+        <item>I live around [Area/Neighborhood], please call my emergency contact: [phone number]</item>
     </string-array>
 
     <string-array name="default_phrases_needs">
@@ -172,8 +168,6 @@
     <string name="response_wait">Wait</string>
     <string name="response_tts_repeat">Please repeat that.</string>
     <string name="response_tts_wait">Please give me a moment.</string>
-    <string name="response_all_good">All good</string>
-    <string name="response_tts_all_good">All good, thank you.</string>
     <string name="replied_indicator">Replied: %1$s</string>
 
     <!-- Microphone Permission Rationale -->
