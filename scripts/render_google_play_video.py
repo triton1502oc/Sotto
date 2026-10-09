@@ -13,12 +13,13 @@ Features:
 - Authentic app UI states:
   * Why Finder guided crisis tree (assets/screenshot_partner_mode.png)
   * 180° Tabletop Partner Mode flip (assets/screenshot_partner_flip.png)
-  * Quick-Speak spontaneous typing (assets/screenshot_quickspeak.png)
-  * Emergency Bystander hero card (assets/screenshot_fullscreen.png)
+  * Main AAC phrase board with Bystander Safety Card (assets/screenshot.png)
+  * Bystander hero card in fullscreen mode (assets/screenshot_fullscreen.png)
+  * Sensory Color Themes & Dual-Engine TTS (assets/screenshot_voice_settings.png)
   * Private Why Log with 30-day patterns (assets/screenshot_whylog.png)
 - Kinetic typography callouts, animated glowing badges, and feature highlights
 - Muted autoplay accessibility with synchronized bottom subtitle pill
-- Neural TTS narration (Christopher Baritone / Andrew) + Attention Chime + low-stimulus ambient pad
+- Neural baritone TTS narration + Attention Chime + low-stimulus ambient pad
 - High-performance multiprocessing renderer + hardware H.264 / AAC encoder
 """
 
@@ -34,7 +35,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 # Video Specifications
 W, H = 1920, 1080
 FPS = 30
-DURATION = 56.0
+DURATION = 60.0
 TOTAL_FRAMES = int(DURATION * FPS)
 SAMPLE_RATE = 44100
 
@@ -45,8 +46,8 @@ OUT_SOUNDTRACK = "demo/sotto_google_play_soundtrack.wav"
 
 # Typography Setup
 try:
-    FONT_HERO = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 64)
-    FONT_TITLE = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 44)
+    FONT_HERO = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 68)
+    FONT_TITLE = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 42)
     FONT_SUBTITLE = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 24)
     FONT_BADGE = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 20)
     FONT_CARD_TITLE = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 26)
@@ -94,57 +95,84 @@ def draw_vector_icon(draw, icon_type, x, y, size=24, color=(255, 183, 77, 255)):
         cx, cy = x + size // 2, y + size // 2
         r = size // 2
         draw.polygon([(cx, cy - r), (cx + 3, cy - 3), (cx + r, cy), (cx + 3, cy + 3), (cx, cy + r), (cx - 3, cy + 3), (cx - r, cy), (cx - 3, cy - 3)], fill=color)
+    elif icon_type == "palette":
+        r = size // 2
+        cx, cy = x + r, y + r
+        draw.ellipse([x + 2, y + 2, x + size - 2, y + size - 2], outline=color, width=2)
+        draw.ellipse([cx - 4, cy - 6, cx - 1, cy - 3], fill=color)
+        draw.ellipse([cx + 3, cy - 4, cx + 6, cy - 1], fill=color)
+        draw.ellipse([cx + 2, cy + 3, cx + 5, cy + 6], fill=color)
+
+# Fit screenshot to target aspect ratio (tw x th) with subtle center crop
+def fit_screen(img, tw=440, th=920):
+    src_ratio = img.width / img.height
+    dst_ratio = tw / th
+    if src_ratio > dst_ratio:
+        scale = th / img.height
+        new_w = int(img.width * scale)
+        scaled = img.resize((new_w, th), Image.Resampling.LANCZOS)
+        left = (new_w - tw) // 2
+        return scaled.crop((left, 0, left + tw, th))
+    else:
+        scale = tw / img.width
+        new_h = int(img.height * scale)
+        scaled = img.resize((tw, new_h), Image.Resampling.LANCZOS)
+        top = (new_h - th) // 2
+        return scaled.crop((0, top, tw, top + th))
 
 # Generate phone mockup
-def render_phone_mockup(screen_img, target_h=920, rotation_deg=0):
-    aspect = screen_img.width / screen_img.height
-    target_w = int(target_h * aspect)
-    scr_resized = screen_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
-    
-    if rotation_deg != 0:
-        scr_resized = scr_resized.rotate(rotation_deg, resample=Image.Resampling.BICUBIC, expand=False)
-        
+def render_phone_mockup(screen_img, tw=440, th=920):
     bezel = 12
-    pw = target_w + bezel * 2
-    ph = target_h + bezel * 2
+    pw = tw + bezel * 2
+    ph = th + bezel * 2
     r = 38
     
     phone = Image.new("RGBA", (pw + 40, ph + 40), (0, 0, 0, 0))
     pdraw = ImageDraw.Draw(phone)
     
-    # Realistic soft drop shadow
+    # Layer 1: Ambient deep elevation shadow
     shadow_mask = Image.new("RGBA", (pw + 40, ph + 40), (0, 0, 0, 0))
     sdraw = ImageDraw.Draw(shadow_mask)
-    sdraw.rounded_rectangle([20, 24, 20 + pw, 24 + ph], radius=r, fill=(0, 0, 0, 160))
-    shadow_blur = shadow_mask.filter(ImageFilter.GaussianBlur(16))
+    sdraw.rounded_rectangle([20, 24, 20 + pw, 24 + ph], radius=r, fill=(0, 0, 0, 140))
+    shadow_blur = shadow_mask.filter(ImageFilter.GaussianBlur(18))
     phone.paste(shadow_blur, (0, 0), shadow_blur)
+
+    # Layer 2: Tight contact shadow
+    shadow_contact = Image.new("RGBA", (pw + 40, ph + 40), (0, 0, 0, 0))
+    scdraw = ImageDraw.Draw(shadow_contact)
+    scdraw.rounded_rectangle([20, 22, 20 + pw, 22 + ph], radius=r, fill=(0, 0, 0, 110))
+    shadow_contact_b = shadow_contact.filter(ImageFilter.GaussianBlur(6))
+    phone.paste(shadow_contact_b, (0, 0), shadow_contact_b)
     
     # Titanium dark bezel
-    pdraw.rounded_rectangle([20, 20, 20 + pw, 20 + ph], radius=r, fill=(26, 30, 38, 255), outline=(64, 72, 86, 255), width=2)
+    pdraw.rounded_rectangle([20, 20, 20 + pw, 20 + ph], radius=r, fill=(24, 28, 36, 255), outline=(58, 66, 80, 255), width=2)
     
     # Clip screen with rounded corners
-    screen_mask = Image.new("L", (target_w, target_h), 0)
+    screen_mask = Image.new("L", (tw, th), 0)
     smdraw = ImageDraw.Draw(screen_mask)
-    smdraw.rounded_rectangle([0, 0, target_w, target_h], radius=r - bezel + 2, fill=255)
+    smdraw.rounded_rectangle([0, 0, tw, th], radius=r - bezel + 2, fill=255)
     
-    phone.paste(scr_resized, (20 + bezel, 20 + bezel), screen_mask)
+    phone.paste(screen_img, (20 + bezel, 20 + bezel), screen_mask)
     
     # Camera punch hole
     cam_x = 20 + pw // 2
     cam_y = 20 + bezel + 12
-    pdraw.ellipse([cam_x - 6, cam_y - 6, cam_x + 6, cam_y + 6], fill=(12, 12, 14, 255))
+    pdraw.ellipse([cam_x - 6, cam_y - 6, cam_x + 6, cam_y + 6], fill=(10, 10, 12, 255))
+    pdraw.ellipse([cam_x - 2, cam_y - 2, cam_x + 2, cam_y + 2], fill=(25, 30, 42, 255))
     
     return phone
 
-# Preloaded Screen Cache
+# Preloaded Screen Cache (Pre-fitted to tw x th)
 SCREEN_CACHE = {}
 
-def get_screen(path):
-    if path not in SCREEN_CACHE:
+def get_screen(path, tw=440, th=920):
+    key = (path, tw, th)
+    if key not in SCREEN_CACHE:
         if not os.path.exists(path):
             raise FileNotFoundError(f"Required screenshot asset not found: {path}")
-        SCREEN_CACHE[path] = Image.open(path).convert("RGBA")
-    return SCREEN_CACHE[path]
+        raw = Image.open(path).convert("RGBA")
+        SCREEN_CACHE[key] = fit_screen(raw, tw, th)
+    return SCREEN_CACHE[key]
 
 # Scene Definitions (Using 100% Authentic Repository Screenshots)
 SCENES = [
@@ -156,13 +184,13 @@ SCENES = [
         "badge": "SOTTO • ASSISTIVE COMMUNICATION",
         "badge_icon": "sparkle",
         "title": "A Calm Voice in Verbal Shutdowns",
-        "subtitle": "Designed for autistic teens, adults & caregivers navigating sensory overload.",
+        "subtitle": "Low-stimulus, dignified communication for autistic teens & adults.",
         "features": [
-            ("check", "Zero Open-Ended Pressure", "Replaces overwhelming 'What's wrong?' questions with structured clarity.", (255, 183, 77)),
-            ("grid", "Mature Material 3 Aesthetic", "High contrast and dignified dark neutral palette—free of childish cartoons.", (129, 199, 132)),
-            ("shield", "100% Offline & Private", "Zero cloud accounts, zero ads, zero tracking. All data stays strictly on-device.", (144, 202, 249))
+            ("check", "Dignified Adult Interface", "High-contrast Material 3 design—free of childish cartoons and clutter.", (255, 183, 77)),
+            ("speaker", "One-Tap Spoken Voice", "Instant vocal speech with two-tone attention chime for quiet settings.", (129, 199, 132)),
+            ("shield", "Bystander Safety Hero Card", "Always-ready emergency card for immediate reassurance and contact.", (144, 202, 249))
         ],
-        "caption": "Sotto: Calm crisis navigation & dignified voice for autistic teens, adults, and caregivers.",
+        "caption": "Sotto: Low-stimulus assistive communication and calm crisis de-escalation.",
         "glow_color": (255, 183, 77)
     },
     {
@@ -175,71 +203,74 @@ SCENES = [
         "title": "Calm Yes/No Inquiries in Meltdowns",
         "subtitle": "Uncovers the root cause when cognitive overload prevents open speech.",
         "features": [
-            ("compass", "Gentle Binary Tree", "Replaces open-ended demands with single, low-cognitive-load yes/no questions.", (255, 183, 77)),
-            ("check", "Four Investigation Domains", "Step through Physical pain, Sensory overload, Emotion, or Routine friction.", (129, 199, 132)),
-            ("speaker", "Immediate Action Steps", "Provides concrete, soothing relief: dim lights, solitary space, or calm comfort.", (144, 202, 249))
+            ("compass", "Gentle Binary Tree", "Replaces stressful “What's wrong?” with one simple question at a time.", (255, 183, 77)),
+            ("grid", "4 Distress Domains", "Systematically explores Physical, Sensory, Emotional, or Routine triggers.", (129, 199, 132)),
+            ("sparkle", "Actionable Relief Steps", "Suggests immediate de-escalation: dim lights, quiet space, or comfort.", (144, 202, 249))
         ],
-        "caption": "Why Finder: Gentle binary yes/no branching to identify root causes without distress.",
-        "glow_color": (255, 183, 77)
+        "caption": "Why Finder: Low-cognitive-load binary questions to identify distress calmly.",
+        "glow_color": (129, 199, 132)
     },
     {
         "id": "partnermode",
         "start": 19.5,
-        "end": 30.5,
+        "end": 31.0,
         "screen_path": "assets/screenshot_partner_flip.png",
         "badge": "PARTNER MODE",
         "badge_icon": "flip",
         "title": "180° Tabletop Screen Flip",
-        "subtitle": "Dignified face-to-face communication across a table with zero pressure.",
+        "subtitle": "Dignified face-to-face conversation across any table with zero pressure.",
         "features": [
-            ("flip", "180° Tabletop Rotation", "Caregiver and partner communicate across a table with flipped orientation.", (255, 183, 77)),
-            ("grid", "Four Dignified Replies", "Rapid response dock: Yes, No, Repeat, or Wait with high-contrast buttons.", (129, 199, 132)),
-            ("speaker", "Instant Vocal Speech", "Spoken audio playback confirms choices out loud for complete peace of mind.", (144, 202, 249))
+            ("flip", "180° Tabletop Rotation", "Rest the phone between you; communicator interface flips upside down.", (255, 183, 77)),
+            ("grid", "4-Card Rapid Response Dock", "Large high-contrast touch targets: Yes, No, Repeat, and Wait.", (129, 199, 132)),
+            ("speaker", "Audible Speech Feedback", "Tapping any response speaks clearly aloud for complete mutual certainty.", (144, 202, 249))
         ],
-        "caption": "Partner Mode: 180° screen rotation for dignified tabletop conversation.",
-        "glow_color": (129, 199, 132)
+        "caption": "Partner Mode: 180° tabletop screen flip for calm face-to-face communication.",
+        "glow_color": (144, 202, 249)
     },
     {
         "id": "aac",
-        "start": 30.5,
-        "end": 41.5,
-        "screen_path": "assets/screenshot_quickspeak.png",
+        "start": 31.0,
+        "end": 42.0,
+        "screen_path": "assets/screenshot.png",
         "screen_alt_path": "assets/screenshot_fullscreen.png",
-        "badge": "DIGNIFIED AAC",
+        "crossfade_at": 35.5,
+        "badge": "DIGNIFIED AAC & SAFETY",
         "badge_icon": "speaker",
-        "title": "Mature Voice • Zero Pediatric Clutter",
-        "subtitle": "A clean, adult communication board for non-speaking and unclear speech.",
+        "title": "One-Tap Speech & Safety Hero Card",
+        "subtitle": "Express needs in noisy environments or display safety cards to bystanders.",
         "features": [
-            ("speaker", "Spontaneous Quick-Speak", "Bottom dock for spontaneous typing, voice dictation, and one-tap speech.", (255, 183, 77)),
-            ("grid", "Emergency Bystander Card", "High-visibility banner and card to display directly to first responders.", (239, 83, 80)),
-            ("flip", "Giant Fullscreen Text", "Long-press any phrase to display giant readable text across noisy environments.", (144, 202, 249))
+            ("speaker", "Spontaneous Quick-Speak", "Bottom dock for spontaneous typing, voice dictation, and saved phrases.", (255, 183, 77)),
+            ("shield", "Bystander Safety Card", "High-contrast card for first responders when words cannot be formed.", (239, 83, 80)),
+            ("flip", "Giant Fullscreen Display", "Show giant high-contrast text across crowded rooms or noisy spaces.", (129, 199, 132))
         ],
-        "caption": "Dignified AAC: Clean Material 3 design, mature voice, and emergency cards.",
+        "caption": "Dignified AAC: Quick-Speak typing, attention chimes, and giant safety cards.",
         "glow_color": (255, 183, 77)
     },
     {
-        "id": "privacy",
-        "start": 41.5,
-        "end": 51.0,
-        "screen_path": "assets/screenshot_whylog.png",
-        "badge": "100% OFFLINE & PRIVATE",
-        "badge_icon": "shield",
-        "title": "Zero Cloud Accounts • Zero Tracking",
-        "subtitle": "All crisis notes and communication stay strictly confidential on-device.",
+        "id": "sensory_privacy",
+        "start": 42.0,
+        "end": 53.0,
+        "screen_path": "assets/screenshot_voice_settings.png",
+        "screen_alt_path": "assets/screenshot_whylog.png",
+        "crossfade_at": 47.5,
+        "badge": "SENSORY THEMES & 100% OFFLINE",
+        "badge_icon": "palette",
+        "title": "Sensory Themes • Zero Cloud • Zero Ads",
+        "subtitle": "Low-stimulus palettes and absolute privacy—all data stays on your phone.",
         "features": [
-            ("shield", "100% Local Device Storage", "Zero tracking, zero cloud accounts, and zero covert analytics.", (129, 199, 132)),
-            ("grid", "30-Day Crisis Pattern Trends", "Identify top environmental stressors and peak hours to prevent future distress.", (255, 183, 77)),
-            ("speaker", "Offline Dual-Language", "On-device ML Kit models translate and speak offline in multiple languages.", (144, 202, 249))
+            ("palette", "4 Sensory Color Themes", "Default, OLED Pure Black, Soft Sage, and Warm Amber for photophobia.", (129, 199, 132)),
+            ("shield", "100% Offline & Private", "Zero cloud accounts, zero ads, zero analytics. Strictly local on-device.", (144, 202, 249)),
+            ("grid", "30-Day Stressor Trends", "Private Why Log uncovers environmental patterns to prevent future distress.", (255, 183, 77))
         ],
-        "caption": "100% Offline Guarantee: Zero tracking, no accounts, private on-device logs.",
+        "caption": "Sensory Comfort & Privacy: Low-stimulus color themes and 100% offline privacy.",
         "glow_color": (129, 199, 132)
     },
     {
         "id": "outro",
-        "start": 51.0,
-        "end": 56.0,
-        "screen_path": "assets/screenshot.png",
-        "caption": "Join Sotto Closed Testing on Google Play."
+        "start": 53.0,
+        "end": 60.0,
+        "glow_color": (255, 183, 77),
+        "caption": "Download Sotto on Google Play. 100% Free & Open Source."
     }
 ]
 
@@ -255,115 +286,153 @@ def render_frame_worker(args):
             scene = s
             break
             
-    scene_progress = (t - scene["start"]) / max(0.001, (scene["end"] - scene["start"]))
-    
     canvas = Image.new("RGBA", (W, H), (14, 17, 23, 255))
     d = ImageDraw.Draw(canvas)
     
     # 1. Atmospheric ambient glow
     glow_color = scene.get("glow_color", (255, 183, 77))
-    pulse = 0.85 + 0.15 * math.sin(2.0 * math.pi * 0.4 * t)
+    pulse = 0.85 + 0.15 * math.sin(2.0 * math.pi * 0.3 * t)
     glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
-    gd.ellipse([100, 200, 700, 800], fill=(glow_color[0], glow_color[1], glow_color[2], int(40 * pulse)))
-    gd.ellipse([1100, 180, 1900, 920], fill=(28, 85, 55, int(28 * pulse)))
+    gd.ellipse([100, 180, 750, 820], fill=(glow_color[0], glow_color[1], glow_color[2], int(42 * pulse)))
+    gd.ellipse([1150, 180, 1900, 920], fill=(28, 85, 55, int(26 * pulse)))
     glow_blur = glow.filter(ImageFilter.GaussianBlur(80))
     canvas.paste(glow_blur, (0, 0), glow_blur)
     
-    # SCENE: OUTRO (51.0s - 56.0s)
+    # SCENE: OUTRO (53.0s - 60.0s)
     if scene["id"] == "outro":
-        outro_t = (t - 51.0) / 5.0
-        alpha = min(1.0, outro_t * 2.5)
+        outro_t = (t - 53.0) / 7.0
+        alpha = min(1.0, outro_t * 2.2)
         
-        # Load app icon
+        # End fade to black for the final 1.0s
+        if t >= 59.0:
+            fade_out = max(0.0, (60.0 - t) / 1.0)
+            alpha *= fade_out
+            
+        # App Icon
         icon_path = "assets/play_store_icon_512.png"
         if os.path.exists(icon_path):
-            icon_img = Image.open(icon_path).convert("RGBA").resize((180, 180), Image.Resampling.LANCZOS)
-            # Rounded mask for icon
-            imask = Image.new("L", (180, 180), 0)
-            ImageDraw.Draw(imask).rounded_rectangle([0, 0, 180, 180], radius=42, fill=255)
+            icon_img = Image.open(icon_path).convert("RGBA").resize((170, 170), Image.Resampling.LANCZOS)
+            imask = Image.new("L", (170, 170), 0)
+            ImageDraw.Draw(imask).rounded_rectangle([0, 0, 170, 170], radius=40, fill=255)
             
             # Outer icon glow
             iglow = Image.new("RGBA", (260, 260), (0, 0, 0, 0))
-            ImageDraw.Draw(iglow).rounded_rectangle([20, 20, 240, 240], radius=50, fill=(255, 183, 77, int(90 * alpha)))
+            ImageDraw.Draw(iglow).rounded_rectangle([20, 20, 240, 240], radius=50, fill=(255, 183, 77, int(85 * alpha)))
             iglow_b = iglow.filter(ImageFilter.GaussianBlur(24))
-            canvas.paste(iglow_b, (W // 2 - 130, 210), iglow_b)
-            canvas.paste(icon_img, (W // 2 - 90, 250), imask)
+            canvas.paste(iglow_b, (W // 2 - 130, 205), iglow_b)
+            canvas.paste(icon_img, (W // 2 - 85, 250), imask)
             
         # Hero Title
-        d.text((W // 2 - 110, 460), "SOTTO", font=FONT_HERO, fill=(255, 255, 255, int(255 * alpha)))
+        tbox = FONT_HERO.getbbox("SOTTO")
+        tw = tbox[2] - tbox[0]
+        d.text(((W - tw) // 2, 450), "SOTTO", font=FONT_HERO, fill=(255, 255, 255, int(255 * alpha)))
         
         # Tagline
         tag = "A Calm Voice When Words Are Hard"
         tbox = FONT_OUTRO_TAG.getbbox(tag)
         tw = tbox[2] - tbox[0]
-        d.text(((W - tw) // 2, 545), tag, font=FONT_OUTRO_TAG, fill=(255, 204, 128, int(255 * alpha)))
+        d.text(((W - tw) // 2, 535), tag, font=FONT_OUTRO_TAG, fill=(255, 204, 128, int(255 * alpha)))
         
-        sub = "Assistive Communication & Crisis Navigation for Autistic Teens & Adults"
+        # Subtitle
+        sub = "Dignified Assistive Communication & Crisis Navigation"
         sbox = FONT_SUBTITLE.getbbox(sub)
         sw = sbox[2] - sbox[0]
-        d.text(((W - sw) // 2, 600), sub, font=FONT_SUBTITLE, fill=(180, 192, 210, int(255 * alpha)))
+        d.text(((W - sw) // 2, 590), sub, font=FONT_SUBTITLE, fill=(180, 192, 210, int(255 * alpha)))
         
-        # 3 Trust Badges
+        # 3 Trust Badges (dynamically centered with snug padding)
         badges = [
-            ("sparkle", "Google Play Beta", (255, 183, 77)),
+            ("sparkle", "Google Play", (255, 183, 77)),
             ("check", "100% Free & Open Source", (129, 199, 132)),
             ("shield", "100% Offline Privacy", (144, 202, 249))
         ]
-        bx = 420
-        by = 680
+        badge_data = []
+        total_w = 0
+        gap = 24
         for b_icon, b_title, b_col in badges:
-            d.rounded_rectangle([bx, by, bx + 330, by + 56], radius=28, fill=(26, 32, 42, int(230 * alpha)), outline=(b_col[0], b_col[1], b_col[2], int(200 * alpha)), width=2)
-            draw_vector_icon(d, b_icon, bx + 18, by + 16, size=24, color=(b_col[0], b_col[1], b_col[2], int(255 * alpha)))
-            d.text((bx + 52, by + 16), b_title, font=FONT_BADGE, fill=(240, 240, 240, int(255 * alpha)))
-            bx += 370
+            bbox = FONT_BADGE.getbbox(b_title)
+            bw = (bbox[2] - bbox[0]) + 74
+            badge_data.append((b_icon, b_title, b_col, bw))
+            total_w += bw
+        total_w += gap * (len(badges) - 1)
+        bx = (W - total_w) // 2
+        by = 675
+        for b_icon, b_title, b_col, bw in badge_data:
+            d.rounded_rectangle([bx, by, bx + bw, by + 52], radius=26, fill=(24, 28, 38, int(230 * alpha)), outline=(b_col[0], b_col[1], b_col[2], int(200 * alpha)), width=2)
+            draw_vector_icon(d, b_icon, bx + 18, by + 14, size=24, color=(b_col[0], b_col[1], b_col[2], int(255 * alpha)))
+            d.text((bx + 50, by + 14), b_title, font=FONT_BADGE, fill=(240, 240, 240, int(255 * alpha)))
+            bx += bw + gap
             
     # SCENES: 0, 1, 2, 3, 4
     else:
-        # Subtle organic vertical float
-        float_y = 60 + int(4.0 * math.sin(2.0 * math.pi * 0.3 * t))
+        float_y = 42 + int(4.0 * math.sin(2.0 * math.pi * 0.25 * t))
         
-        # Determine screen image
-        screen_img = get_screen(scene["screen_path"])
-        # For Scene 3 (AAC), swap to emergency card during second half
-        if scene["id"] == "aac" and (t - scene["start"]) >= 5.5:
-            screen_img = get_screen(scene["screen_alt_path"])
-            
-        # Intro slide-in transition
-        if scene["id"] == "intro":
-            if t < 2.5:
-                phone_x = int(W // 2 - 220)
+        # Crossfade between screen_path and screen_alt_path if defined
+        if "screen_alt_path" in scene and "crossfade_at" in scene:
+            cf_t = scene["crossfade_at"]
+            if t < cf_t:
+                screen_img = get_screen(scene["screen_path"])
+            elif t >= cf_t + 0.5:
+                screen_img = get_screen(scene["screen_alt_path"])
             else:
-                glide_p = ease_out_cubic((t - 2.5) / 1.0)
-                phone_x = int((W // 2 - 220) + (160 - (W // 2 - 220)) * glide_p)
+                blend_p = (t - cf_t) / 0.5
+                img1 = get_screen(scene["screen_path"])
+                img2 = get_screen(scene["screen_alt_path"])
+                screen_img = Image.blend(img1, img2, blend_p)
         else:
-            phone_x = 160
+            screen_img = get_screen(scene["screen_path"])
             
-        # Mockup render
-        phone = render_phone_mockup(screen_img, target_h=920)
+        # Intro slide-in transition: starts center then glides left
+        if scene["id"] == "intro":
+            if t < 2.0:
+                phone_x = int(W // 2 - 240)
+            elif t < 3.0:
+                glide_p = ease_out_cubic((t - 2.0) / 1.0)
+                phone_x = int((W // 2 - 240) + (140 - (W // 2 - 240)) * glide_p)
+            else:
+                phone_x = 140
+        else:
+            phone_x = 140
+            
+        # Render phone mockup with standardized dimensions
+        phone = render_phone_mockup(screen_img, tw=440, th=920)
         canvas.paste(phone, (phone_x, float_y), phone)
         
-        # Interactive tap pulse animation on real UI buttons
-        # In Why Finder (scene 1): pulse over the real green "✓ Yes" button
-        if scene["id"] == "whyfinder" and 13.8 <= t <= 15.0:
-            pulse_p = (t - 13.8) / 1.2
-            pr = int(15 + 40 * pulse_p)
-            pa = int(220 * (1.0 - pulse_p))
-            d.ellipse([phone_x + 138 - pr, float_y + 715 - pr, phone_x + 138 + pr, float_y + 715 + pr], outline=(129, 199, 132, pa), width=3)
-        # In Partner Mode (scene 2): pulse over the flipped green "✓ Yes" button facing partner
-        elif scene["id"] == "partnermode" and 28.0 <= t <= 29.5:
-            pulse_p = (t - 28.0) / 1.5
-            pr = int(15 + 45 * pulse_p)
-            pa = int(220 * (1.0 - pulse_p))
-            d.ellipse([phone_x + 338 - pr, float_y + 86 - pr, phone_x + 338 + pr, float_y + 86 + pr], outline=(129, 199, 132, pa), width=3)
-            
-        # Right Motion Graphics Panel (only after 2.5s for intro)
-        if scene["id"] != "intro" or t >= 2.5:
-            card_p = ease_out_cubic(min(1.0, (t - (2.5 if scene["id"] == "intro" else scene["start"])) / 0.6))
+        # Interactive touch pulses
+        bezel_offset = 20 + 12
+        # Scene 1 (Why Finder): pulse on green Yes button (115, 668)
+        if scene["id"] == "whyfinder" and 14.8 <= t <= 16.2:
+            p_prog = (t - 14.8) / 1.4
+            pr = int(14 + 38 * p_prog)
+            pa = int(220 * (1.0 - p_prog))
+            px = phone_x + bezel_offset + 115
+            py = float_y + bezel_offset + 668
+            d.ellipse([px - pr, py - pr, px + pr, py + pr], outline=(129, 199, 132, pa), width=3)
+        # Scene 2 (Partner Mode): pulse on flipped green Yes button (315, 101)
+        elif scene["id"] == "partnermode" and 28.5 <= t <= 29.8:
+            p_prog = (t - 28.5) / 1.3
+            pr = int(14 + 40 * p_prog)
+            pa = int(220 * (1.0 - p_prog))
+            px = phone_x + bezel_offset + 315
+            py = float_y + bezel_offset + 101
+            d.ellipse([px - pr, py - pr, px + pr, py + pr], outline=(129, 199, 132, pa), width=3)
+        # Scene 3 (AAC & Safety): pulse on speech phrase at 38.6s - 39.8s
+        elif scene["id"] == "aac" and 38.6 <= t <= 39.8:
+            p_prog = (t - 38.6) / 1.2
+            pr = int(16 + 45 * p_prog)
+            pa = int(220 * (1.0 - p_prog))
+            px = phone_x + bezel_offset + 220
+            py = float_y + bezel_offset + 460
+            d.ellipse([px - pr, py - pr, px + pr, py + pr], outline=(255, 183, 77, pa), width=3)
+
+        # Right Motion Graphics Panel (only after 2.0s in intro)
+        if scene["id"] != "intro" or t >= 2.0:
+            panel_t = t - (2.0 if scene["id"] == "intro" else scene["start"])
+            card_p = ease_out_cubic(min(1.0, panel_t / 0.55))
             card_alpha = int(255 * card_p)
-            offset_x = int(35 * (1.0 - card_p))
-            rx = 680 + offset_x
-            ry = 130
+            offset_x = int(32 * (1.0 - card_p))
+            rx = 670 + offset_x
+            ry = 120
             
             # Badge
             badge_txt = scene["badge"]
@@ -374,27 +443,34 @@ def render_frame_worker(args):
             d.text((rx + 38, ry + 8), badge_txt, font=FONT_BADGE, fill=(255, 204, 128, card_alpha))
             
             # Title & Subtitle
-            d.text((rx, ry + 56), scene["title"], font=FONT_TITLE, fill=(255, 255, 255, card_alpha))
-            d.text((rx, ry + 120), scene["subtitle"], font=FONT_SUBTITLE, fill=(180, 192, 210, card_alpha))
+            d.text((rx, ry + 54), scene["title"], font=FONT_TITLE, fill=(255, 255, 255, card_alpha))
+            d.text((rx, ry + 115), scene["subtitle"], font=FONT_SUBTITLE, fill=(180, 192, 210, card_alpha))
             
-            # 3 Feature Cards
-            card_y = ry + 185
-            for icon, c_title, c_desc, col in scene["features"]:
-                d.rounded_rectangle([rx, card_y, rx + 1060, card_y + 115], radius=18, fill=(24, 28, 38, int(230 * card_p)), outline=(48, 56, 70, int(255 * card_p)), width=1)
-                d.rounded_rectangle([rx + 16, card_y + 20, rx + 22, card_y + 95], radius=3, fill=(col[0], col[1], col[2], card_alpha))
-                draw_vector_icon(d, icon, rx + 38, card_y + 24, size=24, color=(col[0], col[1], col[2], card_alpha))
-                d.text((rx + 72, card_y + 22), c_title, font=FONT_CARD_TITLE, fill=(255, 255, 255, card_alpha))
-                d.text((rx + 38, card_y + 64), c_desc, font=FONT_CARD_DESC, fill=(170, 182, 198, card_alpha))
-                card_y += 135
+            # 3 Staggered Feature Cards
+            card_y = ry + 175
+            for idx, (icon, c_title, c_desc, col) in enumerate(scene["features"]):
+                # Staggered entrance
+                stagger_t = max(0.0, panel_t - 0.12 * idx)
+                c_anim = ease_out_cubic(min(1.0, stagger_t / 0.45))
+                c_alpha = int(255 * c_anim)
+                c_off_x = int(20 * (1.0 - c_anim))
+                cx_cur = rx + c_off_x
+                
+                d.rounded_rectangle([cx_cur, card_y, cx_cur + 1170, card_y + 118], radius=18, fill=(24, 28, 38, int(230 * c_anim)), outline=(48, 56, 72, int(255 * c_anim)), width=1)
+                d.rounded_rectangle([cx_cur + 16, card_y + 18, cx_cur + 22, card_y + 100], radius=3, fill=(col[0], col[1], col[2], c_alpha))
+                draw_vector_icon(d, icon, cx_cur + 38, card_y + 24, size=24, color=(col[0], col[1], col[2], c_alpha))
+                d.text((cx_cur + 72, card_y + 22), c_title, font=FONT_CARD_TITLE, fill=(255, 255, 255, c_alpha))
+                d.text((cx_cur + 38, card_y + 64), c_desc, font=FONT_CARD_DESC, fill=(170, 182, 198, c_alpha))
+                card_y += 136
                 
     # 3. Synchronized Bottom Subtitle Bar (Accessibility for muted autoplay)
     caption_txt = scene["caption"]
     sbox = FONT_CAPTION.getbbox(caption_txt)
     sw = sbox[2] - sbox[0] + 50
     sx = (W - sw) // 2
-    sy = 1005
-    d.rounded_rectangle([sx, sy, sx + sw, sy + 48], radius=24, fill=(18, 22, 30, 240), outline=(255, 183, 77, 180), width=1)
-    d.text((sx + 25, sy + 11), caption_txt, font=FONT_CAPTION, fill=(240, 240, 240, 255))
+    sy = 1015
+    d.rounded_rectangle([sx, sy, sx + sw, sy + 46], radius=23, fill=(18, 22, 30, 240), outline=(255, 183, 77, 180), width=1)
+    d.text((sx + 25, sy + 10), caption_txt, font=FONT_CAPTION, fill=(240, 240, 240, 255))
     
     # Save frame as JPEG for high speed & low disk I/O
     canvas.convert("RGB").save(out_path, "JPEG", quality=95)
@@ -448,7 +524,7 @@ def main():
         "-i", os.path.join(FRAMES_DIR, "frame_%05d.jpg"),
         "-i", OUT_SOUNDTRACK,
         "-c:v", "h264_videotoolbox",
-        "-b:v", "8000k",
+        "-b:v", "8500k",
         "-pix_fmt", "yuv420p",
         "-c:a", "aac",
         "-b:a", "192k",

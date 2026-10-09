@@ -7,25 +7,22 @@ only the marketing script below is sent, no user data). Install: `pip install ed
 import math, os, shutil, struct, subprocess, sys, wave
 
 SR = 44100
-DURATION = 56.0
+DURATION = 60.0
 OUT = "demo/sotto_google_play_soundtrack.wav"
 TMP = "/tmp/sotto_play_audio"
-NARRATOR = ("en-US-ChristopherNeural", "-2%", "-3Hz")   # deep, resonant baritone
+NARRATOR = ("en-US-ChristopherNeural", "-3%", "-4Hz")   # deep, resonant baritone
 APP_VOICE = ("en-US-AndrewNeural", "+0%", "+0Hz")  # distinct "device" voice
 
 # (start_sec, voice, text) — starts align with scene boundaries in render_google_play_video.py
 CUES = [
-    (0.6, NARRATOR, "When a meltdown hits, even a simple question can feel like too much. "
-                    "Sotto was made for those moments."),
-    (9.2, NARRATOR, "Instead of asking, “What's wrong?”, Why Finder offers one gentle yes-or-no question at a time, "
-                    "so you can find the cause together, calmly."),
-    (20.0, NARRATOR, "In Partner Mode, flip the screen and set the phone down between you. "
-                     "They can answer with a single tap."),
-    (28.2, APP_VOICE, "Yes."),
-    (31.0, NARRATOR, "Day to day, it's a clean, grown-up speech board. No cartoons."),
-    (37.6, APP_VOICE, "I need a moment, please."),
-    (42.0, NARRATOR, "And it all stays on the device. No accounts. No ads. No tracking."),
-    (50.8, NARRATOR, "Sotto. A calm voice, when words are hard."),
+    (0.8, NARRATOR, "When words become hard during sensory overload or verbal shutdown, Sotto is here."),
+    (9.0, NARRATOR, "Never ask “What's wrong?”. Why Finder guides caregivers through gentle yes-or-no questions to uncover distress calmly."),
+    (19.8, NARRATOR, "In Partner Mode, flip the screen and set the phone between you. They can answer across the table with a single tap."),
+    (29.2, APP_VOICE, "Yes."),
+    (31.6, NARRATOR, "Day to day, speak instantly with one tap, or show high-contrast safety cards directly to bystanders."),
+    (39.6, APP_VOICE, "I need a moment, please."),
+    (42.5, NARRATOR, "Sensory color themes for low-stimulus comfort. And zero data leaves your device: no accounts, no tracking, 100% offline."),
+    (53.8, NARRATOR, "Sotto. A calm voice, when words are hard."),
 ]
 
 
@@ -80,13 +77,19 @@ def main():
         for i, v in enumerate(clip[: n - s0]):
             mix[s0 + i] += v * 0.95
     for i, v in enumerate(chime()):  # chime precedes the in-app phrase, like the real app
-        mix[int(37.0 * SR) + i] += v
+        mix[int(39.0 * SR) + i] += v
+    
+    # 2.0s master fadeout
+    fade_len = int(2.0 * SR)
+    for i in range(fade_len):
+        mix[n - 1 - i] *= (i / fade_len)
+        
     peak = max(abs(v) for v in mix)
     gain = min(1.0, 30000 / peak)
     with wave.open(OUT, "wb") as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(b"".join(struct.pack("<hh", int(v * gain), int(v * gain)) for v in mix))
-    print(f"Wrote {OUT}")
+    print(f"Wrote {OUT} ({DURATION}s)")
 
 
 if __name__ == "__main__":

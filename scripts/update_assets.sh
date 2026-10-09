@@ -140,8 +140,8 @@ echo "=== 8. Capturing Partner Mode (Guided Crisis Navigation) Screenshot ==="
 # Tap Partner handshake icon (top bar icon, center: 620, 145)
 $ADB -s "$DEVICE_ID" shell input tap 620 145
 sleep 1.5
-# Tap "Guided" mode in bottom control bar (center: 180, 2030)
-$ADB -s "$DEVICE_ID" shell input tap 180 2030
+# Tap "Guided" mode in bottom control bar (center: 150, 2075)
+$ADB -s "$DEVICE_ID" shell input tap 150 2075
 sleep 1.5
 $ADB -s "$DEVICE_ID" exec-out screencap -p > /tmp/raw_partner_mode.png
 # Dismiss Partner dialog
