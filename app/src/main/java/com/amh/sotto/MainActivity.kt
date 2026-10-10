@@ -283,13 +283,14 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             }
             val effectiveLang = LocaleHelper.getEffectiveLanguage(this)
             val targetLocale = LocaleHelper.resolvePhraseLocale(language ?: LocaleHelper.LANG_AUTO, text, effectiveLang)
+            val speechText = LocaleHelper.formatDigitsForSpeech(text)
             tts?.setLanguage(targetLocale)
             applyVoiceSettings(latestVoiceSettings, targetLocale)
             if (latestVoiceSettings.playAttentionChime) {
                 tts?.playSilentUtterance(280, TextToSpeech.QUEUE_FLUSH, null)
-                tts?.speak(text, TextToSpeech.QUEUE_ADD, null, null)
+                tts?.speak(speechText, TextToSpeech.QUEUE_ADD, null, null)
             } else {
-                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+                tts?.speak(speechText, TextToSpeech.QUEUE_FLUSH, null, null)
             }
         }
     }

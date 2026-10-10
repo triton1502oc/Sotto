@@ -211,4 +211,29 @@ object LocaleHelper {
             else -> getLocaleForLanguage(appLanguage)
         }
     }
+
+    /**
+     * Formats long digit sequences (phone numbers, emergency contacts) to be separated
+     * by spaces so TTS engines pronounce them digit-by-digit instead of colossal integers.
+     */
+    fun formatDigitsForSpeech(text: String): String {
+        val pattern = Regex("(\\+?[0-9][0-9\\s\\-\\(\\)]{3,}[0-9])")
+        return pattern.replace(text) { matchResult ->
+            val matchedStr = matchResult.value
+            val digitCount = matchedStr.count { it.isDigit() }
+            if (digitCount >= 5) {
+                val formatted = StringBuilder()
+                for (char in matchedStr) {
+                    when {
+                        char.isDigit() -> formatted.append("$char ")
+                        char == '-' || char == '/' || char == ',' -> formatted.append("- ")
+                    }
+                }
+                formatted.toString().trim().replace(Regex("\\s+"), " ")
+            } else {
+                matchedStr
+            }
+        }
+    }
 }
+

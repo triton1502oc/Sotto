@@ -55,4 +55,22 @@ class LocaleHelperTest {
         val localeId = LocaleHelper.detectLocale(ambiguousPhrase, LocaleHelper.LANG_INDONESIAN)
         assertEquals("id", localeId.language)
     }
+
+    @Test
+    fun `formatDigitsForSpeech formats phone numbers with spaces for digit by digit pronunciation`() {
+        val input = "Please call my emergency contact: 08123456789"
+        val expected = "Please call my emergency contact: 0 8 1 2 3 4 5 6 7 8 9"
+        assertEquals(expected, LocaleHelper.formatDigitsForSpeech(input))
+
+        val international = "Contact: +62 812-345-678"
+        val formattedIntl = LocaleHelper.formatDigitsForSpeech(international)
+        assertEquals("Contact: 6 2 8 1 2 - 3 4 5 - 6 7 8", formattedIntl)
+    }
+
+    @Test
+    fun `formatDigitsForSpeech leaves short numbers untouched`() {
+        val shortNumber = "Room 102 in Area 4"
+        assertEquals(shortNumber, LocaleHelper.formatDigitsForSpeech(shortNumber))
+    }
 }
+

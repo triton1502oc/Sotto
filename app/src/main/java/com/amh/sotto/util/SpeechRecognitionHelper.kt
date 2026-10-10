@@ -2,6 +2,7 @@ package com.amh.sotto.util
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -14,6 +15,9 @@ class SpeechRecognitionHelper(private val context: Context) {
 
     private var speechRecognizer: SpeechRecognizer? = null
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var silenceRunnable: Runnable? = null
+    private var lastRecognizedText: String = ""
+    private val autoStopDelayMs: Long = 1800L
 
     var isListening: Boolean = false
         private set
@@ -30,8 +34,28 @@ class SpeechRecognitionHelper(private val context: Context) {
         }
     }
 
+    private fun cancelSilenceTimer() {
+        silenceRunnable?.let { mainHandler.removeCallbacks(it) }
+        silenceRunnable = null
+    }
+
+    private fun resetSilenceTimer(onFinalResult: (String) -> Unit) {
+        cancelSilenceTimer()
+        val runnable = Runnable {
+            if (isListening && lastRecognizedText.isNotBlank()) {
+                val finalText = lastRecognizedText
+                stopListening()
+                onFinalResult(finalText)
+            }
+        }
+        silenceRunnable = runnable
+        mainHandler.postDelayed(runnable, autoStopDelayMs)
+    }
+
     private fun cleanupInternal() {
         try {
+            cancelSilenceTimer()
+            lastRecognizedText = ""
             isListening = false
             speechRecognizer?.stopListening()
             speechRecognizer?.destroy()
@@ -51,7 +75,11 @@ class SpeechRecognitionHelper(private val context: Context) {
             try {
                 cleanupInternal()
 
-                val recognizer = SpeechRecognizer.createSpeechRecognizer(context)
+                val recognizer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(context)) {
+                    SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
+                } else {
+                    SpeechRecognizer.createSpeechRecognizer(context)
+                }
                 speechRecognizer = recognizer
 
                 val langTag = locale.toLanguageTag()
@@ -61,6 +89,9 @@ class SpeechRecognitionHelper(private val context: Context) {
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
                     putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+                    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, autoStopDelayMs)
+                    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, autoStopDelayMs)
                 }
 
                 recognizer.setRecognitionListener(object : RecognitionListener {
@@ -80,19 +111,23 @@ class SpeechRecognitionHelper(private val context: Context) {
                     override fun onEndOfSpeech() {
                         android.util.Log.d("SottoSpeech", "onEndOfSpeech")
                         isListening = false
+                        cancelSilenceTimer()
                     }
 
                     override fun onError(error: Int) {
                         isListening = false
+                        cancelSilenceTimer()
                         android.util.Log.e("SottoSpeech", "SpeechRecognizer onError: $error")
                         onError(error)
                     }
 
                     override fun onResults(results: Bundle?) {
                         isListening = false
+                        cancelSilenceTimer()
                         val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         android.util.Log.d("SottoSpeech", "onResults: $matches")
                         if (!matches.isNullOrEmpty()) {
+                            lastRecognizedText = matches[0]
                             onFinalResult(matches[0])
                         }
                     }
@@ -101,7 +136,10 @@ class SpeechRecognitionHelper(private val context: Context) {
                         val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         android.util.Log.d("SottoSpeech", "onPartialResults: $matches")
                         if (!matches.isNullOrEmpty()) {
-                            onPartialResult(matches[0])
+                            val partial = matches[0]
+                            lastRecognizedText = partial
+                            onPartialResult(partial)
+                            resetSilenceTimer(onFinalResult)
                         }
                     }
 
@@ -113,6 +151,7 @@ class SpeechRecognitionHelper(private val context: Context) {
             } catch (e: Exception) {
                 android.util.Log.e("SottoSpeech", "SpeechRecognizer exception on startListening", e)
                 isListening = false
+                cancelSilenceTimer()
                 onError(SpeechRecognizer.ERROR_CLIENT)
             }
         }

@@ -177,6 +177,7 @@ fun SottoApp(
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
             putExtra(RecognizerIntent.EXTRA_PROMPT, listenModePrompt)
+            putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         }
         try {
             twoWaySpeechLauncher.launch(intent)
@@ -593,6 +594,8 @@ fun SottoApp(
                     .imePadding()
             ) {
                 var isQuickTranslating by remember { mutableStateOf(false) }
+                var isQuickListening by remember { mutableStateOf(false) }
+                var quickBaseText by remember { mutableStateOf("") }
                 val voiceInputPrompt = stringResource(R.string.cd_voice_input)
 
                 val quickSpeechLauncher = rememberLauncherForActivityResult(
@@ -606,7 +609,84 @@ fun SottoApp(
                     }
                 }
 
+                fun stopQuickListening() {
+                    if (isQuickListening) {
+                        speechHelper.stopListening()
+                        isQuickListening = false
+                    }
+                }
+
+                val quickAudioPermissionLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission()
+                ) { isGranted ->
+                    if (isGranted) {
+                        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                        val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
+                        quickBaseText = quickText.trim()
+                        isQuickListening = true
+                        speechHelper.startListening(
+                            locale = locale,
+                            onPartialResult = { partial ->
+                                quickText = if (quickBaseText.isEmpty()) partial else "$quickBaseText $partial"
+                            },
+                            onFinalResult = { final ->
+                                quickText = if (quickBaseText.isEmpty()) final else "$quickBaseText $final"
+                                isQuickListening = false
+                            },
+                            onError = {
+                                isQuickListening = false
+                            }
+                        )
+                    } else {
+                        isQuickListening = false
+                    }
+                }
+
+                fun toggleQuickListening() {
+                    if (isQuickListening) {
+                        stopQuickListening()
+                    } else {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                            if (!speechHelper.isAvailable()) {
+                                val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                                val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
+                                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+                                    putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
+                                    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+                                }
+                                try {
+                                    quickSpeechLauncher.launch(intent)
+                                } catch (_: Exception) {}
+                                return
+                            }
+                            val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                            val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
+                            quickBaseText = quickText.trim()
+                            isQuickListening = true
+                            speechHelper.startListening(
+                                locale = locale,
+                                onPartialResult = { partial ->
+                                    quickText = if (quickBaseText.isEmpty()) partial else "$quickBaseText $partial"
+                                },
+                                onFinalResult = { final ->
+                                    quickText = if (quickBaseText.isEmpty()) final else "$quickBaseText $final"
+                                    isQuickListening = false
+                                },
+                                onError = {
+                                    isQuickListening = false
+                                }
+                            )
+                        } else {
+                            quickAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                        }
+                    }
+                }
+
                 fun handleQuickSpeak(text: String) {
+                    stopQuickListening()
                     if (text.isBlank()) return
                     UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "completed", contextTag = "len_${text.length}")
                     if (voiceSettings.showLanguageSwitcher && activeSpeechTarget == "secondary") {
@@ -682,52 +762,55 @@ fun SottoApp(
                         minLines = 1,
                         maxLines = 4,
                         trailingIcon = {
-                            if (quickText.isNotBlank()) {
-                                val clearTextCd = stringResource(R.string.cd_clear_text)
-                                IconButton(
-                                    onClick = {
-                                        UsabilityTracker.endIntent(
-                                            context,
-                                            "QuickSpeak",
-                                            outcome = "aborted",
-                                            frictionTag = "cleared_text",
-                                            contextTag = "len_${quickText.length}"
+                            val stopVoiceInputCd = stringResource(R.string.cd_stop_voice_input)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (isQuickListening) {
+                                    IconButton(
+                                        onClick = { stopQuickListening() },
+                                        modifier = Modifier.semantics { contentDescription = stopVoiceInputCd }
+                                    ) {
+                                        Text(
+                                            "⏹",
+                                            fontSize = 18.sp,
+                                            color = MaterialTheme.colorScheme.error
                                         )
-                                        quickText = ""
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = clearTextCd }
-                                ) {
-                                    Text(
-                                        "✕",
-                                        fontSize = 16.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                    )
+                                    }
                                 }
-                            } else {
-                                IconButton(
-                                    onClick = {
-                                        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                                        val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
-                                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
-                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-                                            putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                                        }
-                                        try {
-                                            quickSpeechLauncher.launch(intent)
-                                        } catch (e: Exception) {
-                                            // Ignore if speech recognizer not present
-                                        }
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = voiceInputPrompt }
-                                ) {
-                                    Text("🎤", fontSize = 18.sp)
+                                if (quickText.isNotBlank()) {
+                                    val clearTextCd = stringResource(R.string.cd_clear_text)
+                                    IconButton(
+                                        onClick = {
+                                            stopQuickListening()
+                                            UsabilityTracker.endIntent(
+                                                context,
+                                                "QuickSpeak",
+                                                outcome = "aborted",
+                                                frictionTag = "cleared_text",
+                                                contextTag = "len_${quickText.length}"
+                                            )
+                                            quickText = ""
+                                        },
+                                        modifier = Modifier.semantics { contentDescription = clearTextCd }
+                                    ) {
+                                        Text(
+                                            "✕",
+                                            fontSize = 16.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                } else if (!isQuickListening) {
+                                    IconButton(
+                                        onClick = { toggleQuickListening() },
+                                        modifier = Modifier.semantics { contentDescription = voiceInputPrompt }
+                                    ) {
+                                        Text("🎤", fontSize = 18.sp)
+                                    }
                                 }
                             }
                         },
                         keyboardActions = KeyboardActions(
                             onDone = {
+                                stopQuickListening()
                                 if (quickText.isNotBlank()) {
                                     handleQuickSpeak(quickText.trim())
                                 }
@@ -761,6 +844,7 @@ fun SottoApp(
                             ) {
                                 IconButton(
                                     onClick = {
+                                        stopQuickListening()
                                         if (quickText.isNotBlank()) {
                                             handleQuickFullscreen(quickText.trim())
                                         }
@@ -781,6 +865,7 @@ fun SottoApp(
                             if (quickText.isNotBlank()) {
                                 IconButton(
                                     onClick = {
+                                        stopQuickListening()
                                         UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "saved_as_card", contextTag = "len_${quickText.trim().length}")
                                         initialAddText = quickText.trim()
                                         showAddDialog = true
@@ -837,16 +922,79 @@ fun SottoApp(
             }
         }
     ) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            state = lazyGridState,
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+        val showPersistentSafetyBanner = voiceSettings.showSafetyCards &&
+            selectedCategory != allCategoryKey &&
+            selectedCategory != Phrase.CATEGORY_EMERGENCY
+        val persistentEmergencyPhrase = remember(phrases) {
+            phrases.firstOrNull { it.isEmergency }
+        }
+
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            if (showPersistentSafetyBanner && persistentEmergencyPhrase != null) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                        .clickable {
+                            if (isEditMode) {
+                                phraseToEdit = persistentEmergencyPhrase
+                            } else {
+                                val hasValidSpoken = voiceSettings.showLanguageSwitcher &&
+                                    !persistentEmergencyPhrase.spokenText.isNullOrBlank() &&
+                                    persistentEmergencyPhrase.spokenText != LocaleHelper.LANG_AUTO
+                                if (hasValidSpoken) {
+                                    onSpeakText(
+                                        persistentEmergencyPhrase.spokenText,
+                                        persistentEmergencyPhrase.spokenLanguage ?: voiceSettings.secondaryLanguage
+                                    )
+                                } else {
+                                    onSpeak(persistentEmergencyPhrase)
+                                }
+                            }
+                        },
+                    color = SottoColors.EmergencyCardBackground,
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, SottoColors.EmergencyAccent.copy(alpha = 0.8f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text("🛡️", fontSize = 16.sp)
+                        Text(
+                            text = persistentEmergencyPhrase.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = SottoColors.EmergencyText,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "🔊",
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                state = lazyGridState,
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
             items(
                 items = filteredPhrases,
                 key = { it.text },
@@ -1019,6 +1167,7 @@ fun SottoApp(
             }
         }
     }
+}
 
     val availableLanguages = remember(availableTtsLanguages) {
         LocaleHelper.getAvailableLanguages(availableTtsLanguages)
@@ -1603,6 +1752,7 @@ fun SottoApp(
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
                                         putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
+                                        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
                                     }
                                     try {
                                         speechLauncher.launch(intent)
@@ -1734,6 +1884,7 @@ fun SottoApp(
                                                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
                                                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
                                                 putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
+                                                putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
                                             }
                                             try {
                                                 spokenSpeechLauncher.launch(intent)
@@ -1822,6 +1973,9 @@ fun SottoApp(
                             if (initialAddText.isNotBlank()) {
                                 quickText = ""
                             }
+                        }
+                        if (newPhrase.isEmergency) {
+                            UsabilityTracker.recordSafetyCardSaved(context)
                         }
                     }
                     showAddDialog = false

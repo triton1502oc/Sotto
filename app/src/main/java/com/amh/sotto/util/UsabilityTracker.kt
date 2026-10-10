@@ -427,6 +427,20 @@ object UsabilityTracker {
         )
     }
 
+    fun recordSafetyCardSaved(context: Context) {
+        val repo = SharedPreferencesVoiceSettingsRepository(context)
+        if (!repo.getVoiceSettings().shareUsabilityMetrics) return
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "SafetyCard",
+                durationMs = 0L,
+                outcome = "saved",
+                contextTag = "safety_card_saved"
+            )
+        )
+    }
+
     private fun recordEventInternal(context: Context, event: UsabilityEvent) {
         val file = getBufferFile(context)
         val currentList = readEventsFromFile(file).toMutableList()
