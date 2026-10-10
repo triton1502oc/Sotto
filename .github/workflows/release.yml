@@ -39,14 +39,14 @@ jobs:
           fi
           echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
 
-      - name: Build Release APK
+      - name: Build Release APK & App Bundle
         env:
           REQUIRE_RELEASE_SIGNING: "true"
           KEYSTORE_FILE: release.keystore
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease bundleRelease
 
       - name: Extract Release Notes from CHANGELOG
         id: extract_notes
@@ -80,7 +80,9 @@ jobs:
           name: ${{ github.ref_name }}
           body_path: ${{ steps.extract_notes.outputs.has_notes == 'true' && 'RELEASE_NOTES.md' || '' }}
           generate_release_notes: ${{ steps.extract_notes.outputs.has_notes != 'true' }}
-          files: app/build/outputs/apk/release/*.apk
+          files: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

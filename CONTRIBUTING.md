@@ -63,10 +63,11 @@ All contributors and AI agents must follow this standard checklist before releas
      ```bash
      ./gradlew lintDebug
      ```
-   - Run compilation & ProGuard/R8 verification:
+   - Run compilation & ProGuard/R8 verification (APKs & AAB bundle):
      ```bash
      ./gradlew assembleDebug
      ./gradlew assembleRelease
+     ./gradlew bundleRelease
      ```
 2. **Device Verification (MANDATORY)**:
    - Install and test the release build on a physical device or emulator before proceeding:
@@ -97,10 +98,10 @@ All contributors and AI agents must follow this standard checklist before releas
      git push origin v<version>
      ```
 6. **Automated GitHub Release (CI/CD)**:
-   - Pushing the `v<version>` tag triggers [.github/workflows/release.yml](.github/workflows/release.yml), which automatically builds the release APK, extracts release notes from [CHANGELOG.md](CHANGELOG.md), and publishes the GitHub Release with the APK attached.
+   - Pushing the `v<version>` tag triggers [.github/workflows/release.yml](.github/workflows/release.yml), which automatically builds the release APKs and Android App Bundle (`.aab`), extracts release notes from [CHANGELOG.md](CHANGELOG.md), and publishes the GitHub Release with the APKs and AAB attached.
    - *Offline / Manual Fallback*: If publishing locally via GitHub CLI:
      ```bash
-     gh release create v<version> app/build/outputs/apk/release/Sotto-v<version>.apk \
+     gh release create v<version> app/build/outputs/apk/release/*.apk app/build/outputs/bundle/release/*.aab \
        --title "v<version>" \
        --notes-file <release-notes-file>
      ```
