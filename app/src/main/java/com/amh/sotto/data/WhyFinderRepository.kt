@@ -2,6 +2,8 @@ package com.amh.sotto.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.amh.sotto.R
 import com.amh.sotto.util.WhyFinderJson
 import org.json.JSONArray
@@ -23,6 +25,41 @@ class SharedPreferencesWhyFinderRepository(
 ) : WhyFinderRepository {
 
     private val prefs: SharedPreferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+
+    private val encryptedPrefs: SharedPreferences by lazy {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                "sotto_encrypted_why_logs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (_: Exception) {
+            prefs
+        }
+    }
+
+    init {
+        migrateLogsIfNecessary()
+    }
+
+    private fun migrateLogsIfNecessary() {
+        try {
+            if (encryptedPrefs !== prefs && prefs.contains(KEY_LOGS)) {
+                val unencrypted = prefs.getString(KEY_LOGS, null)
+                if (!unencrypted.isNullOrBlank()) {
+                    if (!encryptedPrefs.contains(KEY_LOGS)) {
+                        encryptedPrefs.edit().putString(KEY_LOGS, unencrypted).apply()
+                    }
+                    prefs.edit().remove(KEY_LOGS).apply()
+                }
+            }
+        } catch (_: Exception) {}
+    }
 
     companion object {
         const val KEY_TREE = "why_tree"
@@ -191,7 +228,7 @@ class SharedPreferencesWhyFinderRepository(
     }
 
     override fun getLogs(): List<WhyLogEntry> {
-        val jsonStr = prefs.getString(KEY_LOGS, null) ?: return emptyList()
+        val jsonStr = encryptedPrefs.getString(KEY_LOGS, null) ?: return emptyList()
         return try {
             val list = WhyFinderJson.logListFromJson(JSONArray(jsonStr))
             list.sortedByDescending { it.startedAt }
@@ -221,11 +258,12 @@ class SharedPreferencesWhyFinderRepository(
     }
 
     override fun clearLogs() {
+        encryptedPrefs.edit().remove(KEY_LOGS).apply()
         prefs.edit().remove(KEY_LOGS).apply()
     }
 
     private fun saveLogsInternal(entries: List<WhyLogEntry>) {
         val array = WhyFinderJson.logListToJson(entries)
-        prefs.edit().putString(KEY_LOGS, array.toString()).apply()
+        encryptedPrefs.edit().putString(KEY_LOGS, array.toString()).apply()
     }
 }

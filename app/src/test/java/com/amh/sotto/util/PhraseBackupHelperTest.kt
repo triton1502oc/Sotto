@@ -268,4 +268,30 @@ class PhraseBackupHelperTest {
         assertEquals("log-2", merged[1].id)
         assertEquals("log-1", merged[2].id)
     }
+
+    @Test
+    fun `exportCompactPhrasesForQR produces compact parseable deck`() {
+        val compactJson = PhraseBackupHelper.exportCompactPhrasesForQR(samplePhrases, sampleCategories)
+        assertNotNull(compactJson)
+        val parsed = PhraseBackupHelper.parseBackupJson(compactJson)
+        assertEquals(4, parsed.phrases.size)
+        assertEquals("I cannot speak right now. Please read my screen.", parsed.phrases[0].text)
+        assertTrue(parsed.phrases[0].isEmergency)
+        assertEquals("Terima kasih", parsed.phrases[2].spokenText)
+    }
+
+    @Test
+    fun `parseBackupJson successfully decodes Base64 and SOTTO v1 prefix payloads`() {
+        val compactJson = PhraseBackupHelper.exportCompactPhrasesForQR(samplePhrases, sampleCategories)
+        val b64 = java.util.Base64.getEncoder().encodeToString(compactJson.toByteArray(Charsets.UTF_8))
+
+        // Test raw Base64
+        val fromB64 = PhraseBackupHelper.parseBackupJson(b64)
+        assertEquals(4, fromB64.phrases.size)
+
+        // Test SOTTO:v1: prefix (cross-platform parity with Sotto-iOS)
+        val fromPrefixed = PhraseBackupHelper.parseBackupJson("SOTTO:v1:$b64")
+        assertEquals(4, fromPrefixed.phrases.size)
+        assertEquals("I cannot speak right now. Please read my screen.", fromPrefixed.phrases[0].text)
+    }
 }

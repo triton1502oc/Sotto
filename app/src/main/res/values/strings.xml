@@ -207,6 +207,21 @@
     <string name="dialog_import_v2_log">Private Why Log: %1$d entries</string>
     <string name="dialog_import_tree_only">This backup contains a Why Finder question tree (%1$d areas).\n\nDo you want to import this question tree?</string>
     <string name="action_import_tree">Import Question Tree</string>
+    <string name="action_share_qr">Share Phrases via QR Code</string>
+    <string name="action_scan_qr">Scan QR Deck</string>
+    <string name="title_qr_code">Sotto Vocabulary Deck</string>
+    <string name="subtitle_qr_code">Scan with camera to import phrases</string>
+    <string name="title_qr_scanner">Scan Vocabulary Deck</string>
+    <string name="desc_qr_scanner">Point your camera at a Sotto QR code or paste deck data below.</string>
+    <string name="action_scan_camera">Scan with Camera</string>
+    <string name="action_paste_clipboard">Paste from Clipboard</string>
+    <string name="action_import_deck">Import Deck</string>
+    <string name="hint_paste_deck">Paste Sotto deck data here...</string>
+    <string name="err_qr_capacity">Data Exceeds QR Capacity</string>
+    <string name="desc_qr_capacity">This deck contains %1$s, which exceeds optical QR limits (~2.5 KB). Please export as a file instead.</string>
+    <string name="action_copy_deck">Copy Deck Data</string>
+    <string name="msg_copied">Copied to clipboard</string>
+    <string name="qr_scan_prompt">Scan Sotto QR Code</string>
 
     <!-- Anonymous Usability Analytics -->
     <string name="label_metrics_section">Analytics &amp; Privacy</string>

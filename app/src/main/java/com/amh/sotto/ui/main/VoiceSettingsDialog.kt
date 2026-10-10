@@ -52,6 +52,7 @@ fun VoiceSettingsDialog(
     onTestVoice: (VoiceSettings) -> Unit,
     onExportPhrases: () -> Unit = {},
     onImportPhrases: () -> Unit = {},
+    onOpenQRScanner: () -> Unit = {},
     onOpenWhyLog: () -> Unit = {},
     onOpenWhyTreeEditor: () -> Unit = {},
     onDismiss: () -> Unit
@@ -1100,6 +1101,21 @@ fun VoiceSettingsDialog(
                                         style = MaterialTheme.typography.labelMedium
                                     )
                                 }
+                            }
+
+                            OutlinedButton(
+                                onClick = onOpenQRScanner,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 44.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                            ) {
+                                Text("📷  ", fontSize = 14.sp)
+                                Text(
+                                    text = stringResource(R.string.action_scan_qr),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
                             }
                         }
 

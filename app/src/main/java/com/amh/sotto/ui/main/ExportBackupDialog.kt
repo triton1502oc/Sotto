@@ -23,6 +23,7 @@ fun ExportBackupDialog(
     areaCount: Int,
     logCount: Int,
     onConfirmExport: (exportPhrases: Boolean, exportTree: Boolean, exportLog: Boolean) -> Unit,
+    onShareQR: ((exportPhrases: Boolean, exportTree: Boolean, exportLog: Boolean) -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     var exportPhrases by rememberSaveable { mutableStateOf(true) }
@@ -128,6 +129,22 @@ fun ExportBackupDialog(
                             color = MaterialTheme.colorScheme.error,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(start = 40.dp, end = 8.dp)
+                        )
+                    }
+                }
+
+                if (onShareQR != null) {
+                    OutlinedButton(
+                        onClick = { onShareQR(exportPhrases, exportTree, exportLog) },
+                        enabled = exportPhrases,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = "📱  " + stringResource(R.string.action_share_qr),
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }

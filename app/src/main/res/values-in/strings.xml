@@ -207,6 +207,21 @@
     <string name="dialog_import_v2_log">Catatan Why: %1$d entri</string>
     <string name="dialog_import_tree_only">Berkas cadangan ini berisi pohon pertanyaan Why Finder (%1$d area).\n\nApakah Anda ingin mengimpor pohon pertanyaan ini?</string>
     <string name="action_import_tree">Impor Pohon Pertanyaan</string>
+    <string name="action_share_qr">Bagikan Frasa via Kode QR</string>
+    <string name="action_scan_qr">Pindai Dek QR</string>
+    <string name="title_qr_code">Dek Kosakata Sotto</string>
+    <string name="subtitle_qr_code">Pindai dengan kamera untuk mengimpor frasa</string>
+    <string name="title_qr_scanner">Pindai Dek Kosakata</string>
+    <string name="desc_qr_scanner">Arahkan kamera ke kode QR Sotto atau tempel data dek di bawah.</string>
+    <string name="action_scan_camera">Pindai dengan Kamera</string>
+    <string name="action_paste_clipboard">Tempel dari Papan Klip</string>
+    <string name="action_import_deck">Impor Dek</string>
+    <string name="hint_paste_deck">Tempel data dek Sotto di sini...</string>
+    <string name="err_qr_capacity">Data Melebihi Kapasitas QR</string>
+    <string name="desc_qr_capacity">Dek ini berisi %1$s, yang melebihi batas kamera QR optik (~2.5 KB). Silakan gunakan Ekspor Berkas.</string>
+    <string name="action_copy_deck">Salin Data Dek</string>
+    <string name="msg_copied">Disalin ke papan klip</string>
+    <string name="qr_scan_prompt">Pindai Kode QR Sotto</string>
 
     <!-- Anonymous Usability Analytics -->
     <string name="label_metrics_section">Analisis &amp; Privasi</string>

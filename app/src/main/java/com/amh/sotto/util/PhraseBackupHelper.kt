@@ -88,13 +88,80 @@ object PhraseBackupHelper {
     }
 
     /**
-     * Parses a JSON string containing either a structured backup object or a raw array of phrases.
+     * Generates lightweight, compact JSON optimized specifically for optical QR code scanning.
+     * Excludes bulky question trees and logs, and omits default values to keep byte count well within QR limits (<2 KB).
+     */
+    fun exportCompactPhrasesForQR(phrases: List<Phrase>, categories: List<String>): String {
+        val cleanCategories = mutableListOf<String>()
+        categories.forEach { cat ->
+            val trimmed = cat.trim()
+            if (trimmed.isNotBlank() && !trimmed.equals("ALL", ignoreCase = true) && !cleanCategories.any { it.equals(trimmed, ignoreCase = true) }) {
+                cleanCategories.add(trimmed)
+            }
+        }
+        val root = JSONObject()
+        root.put("version", CURRENT_VERSION)
+        root.put("categories", JSONArray(cleanCategories))
+
+        val phrasesArray = JSONArray()
+        phrases.forEach { phrase ->
+            val obj = JSONObject()
+            obj.put("text", phrase.text)
+            if (phrase.isEmergency) {
+                obj.put("isEmergency", true)
+            }
+            if (phrase.category != Phrase.CATEGORY_GENERAL && !phrase.isEmergency) {
+                obj.put("category", phrase.category)
+            }
+            if (phrase.language != LocaleHelper.LANG_AUTO && phrase.language.isNotBlank()) {
+                obj.put("language", phrase.language)
+            }
+            if (!phrase.spokenText.isNullOrBlank() && phrase.spokenText != LocaleHelper.LANG_AUTO) {
+                obj.put("spokenText", phrase.spokenText.trim())
+            }
+            if (!phrase.spokenLanguage.isNullOrBlank() && phrase.spokenLanguage != LocaleHelper.LANG_AUTO) {
+                obj.put("spokenLanguage", phrase.spokenLanguage.trim())
+            }
+            phrasesArray.put(obj)
+        }
+        root.put("phrases", phrasesArray)
+        return root.toString()
+    }
+
+    private fun decodeBase64(input: String): ByteArray {
+        return try {
+            android.util.Base64.decode(input, android.util.Base64.DEFAULT)
+        } catch (_: Throwable) {
+            java.util.Base64.getDecoder().decode(input)
+        }
+    }
+
+    /**
+     * Parses a JSON or Base64 string containing either a structured backup object or a raw array of phrases.
      * Throws IllegalArgumentException if the JSON is malformed or contains no valid phrases.
      */
     fun parseBackupJson(jsonString: String): BackupData {
         val trimmed = jsonString.trim()
         if (trimmed.isBlank()) {
             throw IllegalArgumentException("Backup content is empty")
+        }
+
+        val resolvedJson = if (trimmed.startsWith("SOTTO:v1:")) {
+            val b64 = trimmed.substring("SOTTO:v1:".length).trim()
+            try {
+                String(decodeBase64(b64), Charsets.UTF_8).trim()
+            } catch (_: Exception) {
+                trimmed
+            }
+        } else if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+            try {
+                val decoded = String(decodeBase64(trimmed), Charsets.UTF_8).trim()
+                if (decoded.startsWith("{") || decoded.startsWith("[")) decoded else trimmed
+            } catch (_: Exception) {
+                trimmed
+            }
+        } else {
+            trimmed
         }
 
         val categoriesList = mutableListOf<String>()
@@ -104,8 +171,8 @@ object PhraseBackupHelper {
         var whyTree: WhyTree? = null
         var whyLog: List<WhyLogEntry>? = null
 
-        if (trimmed.startsWith("{")) {
-            val root = JSONObject(trimmed)
+        if (resolvedJson.startsWith("{")) {
+            val root = JSONObject(resolvedJson)
             version = root.optInt("version", CURRENT_VERSION)
             exportedAt = root.optLong("exportedAt", System.currentTimeMillis())
 
@@ -133,8 +200,8 @@ object PhraseBackupHelper {
             if (logArray != null) {
                 whyLog = WhyFinderJson.logListFromJson(logArray)
             }
-        } else if (trimmed.startsWith("[")) {
-            val phrasesArray = JSONArray(trimmed)
+        } else if (resolvedJson.startsWith("[")) {
+            val phrasesArray = JSONArray(resolvedJson)
             parsePhrasesArray(phrasesArray, phrasesList)
         } else {
             throw IllegalArgumentException("Unrecognized backup format")

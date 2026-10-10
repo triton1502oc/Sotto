@@ -50,6 +50,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -147,6 +151,8 @@ fun SottoApp(
     val whyFinderRepository = remember { SharedPreferencesWhyFinderRepository(context) }
     var showWhyLogDialog by rememberSaveable { mutableStateOf(false) }
     var showWhyTreeEditorDialog by rememberSaveable { mutableStateOf(false) }
+    var activeQRShareString by remember { mutableStateOf<String?>(null) }
+    var showQRScannerDialog by rememberSaveable { mutableStateOf(false) }
 
     val speechHelper = remember { SpeechRecognitionHelper(context) }
 
@@ -408,7 +414,7 @@ fun SottoApp(
                                 if (isEditMode) SottoColors.ActiveGreen else MaterialTheme.colorScheme.outlineVariant
                             ),
                             modifier = Modifier
-                                .heightIn(min = 36.dp)
+                                .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                                 .padding(start = 4.dp, end = 8.dp)
                         ) {
                             Row(
@@ -468,6 +474,7 @@ fun SottoApp(
                         FilterChip(
                             selected = isSelected,
                             onClick = { selectedCategory = allCategoryKey },
+                            modifier = Modifier.sizeIn(minHeight = 48.dp),
                             label = {
                                 Text(
                                     text = stringResource(R.string.category_all),
@@ -497,6 +504,7 @@ fun SottoApp(
                                     selectedCategory = catName
                                 }
                             },
+                            modifier = Modifier.sizeIn(minHeight = 48.dp),
                             label = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
@@ -536,6 +544,7 @@ fun SottoApp(
                             FilterChip(
                                 selected = false,
                                 onClick = { showManageCategoriesDialog = true },
+                                modifier = Modifier.sizeIn(minHeight = 48.dp),
                                 leadingIcon = {
                                     Text(
                                         "↕",
@@ -560,6 +569,7 @@ fun SottoApp(
                             FilterChip(
                                 selected = false,
                                 onClick = { showAddCategoryDialog = true },
+                                modifier = Modifier.sizeIn(minHeight = 48.dp),
                                 leadingIcon = {
                                     Text(
                                         "+",
@@ -1015,44 +1025,67 @@ fun SottoApp(
                         )
                         .clip(RoundedCornerShape(16.dp))
                         
+                    val speakActionLabel = stringResource(R.string.action_speak)
+                    val fullscreenActionLabel = stringResource(R.string.cd_show_fullscreen)
+                    val cardCd = if (phrase.isEmergency) "Safety: ${phrase.text}" else phrase.text
+
+                    fun performSpeak(p: Phrase) {
+                        UsabilityTracker.recordCardTap(context, p.category, p.isEmergency, System.identityHashCode(p))
+                        if (voiceSettings.showLanguageSwitcher) {
+                            if (activeSpeechTarget == "secondary") {
+                                val hasValidSpoken = !p.spokenText.isNullOrBlank() && p.spokenText != LocaleHelper.LANG_AUTO
+                                if (hasValidSpoken) {
+                                    onSpeakText(p.spokenText, p.spokenLanguage ?: voiceSettings.secondaryLanguage)
+                                } else {
+                                    val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                                    val sourceLang = LocaleHelper.resolvePhraseLocale(p.language, p.text, effectiveLang).language
+                                    val targetLang = voiceSettings.secondaryLanguage
+                                    TranslationHelper.translate(
+                                        text = p.text,
+                                        sourceLangCode = sourceLang,
+                                        targetLangCode = targetLang,
+                                        onProgress = {},
+                                        onSuccess = { translated ->
+                                            onSpeakText(translated, targetLang)
+                                            onEditPhrase(p, p.copy(spokenText = translated, spokenLanguage = targetLang))
+                                        },
+                                        onError = {
+                                            onSpeakText(p.text, targetLang)
+                                        }
+                                    )
+                                }
+                            } else {
+                                onSpeakText(p.text, p.language)
+                            }
+                        } else {
+                            onSpeak(p)
+                        }
+                    }
+
+                    cardModifier = cardModifier.semantics {
+                        contentDescription = cardCd
+                        role = Role.Button
+                        if (!isEditMode) {
+                            customActions = listOf(
+                                CustomAccessibilityAction(label = speakActionLabel) {
+                                    performSpeak(phrase)
+                                    true
+                                },
+                                CustomAccessibilityAction(label = fullscreenActionLabel) {
+                                    expandedPhrase = phrase
+                                    true
+                                }
+                            )
+                        }
+                    }
+
                     cardModifier = if (isEditMode) {
                         cardModifier
                             .longPressDraggableHandle()
                             .clickable { phraseToEdit = phrase }
                     } else {
                         cardModifier.combinedClickable(
-                            onClick = {
-                                UsabilityTracker.recordCardTap(context, phrase.category, phrase.isEmergency, System.identityHashCode(phrase))
-                                if (voiceSettings.showLanguageSwitcher) {
-                                    if (activeSpeechTarget == "secondary") {
-                                        val hasValidSpoken = !phrase.spokenText.isNullOrBlank() && phrase.spokenText != LocaleHelper.LANG_AUTO
-                                        if (hasValidSpoken) {
-                                            onSpeakText(phrase.spokenText, phrase.spokenLanguage ?: voiceSettings.secondaryLanguage)
-                                        } else {
-                                            val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                                            val sourceLang = LocaleHelper.resolvePhraseLocale(phrase.language, phrase.text, effectiveLang).language
-                                            val targetLang = voiceSettings.secondaryLanguage
-                                            TranslationHelper.translate(
-                                                text = phrase.text,
-                                                sourceLangCode = sourceLang,
-                                                targetLangCode = targetLang,
-                                                onProgress = {},
-                                                onSuccess = { translated ->
-                                                    onSpeakText(translated, targetLang)
-                                                    onEditPhrase(phrase, phrase.copy(spokenText = translated, spokenLanguage = targetLang))
-                                                },
-                                                onError = {
-                                                    onSpeakText(phrase.text, targetLang)
-                                                }
-                                            )
-                                        }
-                                    } else {
-                                        onSpeakText(phrase.text, phrase.language)
-                                    }
-                                } else {
-                                    onSpeak(phrase)
-                                }
-                            },
+                            onClick = { performSpeak(phrase) },
                             onLongClick = { expandedPhrase = phrase }
                         )
                     }
@@ -1189,6 +1222,10 @@ fun SottoApp(
             onImportPhrases = {
                 importLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
             },
+            onOpenQRScanner = {
+                showVoiceDialog = false
+                showQRScannerDialog = true
+            },
             onOpenWhyLog = { showWhyLogDialog = true },
             onOpenWhyTreeEditor = { showWhyTreeEditorDialog = true },
             onDismiss = {
@@ -1221,6 +1258,14 @@ fun SottoApp(
                 showExportDialog = false
                 val dateStr = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
                 exportLauncher.launch("sotto_backup_$dateStr.json")
+            },
+            onShareQR = { expPhrases, _, _ ->
+                if (expPhrases) {
+                    val compactJson = PhraseBackupHelper.exportCompactPhrasesForQR(phrases, effectiveCategories)
+                    showExportDialog = false
+                    activeQRShareString = compactJson
+                    UsabilityTracker.recordActivation(context, "qr_deck_exported")
+                }
             },
             onDismiss = { showExportDialog = false }
         )
@@ -1369,6 +1414,31 @@ fun SottoApp(
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             },
             onDismiss = { pendingBackupData = null }
+        )
+    }
+
+    // QR Code Scanner Dialog
+    if (showQRScannerDialog) {
+        QRScannerDialog(
+            onScan = { scannedData ->
+                showQRScannerDialog = false
+                try {
+                    val backup = PhraseBackupHelper.parseBackupJson(scannedData)
+                    pendingBackupData = backup
+                    UsabilityTracker.recordActivation(context, "qr_deck_imported")
+                } catch (_: Exception) {
+                    Toast.makeText(context, context.getString(R.string.error_import_failed), Toast.LENGTH_SHORT).show()
+                }
+            },
+            onDismiss = { showQRScannerDialog = false }
+        )
+    }
+
+    // Offline QR Code Display Dialog
+    if (activeQRShareString != null) {
+        QRCodeDialog(
+            dataString = activeQRShareString!!,
+            onDismiss = { activeQRShareString = null }
         )
     }
 
