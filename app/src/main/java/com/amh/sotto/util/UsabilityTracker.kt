@@ -415,6 +415,7 @@ object UsabilityTracker {
             else -> "20_plus"
         }
         val safety = if (settings.showSafetyCards) 1 else 0
+        val customVoice = if (settings.voiceName != null) 1 else 0
 
         recordEvent(
             context,
@@ -422,7 +423,7 @@ object UsabilityTracker {
                 intent = "SettingsState",
                 durationMs = 0L,
                 outcome = "active",
-                contextTag = "chime=${chime};bi=${bilingual};sec=${secLang};rate=${rateBucket};cust=${customBucket};theme=${settings.appTheme};safety_cards_visible=${safety}"
+                contextTag = "chime=${chime};bi=${bilingual};sec=${secLang};rate=${rateBucket};cust=${customBucket};theme=${settings.appTheme};safety_cards_visible=${safety};custom_voice=${customVoice}"
             )
         )
     }

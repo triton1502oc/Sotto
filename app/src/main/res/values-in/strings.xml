@@ -42,6 +42,11 @@
     <string name="speed_slower">Lebih lambat</string>
     <string name="speed_normal">Normal</string>
     <string name="speed_faster">Lebih cepat</string>
+    <string name="label_voice_model">Suara</string>
+    <string name="voice_system_default">Bawaan Sistem</string>
+    <string name="title_high_quality_voices">Paket Suara Alami</string>
+    <string name="desc_high_quality_voices">Unduh suara alami di pengaturan Aksesibilitas &amp; Text-to-Speech Android.</string>
+    <string name="action_open_tts_settings">Pengaturan Suara</string>
     <string name="pitch_lower">Lebih rendah</string>
     <string name="pitch_normal">Normal</string>
     <string name="pitch_higher">Lebih tinggi</string>

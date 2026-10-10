@@ -1,6 +1,9 @@
 package com.amh.sotto.ui.conversation
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -97,6 +100,29 @@ fun TwoWayConversationDialog(
 
     var displayedText by rememberSaveable { mutableStateOf("") }
     var isFlipped by rememberSaveable { mutableStateOf(false) }
+
+    val activity = remember(context) {
+        var current: Context? = context
+        while (current is ContextWrapper) {
+            if (current is Activity) return@remember current
+            current = current.baseContext
+        }
+        null
+    }
+
+    DisposableEffect(isFlipped) {
+        val originalOrientation = activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        if (isFlipped) {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+            UsabilityTracker.recordActivation(context, "partner_mode_flip")
+        }
+        onDispose {
+            if (isFlipped) {
+                activity?.requestedOrientation = originalOrientation
+            }
+        }
+    }
+
     var lastReply by remember { mutableStateOf<String?>(null) }
     var showQuestionsSheet by rememberSaveable { mutableStateOf(false) }
     var showKeyboardInput by rememberSaveable { mutableStateOf(false) }

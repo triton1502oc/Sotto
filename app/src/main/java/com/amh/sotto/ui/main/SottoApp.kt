@@ -986,7 +986,7 @@ fun SottoApp(
             }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Adaptive(minSize = 160.dp),
                 state = lazyGridState,
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -999,7 +999,7 @@ fun SottoApp(
                 items = filteredPhrases,
                 key = { it.text },
                 span = { phrase ->
-                    if (phrase.isEmergency) GridItemSpan(2) else GridItemSpan(1)
+                    if (phrase.isEmergency) GridItemSpan(maxLineSpan) else GridItemSpan(1)
                 }
             ) { phrase ->
                 ReorderableItem(state, key = phrase.text) { isDragging ->
@@ -1179,6 +1179,7 @@ fun SottoApp(
             currentSettings = voiceSettings,
             currentLanguage = currentLanguage,
             availableLanguages = availableLanguages,
+            availableVoices = availableVoices,
             isTtsLanguageInstalled = isTtsLanguageInstalled,
             onInstallTtsVoice = onInstallTtsVoice,
             onLanguageChanged = onLanguageChanged,

@@ -42,6 +42,11 @@
     <string name="speed_slower">Slower</string>
     <string name="speed_normal">Normal</string>
     <string name="speed_faster">Faster</string>
+    <string name="label_voice_model">Voice</string>
+    <string name="voice_system_default">System Default</string>
+    <string name="title_high_quality_voices">High-Quality Voice Packs</string>
+    <string name="desc_high_quality_voices">Download natural neural speech voices in Android Accessibility &amp; Text-to-Speech settings.</string>
+    <string name="action_open_tts_settings">Voice Settings</string>
     <string name="pitch_lower">Lower</string>
     <string name="pitch_normal">Normal</string>
     <string name="pitch_higher">Higher</string>

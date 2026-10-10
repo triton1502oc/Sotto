@@ -3,6 +3,7 @@ package com.amh.sotto.ui.main
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.speech.tts.Voice
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -42,6 +44,7 @@ fun VoiceSettingsDialog(
     currentSettings: VoiceSettings,
     currentLanguage: String,
     availableLanguages: List<Pair<String, String>> = remember { LocaleHelper.getAvailableLanguages() },
+    availableVoices: List<Voice> = emptyList(),
     isTtsLanguageInstalled: (String) -> Boolean = { true },
     onInstallTtsVoice: () -> Unit = {},
     onLanguageChanged: (String) -> Unit,
@@ -56,6 +59,7 @@ fun VoiceSettingsDialog(
     val context = LocalContext.current
     var rate by remember { mutableFloatStateOf(currentSettings.speechRate) }
     var pitch by remember { mutableFloatStateOf(currentSettings.speechPitch) }
+    var voiceName by remember { mutableStateOf(currentSettings.voiceName) }
     var attentionChime by remember { mutableStateOf(currentSettings.playAttentionChime) }
     var showLangSwitcher by remember { mutableStateOf(currentSettings.showLanguageSwitcher) }
     var secondaryLang by remember { mutableStateOf(currentSettings.secondaryLanguage) }
@@ -65,6 +69,7 @@ fun VoiceSettingsDialog(
     var showSafetyCards by remember { mutableStateOf(currentSettings.showSafetyCards) }
     var secondaryLangDropdownExpanded by remember { mutableStateOf(false) }
     var langDropdownExpanded by remember { mutableStateOf(false) }
+    var voiceDropdownExpanded by remember { mutableStateOf(false) }
     var langSearchQuery by remember { mutableStateOf("") }
 
     val systemDefaultLabel = stringResource(R.string.system_default)
@@ -72,6 +77,7 @@ fun VoiceSettingsDialog(
     fun updateSettings(
         newRate: Float = rate,
         newPitch: Float = pitch,
+        newVoiceName: String? = voiceName,
         newChime: Boolean = attentionChime,
         newShowLangSwitcher: Boolean = showLangSwitcher,
         newSecondaryLang: String = secondaryLang,
@@ -82,6 +88,7 @@ fun VoiceSettingsDialog(
     ) {
         rate = newRate
         pitch = newPitch
+        voiceName = newVoiceName
         attentionChime = newChime
         showLangSwitcher = newShowLangSwitcher
         secondaryLang = newSecondaryLang
@@ -93,7 +100,7 @@ fun VoiceSettingsDialog(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
                 speechPitch = ((newPitch * 10).roundToInt() / 10f),
-                voiceName = null,
+                voiceName = newVoiceName,
                 playAttentionChime = newChime,
                 showLanguageSwitcher = newShowLangSwitcher,
                 secondaryLanguage = newSecondaryLang,
@@ -121,6 +128,50 @@ fun VoiceSettingsDialog(
             availableLanguages.filter { (code, label) ->
                 code == LocaleHelper.LANG_SYSTEM || label.contains(langSearchQuery, ignoreCase = true)
             }
+        }
+    }
+
+    val defaultVoiceLabel = stringResource(R.string.voice_system_default)
+
+    val effectiveLocale = remember(currentLanguage) {
+        LocaleHelper.getLocaleForLanguage(currentLanguage)
+    }
+
+    val matchingVoices = remember(availableVoices, effectiveLocale) {
+        availableVoices.filter { voice ->
+            !voice.isNetworkConnectionRequired &&
+            (voice.locale.language.equals(effectiveLocale.language, ignoreCase = true) ||
+             (effectiveLocale.language == "id" && voice.locale.language.equals("in", ignoreCase = true)) ||
+             (effectiveLocale.language == "in" && voice.locale.language.equals("id", ignoreCase = true)))
+        }.sortedWith(
+            compareByDescending<Voice> { it.quality }
+                .thenBy { it.locale.displayCountry }
+                .thenBy { it.name }
+        )
+    }
+
+    fun formatVoiceName(voice: Voice): String {
+        val naturalTag = when (voice.quality) {
+            Voice.QUALITY_VERY_HIGH, Voice.QUALITY_HIGH -> " (Natural)"
+            else -> ""
+        }
+        val country = if (voice.locale.displayCountry.isNotBlank()) " - ${voice.locale.displayCountry}" else ""
+        val cleanName = voice.name
+            .replace(Regex("^[a-z]{2,3}[-_][A-Za-z]{2,4}[-_]x-"), "")
+            .replace(Regex("[-_]local$"), "")
+            .replace(Regex("[-_]network$"), "")
+            .replace("#", " ")
+            .replace("-", " ")
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+        return "$cleanName$country$naturalTag"
+    }
+
+    val selectedVoiceLabel = remember(voiceName, matchingVoices, defaultVoiceLabel) {
+        if (voiceName == null) {
+            defaultVoiceLabel
+        } else {
+            matchingVoices.firstOrNull { it.name == voiceName }?.let { formatVoiceName(it) }
+                ?: voiceName ?: defaultVoiceLabel
         }
     }
 
@@ -289,6 +340,143 @@ fun VoiceSettingsDialog(
                                 }
                             }
 
+                            // Voice Selection Dropdown (if matching voices available)
+                            if (matchingVoices.isNotEmpty()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.label_voice_model),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+                                        Surface(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .clickable { voiceDropdownExpanded = true },
+                                            color = MaterialTheme.colorScheme.surface,
+                                            shape = RoundedCornerShape(10.dp),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = selectedVoiceLabel,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    modifier = Modifier.weight(1f, fill = false)
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "▼",
+                                                    fontSize = 11.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+
+                                        DropdownMenu(
+                                            expanded = voiceDropdownExpanded,
+                                            onDismissRequest = { voiceDropdownExpanded = false },
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.85f)
+                                                .heightIn(max = 300.dp)
+                                                .background(MaterialTheme.colorScheme.surface)
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        defaultVoiceLabel,
+                                                        fontWeight = if (voiceName == null) FontWeight.Bold else FontWeight.Normal,
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                },
+                                                onClick = {
+                                                    updateSettings(newVoiceName = null)
+                                                    voiceDropdownExpanded = false
+                                                }
+                                            )
+                                            matchingVoices.forEach { voice ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            formatVoiceName(voice),
+                                                            fontWeight = if (voiceName == voice.name) FontWeight.Bold else FontWeight.Normal,
+                                                            color = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                        updateSettings(newVoiceName = voice.name)
+                                                        voiceDropdownExpanded = false
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // High-Quality Voice Pack Guide Card
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.title_high_quality_voices),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        TextButton(
+                                            onClick = {
+                                                try {
+                                                    val intent = Intent("com.android.settings.TTS_SETTINGS")
+                                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                    context.startActivity(intent)
+                                                } catch (_: Exception) {
+                                                    try {
+                                                        val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                        context.startActivity(intent)
+                                                    } catch (_: Exception) {}
+                                                }
+                                            },
+                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.action_open_tts_settings),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = stringResource(R.string.desc_high_quality_voices),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
                             // Speech Rate (Speed)
                             Column {
                                 val rateText = when {
@@ -420,7 +608,7 @@ fun VoiceSettingsDialog(
                                         VoiceSettings(
                                             speechRate = ((rate * 10).roundToInt() / 10f),
                                             speechPitch = ((pitch * 10).roundToInt() / 10f),
-                                            voiceName = null,
+                                            voiceName = voiceName,
                                             playAttentionChime = attentionChime,
                                             showLanguageSwitcher = showLangSwitcher,
                                             secondaryLanguage = secondaryLang,
