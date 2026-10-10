@@ -9,7 +9,8 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 
 | Video | Format | Primary Lang | Audio / Voice | Specs | File |
 |---|---|---|---|---|---|
-| **Google Play Preview (Master)** | 16:9 Landscape | `en-US` | Neural Baritone Christopher + Andrew + Ambient Bed + Chime | 1920×1080 @ 30fps, ~56s | [`sotto_google_play_preview.mp4`](sotto_google_play_preview.mp4) |
+| **Google Play Preview (Master)** | 16:9 Landscape | `en-US` | Neural Baritone Christopher + Andrew + Ambient Bed + Chime | 1920×1080 @ 30fps, 60s | [`sotto_google_play_preview.mp4`](sotto_google_play_preview.mp4) |
+| **Shorts / Reels / TikTok (Vertical)** | 9:16 Portrait | `en-US` | Neural Baritone Christopher + Andrew + Ambient Bed + Chime | 1080×1920 @ 30fps, 60s | [`sotto_vertical_preview.mp4`](sotto_vertical_preview.mp4) |
 | **English Device Demo** | 9:20 Portrait | `en-US` | Samantha | 720×1600 @ 30fps, ~54s | [`sotto_demo_en.mp4`](sotto_demo_en.mp4) |
 
 *Link: [YouTube Demo](https://youtu.be/Kd9qPu3F-Gg) ([Watch](https://www.youtube.com/watch?v=Kd9qPu3F-Gg))*
@@ -35,15 +36,18 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 
 ### Commands
 ```bash
-# Render Google Play Store Preview Video (16:9 1080p Motion Graphics)
+# 1. Build Master Neural Baritone Soundtrack (60s)
 pip install edge-tts                        # neural narration (internet needed at build time only)
 python3 scripts/build_play_soundtrack.py    # -> demo/sotto_google_play_soundtrack.wav
-python3 scripts/render_google_play_video.py
 
-# Record English Device Demo
+# 2. Render Google Play Store Preview Video (16:9 Landscape 1080p)
+python3 scripts/render_google_play_video.py # -> demo/sotto_google_play_preview.mp4
+
+# 3. Render Shorts / Reels / TikTok Video (9:16 Portrait 1080x1920)
+python3 scripts/render_vertical_short.py   # -> demo/sotto_vertical_preview.mp4
+
+# 4. Record Device Demos (Emulator or Physical Device)
 ./scripts/record_demo_en.sh
-
-# Record Indonesian Device Demo
 ./scripts/record_demo_id.sh
 ```
 
