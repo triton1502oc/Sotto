@@ -15,7 +15,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/youtube"
 ]
 
-OLD_EN_ID = "UKZu5ZsdORg"
+OLD_EN_ID = "Kd9qPu3F-Gg"
 OLD_ID_ID = "4CvpJkjaz-k"
 
 REPO_FILES = [

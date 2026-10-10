@@ -8,8 +8,7 @@
 
 <p align="center">
   🎬 <b>Video Demo:</b> 
-  <a href="https://www.youtube.com/watch?v=UKZu5ZsdORg">English</a> • 
-  <a href="https://www.youtube.com/watch?v=4CvpJkjaz-k">Indonesian</a>
+  <a href="https://youtu.be/Kd9qPu3F-Gg">YouTube</a>
 </p>
 
 ---

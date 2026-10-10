@@ -1,7 +1,7 @@
 # Sotto Demo Videos
 
 ### TL;DR
-High-definition demo videos and reproduction scripts showcasing Sotto's flagship assistive communication features—including **Two-Way Caregiver Receptive Mode** (180° face-to-face screen flip and rapid responses), **Dual-Language Speech** (`[ EN | ID ]` switching & bilingual emergency buttons), **Two-Tier Quick-Speak Bar**, **Safety Bystander Hero Card**, and the **Two-Tone Attention Chime**—in both English and Indonesian.
+High-definition demo videos and reproduction scripts showcasing Sotto's flagship assistive communication features—including **Two-Way Caregiver Receptive Mode** (180° face-to-face screen flip and rapid responses), **Two-Tier Quick-Speak Bar**, **Safety Bystander Card**, **Sensory Color Themes**, and the **Two-Tone Attention Chime**.
 
 ---
 
@@ -11,9 +11,8 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 |---|---|---|---|---|---|
 | **Google Play Preview (Master)** | 16:9 Landscape | `en-US` | Neural Baritone Christopher + Andrew + Ambient Bed + Chime | 1920×1080 @ 30fps, ~56s | [`sotto_google_play_preview.mp4`](sotto_google_play_preview.mp4) |
 | **English Device Demo** | 9:20 Portrait | `en-US` | Samantha | 720×1600 @ 30fps, ~54s | [`sotto_demo_en.mp4`](sotto_demo_en.mp4) |
-| **Indonesian Device Demo** | 9:20 Portrait | `id-ID` | Damayanti | 720×1600 @ 30fps, ~54s | [`sotto_demo_id.mp4`](sotto_demo_id.mp4) |
 
-*Links: English [YouTube](https://www.youtube.com/watch?v=UKZu5ZsdORg) ([Shorts](https://youtube.com/shorts/UKZu5ZsdORg)) • Indonesian [YouTube](https://www.youtube.com/watch?v=4CvpJkjaz-k) ([Shorts](https://youtube.com/shorts/4CvpJkjaz-k))*
+*Link: [YouTube Demo](https://youtu.be/Kd9qPu3F-Gg) ([Watch](https://www.youtube.com/watch?v=Kd9qPu3F-Gg))*
 
 ---
 

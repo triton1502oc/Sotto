@@ -12,8 +12,7 @@ Ready-to-use metadata, descriptions, graphics specifications, and policy questio
 * **Short Description:**  
   `Calm yes/no tool for caregivers to reach autistic teens & adults in meltdowns.` *(78 / 80 characters)*
 * **Preview Video (YouTube URL):**
-  - **Default / English:** `https://www.youtube.com/watch?v=UKZu5ZsdORg`
-  - **Indonesian (`id-ID`):** `https://www.youtube.com/watch?v=4CvpJkjaz-k`  
+  - **English:** `https://www.youtube.com/watch?v=Kd9qPu3F-Gg`  
   *(Note: Enter the standard `https://www.youtube.com/watch?v=...` format; Play Console may reject `/shorts/` URLs).*
 
 ### Full Description *(Markdown & Plain Text compliant, ~2,800 / 4,000 characters)*
@@ -69,7 +68,7 @@ Zero accounts. Zero ads. Zero cloud speech recording. Your phrases and private l
 | **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | ✅ Ready: [`play_store_icon_512.png`](../assets/play_store_icon_512.png) |
 | **Feature Graphic** | 1024 x 500 px | 24-bit PNG / JPEG | ✅ Ready: [`play_store_feature_graphic.png`](../assets/play_store_feature_graphic.png) |
 | **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 5 Ready: [`screenshot.png`](../assets/screenshot.png) (Main phrase view), [`screenshot_fullscreen.png`](../assets/screenshot_fullscreen.png) (Emergency Bystander & Fullscreen Mode), [`screenshot_partner_mode.png`](../assets/screenshot_partner_mode.png) (Partner Mode & Guided Crisis Navigation), [`screenshot_edit_phrase.png`](../assets/screenshot_edit_phrase.png) (Phrase Customization & Translation), [`screenshot_voice_settings.png`](../assets/screenshot_voice_settings.png) (Voice & Language Settings) |
-| **Preview Video** | YouTube URL | YouTube link (`watch?v=`) | ✅ Ready: [English](https://www.youtube.com/watch?v=UKZu5ZsdORg) / [Indonesian](https://www.youtube.com/watch?v=4CvpJkjaz-k) |
+| **Preview Video** | YouTube URL | YouTube link (`watch?v=`) | ✅ Ready: [English](https://www.youtube.com/watch?v=Kd9qPu3F-Gg) |
 
 ### Rebuilding Graphic Assets
 To automatically regenerate and format all visual assets (`screenshot.png`, `screenshot_fullscreen.png`, `screenshot_partner_mode.png`, `screenshot_edit_phrase.png`, `screenshot_voice_settings.png`, and `play_store_feature_graphic.png`) from the latest app build:
