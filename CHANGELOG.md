@@ -16,6 +16,9 @@ All notable changes to the Sotto project will be documented in this file. The fo
 - **Dignified Medical Terminology Scrub**: Completely scrubbed clinical and medical terminology (`triage`, `diagnostic`, `treatment`, `de-escalation`) across user-facing documentation and UI strings, replacing them with dignified, assistive terminology (`crisis navigation`, `binary check-in`, `root cause discovery`, `calm communication`) while upholding Google Play medical disclaimer compliance ([#40](https://github.com/triton1502oc/Sotto/issues/40)).
 - **Aligned Secondary Crisis Actions**: High-contrast secondary response cards (`Wait` / `Repeat` in Talk Mode vs `Not sure` / `Stop` in Guided Mode) with guaranteed accessibility semantics.
 
+### Fixed
+- **Compact Screen Adaptive Grid Layout**: Fixed phrase cards collapsing to a single column (1 per row) on compact screens ($\le 360\text{dp}$) and high-scaling display modes by reducing adaptive grid minimum size from 160dp to 140dp, maintaining a comfortable 2-column layout ([#41](https://github.com/triton1502oc/Sotto/issues/41)).
+
 ### Assets
 - `Sotto-v1.7.0.apk`: Universal release APK for all architectures.
 - `Sotto-v1.7.0-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.

@@ -958,7 +958,7 @@ fun SottoApp(
                 .padding(padding)
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 160.dp),
+                columns = GridCells.Adaptive(minSize = 140.dp),
                 state = lazyGridState,
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
