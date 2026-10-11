@@ -458,9 +458,7 @@ fun SottoApp(
                 )
 
                 // Category Filter Chips
-                val mainBarCategories = remember(effectiveCategories) {
-                    effectiveCategories.filter { !it.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true) }
-                }
+                val mainBarCategories = effectiveCategories
 
                 LazyRow(
                     modifier = Modifier
@@ -492,6 +490,7 @@ fun SottoApp(
 
                     items(mainBarCategories) { catName ->
                         val isSelected = selectedCategory == catName
+                        val isEmergency = catName.equals(Phrase.CATEGORY_EMERGENCY, ignoreCase = true)
                         val isProtectedFromDelete = Phrase.isUndeletableCategory(catName)
                         val isProtectedFromRename = Phrase.isUnrenamableCategory(catName)
 
@@ -505,6 +504,14 @@ fun SottoApp(
                                 }
                             },
                             modifier = Modifier.sizeIn(minHeight = 48.dp),
+                            leadingIcon = if (isEmergency) {
+                                {
+                                    Text(
+                                        text = "🛡️",
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            } else null,
                             label = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
@@ -531,11 +538,14 @@ fun SottoApp(
                                 }
                             } else null,
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                selectedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                selectedContainerColor = if (isEmergency) SottoColors.EmergencyChipBackground else MaterialTheme.colorScheme.surfaceVariant,
+                                selectedLabelColor = if (isEmergency) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurface,
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
+                            ),
+                            border = if (isEmergency && isSelected) {
+                                BorderStroke(1.dp, SottoColors.EmergencyAccent)
+                            } else null
                         )
                     }
 
@@ -932,69 +942,11 @@ fun SottoApp(
             }
         }
     ) { padding ->
-        val showPersistentSafetyBanner = voiceSettings.showSafetyCards &&
-            selectedCategory != allCategoryKey &&
-            selectedCategory != Phrase.CATEGORY_EMERGENCY
-        val persistentEmergencyPhrase = remember(phrases) {
-            phrases.firstOrNull { it.isEmergency }
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (showPersistentSafetyBanner && persistentEmergencyPhrase != null) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
-                        .clickable {
-                            if (isEditMode) {
-                                phraseToEdit = persistentEmergencyPhrase
-                            } else {
-                                val hasValidSpoken = voiceSettings.showLanguageSwitcher &&
-                                    !persistentEmergencyPhrase.spokenText.isNullOrBlank() &&
-                                    persistentEmergencyPhrase.spokenText != LocaleHelper.LANG_AUTO
-                                if (hasValidSpoken) {
-                                    onSpeakText(
-                                        persistentEmergencyPhrase.spokenText,
-                                        persistentEmergencyPhrase.spokenLanguage ?: voiceSettings.secondaryLanguage
-                                    )
-                                } else {
-                                    onSpeak(persistentEmergencyPhrase)
-                                }
-                            }
-                        },
-                    color = SottoColors.EmergencyCardBackground,
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, SottoColors.EmergencyAccent.copy(alpha = 0.8f))
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text("🛡️", fontSize = 16.sp)
-                        Text(
-                            text = persistentEmergencyPhrase.text,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = SottoColors.EmergencyText,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "🔊",
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-            }
-
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 160.dp),
                 state = lazyGridState,
@@ -1112,17 +1064,50 @@ fun SottoApp(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Surface(
-                                    color = SottoColors.EmergencyTranslucent,
-                                    shape = RoundedCornerShape(6.dp)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = "🛡️ " + stringResource(R.string.emergency_badge),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = SottoColors.EmergencyAccent,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .background(
+                                                color = SottoColors.EmergencyTranslucent,
+                                                shape = RoundedCornerShape(6.dp)
+                                            )
+                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "🛡️ " + stringResource(R.string.emergency_badge),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = SottoColors.EmergencyAccent
+                                        )
+                                    }
+                                    if (!isEditMode) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            IconButton(
+                                                onClick = { expandedPhrase = phrase },
+                                                modifier = Modifier.size(40.dp)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_fullscreen),
+                                                    contentDescription = stringResource(R.string.cd_show_fullscreen),
+                                                    tint = SottoColors.EmergencyAccent,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { performSpeak(phrase) },
+                                                modifier = Modifier.size(40.dp)
+                                            ) {
+                                                Text("🔊", fontSize = 16.sp)
+                                            }
+                                        }
+                                    }
                                 }
                                 Text(
                                     text = phrase.text,
@@ -1427,7 +1412,7 @@ fun SottoApp(
                     pendingBackupData = backup
                     UsabilityTracker.recordActivation(context, "qr_deck_imported")
                 } catch (_: Exception) {
-                    Toast.makeText(context, context.getString(R.string.error_import_failed), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.error_import_failed, Toast.LENGTH_SHORT).show()
                 }
             },
             onDismiss = { showQRScannerDialog = false }
@@ -1713,7 +1698,7 @@ fun SottoApp(
         var selectedCat by remember(phraseToEdit, showAddDialog) {
             mutableStateOf(
                 if (phraseToEdit?.isEmergency == true) Phrase.CATEGORY_EMERGENCY
-                else (phraseToEdit?.category ?: if (selectedCategory != allCategoryKey && selectedCategory != Phrase.CATEGORY_EMERGENCY) selectedCategory else Phrase.CATEGORY_GENERAL)
+                else (phraseToEdit?.category ?: if (selectedCategory != allCategoryKey) selectedCategory else Phrase.CATEGORY_GENERAL)
             )
         }
         val isEditModeDialog = phraseToEdit != null

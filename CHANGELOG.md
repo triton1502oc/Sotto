@@ -3,6 +3,36 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.6.2] - 2026-10-11
+
+### Added
+- **Instant Vocabulary Sharing via Offline QR Code Deck Generator & Camera Scanner**: Transfer vocabulary decks and categories between devices completely offline without cloud accounts or file management. Encodes compact payloads (`SOTTO:v1:...`) compatible with Sotto-iOS, paired with an integrated in-app optical scanner powered by ZXing ([#30](https://github.com/triton1502oc/Sotto/issues/30)).
+- **Encrypted Why Finder Crisis Logs**: Private meltdown and verbal shutdown resolution logs are now encrypted at rest using AndroidX Security `EncryptedSharedPreferences` (AES256-GCM values, AES256-SIV keys). Includes seamless on-launch migration from legacy unencrypted logs ([#35](https://github.com/triton1502oc/Sotto/issues/35)).
+- **Intelligent TTS Voice Picker & Voice Pack Guide**: Dedicated voice selection dropdown in Voice & Language Settings filtered exclusively for local, offline voices. Includes system settings shortcut (`Intent("com.android.settings.TTS_SETTINGS")`) and guidance for installing free neural voice packs ([#32](https://github.com/triton1502oc/Sotto/issues/32)).
+- **Natural Digit-by-Digit Speech Pronunciation**: Automatic detection of 5+ digit sequences (phone numbers, safety contact cards) formatted with pauses and individual digit enunciation so Android TTS engines speak contact numbers intelligibly rather than reciting colossal numbers ([#29](https://github.com/triton1502oc/Sotto/issues/29)).
+- **Safety Category Navigation & 1-Tap Hero Card Actions**: Restored `🛡️ Safety` as a first-class, pinned filter chip in the category bar with distinct amber accent styling, allowing users to directly filter, view, and organize all safety cards. Added dedicated `⛶ Fullscreen` (bystander display) and `🔊 Speak` buttons directly to the Safety card header for instant accessibility without motor fatigue or reliance on long-press gestures. Subcategories now enjoy clean, full-height phrase grids without intrusive single-phrase banners ([#39](https://github.com/triton1502oc/Sotto/issues/39)).
+- **Inline Speech Dictation & 100% Offline Speech Recognition**: Hands-free question dictation in Two-Way Partner Mode with automatic silence detection (1.8s) and lifecycle-safe audio management, enforcing strictly on-device offline recognition via `createOnDeviceSpeechRecognizer` ([#34](https://github.com/triton1502oc/Sotto/issues/34), [#36](https://github.com/triton1502oc/Sotto/issues/36)).
+- **Responsive Adaptive Grid for Tablets & Foldables**: Responsive phrase layout using `GridCells.Adaptive(minSize = 140.dp)` that dynamically scales between 2 and 5 columns depending on screen width and device orientation ([#37](https://github.com/triton1502oc/Sotto/issues/37)).
+- **TalkBack Custom Actions & 48dp Minimum Touch Targets**: Full accessibility overhaul with TalkBack actions, explicit semantic labels, and guaranteed 48dp touch targets on navigation controls and tool buttons ([#38](https://github.com/triton1502oc/Sotto/issues/38)).
+- **Social Marketing Reel & Script**: Added vertical 9:16 demo preview (`demo/sotto_vertical_preview.mp4`) and automated video generation script (`scripts/render_vertical_short.py`).
+
+### Changed
+- **Partner Mode Face-to-Face Orientation Lock**: Automatically locks device orientation (`SCREEN_ORIENTATION_LOCKED`) when entering 180° face-to-face partner flip mode to prevent accidental rotation, safely restoring original orientation on dismiss ([#33](https://github.com/triton1502oc/Sotto/issues/33)).
+- **Automated AAB Bundle Builds in CI**: GitHub Actions release workflow now automatically packages and attaches the Google Play Android App Bundle (`app-release.aab`) alongside universal and ABI-specific APKs.
+
+### Fixed
+- **Partner Mode Talk Card Playback**: Fixed prompt card tap action in Talk mode (`CaregiverTab.FREEFORM`) erroneously reciting the first question from the Guided Why Finder tree instead of the active receptive text.
+- **Context-Aware Safety Card Creation**: Fixed Add/Edit phrase dialog defaulting to `General` when adding cards while viewing the Safety category, ensuring newly saved phrases inherit `isEmergency` and `Safety` automatically ([#39](https://github.com/triton1502oc/Sotto/issues/39)).
+- **Safety Card Fullscreen Touch Accessibility**: Eliminated nested `Surface` touch interception on grid safety cards so they expand to giant fullscreen text cleanly like all standard phrase cards.
+- **Compose LocalContext Resource Lint Error**: Replaced indirect `context.getString()` in Compose Toast invocation with direct string resource identifier in `SottoApp.kt`.
+
+### Assets
+- `Sotto-v1.6.2.apk`: Universal release APK for all architectures.
+- `Sotto-v1.6.2-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.6.2-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.6.2-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.6.1] - 2026-10-09
 
 ### Added

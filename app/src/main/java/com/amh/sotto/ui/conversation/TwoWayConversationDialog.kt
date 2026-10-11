@@ -292,7 +292,12 @@ fun TwoWayConversationDialog(
                                     whySessionSaved = false
                                 },
                                 onFinish = onDismiss,
-                                onReadAloudPrompt = { onSpeakResponse(whyPromptText) },
+                                onReadAloudPrompt = {
+                                    val promptToSpeak = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
+                                    if (promptToSpeak.isNotBlank()) {
+                                        onSpeakResponse(promptToSpeak)
+                                    }
+                                },
                                 modifier = Modifier.weight(1f)
                             )
 
@@ -403,7 +408,12 @@ fun TwoWayConversationDialog(
                             whySessionSaved = false
                         },
                         onFinish = onDismiss,
-                        onReadAloudPrompt = { onSpeakResponse(whyPromptText) },
+                        onReadAloudPrompt = {
+                            val promptToSpeak = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
+                            if (promptToSpeak.isNotBlank()) {
+                                onSpeakResponse(promptToSpeak)
+                            }
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .padding(bottom = 8.dp)
