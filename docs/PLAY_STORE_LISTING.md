@@ -8,55 +8,49 @@ Ready-to-use metadata, descriptions, graphics specifications, and policy questio
 ## 1. Store Listing Metadata
 
 ### App Details
-* **App Name:** `Sotto` *(5 / 30 characters)*
+* **App Name:** `Sotto: Calm Meltdown Yes/No` *(27 / 30 characters; Google Play console title limit is 30 characters)*  
 * **Short Description:**  
-  `Calm yes/no tool for caregivers to reach autistic teens & adults in meltdowns.` *(78 / 80 characters)*
-* **Preview Video (YouTube URL):**
+  `He uses cards for complex info. During meltdown I operate, he taps Yes/No.` *(74 / 80 characters)*  
+* **Preview Video (YouTube URL):**  
   - **English:** `https://www.youtube.com/watch?v=Kd9qPu3F-Gg`  
   *(Note: Enter the standard `https://www.youtube.com/watch?v=...` format; Play Console may reject `/shorts/` URLs).*
 
-### Full Description *(Markdown & Plain Text compliant, ~2,800 / 4,000 characters)*
+### Full Description *(Plain Text & Markdown compliant)*
 ```text
-Sotto is a calm yes/no crisis navigation tool for caregivers, parents, and therapists to connect with autistic teens and adults during sensory overload, meltdowns, and verbal shutdowns — paired with a dignified, low-stimulation AAC speech board for daily self-expression and unclear speech support.
+When speech is hard, tap instead.
 
-Created by a father of two autistic sons (ages 22 and 15), Sotto is built around a simple reality: during a meltdown or verbal shutdown, processing complex questions or speaking is exhausting. Sotto bridges this divide with gentle binary choices, speech clarity support, and zero open-ended demands.
+Built by a father in Singapore for his two autistic sons (22 & 15) who can speak but not always. During meltdown, operating a phone is too hard. So I operate Sotto on MY phone, they tap Yes/No/Wait to pinpoint the problem — issue resolved.
 
-FOR CAREGIVERS, FAMILIES & THERAPISTS:
+We use Sotto in two modes:
 
-• Two-Way Speak HUD & 180° Tabletop Flip (Immediate Emergency Triage)
-During acute sensory overload or verbal shutdowns, processing complex questions or branching trees worsens distress. Caregivers can speak naturally or pick an urgent prompt, flip the phone 180° face-to-face on a table, and let their loved one tap giant, dignified response targets (Yes, No, Not sure, Stop) with instant voice confirmation. Zero cognitive load.
+MODE 1 - DAILY (He holds his phone):
+For complex information, noisy places, or new people. He opens Sotto himself and taps cards — Needs, Social, Care, General — or types in Quick-Speak Bar. One-tap speech, long-press for giant fullscreen text readable without speaking.
 
-• Why Finder (Guided Root-Cause Discovery Tree)
-When the source of distress is unknown, Why Finder provides a gentle, step-by-step yes/no branching tree to systematically uncover hidden physical pain (with body part & intensity locator), sensory overload, emotional fatigue, or routine disruption without open-ended interrogation.
+MODE 2 - MELTDOWN (You hold YOUR phone):
+This is what stops meltdowns at home. You open Sotto on YOUR phone, tap partner mode, tap Flip 🔄 to show giant text to him, and he taps Yes / No / Wait / Repeat. No branching, no tree to navigate. That tap IS his voice right now.
 
-• Private On-Device Why Log & Pattern Trends
-Resolved crisis sessions are automatically logged 100% locally on your device. Review 30-day patterns to identify frequent environmental triggers, recurring peak hours, and actionable interventions. Never shared or uploaded to the cloud.
+Why this works:
+• Direct Yes/No Pinpoint Cards: Huge 80dp+ buttons with haptics for shaky hands
+• Safety Bystander Card: High-contrast amber hero for non-verbal episodes
+• Two-Way Partner Mode: Talk HUD with dictation, preset direct questions, Read Aloud 🔊, 180° Flip 🔄
+• Quick-Speak Bar: Spontaneous speech, fullscreen, dictation 🎤, 1-tap save
+• Low-Stimulus UI: Dark-neutral Material 3, high contrast, zero cartoons
+• Zero-Distraction Mode: No admin clutter during communication
+• Dual-Language Offline: Display English, speak Indonesian/Malay/etc via ML Kit — 100% offline
+• Private Pattern Log: After resolution, optional one-tap log Pain/Noise/Task/Emotion to find 30-day patterns locally
+• QR Deck Sharing: Share phrase decks offline via QR SOTTO:v1:... between Android & iOS — zero cloud
+• Backup v2: Selective export phrases, Why tree, Why log
 
-• Customizable Why Tree & Safe Sharing
-Adapt questions and areas to your loved one's specific triggers using voice dictation and reordering. Easily export and share customized trees with teachers or speech therapists while keeping private crisis logs strictly excluded.
+100% offline core. Zero accounts, ads, trackers. Optional anonymous timing opt-in (zero text/speech ever collected). Open source.
 
-FOR NON-SPEAKING & UNCLEAR VOICES (DIGNIFIED SELF-EXPRESSION):
+Sotto is not a medical device and does not provide medical advice, diagnosis, or treatment. It is an assistive communication tool.
 
-• Mature, Dignified Voice for Unclear or Fatigued Speech
-Whether completely non-verbal, navigating an autistic shutdown, or speaking with quiet, slurred, or dysarthric speech that listeners struggle to understand, Sotto provides a crisp, adult text-to-speech voice and high-contrast cards—free of childish cartoons and patronizing symbols.
+github.com/triton1502oc/Sotto | iOS version available
+```
 
-• Safety & Bystander Hero Card
-A prominent high-contrast banner for non-verbal episodes, local contacts, or medical personnel. Show fullscreen directly to bystanders or first responders.
-
-• Quick-Speak Bar & Voice Dictation
-Type spontaneous thoughts with auto-expanding multi-line text, one-tap speech, voice dictation, and one-touch card creation.
-
-• High-Visibility Giant Fullscreen
-Display any phrase across the entire display in giant text to silently communicate in loud or crowded environments.
-
-• Contextual Categories & Custom Boards
-Filter phrases by situation (Safety, Needs, Social, Care, General) or create custom categories.
-
-• Dual-Language Speech & On-Device Auto-Translate
-Display cards in one language while speaking in another (e.g. English text read aloud in Indonesian) using 100% offline on-device translation.
-
-• 100% Offline Core & Privacy Guarantee
-Zero accounts. Zero ads. Zero cloud speech recording. Your phrases and private logs never leave your phone. Optional, strictly opt-in anonymous usability timing to help diagnose accessibility friction (zero text or speech collected).
+### What's New
+```text
+First production release — built from real family use. Direct Yes/No crisis cards now primary: You hold your phone during meltdown, he taps Yes/No/Wait to pinpoint and resolve. Why Finder moved to post-crisis explorer. Added QR offline sharing between Android & iOS.
 ```
 
 ---
@@ -67,8 +61,18 @@ Zero accounts. Zero ads. Zero cloud speech recording. Your phrases and private l
 |---|---|---|---|
 | **App Icon** | 512 x 512 px | 32-bit PNG (with alpha) | ✅ Ready: [`play_store_icon_512.png`](../assets/play_store_icon_512.png) |
 | **Feature Graphic** | 1024 x 500 px | 24-bit PNG / JPEG | ✅ Ready: [`play_store_feature_graphic.png`](../assets/play_store_feature_graphic.png) |
-| **Phone Screenshots** | Min 2 screenshots | JPEG or 24-bit PNG | ✅ 5 Ready: [`screenshot.png`](../assets/screenshot.png) (Main phrase view), [`screenshot_fullscreen.png`](../assets/screenshot_fullscreen.png) (Emergency Bystander & Fullscreen Mode), [`screenshot_partner_mode.png`](../assets/screenshot_partner_mode.png) (Partner Mode & Guided Crisis Navigation), [`screenshot_edit_phrase.png`](../assets/screenshot_edit_phrase.png) (Phrase Customization & Translation), [`screenshot_voice_settings.png`](../assets/screenshot_voice_settings.png) (Voice & Language Settings) |
+| **Phone Screenshots** | Min 2 screenshots (Recommended 8) | JPEG or 24-bit PNG | 8 Planned / In-Progress (see below) |
 | **Preview Video** | YouTube URL | YouTube link (`watch?v=`) | ✅ Ready: [English](https://www.youtube.com/watch?v=Kd9qPu3F-Gg) |
+
+### Unified Screenshot Sequence (8 Screens)
+1. **Dual mode split**: Teen self-using cards + Dad holding flipped phone with Yes/No
+2. **Safety amber hero fullscreen**: Fullscreen high-contrast bystander card
+3. **Huge Yes/No/Wait/Repeat buttons**: Direct 80dp+ binary crisis buttons with haptics
+4. **Flip 180°**: Tabletop face-to-face partner mode
+5. **Quick-Speak Bar**: Multi-line spontaneous input with mic dictation and speech
+6. **Main board categories**: Low-stimulus Material 3 grid (Needs, Social, Care, General)
+7. **Why Log 30-day trends**: Private local root-cause patterns
+8. **Privacy + QR sharing**: 100% offline core, zero cloud, QR deck exchange
 
 ### Rebuilding Graphic Assets
 To automatically regenerate and format all visual assets (`screenshot.png`, `screenshot_fullscreen.png`, `screenshot_partner_mode.png`, `screenshot_edit_phrase.png`, `screenshot_voice_settings.png`, and `play_store_feature_graphic.png`) from the latest app build:

@@ -182,7 +182,7 @@ SCENES = [
         "card_desc": "Clean Material 3 interface without childish cartoons or clutter.",
         "card_tag": "Zero Pediatric Clutter",
         "card_color": (255, 183, 77),
-        "caption": "Sotto: Low-stimulus assistive communication and calm crisis de-escalation.",
+        "caption": "Sotto: Low-stimulus assistive communication and calm crisis navigation.",
         "glow_color": (255, 183, 77)
     },
     {

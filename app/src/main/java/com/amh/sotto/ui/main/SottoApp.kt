@@ -124,7 +124,9 @@ fun SottoApp(
     onRolePromptAnswered: (String) -> Unit = {},
     shouldPromptPmfSurvey: Boolean = false,
     onPmfSurveyAnswered: (String, String, String) -> Unit = { _, _, _ -> },
-    onPmfSurveyDismissed: () -> Unit = {}
+    onPmfSurveyDismissed: () -> Unit = {},
+    initialOpenPartnerMode: Boolean = false,
+    onPartnerModeOpened: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
@@ -153,6 +155,14 @@ fun SottoApp(
     var showWhyTreeEditorDialog by rememberSaveable { mutableStateOf(false) }
     var activeQRShareString by remember { mutableStateOf<String?>(null) }
     var showQRScannerDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(initialOpenPartnerMode) {
+        if (initialOpenPartnerMode) {
+            UsabilityTracker.startIntent("TwoWay")
+            showTwoWayDialog = true
+            onPartnerModeOpened()
+        }
+    }
 
     val speechHelper = remember { SpeechRecognitionHelper(context) }
 

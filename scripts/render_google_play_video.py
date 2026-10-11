@@ -190,7 +190,7 @@ SCENES = [
             ("speaker", "One-Tap Spoken Voice", "Instant vocal speech with two-tone attention chime for quiet settings.", (129, 199, 132)),
             ("shield", "Bystander Safety Hero Card", "Always-ready emergency card for immediate reassurance and contact.", (144, 202, 249))
         ],
-        "caption": "Sotto: Low-stimulus assistive communication and calm crisis de-escalation.",
+        "caption": "Sotto: Low-stimulus assistive communication and calm crisis navigation.",
         "glow_color": (255, 183, 77)
     },
     {
@@ -205,7 +205,7 @@ SCENES = [
         "features": [
             ("compass", "Gentle Binary Tree", "Replaces stressful “What's wrong?” with one simple question at a time.", (255, 183, 77)),
             ("grid", "4 Distress Domains", "Systematically explores Physical, Sensory, Emotional, or Routine triggers.", (129, 199, 132)),
-            ("sparkle", "Actionable Relief Steps", "Suggests immediate de-escalation: dim lights, quiet space, or comfort.", (144, 202, 249))
+            ("sparkle", "Actionable Relief Steps", "Suggests immediate calm support: dim lights, quiet space, or comfort.", (144, 202, 249))
         ],
         "caption": "Why Finder: Low-cognitive-load binary questions to identify distress calmly.",
         "glow_color": (129, 199, 132)

@@ -401,4 +401,17 @@
     <string name="label_safety_section">Keselamatan &amp; Penolong</string>
     <string name="label_show_safety_cards">Tampilkan kartu Keselamatan di Beranda</string>
     <string name="label_show_safety_cards_desc">Tampilkan kartu keselamatan dan kontak di bagian atas kisi frasa Semua</string>
+
+    <!-- Quick Settings Emergency / Partner Tile -->
+    <string name="tile_partner_mode">Mode Partner</string>
+
+    <!-- Post-Crisis Pattern Logger -->
+    <string name="label_log_trigger">Catat pemicu krisis ke Catatan Why</string>
+    <string name="label_log_trigger_short">Catat</string>
+    <string name="trigger_pain">Nyeri</string>
+    <string name="trigger_noise">Bising</string>
+    <string name="trigger_task">Tugas</string>
+    <string name="trigger_emotion">Emosi</string>
+    <string name="trigger_other">Lainnya</string>
+    <string name="msg_trigger_logged">Pemicu tercatat: %1$s ✓</string>
 </resources>

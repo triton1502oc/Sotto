@@ -13,19 +13,25 @@
 
 ---
 
-## Origin & Mission
-Sotto was created by a father to navigate overwhelming communication breakdowns and meltdowns with his autistic sons (ages 22 and 15). When sensory overload strikes, speaking, reading long sentences, or processing complex questions becomes exhausting or impossible.
+## Origin & The Dual Mode Truth
 
-**Primary Mission (Crisis Navigation for Caregivers & Families):**  
-Provide parents, siblings, family members, caregivers, therapists, and educators with an immediate two-way receptive triage HUD and low-cognitive-load yes/no inquiry to reach loved ones during meltdowns and shutdowns without escalating distress.
+> *"Built by a father in Singapore for his two autistic sons (22 & 15) who can speak but not always. During meltdown I operate Sotto on MY phone, they tap Yes/No to pinpoint — issue resolved."*
 
-**Secondary Purpose (Dignified Voice for Non-Speaking & Unclear Speech):**  
-Provide non-speaking individuals, those with unclear or dysfluent speech, and anyone navigating verbal fatigue with a clean, mature text-to-speech board and spontaneous quick-speak bar—free of pediatric cartoons, patronizing symbols, and visual clutter.
+Sotto was created out of real family experience. When sensory overload strikes, operating a phone, reading complex choices, or processing multi-step menus is impossible.
+
+We use Sotto in two distinct modes:
+
+* **MODE 1 — DAILY (He holds his phone):**  
+  Self-operated dignified AAC for complex information, noisy spaces, or unfamiliar people. The individual opens Sotto themselves and taps phrase cards (**Needs**, **Social**, **Care**, **General**) or types in the Quick-Speak Bar. 1-tap speech, long-press for giant fullscreen text.
+* **MODE 2 — MELTDOWN (You hold YOUR phone):**  
+  Caregiver-operated on the caregiver's device. During acute sensory meltdowns or verbal shutdowns, operating a phone is too difficult. The caregiver opens Sotto, enters Partner Mode, flips the phone 180° (`🔄`) to show giant text, and the individual taps **Yes / No / Wait / Repeat** (or **Not sure / Stop**). Direct binary choice pinpoints the problem without navigating a complex tree.
+
+> **Medical Disclaimer:** Sotto is not a medical device and does not provide medical advice, diagnosis, or treatment. It is an assistive communication tool.
 
 ---
 
 ## Target Audience
-- **Parents, Siblings, Family, Caregivers, Therapists & Teachers**: Reaching loved ones during verbal shutdowns, cognitive freezes, and meltdowns with immediate 1-tap de-escalation; discovering hidden root causes through structured inquiry.
+- **Parents, Siblings, Family, Caregivers & Allies**: Reaching loved ones during verbal shutdowns, cognitive freezes, and meltdowns with immediate 1-tap binary check-ins; discovering hidden root causes post-crisis.
 - **Autistic Teens & Adults**: Dignified self-advocacy and daily communication with high-contrast, low-stimulation phrase cards and giant fullscreen text.
 - **Individuals with Unclear, Fatigued, or Non-Speaking Speech**: Accessible one-touch speech for motor apraxia, dysarthria, cerebral palsy, ALS, stroke recovery (aphasia), quiet/strained voices, or situational speech loss.
 
@@ -33,16 +39,16 @@ Provide non-speaking individuals, those with unclear or dysfluent speech, and an
 
 ## Key Features
 
-### 1. Emergency Triage & Crisis Navigation (Caregiver-First)
-- **Two-Way Speak HUD & 180° Flip (`🤝`)**: Immediate emergency de-escalation for acute meltdowns and verbal shutdowns. Caregivers speak naturally or pick urgent preset prompts, flip the display 180° on a table, and the individual responds with one tap (`Yes`, `No`, `Not sure`, `Stop`) with instant voice confirmation. Zero demand fatigue or cognitive load.
-- **Why Finder Diagnostic Tree (`🧭`)**: A guided, low-stimulus yes/no branching tree to uncover hidden root causes (acute physical pain, body part location, sensory overload, routine disruption) when triggers are unclear or during post-crisis recovery.
-- **Private Why Log & 30-Day Trend Insights**: Automatically logs resolved crisis events locally in private app storage. Highlights top 30-day root-cause patterns and peak time-of-day triggers to help families and therapists identify recurring environmental stressors.
-- **Customizable Why Tree (`🌳`)**: Personalize branching questions and resolution steps with voice dictation (`🎤`), sequence reordering, and one-tap clinical defaults reset.
+### 1. Direct Yes/No Crisis Navigation & Post-Crisis Explorer (Caregiver Mode)
+- **Two-Way Partner Mode & 180° Flip (`🤝`)**: Immediate crisis support for acute meltdowns and verbal shutdowns. Caregivers speak naturally or pick preset questions, flip the display 180° on a table, and the individual responds with one tap on huge 80dp+ targets (`Yes`, `No`, `Wait`, `Repeat` / `Not sure`, `Stop`) with instant voice confirmation. Zero cognitive load.
+- **Why Finder Post-Crisis Explorer (`🧭`)**: When distress triggers are unknown, Why Finder provides a gentle, post-crisis binary discovery tree to systematically uncover hidden physical discomfort (with body map locator), sensory overload, emotional fatigue, or routine disruptions without demanding open-ended answers.
+- **Private Pattern Log & 30-Day Trends**: Automatically logs resolved crisis events locally in private app storage. Highlights top 30-day root-cause patterns and peak time-of-day clusters to help families identify recurring environmental stressors.
+- **Customizable Inquiry Tree (`🌳`)**: Personalize questions and areas with voice dictation (`🎤`), sequence reordering, and one-tap defaults reset.
 
 ### 2. Dignified Self-Expression (AAC Phrase Board)
 - **Low-Stimulus UI**: Dark-neutral Material 3 theme with high contrast, calm earth tones, and zero cartoon animations or visual distractions.
 - **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
-- **Safety Bystander Card**: Prominent high-contrast card and fullscreen banner for non-verbal episodes, local contacts, and medical personnel.
+- **Safety Bystander Card**: Prominent high-contrast card and fullscreen banner for non-verbal episodes, local contacts, and support personnel.
 - **Quick-Speak Bar**: Docked bottom bar for spontaneous speech (`🔊`), fullscreen expand, voice dictation (`🎤`), and 1-tap card creation (`+`).
 - **Contextual & Custom Categories**: Filter cards by situation (**Safety**, **Needs**, **Social**, **Care**, **General**), or customize your own categories.
 - **High-Visibility Fullscreen**: Long-press any card to show giant text for silent, readable communication in loud spaces.

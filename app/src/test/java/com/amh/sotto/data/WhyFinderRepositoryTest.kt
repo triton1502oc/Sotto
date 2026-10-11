@@ -124,4 +124,33 @@ class WhyFinderRepositoryTest {
         repo.clearLogs()
         assertTrue(repo.getLogs().isEmpty())
     }
+
+    @Test
+    fun `quick post-crisis pattern trigger entries are saved with cause and area`() {
+        val repo = SharedPreferencesWhyFinderRepository(context)
+        val triggerEntry = WhyLogEntry(
+            id = "quick_trigger_1",
+            startedAt = 1000L,
+            endedAt = 4000L,
+            outcome = WhyOutcome.FOUND,
+            areaId = SharedPreferencesWhyFinderRepository.AREA_BODY,
+            causeText = "Pain",
+            bodyPart = "pain",
+            steps = listOf(
+                com.amh.sotto.data.WhyStep(questionText = "Are you in pain?", answer = "yes")
+            )
+        )
+        repo.addLog(triggerEntry)
+
+        val logs = repo.getLogs()
+        assertEquals(1, logs.size)
+        val saved = logs[0]
+        assertEquals("quick_trigger_1", saved.id)
+        assertEquals(WhyOutcome.FOUND, saved.outcome)
+        assertEquals(SharedPreferencesWhyFinderRepository.AREA_BODY, saved.areaId)
+        assertEquals("Pain", saved.causeText)
+        assertEquals("pain", saved.bodyPart)
+        assertEquals(1, saved.steps.size)
+        assertEquals("yes", saved.steps[0].answer)
+    }
 }

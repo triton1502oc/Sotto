@@ -401,4 +401,17 @@
     <string name="label_safety_section">Safety &amp; Bystander</string>
     <string name="label_show_safety_cards">Show Safety cards on Home</string>
     <string name="label_show_safety_cards_desc">Display safety and contact cards at the top of the All phrases grid</string>
+
+    <!-- Quick Settings Emergency / Partner Tile -->
+    <string name="tile_partner_mode">Partner Mode</string>
+
+    <!-- Post-Crisis Pattern Logger -->
+    <string name="label_log_trigger">Log crisis trigger to Why Log</string>
+    <string name="label_log_trigger_short">Log</string>
+    <string name="trigger_pain">Pain</string>
+    <string name="trigger_noise">Noise</string>
+    <string name="trigger_task">Task</string>
+    <string name="trigger_emotion">Emotion</string>
+    <string name="trigger_other">Other</string>
+    <string name="msg_trigger_logged">Trigger logged: %1$s ✓</string>
 </resources>

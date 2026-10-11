@@ -95,6 +95,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import com.amh.sotto.service.EmergencyTileService
+
 class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
 
     private var tts: TextToSpeech? = null
@@ -103,6 +105,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     private var availableTtsLanguages by mutableStateOf<Set<Locale>>(emptySet())
     private var latestVoiceSettings by mutableStateOf(VoiceSettings())
     private var currentLanguage by mutableStateOf(LocaleHelper.LANG_SYSTEM)
+    private var initialOpenPartnerMode by mutableStateOf(false)
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
@@ -112,6 +115,9 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         currentLanguage = LocaleHelper.getLanguage(this)
+        if (intent?.getBooleanExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE, false) == true) {
+            initialOpenPartnerMode = true
+        }
         tts = TextToSpeech(this, this)
         UsabilityTracker.recordAppOpen(this)
 
@@ -228,10 +234,20 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                                 UsabilityTracker.recordSurvey(this@MainActivity, s, b, r)
                             }
                         },
-                        onPmfSurveyDismissed = { viewModel.onPmfSurveyDismissed() }
+                        onPmfSurveyDismissed = { viewModel.onPmfSurveyDismissed() },
+                        initialOpenPartnerMode = initialOpenPartnerMode,
+                        onPartnerModeOpened = { initialOpenPartnerMode = false }
                     )
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE, false)) {
+            initialOpenPartnerMode = true
         }
     }
 

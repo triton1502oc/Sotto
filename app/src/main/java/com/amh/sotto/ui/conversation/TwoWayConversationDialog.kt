@@ -37,8 +37,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -49,10 +55,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.amh.sotto.R
 import com.amh.sotto.data.Phrase
+import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
 import com.amh.sotto.data.WhyFinderRepository
-import com.amh.sotto.theme.SottoColors
+import com.amh.sotto.data.WhyLogEntry
 import com.amh.sotto.data.WhyOutcome
+import com.amh.sotto.data.WhyStep
 import com.amh.sotto.data.WhyTree
+import com.amh.sotto.theme.SottoColors
 import com.amh.sotto.ui.category.getCategoryDisplayName
 import com.amh.sotto.ui.whyfinder.BodyPartSelectionGrid
 import com.amh.sotto.ui.whyfinder.IntensityScaleRow
@@ -63,6 +72,7 @@ import com.amh.sotto.ui.whyfinder.getAreaDisplayName
 import com.amh.sotto.util.UsabilityTracker
 import kotlinx.coroutines.delay
 import java.util.Locale
+import java.util.UUID
 
 enum class CaregiverTab {
     WHY_FINDER,
@@ -230,10 +240,53 @@ fun TwoWayConversationDialog(
         } catch (_: Exception) {}
     }
 
-    fun handleUserResponse(displayText: String, ttsText: String) {
-        vibrateFeedback()
-        lastReply = displayText
-        onSpeakResponse(ttsText)
+    var showPostResolutionPrompt by rememberSaveable { mutableStateOf(false) }
+    var triggerLoggedFeedback by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(triggerLoggedFeedback) {
+        if (triggerLoggedFeedback != null) {
+            delay(2500)
+            triggerLoggedFeedback = null
+        }
+    }
+
+    fun logPostResolutionTrigger(triggerKey: String) {
+        val areaId = when (triggerKey) {
+            "Pain" -> SharedPreferencesWhyFinderRepository.AREA_BODY
+            "Noise" -> SharedPreferencesWhyFinderRepository.AREA_SENSES
+            "Task" -> SharedPreferencesWhyFinderRepository.AREA_HAPPENED
+            "Emotion" -> SharedPreferencesWhyFinderRepository.AREA_FEELINGS
+            else -> "other"
+        }
+        val now = System.currentTimeMillis()
+        val entry = WhyLogEntry(
+            id = UUID.randomUUID().toString(),
+            startedAt = now - 3000L,
+            endedAt = now,
+            outcome = WhyOutcome.FOUND,
+            areaId = areaId,
+            causeText = triggerKey,
+            steps = listOf(
+                WhyStep(
+                    questionText = activeFreeformText.ifBlank { "Direct Yes/No Check-in" },
+                    answer = "yes"
+                )
+            )
+        )
+        whyFinderRepository?.addLog(entry)
+        UsabilityTracker.recordActivation(context, "why_log_quick_trigger")
+        UsabilityTracker.recordWhyFinder(
+            context = context,
+            outcome = "found",
+            areaId = areaId,
+            depth = 1,
+            notSureCount = 0,
+            bodyPart = if (triggerKey == "Pain") "pain" else null,
+            intensity = null,
+            durationMs = 3000L
+        )
+        showPostResolutionPrompt = false
+        triggerLoggedFeedback = triggerKey
     }
 
     // Reusable response strings
@@ -245,6 +298,15 @@ fun TwoWayConversationDialog(
     val strStop = stringResource(R.string.why_finder_btn_stop)
     val ttsRepeat = stringResource(R.string.response_tts_repeat)
     val ttsWait = stringResource(R.string.response_tts_wait)
+
+    fun handleUserResponse(displayText: String, ttsText: String) {
+        vibrateFeedback()
+        lastReply = displayText
+        if (activeTab == CaregiverTab.FREEFORM && (displayText == strYes || displayText == strNo)) {
+            showPostResolutionPrompt = true
+        }
+        onSpeakResponse(ttsText)
+    }
 
     Dialog(
         onDismissRequest = {
@@ -314,6 +376,12 @@ fun TwoWayConversationDialog(
                                     handleUserResponse(strNo, strNo)
                                     if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNo()
                                 },
+                                onWait = {
+                                    handleUserResponse(strWait, ttsWait)
+                                },
+                                onRepeat = {
+                                    handleUserResponse(strRepeat, ttsRepeat)
+                                },
                                 onNotSure = {
                                     handleUserResponse(strNotSure, strNotSure)
                                     if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNotSure()
@@ -338,6 +406,34 @@ fun TwoWayConversationDialog(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     // Bottom: Caregiver controls facing caregiver
+                    AnimatedVisibility(visible = triggerLoggedFeedback != null && activeTab == CaregiverTab.FREEFORM) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = SottoColors.SuccessGreen.copy(alpha = 0.2f),
+                            border = BorderStroke(1.dp, SottoColors.SuccessGreen),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 6.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.msg_trigger_logged, triggerLoggedFeedback ?: ""),
+                                color = SottoColors.SuccessText,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 6.dp)
+                            )
+                        }
+                    }
+
+                    AnimatedVisibility(visible = showPostResolutionPrompt && activeTab == CaregiverTab.FREEFORM) {
+                        PostResolutionTriggerLogger(
+                            onLogTrigger = { triggerKey -> logPostResolutionTrigger(triggerKey) },
+                            onDismiss = { showPostResolutionPrompt = false },
+                            modifier = Modifier.padding(bottom = 6.dp)
+                        )
+                    }
+
                     AnimatedVisibility(visible = showKeyboardInput && activeTab == CaregiverTab.FREEFORM) {
                         ManualKeyboardInputRow(
                             text = manualInputText,
@@ -359,6 +455,7 @@ fun TwoWayConversationDialog(
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = true,
                         onToggleFlip = { isFlipped = false },
+                        onToggleTriggerLogger = { showPostResolutionPrompt = !showPostResolutionPrompt },
                         canSpeakPrompt = whyPromptText.isNotBlank(),
                         onSpeakPrompt = { onSpeakResponse(whyPromptText) },
                         onPickCard = { showQuestionsSheet = true },
@@ -431,6 +528,12 @@ fun TwoWayConversationDialog(
                             handleUserResponse(strNo, strNo)
                             if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNo()
                         },
+                        onWait = {
+                            handleUserResponse(strWait, ttsWait)
+                        },
+                        onRepeat = {
+                            handleUserResponse(strRepeat, ttsRepeat)
+                        },
                         onNotSure = {
                             handleUserResponse(strNotSure, strNotSure)
                             if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNotSure()
@@ -453,6 +556,34 @@ fun TwoWayConversationDialog(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     // Bottom: Caregiver 2-line menu
+                    AnimatedVisibility(visible = triggerLoggedFeedback != null && activeTab == CaregiverTab.FREEFORM) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = SottoColors.SuccessGreen.copy(alpha = 0.2f),
+                            border = BorderStroke(1.dp, SottoColors.SuccessGreen),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 6.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.msg_trigger_logged, triggerLoggedFeedback ?: ""),
+                                color = SottoColors.SuccessText,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 6.dp)
+                            )
+                        }
+                    }
+
+                    AnimatedVisibility(visible = showPostResolutionPrompt && activeTab == CaregiverTab.FREEFORM) {
+                        PostResolutionTriggerLogger(
+                            onLogTrigger = { triggerKey -> logPostResolutionTrigger(triggerKey) },
+                            onDismiss = { showPostResolutionPrompt = false },
+                            modifier = Modifier.padding(bottom = 6.dp)
+                        )
+                    }
+
                     AnimatedVisibility(visible = showKeyboardInput && activeTab == CaregiverTab.FREEFORM) {
                         ManualKeyboardInputRow(
                             text = manualInputText,
@@ -474,6 +605,7 @@ fun TwoWayConversationDialog(
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = false,
                         onToggleFlip = { isFlipped = true },
+                        onToggleTriggerLogger = { showPostResolutionPrompt = !showPostResolutionPrompt },
                         canSpeakPrompt = whyPromptText.isNotBlank(),
                         onSpeakPrompt = { onSpeakResponse(whyPromptText) },
                         onPickCard = { showQuestionsSheet = true },
@@ -751,6 +883,7 @@ private fun CaregiverBottomMenu(
     onReadAloudFreeform: () -> Unit,
     onToggleKeyboard: () -> Unit,
     onDismiss: () -> Unit,
+    onToggleTriggerLogger: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -805,6 +938,21 @@ private fun CaregiverBottomMenu(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    if (activeTab == CaregiverTab.FREEFORM && hasWhyFinder && onToggleTriggerLogger != null) {
+                        OutlinedButton(
+                            onClick = onToggleTriggerLogger,
+                            shape = RoundedCornerShape(20.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                        ) {
+                            Text(
+                                text = "📝 " + stringResource(R.string.label_log_trigger_short),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
                     OutlinedButton(
                         onClick = onToggleFlip,
                         shape = RoundedCornerShape(20.dp),
@@ -1056,99 +1204,140 @@ private fun CaregiverDisplayCard(
 private fun UnifiedFourCardResponseDock(
     onYes: () -> Unit,
     onNo: () -> Unit,
-    onNotSure: () -> Unit,
-    onStop: () -> Unit,
+    secondaryLeftText: String,
+    onSecondaryLeft: () -> Unit,
+    secondaryRightText: String,
+    onSecondaryRight: () -> Unit,
+    secondaryLeftColors: ButtonColors = ButtonDefaults.buttonColors(
+        containerColor = SottoColors.NeutralDarkContainer,
+        contentColor = SottoColors.NeutralDarkText
+    ),
+    secondaryRightColors: ButtonColors = ButtonDefaults.buttonColors(
+        containerColor = SottoColors.NeutralDarkContainer,
+        contentColor = SottoColors.NeutralDarkText
+    ),
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
     val strYes = stringResource(R.string.response_yes)
     val strNo = stringResource(R.string.response_no)
-    val strNotSure = stringResource(R.string.why_finder_btn_not_sure)
-    val strStop = stringResource(R.string.why_finder_btn_stop)
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Row 1: YES & NO
+        // Row 1: YES & NO (Primary Crisis Buttons >= 80dp touch target with tactile haptics)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Button(
-                onClick = onYes,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onYes()
+                },
                 modifier = Modifier
                     .weight(1f)
-                    .height(58.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .heightIn(min = 80.dp)
+                    .height(80.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = "✓ $strYes"
+                    },
+                shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = SottoColors.SuccessContainer,
                     contentColor = SottoColors.SuccessText
-                )
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
                 Text(
                     text = "✓ $strYes",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
             }
 
             Button(
-                onClick = onNo,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onNo()
+                },
                 modifier = Modifier
                     .weight(1f)
-                    .height(58.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .heightIn(min = 80.dp)
+                    .height(80.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = "✕ $strNo"
+                    },
+                shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = SottoColors.CrisisStopContainer,
                     contentColor = SottoColors.CrisisStopText
-                )
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
                 Text(
                     text = "✕ $strNo",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
             }
         }
 
-        // Row 2: NOT SURE & STOP
+        // Row 2: Secondary actions (Wait / Repeat in Talk mode vs Not sure / Stop in Guided mode)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Button(
-                onClick = onNotSure,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onSecondaryLeft()
+                },
                 modifier = Modifier
                     .weight(1f)
-                    .height(54.dp),
+                    .heightIn(min = 54.dp)
+                    .height(54.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = secondaryLeftText
+                    },
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SottoColors.WarningHighContainer,
-                    contentColor = SottoColors.WarningHighText
-                )
+                colors = secondaryLeftColors
             ) {
                 Text(
-                    text = "? $strNotSure",
+                    text = secondaryLeftText,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center
                 )
             }
 
             Button(
-                onClick = onStop,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onSecondaryRight()
+                },
                 modifier = Modifier
                     .weight(1f)
-                    .height(54.dp),
+                    .heightIn(min = 54.dp)
+                    .height(54.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = secondaryRightText
+                    },
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SottoColors.NeutralStoppedContainer,
-                    contentColor = SottoColors.NeutralStoppedText
-                )
+                colors = secondaryRightColors
             ) {
                 Text(
-                    text = "⏹ $strStop",
+                    text = secondaryRightText,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -1161,12 +1350,19 @@ private fun CaregiverResponseDock(
     whyState: WhyFinderState,
     onYes: () -> Unit,
     onNo: () -> Unit,
+    onWait: () -> Unit,
+    onRepeat: () -> Unit,
     onNotSure: () -> Unit,
     onStop: () -> Unit,
     onSelectBodyPart: (String) -> Unit,
     onSelectIntensity: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val strWait = stringResource(R.string.response_wait)
+    val strRepeat = stringResource(R.string.response_repeat)
+    val strNotSure = stringResource(R.string.why_finder_btn_not_sure)
+    val strStop = stringResource(R.string.why_finder_btn_stop)
+
     if (activeTab == CaregiverTab.WHY_FINDER) {
         when (whyState) {
             is WhyFinderState.SelectingBodyPart -> {
@@ -1190,20 +1386,113 @@ private fun CaregiverResponseDock(
                 UnifiedFourCardResponseDock(
                     onYes = onYes,
                     onNo = onNo,
-                    onNotSure = onNotSure,
-                    onStop = onStop,
+                    secondaryLeftText = "? $strNotSure",
+                    onSecondaryLeft = onNotSure,
+                    secondaryRightText = "⏹ $strStop",
+                    onSecondaryRight = onStop,
+                    secondaryLeftColors = ButtonDefaults.buttonColors(
+                        containerColor = SottoColors.WarningHighContainer,
+                        contentColor = SottoColors.WarningHighText
+                    ),
+                    secondaryRightColors = ButtonDefaults.buttonColors(
+                        containerColor = SottoColors.NeutralStoppedContainer,
+                        contentColor = SottoColors.NeutralStoppedText
+                    ),
                     modifier = modifier
                 )
             }
         }
     } else {
+        // Freeform / Talk mode: Wait & Repeat
         UnifiedFourCardResponseDock(
             onYes = onYes,
             onNo = onNo,
-            onNotSure = onNotSure,
-            onStop = onStop,
+            secondaryLeftText = "⏳ $strWait",
+            onSecondaryLeft = onWait,
+            secondaryRightText = "🔁 $strRepeat",
+            onSecondaryRight = onRepeat,
+            secondaryLeftColors = ButtonDefaults.buttonColors(
+                containerColor = SottoColors.NeutralDarkContainer,
+                contentColor = SottoColors.NeutralDarkText
+            ),
+            secondaryRightColors = ButtonDefaults.buttonColors(
+                containerColor = SottoColors.NeutralDarkContainer,
+                contentColor = SottoColors.NeutralDarkText
+            ),
             modifier = modifier
         )
+    }
+}
+
+@Composable
+private fun PostResolutionTriggerLogger(
+    onLogTrigger: (String) -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "📝 " + stringResource(R.string.label_log_trigger),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Text("✕", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                val triggers = listOf(
+                    "Pain" to stringResource(R.string.trigger_pain),
+                    "Noise" to stringResource(R.string.trigger_noise),
+                    "Task" to stringResource(R.string.trigger_task),
+                    "Emotion" to stringResource(R.string.trigger_emotion),
+                    "Other" to stringResource(R.string.trigger_other)
+                )
+
+                triggers.forEach { (key, label) ->
+                    FilledTonalButton(
+                        onClick = { onLogTrigger(key) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(38.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 2.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
