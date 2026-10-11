@@ -47,6 +47,7 @@
     <string name="title_high_quality_voices">High-Quality Voice Packs</string>
     <string name="desc_high_quality_voices">Download natural neural speech voices in Android Accessibility &amp; Text-to-Speech settings.</string>
     <string name="action_open_tts_settings">Voice Settings</string>
+    <string name="action_add_more_voices">Add more voices in Android Settings…</string>
     <string name="pitch_lower">Lower</string>
     <string name="pitch_normal">Normal</string>
     <string name="pitch_higher">Higher</string>

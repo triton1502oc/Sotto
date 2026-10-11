@@ -422,59 +422,36 @@ fun VoiceSettingsDialog(
                                                     }
                                                 )
                                             }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // High-Quality Voice Pack Guide Card
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.title_high_quality_voices),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        TextButton(
-                                            onClick = {
-                                                try {
-                                                    val intent = Intent("com.android.settings.TTS_SETTINGS")
-                                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                                    context.startActivity(intent)
-                                                } catch (_: Exception) {
+                                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        text = stringResource(R.string.action_add_more_voices),
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        fontWeight = FontWeight.Medium
+                                                    )
+                                                },
+                                                leadingIcon = {
+                                                    Text("➕", fontSize = 14.sp)
+                                                },
+                                                onClick = {
+                                                    voiceDropdownExpanded = false
                                                     try {
-                                                        val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                                        val intent = Intent("com.android.settings.TTS_SETTINGS")
                                                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                                         context.startActivity(intent)
-                                                    } catch (_: Exception) {}
+                                                    } catch (_: Exception) {
+                                                        try {
+                                                            val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                            context.startActivity(intent)
+                                                        } catch (_: Exception) {}
+                                                    }
                                                 }
-                                            },
-                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.action_open_tts_settings),
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.primary
                                             )
                                         }
                                     }
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = stringResource(R.string.desc_high_quality_voices),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
                                 }
                             }
 

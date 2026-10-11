@@ -47,6 +47,7 @@
     <string name="title_high_quality_voices">Paket Suara Alami</string>
     <string name="desc_high_quality_voices">Unduh suara alami di pengaturan Aksesibilitas &amp; Text-to-Speech Android.</string>
     <string name="action_open_tts_settings">Pengaturan Suara</string>
+    <string name="action_add_more_voices">Tambah suara lainnya di Pengaturan Android…</string>
     <string name="pitch_lower">Lebih rendah</string>
     <string name="pitch_normal">Normal</string>
     <string name="pitch_higher">Lebih tinggi</string>
