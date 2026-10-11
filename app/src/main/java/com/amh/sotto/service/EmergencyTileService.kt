@@ -1,5 +1,6 @@
 package com.amh.sotto.service
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
@@ -26,6 +27,7 @@ class EmergencyTileService : TileService() {
         }
     }
 
+    @SuppressLint("StartActivityAndCollapseDeprecated")
     override fun onClick() {
         super.onClick()
         UsabilityTracker.recordActivation(this, "emergency_tile")

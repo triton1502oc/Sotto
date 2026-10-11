@@ -3,6 +3,26 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.0] - 2026-10-11
+
+### Added
+- **Direct Yes/No Primary Crisis Cards ($\ge 80\text{dp}$ & Tactile Haptics)**: Real-world family validated crisis check-in dock in Partner Mode (`TwoWayConversationDialog`). Primary Yes/No buttons enforce $\ge 80\text{dp}$ touch target height with tactile haptic feedback and high-contrast typography, designed specifically for shaky or motor-impaired hands during sensory meltdowns and shutdowns ([#40](https://github.com/triton1502oc/Sotto/issues/40)).
+- **Quick Settings Emergency Tile (`EmergencyTileService`)**: 1-tap direct launch into Partner Mode in under 3 seconds directly from the Android notification shade, featuring a custom Sotto speech bubble & voice equalizer vector icon and registered as `"Sotto Partner"` ([#40](https://github.com/triton1502oc/Sotto/issues/40)).
+- **1-Tap Post-Crisis Pattern Trigger Logger**: Inline trigger logger chips (`Pain`, `Noise`, `Task`, `Emotion`, `Other`) following binary resolution in Partner Mode, writing directly to local on-device `WhyLog` without requiring the multi-step branching tree ([#40](https://github.com/triton1502oc/Sotto/issues/40)).
+- **Natural Indonesian Spoken Digit Words**: Phone numbers in safety cards spoken via Indonesian TTS (`id-ID`) are converted directly into Indonesian digit words (`nol`, `satu`, `dua`, `tiga`...) with natural pause grouping, eliminating TTS date/month mispronunciations (e.g. `0812` being read as "8 Desember").
+- **Integrated Voice Settings Shortcut in Voice Dropdown**: Simplified Speech & Voice settings by integrating `"Add more voices in Android Settings…"` directly into the Voice dropdown menu, eliminating the redundant standalone card for a cleaner, lower-stimulus settings layout.
+
+### Changed
+- **Dignified Medical Terminology Scrub**: Completely scrubbed clinical and medical terminology (`triage`, `diagnostic`, `treatment`, `de-escalation`) across user-facing documentation and UI strings, replacing them with dignified, assistive terminology (`crisis navigation`, `binary check-in`, `root cause discovery`, `calm communication`) while upholding Google Play medical disclaimer compliance ([#40](https://github.com/triton1502oc/Sotto/issues/40)).
+- **Aligned Secondary Crisis Actions**: High-contrast secondary response cards (`Wait` / `Repeat` in Talk Mode vs `Not sure` / `Stop` in Guided Mode) with guaranteed accessibility semantics.
+
+### Assets
+- `Sotto-v1.7.0.apk`: Universal release APK for all architectures.
+- `Sotto-v1.7.0-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.7.0-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.7.0-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.6.2] - 2026-10-11
 
 ### Added
