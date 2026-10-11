@@ -403,7 +403,7 @@
     <string name="label_show_safety_cards_desc">Tampilkan kartu keselamatan dan kontak di bagian atas kisi frasa Semua</string>
 
     <!-- Quick Settings Emergency / Partner Tile -->
-    <string name="tile_partner_mode">Mode Partner</string>
+    <string name="tile_partner_mode">Sotto Partner</string>
 
     <!-- Post-Crisis Pattern Logger -->
     <string name="label_log_trigger">Catat pemicu krisis ke Catatan Why</string>

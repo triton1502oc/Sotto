@@ -299,7 +299,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             }
             val effectiveLang = LocaleHelper.getEffectiveLanguage(this)
             val targetLocale = LocaleHelper.resolvePhraseLocale(language ?: LocaleHelper.LANG_AUTO, text, effectiveLang)
-            val speechText = LocaleHelper.formatDigitsForSpeech(text)
+            val speechText = LocaleHelper.formatDigitsForSpeech(text, targetLocale)
             tts?.setLanguage(targetLocale)
             applyVoiceSettings(latestVoiceSettings, targetLocale)
             if (latestVoiceSettings.playAttentionChime) {

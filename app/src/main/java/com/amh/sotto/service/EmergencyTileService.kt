@@ -6,6 +6,7 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.amh.sotto.MainActivity
+import com.amh.sotto.R
 import com.amh.sotto.util.UsabilityTracker
 
 /**
@@ -18,6 +19,9 @@ class EmergencyTileService : TileService() {
         super.onStartListening()
         qsTile?.apply {
             state = Tile.STATE_INACTIVE
+            label = getString(R.string.tile_partner_mode)
+            contentDescription = getString(R.string.tile_partner_mode)
+            icon = android.graphics.drawable.Icon.createWithResource(this@EmergencyTileService, R.drawable.ic_qs_sotto_partner)
             updateTile()
         }
     }

@@ -72,5 +72,24 @@ class LocaleHelperTest {
         val shortNumber = "Room 102 in Area 4"
         assertEquals(shortNumber, LocaleHelper.formatDigitsForSpeech(shortNumber))
     }
+
+    @Test
+    fun `formatDigitsForSpeech converts Indonesian phone numbers to words preventing date-month confusion`() {
+        val input = "Tolong hubungi kontak darurat saya: 0812-3456-7890"
+        val expected = "Tolong hubungi kontak darurat saya: nol delapan satu dua, tiga empat lima enam, tujuh delapan sembilan nol"
+        // Explicit Indonesian locale
+        assertEquals(expected, LocaleHelper.formatDigitsForSpeech(input, java.util.Locale.forLanguageTag("id")))
+        // Auto-detected Indonesian phrase
+        assertEquals(expected, LocaleHelper.formatDigitsForSpeech(input))
+
+        val international = "Kontak darurat: +62 812-345-678"
+        val expectedIntl = "Kontak darurat: plus enam dua, delapan satu dua, tiga empat lima, enam tujuh delapan"
+        assertEquals(expectedIntl, LocaleHelper.formatDigitsForSpeech(international, java.util.Locale.forLanguageTag("id")))
+
+        // English text with Indonesian secondary spoken locale
+        val englishWithIdLocale = "Please call my emergency contact: 0812-3456-7890"
+        val expectedEnglishSpokenId = "Please call my emergency contact: nol delapan satu dua, tiga empat lima enam, tujuh delapan sembilan nol"
+        assertEquals(expectedEnglishSpokenId, LocaleHelper.formatDigitsForSpeech(englishWithIdLocale, java.util.Locale.forLanguageTag("id")))
+    }
 }
 

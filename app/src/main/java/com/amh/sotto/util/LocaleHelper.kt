@@ -191,7 +191,7 @@ object LocaleHelper {
      * Automatically detects whether a phrase is Indonesian or English.
      * If uncertain, falls back to the active app language.
      */
-    fun detectLocale(phrase: String, appLanguage: String): Locale {
+    fun detectLocale(phrase: String, appLanguage: String = LANG_ENGLISH): Locale {
         val tokens = phrase.lowercase(Locale.ROOT)
             .replace(Regex("[^a-zA-Z\\s]"), " ")
             .split(Regex("\\s+"))
@@ -213,27 +213,106 @@ object LocaleHelper {
     }
 
     /**
-     * Formats long digit sequences (phone numbers, emergency contacts) to be separated
-     * by spaces so TTS engines pronounce them digit-by-digit instead of colossal integers.
+     * Formats long digit sequences (phone numbers, emergency contacts) for speech.
+     * In Indonesian ("id" / "in"), digit sequences are converted directly into Indonesian
+     * digit words ("nol", "satu", etc.) with natural group pauses so TTS engines never misread
+     * them as dates, months, or arithmetic ranges.
      */
-    fun formatDigitsForSpeech(text: String): String {
-        val pattern = Regex("(\\+?[0-9][0-9\\s\\-\\(\\)]{3,}[0-9])")
+    fun formatDigitsForSpeech(text: String, locale: Locale? = null): String {
+        val target = locale ?: detectLocale(text)
+        val isIndonesian = target.language.equals("id", ignoreCase = true) ||
+            target.language.equals("in", ignoreCase = true)
+
+        val pattern = Regex("(\\+?\\(?[0-9][0-9\\s\\-\\(\\)]{3,}[0-9])")
         return pattern.replace(text) { matchResult ->
             val matchedStr = matchResult.value
             val digitCount = matchedStr.count { it.isDigit() }
             if (digitCount >= 5) {
-                val formatted = StringBuilder()
-                for (char in matchedStr) {
-                    when {
-                        char.isDigit() -> formatted.append("$char ")
-                        char == '-' || char == '/' || char == ',' -> formatted.append("- ")
+                if (isIndonesian) {
+                    formatIndonesianDigits(matchedStr)
+                } else {
+                    val formatted = StringBuilder()
+                    for (char in matchedStr) {
+                        when {
+                            char.isDigit() -> formatted.append("$char ")
+                            char == '-' || char == '/' || char == ',' -> formatted.append("- ")
+                        }
                     }
+                    formatted.toString().trim().replace(Regex("\\s+"), " ")
                 }
-                formatted.toString().trim().replace(Regex("\\s+"), " ")
             } else {
                 matchedStr
             }
         }
+    }
+
+    private fun formatIndonesianDigits(matchedStr: String): String {
+        val digitWords = mapOf(
+            '0' to "nol",
+            '1' to "satu",
+            '2' to "dua",
+            '3' to "tiga",
+            '4' to "empat",
+            '5' to "lima",
+            '6' to "enam",
+            '7' to "tujuh",
+            '8' to "delapan",
+            '9' to "sembilan"
+        )
+        val trimmed = matchedStr.trim()
+        val startsWithPlus = trimmed.startsWith("+")
+        val clean = if (startsWithPlus) trimmed.substring(1).trim() else trimmed
+
+        val sb = StringBuilder()
+        if (startsWithPlus) {
+            sb.append("plus ")
+        }
+
+        val is62CountryCode = clean.startsWith("62") && clean.count { it.isDigit() } > 8
+        var i = 0
+        if (is62CountryCode) {
+            sb.append("enam dua, ")
+            var digitsSkipped = 0
+            while (i < clean.length && digitsSkipped < 2) {
+                if (clean[i].isDigit()) {
+                    digitsSkipped++
+                }
+                i++
+            }
+            while (i < clean.length && (clean[i] == ' ' || clean[i] == '-' || clean[i] == '/' || clean[i] == '.')) {
+                i++
+            }
+        }
+
+        var groupCount = 0
+        while (i < clean.length) {
+            val char = clean[i]
+            when {
+                char.isDigit() -> {
+                    val word = digitWords[char] ?: char.toString()
+                    sb.append(word).append(" ")
+                    groupCount++
+                    if (groupCount == 4) {
+                        sb.append(", ")
+                        groupCount = 0
+                    }
+                }
+                char == '-' || char == '/' || char == ' ' || char == '.' || char == ',' || char == '(' || char == ')' -> {
+                    if (groupCount > 0) {
+                        sb.append(", ")
+                        groupCount = 0
+                    }
+                }
+            }
+            i++
+        }
+
+        return sb.toString()
+            .replace(Regex("\\s*,\\s*"), ", ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .removeSuffix(",")
+            .trim()
     }
 }
 
