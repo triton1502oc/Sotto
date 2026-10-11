@@ -18,6 +18,7 @@ All notable changes to the Sotto project will be documented in this file. The fo
 
 ### Fixed
 - **Compact Screen Adaptive Grid Layout**: Fixed phrase cards collapsing to a single column (1 per row) on compact screens ($\le 360\text{dp}$) and high-scaling display modes by reducing adaptive grid minimum size from 160dp to 140dp, maintaining a comfortable 2-column layout ([#41](https://github.com/triton1502oc/Sotto/issues/41)).
+- **Partner Mode Talk Tab Quit Button Visibility**: Fixed the quit (`✕`) button being pushed off screen in Partner Mode when switching to the "Talk" tab on compact displays ($\le 360\text{dp}$) by streamlining utility controls into compact icon buttons and prioritizing global controls measurement ([#42](https://github.com/triton1502oc/Sotto/issues/42)).
 
 ### Assets
 - `Sotto-v1.7.0.apk`: Universal release APK for all architectures.

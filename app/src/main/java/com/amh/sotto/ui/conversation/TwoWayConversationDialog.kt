@@ -906,6 +906,7 @@ private fun CaregiverBottomMenu(
             ) {
                 // Tabs: Guided / Mic
                 Row(
+                    modifier = Modifier.weight(1f, fill = false),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -935,40 +936,46 @@ private fun CaregiverBottomMenu(
 
                 // Global Controls
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (activeTab == CaregiverTab.FREEFORM && hasWhyFinder && onToggleTriggerLogger != null) {
-                        OutlinedButton(
+                        val strLogTrigger = stringResource(R.string.label_log_trigger)
+                        IconButton(
                             onClick = onToggleTriggerLogger,
-                            shape = RoundedCornerShape(20.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                            modifier = Modifier
+                                .size(36.dp)
+                                .semantics {
+                                    role = Role.Button
+                                    contentDescription = strLogTrigger
+                                }
                         ) {
-                            Text(
-                                text = "📝 " + stringResource(R.string.label_log_trigger_short),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            Text("📝", fontSize = 16.sp)
                         }
                     }
 
-                    OutlinedButton(
+                    val flipDesc = if (isFlipped) stringResource(R.string.action_flip_back) else stringResource(R.string.action_flip)
+                    IconButton(
                         onClick = onToggleFlip,
-                        shape = RoundedCornerShape(20.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                        modifier = Modifier
+                            .size(36.dp)
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = flipDesc
+                            }
                     ) {
-                        Text(
-                            text = if (isFlipped) "🔄 " + stringResource(R.string.action_flip_back) else "🔄 " + stringResource(R.string.action_flip),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        Text("🔄", fontSize = 16.sp)
                     }
 
+                    val dismissDesc = stringResource(R.string.cd_dismiss)
                     IconButton(
                         onClick = onDismiss,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier
+                            .size(36.dp)
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = dismissDesc
+                            }
                     ) {
                         Text("✕", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
