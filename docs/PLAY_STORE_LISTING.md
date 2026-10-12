@@ -27,14 +27,16 @@ MODE 1 - DAILY (He holds his phone):
 For complex information, noisy places, or new people. He opens Sotto himself and taps cards — Needs, Social, Care, General — or types in Quick-Speak Bar. One-tap speech, long-press for giant fullscreen text readable without speaking.
 
 MODE 2 - MELTDOWN (You hold YOUR phone):
-This is what stops meltdowns at home. You open Sotto on YOUR phone, tap partner mode, tap Flip 🔄 to show giant text to him, and he taps Yes / No / Wait / Repeat. No branching, no tree to navigate. That tap IS his voice right now.
+This is what stops meltdowns at home. You open Sotto on YOUR phone, tap partner mode, flip the screen 180° to show giant text to him, and he taps Yes / No / Wait / Repeat. No branching, no tree to navigate. That tap IS his voice right now.
 
 Why this works:
-• Direct Yes/No Pinpoint Cards: Huge 80dp+ buttons with haptics for shaky hands
+• Direct Yes/No Pinpoint Cards: Huge 80dp+ tactile buttons with haptics for shaky hands
+• Floating PiP Communicator: System overlay with Yes/No/Wait buttons over maps or YouTube
+• Sotto Partner Quick Settings Tile: Sub-3s direct launch from notification shade
 • Safety Bystander Card: High-contrast amber hero for non-verbal episodes
-• Two-Way Partner Mode: Talk HUD with dictation, preset direct questions, Read Aloud 🔊, 180° Flip 🔄
-• Quick-Speak Bar: Spontaneous speech, fullscreen, dictation 🎤, 1-tap save
-• Low-Stimulus UI: Dark-neutral Material 3, high contrast, zero cartoons
+• Two-Way Partner Mode: Talk HUD with dictation, preset direct questions, read aloud, and animated 180° flip
+• Single-Row QuickSpeak Dock: Spontaneous speech, fullscreen, dictation, 1-tap save
+• Low-Stimulus UI: Dark-neutral Material 3, sensory themes, compact card option, zero cartoons
 • Zero-Distraction Mode: No admin clutter during communication
 • Dual-Language Offline: Display English, speak Indonesian/Malay/etc via ML Kit — 100% offline
 • Private Pattern Log: After resolution, optional one-tap log Pain/Noise/Task/Emotion to find 30-day patterns locally

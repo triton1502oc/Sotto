@@ -26,7 +26,7 @@ We use Sotto in two distinct modes:
 * **MODE 1 — DAILY (He holds his phone):**  
   Self-operated dignified AAC for complex information, noisy spaces, or unfamiliar people. The individual opens Sotto themselves and taps phrase cards (**Needs**, **Social**, **Care**, **General**) or types in the Quick-Speak Bar. 1-tap speech, long-press for giant fullscreen text.
 * **MODE 2 — MELTDOWN (You hold YOUR phone):**  
-  Caregiver-operated on the caregiver's device. During acute sensory meltdowns or verbal shutdowns, operating a phone is too difficult. The caregiver opens Sotto, enters Partner Mode, flips the phone 180° (`🔄`) to show giant text, and the individual taps **Yes / No / Wait / Repeat** (or **Not sure / Stop**). Direct binary choice pinpoints the problem without navigating a complex tree.
+  Caregiver-operated on the caregiver's device. During acute sensory meltdowns or verbal shutdowns, operating a phone is too difficult. The caregiver opens Sotto, enters Partner Mode, flips the phone 180° to show giant text, and the individual responds via **Yes / No / Wait / Repeat** (or **Not sure / Stop**). Direct binary choice pinpoints the problem without navigating a complex tree.
 
 > **Medical Disclaimer:** Sotto is not a medical device and does not provide medical advice, diagnosis, or treatment. It is an assistive communication tool.
 
@@ -42,19 +42,22 @@ We use Sotto in two distinct modes:
 ## Key Features
 
 ### 1. Direct Yes/No Crisis Navigation & Post-Crisis Explorer (Caregiver Mode)
-- **Two-Way Partner Mode & 180° Flip (`🤝`)**: Immediate crisis support for acute meltdowns and verbal shutdowns. Caregivers speak naturally or pick preset questions, flip the display 180° on a table, and the individual responds with one tap on huge 80dp+ targets (`Yes`, `No`, `Wait`, `Repeat` / `Not sure`, `Stop`) with instant voice confirmation. Zero cognitive load.
-- **Why Finder Post-Crisis Explorer (`🧭`)**: When distress triggers are unknown, Why Finder provides a gentle, post-crisis binary discovery tree to systematically uncover hidden physical discomfort (with body map locator), sensory overload, emotional fatigue, or routine disruptions without demanding open-ended answers.
-- **Private Pattern Log & 30-Day Trends**: Automatically logs resolved crisis events locally in private app storage. Highlights top 30-day root-cause patterns and peak time-of-day clusters to help families identify recurring environmental stressors.
-- **Customizable Inquiry Tree (`🌳`)**: Personalize questions and areas with voice dictation (`🎤`), sequence reordering, and one-tap defaults reset.
+- **Two-Way Partner Mode & Animated 180° Flip**: Immediate crisis support for acute meltdowns and verbal shutdowns. Caregivers speak naturally or pick preset questions, flip the display 180° with smooth animated perspective, and the individual responds with one tap on elevated 80dp+ tactile targets (`Yes`, `No`, `Wait`, `Repeat` / `Not sure`, `Stop`) with instant voice confirmation. Zero cognitive load.
+- **Sotto Partner Quick Settings Tile**: Direct 1-tap launch into Partner Mode in under 3 seconds from the Android notification shade.
+- **Why Finder Post-Crisis Explorer**: When distress triggers are unknown, Why Finder provides a gentle, post-crisis binary discovery tree to systematically uncover hidden physical discomfort (with body map locator), sensory overload, emotional fatigue, or routine disruptions without demanding open-ended answers.
+- **Private Pattern Log & 30-Day Trends**: Automatically logs resolved crisis events locally in private app storage with 1-tap post-resolution trigger chips (`Pain`, `Noise`, `Task`, `Emotion`, `Other`). Highlights top 30-day root-cause patterns and peak time-of-day clusters to help families identify recurring environmental stressors.
+- **Customizable Inquiry Tree**: Personalize questions and areas with voice dictation, sequence reordering, and one-tap defaults reset.
 
 ### 2. Dignified Self-Expression (AAC Phrase Board)
-- **Low-Stimulus UI & Sensory Color Themes**: Curated sensory-friendly color palettes accessible from Voice & Language Settings (`Appearance` section) to accommodate neurodivergent needs, photophobia, and astigmatism halation while upholding WCAG 2.1 AAA contrast: **Charcoal** (default low-stimulus dark neutral), **OLED Pure Black** (maximum contrast and power efficiency), **Warm Amber / Low Strain** (low blue light dark sepia), **Slate Navy** (calm focus), and **Soft Parchment** (anti-halation muted daylight).
+- **Picture-in-Picture (PiP) AAC Communicator**: Low-friction floating AAC mode enabling continuous Yes/No/Wait communication while navigating maps, videos, or external apps.
+- **Low-Stimulus UI & Sensory Color Themes**: Curated sensory-friendly color palettes accessible from Settings (Appearance) to accommodate neurodivergent needs, photophobia, and astigmatism halation while upholding WCAG 2.1 AAA contrast: **Charcoal** (default low-stimulus dark neutral), **OLED Pure Black** (maximum contrast and power efficiency), **Warm Amber / Low Strain** (low blue light dark sepia), **Slate Navy** (calm focus), and **Soft Parchment** (anti-halation muted daylight).
 - **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
-- **Safety Bystander Card**: Dedicated full-width hero card for non-verbal episodes and shutdowns. Features a distinct `🛡️ Safety` badge, digit-by-digit phone number TTS formatting so emergency numbers are read naturally, and a specialized fullscreen view with high-contrast amber styling (`#251E14` / `#FFB74D`) for bystanders, doctors, or first responders.
-- **Multi-Line Quick-Speak Bar & Card Saving**: Spontaneous communication bar docked at the bottom with multi-line text input (1 to 4 lines), instant speech (`🔊`), fullscreen expansion (`⛶`), voice dictation (`🎤`), smart clear toggle (`✕`), and 1-tap card saving (`+`).
-- **Contextual Categories & Reordering**: Filter cards by situation (**Safety**, **Needs**, **Social**, **Care**, **General**), or customize your own categories with fine-motor single-step ▲/▼ reordering and safe fallback reassignment upon deletion.
+- **Safety Bystander Card**: Dedicated full-width hero card for non-verbal episodes and shutdowns. Features a distinct Safety badge, digit-by-digit phone number TTS formatting so emergency numbers are read naturally, and a specialized fullscreen view with high-contrast amber styling for bystanders, doctors, or first responders.
+- **Single-Row QuickSpeak Dock Capsule**: Streamlined ~56dp single-row dock capsule with inline speech, fullscreen expansion, voice dictation, smart clear toggle, and 1-tap card saving.
+- **Compact Card Density & Contextual Categories**: User-configurable compact card layout option (`1.25:1` aspect ratio) saving +25% screen space; filter cards by situation (**Safety**, **Needs**, **Social**, **Care**, **General**), or customize your own categories with fine-motor single-step reordering and safe fallback reassignment upon deletion.
+- **Categorized 3-Tab Settings**: Clean Material 3 tabs (Voice & Speech, Appearance & Safety, Data & Backup) with vector iconography replacing legacy emoji headers.
 - **High-Visibility Fullscreen**: Long-press any card to show giant text for silent, readable communication in loud spaces.
-- **Attention Chime & Haptics**: Built-in two-tone musical chime (D5 at 587.33 Hz for 90ms followed by A5 at 880.00 Hz for 160ms with harmonic overtone and exponential decay) and haptic vibration alert to capture listener attention before speech begins.
+- **Attention Chime & Haptics**: Built-in two-tone musical chime and haptic vibration alert to capture listener attention before speech begins.
 - **Dual-Language & On-Device Translation**: Display cards in one language while speaking in another, with 100% offline ML Kit models.
 
 ### 3. Privacy & Offline Guarantee
@@ -101,9 +104,13 @@ Sotto/
 │   │   │   ├── Phrase.kt           # Phrase item, category, & emergency flags
 │   │   │   ├── VoiceSettings.kt    # Voice configuration & sensory theme presets
 │   │   │   └── WhyFinder.kt        # Question tree, node navigation & crisis log
+│   │   ├── service/                # System services
+│   │   │   └── EmergencyTileService.kt # Sotto Partner Quick Settings notification shade tile
 │   │   ├── ui/
-│   │   │   ├── conversation/       # Two-Way Partner Mode dialogs & 180° flip HUD
-│   │   │   ├── main/               # Main phrase board, Quick-Speak bar, QR dialogs & settings
+│   │   │   ├── category/           # Category management bottom sheet
+│   │   │   ├── conversation/       # Two-Way Partner Mode dialogs & animated 180° flip HUD
+│   │   │   ├── main/               # Main phrase board, QuickSpeak capsule, QR dialogs & settings
+│   │   │   ├── pip/                # Picture-in-Picture floating quick communicator
 │   │   │   ├── theme/              # Material 3 sensory themes (Charcoal, OLED, Amber, Navy, Parchment)
 │   │   │   └── whyfinder/          # Why Finder crisis inquiry dialogs & tree editor
 │   │   └── util/                   # Offline utilities

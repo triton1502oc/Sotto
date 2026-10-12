@@ -1,7 +1,7 @@
 # Language & Localization
 
 ### TL;DR
-- **First Launch**: 9 default cards are seeded in English or Indonesian based on device locale and saved to local storage (`SharedPreferences`).
+- **First Launch**: 14 default cards are seeded in English or Indonesian based on device locale and saved to local storage (`SharedPreferences`).
 - **Changing App Language (Settings)**: Changes UI labels and default TTS voice. Existing cards **do not change** to protect user edits, but Sotto auto-detects their language so TTS still pronounces them correctly.
 - **Dual-Language Switcher (`EN` ⇄ `ID` on Home)**: Tapping cards while `ID` is active translates English cards into Indonesian offline (ML Kit) and speaks Indonesian.
 
@@ -41,7 +41,7 @@ There are two distinct language features in Sotto:
 
 ### C. Offline Readiness & Voice Data
 - **Translation Models**: Downloaded once (~30 MB) and kept 100% offline via ML Kit.
-- **TTS Voice Packs**: Settings detects if high-quality offline voice data is installed for the target language, providing a 1-tap shortcut to system TTS download settings if missing.
+- **TTS Voice Packs**: Voice dropdown includes a direct "Add more voices in Android Settings…" action to install additional system voice packs.
 
 ---
 

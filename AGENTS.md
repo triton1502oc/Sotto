@@ -40,3 +40,9 @@ Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for:
    - **Secure Code**: Maintain 100% offline privacy guarantees (zero covert analytics/leaks), sanitize file/clipboard imports, and adhere to secure Android development standards.
 10. **Telemetry for New Features**:
     Every newly added user-facing feature or configurable capability MUST include corresponding privacy-preserving, opt-in telemetry via `UsabilityTracker` (e.g., activation marker, anonymous usage count, or state snapshot). Telemetry must strictly remain anonymous, zero PII/content, and gated behind user consent (`shareUsabilityMetrics`).
+11. **Documentation Governance (Zero Slop & Grounded Truth)**:
+    - **Grounded & Verifiable**: Base documentation strictly on verified code, tests, and actual behaviors. Never extrapolate or assume unbuilt features, flags, or parameters.
+    - **Surgical Diffs**: Only edit sections directly affected by code changes. Never rewrite whole documents or alter established structure and human tone.
+    - **High Signal, Low Stimulus**: Strip introductory filler, conversational throat-clearing, and boilerplate. Always lead with a concise `TL;DR` or direct imperative steps.
+    - **Co-Location**: Always update relevant documentation in the same commit or PR as the corresponding feature or bugfix to prevent documentation drift.
+

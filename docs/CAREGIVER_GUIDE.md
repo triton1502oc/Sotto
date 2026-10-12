@@ -1,7 +1,7 @@
 # Sotto User & Caregiver Guide
 
 ### TL;DR
-Sotto serves a vital dual mission: a calm, low-cognitive-load **Partner Mode** (`🤝`)—combining an immediate two-way receptive crisis check-in HUD and guided **Why Finder** root-cause investigation—for caregivers, therapists, and family members, paired with a dignity-first AAC speech board for autistic individuals, non-speaking users, and anyone with unclear or fatigued speech.
+Sotto serves a vital dual mission: a calm, low-cognitive-load **Partner Mode**—combining an immediate two-way receptive crisis check-in HUD and guided **Why Finder** root-cause investigation—for caregivers, therapists, and family members, paired with a dignity-first AAC speech board for autistic individuals, non-speaking users, and anyone with unclear or fatigued speech.
 
 ---
 
@@ -20,45 +20,48 @@ Sotto (*"under one's breath"*) is designed for sensory-sensitive communication a
                       │                                        │
         ┌─────────────┴─────────────┐            ┌─────────────┴─────────────┐
         ▼                           ▼            ▼                           ▼
- 🤝 PARTNER MODE (Caregiver Hub)          🗣️ SELF-ADVOCACY (Daily AAC)
- ├── Talk Tab: Crisis Check-in HUD & Mic  ├── Instant 1-Tap Phrase Cards
- ├── 180° Face-to-Face Screen Flip        ├── Safety Bystander Hero Card
- ├── 4-Card Dignified Response Docks      ├── Quick-Speak Bar & Dictation
- └── Guided Tab: Root-Cause Decision Tree └── Giant High-Contrast Fullscreen
+  PARTNER MODE (Caregiver Hub)             SELF-ADVOCACY (Daily AAC)
+  ├── Talk Tab: Crisis Check-in HUD & Mic  ├── Instant 1-Tap Phrase Cards
+  ├── 180° Face-to-Face Smooth Flip        ├── Safety Bystander Hero Card
+  ├── 4-Card Tactile Response Dock         ├── Single-Row QuickSpeak Capsule
+  └── Guided Tab: Root-Cause Decision Tree └── Floating PiP Communicator
 ```
 
 ---
 
-## 2. Partner Mode: Immediate Crisis Check-in (`🤝`)
+## 2. Partner Mode: Immediate Crisis Check-in
 
-When sensory overload, verbal shutdowns, cognitive freezes, or acute panic occur, processing multi-step questions causes **demand fatigue** and worsens distress. **Two-Way Partner Mode (Talk / Speak tab)** is Sotto's primary front-line tool for immediate crisis navigation and calm communication.
+When sensory overload, verbal shutdowns, cognitive freezes, or acute panic occur, processing multi-step questions causes **demand fatigue** and worsens distress. **Two-Way Partner Mode (Talk tab)** is Sotto's primary front-line tool for immediate crisis navigation and calm communication.
 
 ```
 Caregiver asks 1 direct question ──► Giant text on screen ──► Individual taps 1 of 4 replies
-(Voice Dictation or Preset Card)      (Can be flipped 180°)     (Large 1-Tap Tactile Dock)
+(Voice Dictation or Preset Card)     (Smooth 180° Flip)       (80dp+ Tactile Dock with Haptics)
 ```
 
 > [!IMPORTANT]
-> **Caregiver Rule of Thumb: Speak vs. Guided**
-> - **During Peak Meltdown or Acute Crisis**: Use **Talk / Speak (`💬`)**. Ask one direct question (*"Do you want to leave?"*, *"Is it too loud?"*). Do not make an overwhelmed person navigate a multi-level tree.
-> - **When Trigger is Unknown or After Calming Down**: Use **Guided (`🧭`)**. Methodically investigate physical discomfort, body regions, sensory triggers, or routine changes.
+> **Caregiver Rule of Thumb: Talk vs. Guided**
+> - **During Peak Meltdown or Acute Crisis**: Use **Talk Mode**. Ask one direct question (*"Do you want to leave?"*, *"Is it too loud?"*). Do not make an overwhelmed person navigate a multi-level tree.
+> - **When Trigger is Unknown or After Calming Down**: Use **Guided Mode**. Methodically investigate physical discomfort, body regions, sensory triggers, or routine changes.
 
 ### How to Use Talk Mode During an Emergency Step-by-Step
 
-1. **Open Partner Mode**: Tap the handshake icon (`🤝`) in the top app bar. Sotto lands directly on the **Talk** tab.
+1. **Open Partner Mode (<3s Launch)**:
+   - Tap **Partner Mode** in the top app bar, or tap the **Sotto Partner** Quick Settings tile directly from the Android notification shade.
 2. **Present One Urgent Question**:
-   - **Speak Naturally (`🎤 Mic`)**: Tap the mic button. Sotto transcribes your voice in real time into giant high-contrast text. Tap again or pause to finish.
-   - **Preset Check-in Cards (`📋 Questions`)**: Tap Questions to pick instant comfort and binary checks (*"Are you in pain?"*, *"Do you need water?"*, *"I need a quiet space."*).
-   - **Type Manually (`⌨️ Type`)**: Type directly if ambient noise is too loud for speech recognition.
-3. **Vocalize with Read Aloud (`🔊 Speak`)**:
-   - If the individual has their eyes closed or head down, tap **`🔊 Speak`** to vocalize the prompt through the phone's speaker.
-4. **Face-to-Face 180° Flip (`🔄 Flip`)**:
-   - Rest the phone on a table or between you and tap **`🔄 Flip`**.
-   - The question text and the 4 response buttons flip upside down (facing the person across from you right-side up), while the caregiver controls remain facing you.
-5. **Dignified 4-Button Rapid Response**:
-   - The individual taps one large, high-contrast button:
-     - `✓ Yes` • `✕ No` • `⏳ Wait` • `🔁 Repeat` (or `? Not sure` • `⏹ Stop` in Guided)
-   - Instant offline TTS voice confirmation plays aloud, haptic feedback pulses on the phone, and a visual confirmation badge appears.
+   - **Speak Naturally (Mic)**: Tap the mic button. Sotto transcribes your voice in real time into giant high-contrast text. Tap again or pause to finish.
+   - **Preset Check-in Cards (Questions)**: Tap Questions to pick instant comfort and binary checks (*"Are you in pain?"*, *"Do you need water?"*, *"I need a quiet space."*).
+   - **Type Manually (Type)**: Type directly if ambient noise is too loud for speech recognition.
+3. **Vocalize with Read Aloud (Speak)**:
+   - If the individual has their eyes closed or head down, tap **Speak** to vocalize the prompt through the phone's speaker.
+4. **Face-to-Face 180° Flip**:
+   - Rest the phone on a table or between you and tap **Flip**.
+   - The question text and the 4 response cards smoothly rotate 180° to face the person across from you, while caregiver controls remain facing you.
+5. **Tactile 4-Button Rapid Response**:
+   - The individual taps one large, high-contrast elevated button:
+     - `Yes` • `No` • `Wait` • `Repeat` (or `Not sure` • `Stop` in Guided)
+   - Instant offline TTS voice confirmation plays aloud, tactile haptics pulse, and a visual confirmation badge appears.
+6. **1-Tap Post-Crisis Pattern Logger**:
+   - Following resolution, an optional horizontal strip of trigger chips (`Pain`, `Noise`, `Task`, `Emotion`, `Other`) lets caregivers record the root cause to local Why Log with a single tap.
 
 ---
 
@@ -143,32 +146,33 @@ For autistic teens and adults, as well as individuals with unclear, slurred, or 
 - **Hero Card**: The prominent amber/gold safety card displays your local area and emergency contact directly to bystanders or first responders.
 - **Fullscreen Mode**: Long-press any card (or tap fullscreen on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or medical personnel.
 
-### C. Quick-Speak Input Bar
-- **Type Spontaneously**: Tap the bottom input bar to type any phrase. Sentences automatically expand up to 4 lines for easy editing.
-- **Speak (`🔊`)**: Tap the speaker icon to vocalize what you typed.
-- **Save as Card (`+`)**: While typing, tap the `+` button to permanently save your phrase as a reusable card on your phrase board.
-- **Voice Dictation (`🎤`)**: When the input bar is empty, tap the microphone to dictate phrases by voice.
+### C. Single-Row QuickSpeak Dock Capsule
+- **Type Spontaneously**: Tap the docked input field (~56dp) to compose any phrase.
+- **Speak**: Tap the filled speaker button to vocalize what you typed.
+- **Save as Card**: While typing, tap the `+` button to save your phrase as a reusable card.
+- **Voice Dictation**: Tap the microphone button to dictate phrases hands-free.
+- **Fullscreen**: Tap the expand button for instant giant readable text.
+
+### D. Floating Picture-in-Picture (PiP) Communicator
+- Keep vital crisis affirmations (`Yes`, `No`, `Wait`) accessible as a floating overlay above maps, videos, or external tasks.
+- Toggle PiP directly from the top app bar icon or enable auto-enter in Settings.
 
 ---
 
 ## 7. Customizing Phrases & Settings
 
-### Managing Cards (`[✏️ Edit List]`)
-1. Tap **`[✏️ Edit List]`** in the top right.
-2. The button transforms to **`[✓ Done]`** and a floating **`+`** button appears:
-   - **Add a Card**: Tap the **`+`** button at the bottom right. Enter card text, category, and optional alternative spoken text.
-   - **Edit a Card**: Tap any existing card to change its text, category, or toggle safety status.
-   - **Delete a Card**: Inside the edit dialog, tap the red **Delete** button.
-3. Tap **`[✓ Done]`** when finished.
+### Managing Cards
+1. Tap **Edit** in the top bar. The button transitions to a **Done** pill and a floating `+` action appears.
+2. **Add a Card**: Tap the floating `+` button at the bottom right. Enter card text, category, and optional alternative spoken text.
+3. **Edit a Card**: Tap any existing card to change its text, category, or toggle safety status.
+4. **Delete a Card**: Inside the edit dialog, tap **Delete**.
+5. Tap **Done** when finished.
 
-### Voice & App Settings (`⚙️`)
-Tap the gear icon (`⚙️`) in the top app bar to adjust:
-- **Sensory Color Themes**: Select comfortable visual palettes (System Default, OLED Pure Black, Soft Sage, Warm Amber, or High Contrast) to match sensory sensitivities.
-- **Speech Speed & Pitch**: Slow down speech for clarity or raise/lower voice pitch.
-- **Attention Alert Chime**: Play a polite alert chime before speaking to capture listener attention in noisy spaces.
-- **Dual-Language & On-Device Translation**: Display cards in English while speaking in Indonesian (or vice versa), powered by 100% offline ML Kit models.
-- **Backup & Restore**: Export or import your phrase library, customized Why tree, and optional Why log.
-- **Anonymous Usability Telemetry**: Review or toggle strictly opt-in anonymous interaction telemetry (zero text or speech collected). Preview the queued payload anytime.
+### Categorized 3-Tab Settings
+Tap the settings icon in the top app bar to configure:
+- **Voice & Speech**: Speech speed, voice pitch, voice picker with Android Settings shortcut, attention chime, and dual-language translation.
+- **Appearance & Safety**: Sensory color themes (Charcoal, OLED Pure Black, Warm Amber, Slate Navy, Soft Parchment), card layout density (Square default vs Compact), and safety bystander card visibility.
+- **Data & Backup**: Instant offline QR code deck sharing, JSON v2 selective backup & restore, Why Log historical insights, Why Tree editor, and optional usability telemetry.
 
 ---
 
