@@ -307,14 +307,24 @@ fun TwoWayConversationDialog(
     val ttsRepeat = stringResource(R.string.response_tts_repeat)
     val ttsWait = stringResource(R.string.response_tts_wait)
 
-    fun handleUserResponse(displayText: String, ttsText: String) {
+    fun handleUserResponse(displayText: String, ttsText: String, responseOutcome: String? = null) {
         vibrateFeedback()
         lastReply = displayText
+        if (responseOutcome != null) {
+            UsabilityTracker.startIntent("partner_response")
+            UsabilityTracker.endIntent(context, "partner_response", outcome = responseOutcome)
+        }
         if (activeTab == CaregiverTab.FREEFORM && (displayText == strYes || displayText == strNo)) {
             showPostResolutionPrompt = true
         }
         onSpeakResponse(ttsText)
     }
+
+    val flipCardRotation by animateFloatAsState(
+        targetValue = if (isFlipped) 180f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "flipCardRotation"
+    )
 
     Dialog(
         onDismissRequest = {
@@ -344,7 +354,7 @@ fun TwoWayConversationDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .graphicsLayer { rotationZ = 180f }
+                            .graphicsLayer { rotationZ = flipCardRotation }
                     ) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -377,18 +387,18 @@ fun TwoWayConversationDialog(
                                 activeTab = activeTab,
                                 whyState = whyState,
                                 onYes = {
-                                    handleUserResponse(strYes, strYes)
+                                    handleUserResponse(strYes, strYes, "yes")
                                     if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerYes()
                                 },
                                 onNo = {
-                                    handleUserResponse(strNo, strNo)
+                                    handleUserResponse(strNo, strNo, "no")
                                     if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNo()
                                 },
                                 onWait = {
-                                    handleUserResponse(strWait, ttsWait)
+                                    handleUserResponse(strWait, ttsWait, "wait")
                                 },
                                 onRepeat = {
-                                    handleUserResponse(strRepeat, ttsRepeat)
+                                    handleUserResponse(strRepeat, ttsRepeat, "repeat")
                                 },
                                 onNotSure = {
                                     handleUserResponse(strNotSure, strNotSure)
@@ -462,7 +472,11 @@ fun TwoWayConversationDialog(
                         onTabChange = { activeTab = it },
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = true,
-                        onToggleFlip = { isFlipped = false },
+                        onToggleFlip = {
+                            isFlipped = false
+                            UsabilityTracker.startIntent("partner_flip")
+                            UsabilityTracker.endIntent(context, "partner_flip", outcome = "unflipped")
+                        },
                         onToggleTriggerLogger = { showPostResolutionPrompt = !showPostResolutionPrompt },
                         canSpeakPrompt = whyPromptText.isNotBlank(),
                         onSpeakPrompt = { onSpeakResponse(whyPromptText) },
@@ -529,18 +543,18 @@ fun TwoWayConversationDialog(
                         activeTab = activeTab,
                         whyState = whyState,
                         onYes = {
-                            handleUserResponse(strYes, strYes)
+                            handleUserResponse(strYes, strYes, "yes")
                             if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerYes()
                         },
                         onNo = {
-                            handleUserResponse(strNo, strNo)
+                            handleUserResponse(strNo, strNo, "no")
                             if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNo()
                         },
                         onWait = {
-                            handleUserResponse(strWait, ttsWait)
+                            handleUserResponse(strWait, ttsWait, "wait")
                         },
                         onRepeat = {
-                            handleUserResponse(strRepeat, ttsRepeat)
+                            handleUserResponse(strRepeat, ttsRepeat, "repeat")
                         },
                         onNotSure = {
                             handleUserResponse(strNotSure, strNotSure)
@@ -612,7 +626,11 @@ fun TwoWayConversationDialog(
                         onTabChange = { activeTab = it },
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = false,
-                        onToggleFlip = { isFlipped = true },
+                        onToggleFlip = {
+                            isFlipped = true
+                            UsabilityTracker.startIntent("partner_flip")
+                            UsabilityTracker.endIntent(context, "partner_flip", outcome = "flipped")
+                        },
                         onToggleTriggerLogger = { showPostResolutionPrompt = !showPostResolutionPrompt },
                         canSpeakPrompt = whyPromptText.isNotBlank(),
                         onSpeakPrompt = { onSpeakResponse(whyPromptText) },
@@ -1288,103 +1306,129 @@ private fun CaregiverDisplayCard(
     onReadAloudPrompt: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(18.dp),
-        contentAlignment = Alignment.Center
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        shadowElevation = 1.dp
     ) {
-        if (activeTab == CaregiverTab.WHY_FINDER && whyState is WhyFinderState.Finished) {
-            // Finished Why Finder State
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(18.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (activeTab == CaregiverTab.WHY_FINDER && whyState is WhyFinderState.Finished) {
+                // Finished Why Finder State
                 Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = if (whyState.outcome == WhyOutcome.FOUND) "🎯 " + stringResource(R.string.why_finder_found_title)
-                        else if (whyState.outcome == WhyOutcome.STOPPED) "⏸ " + stringResource(R.string.why_finder_stopped_title)
-                        else "🔍 " + stringResource(R.string.why_finder_not_found_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
-                    )
-
-                    if (whyState.outcome == WhyOutcome.FOUND && !whyState.causeText.isNullOrBlank()) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Column(modifier = Modifier.padding(14.dp)) {
-                                Text(
-                                    text = whyState.causeText,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                                if (!whyState.bodyPart.isNullOrBlank()) {
-                                    val context = LocalContext.current
-                                    val partLabel = getBodyRegionLabel(whyState.bodyPart, context)
-                                    val intensityStr = whyState.intensity?.let { " • Intensity: $it/5" } ?: ""
+                            val (iconRes, titleRes) = when (whyState.outcome) {
+                                WhyOutcome.FOUND -> R.drawable.ic_check_bold to R.string.why_finder_found_title
+                                WhyOutcome.STOPPED -> R.drawable.ic_close_bold to R.string.why_finder_stopped_title
+                                else -> R.drawable.ic_explore to R.string.why_finder_not_found_title
+                            }
+                            Icon(
+                                painter = painterResource(iconRes),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = stringResource(titleRes),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        if (whyState.outcome == WhyOutcome.FOUND && !whyState.causeText.isNullOrBlank()) {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = "$partLabel$intensityStr",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                        text = whyState.causeText,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
+                                    if (!whyState.bodyPart.isNullOrBlank()) {
+                                        val context = LocalContext.current
+                                        val partLabel = getBodyRegionLabel(whyState.bodyPart, context)
+                                        val intensityStr = whyState.intensity?.let { " • Intensity: $it/5" } ?: ""
+                                        Text(
+                                            text = "$partLabel$intensityStr",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilledTonalButton(
+                            onClick = onRestartWhyTree,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_refresh),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(stringResource(R.string.action_restart))
+                        }
+                        Button(
+                            onClick = onFinish,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(stringResource(R.string.action_done))
+                        }
+                    }
+                }
+            } else {
+                // Active Prompt State (Why Finder Question or Freeform Prompt)
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    FilledTonalButton(
-                        onClick = onRestartWhyTree,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("🔄 " + stringResource(R.string.action_restart))
-                    }
-                    Button(
-                        onClick = onFinish,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(stringResource(R.string.action_done))
-                    }
+                    StatusBadge(lastReply = lastReply, isListening = isListening)
+
+                    val prompt = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
+                    GiantPromptDisplay(
+                        activeText = prompt,
+                        isListening = if (activeTab == CaregiverTab.FREEFORM) isListening else false,
+                        onClick = if (prompt.isNotBlank()) onReadAloudPrompt else null
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
-            }
-        } else {
-            // Active Prompt State (Why Finder Question or Freeform Prompt)
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                StatusBadge(lastReply = lastReply, isListening = isListening)
-
-                val prompt = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
-                GiantPromptDisplay(
-                    activeText = prompt,
-                    isListening = if (activeTab == CaregiverTab.FREEFORM) isListening else false,
-                    onClick = if (prompt.isNotBlank()) onReadAloudPrompt else null
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }
@@ -1398,6 +1442,8 @@ private fun UnifiedFourCardResponseDock(
     onSecondaryLeft: () -> Unit,
     secondaryRightText: String,
     onSecondaryRight: () -> Unit,
+    secondaryLeftIcon: Int? = null,
+    secondaryRightIcon: Int? = null,
     secondaryLeftColors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = SottoColors.NeutralDarkContainer,
         contentColor = SottoColors.NeutralDarkText
@@ -1432,21 +1478,32 @@ private fun UnifiedFourCardResponseDock(
                     .height(80.dp)
                     .semantics {
                         role = Role.Button
-                        contentDescription = "✓ $strYes"
+                        contentDescription = strYes
                     },
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = SottoColors.SuccessContainer,
                     contentColor = SottoColors.SuccessText
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
-                Text(
-                    text = "✓ $strYes",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check_bold),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = strYes,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             Button(
@@ -1460,21 +1517,32 @@ private fun UnifiedFourCardResponseDock(
                     .height(80.dp)
                     .semantics {
                         role = Role.Button
-                        contentDescription = "✕ $strNo"
+                        contentDescription = strNo
                     },
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = SottoColors.CrisisStopContainer,
                     contentColor = SottoColors.CrisisStopText
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
-                Text(
-                    text = "✕ $strNo",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close_bold),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = strNo,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
 
@@ -1496,15 +1564,28 @@ private fun UnifiedFourCardResponseDock(
                         role = Role.Button
                         contentDescription = secondaryLeftText
                     },
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = secondaryLeftColors
             ) {
-                Text(
-                    text = secondaryLeftText,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (secondaryLeftIcon != null) {
+                        Icon(
+                            painter = painterResource(secondaryLeftIcon),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text(
+                        text = secondaryLeftText,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             Button(
@@ -1520,15 +1601,28 @@ private fun UnifiedFourCardResponseDock(
                         role = Role.Button
                         contentDescription = secondaryRightText
                     },
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = secondaryRightColors
             ) {
-                Text(
-                    text = secondaryRightText,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (secondaryRightIcon != null) {
+                        Icon(
+                            painter = painterResource(secondaryRightIcon),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text(
+                        text = secondaryRightText,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -1576,9 +1670,9 @@ private fun CaregiverResponseDock(
                 UnifiedFourCardResponseDock(
                     onYes = onYes,
                     onNo = onNo,
-                    secondaryLeftText = "? $strNotSure",
+                    secondaryLeftText = strNotSure,
                     onSecondaryLeft = onNotSure,
-                    secondaryRightText = "⏹ $strStop",
+                    secondaryRightText = strStop,
                     onSecondaryRight = onStop,
                     secondaryLeftColors = ButtonDefaults.buttonColors(
                         containerColor = SottoColors.WarningHighContainer,
@@ -1597,10 +1691,12 @@ private fun CaregiverResponseDock(
         UnifiedFourCardResponseDock(
             onYes = onYes,
             onNo = onNo,
-            secondaryLeftText = "⏳ $strWait",
+            secondaryLeftText = strWait,
             onSecondaryLeft = onWait,
-            secondaryRightText = "🔁 $strRepeat",
+            secondaryRightText = strRepeat,
             onSecondaryRight = onRepeat,
+            secondaryLeftIcon = R.drawable.ic_hourglass,
+            secondaryRightIcon = R.drawable.ic_replay,
             secondaryLeftColors = ButtonDefaults.buttonColors(
                 containerColor = SottoColors.NeutralDarkContainer,
                 contentColor = SottoColors.NeutralDarkText
@@ -1620,6 +1716,7 @@ private fun PostResolutionTriggerLogger(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -1629,55 +1726,72 @@ private fun PostResolutionTriggerLogger(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "📝 " + stringResource(R.string.label_log_trigger),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_note_alt),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(R.string.label_log_trigger),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 IconButton(
                     onClick = onDismiss,
                     modifier = Modifier.size(24.dp)
                 ) {
-                    Text("✕", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = stringResource(R.string.cd_dismiss),
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                val triggers = listOf(
-                    "Pain" to stringResource(R.string.trigger_pain),
-                    "Noise" to stringResource(R.string.trigger_noise),
-                    "Task" to stringResource(R.string.trigger_task),
-                    "Emotion" to stringResource(R.string.trigger_emotion),
-                    "Other" to stringResource(R.string.trigger_other)
-                )
+            val triggers = listOf(
+                "Pain" to stringResource(R.string.trigger_pain),
+                "Noise" to stringResource(R.string.trigger_noise),
+                "Task" to stringResource(R.string.trigger_task),
+                "Emotion" to stringResource(R.string.trigger_emotion),
+                "Other" to stringResource(R.string.trigger_other)
+            )
 
-                triggers.forEach { (key, label) ->
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 2.dp)
+            ) {
+                items(triggers) { (key, label) ->
                     FilledTonalButton(
-                        onClick = { onLogTrigger(key) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(38.dp),
-                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 2.dp),
+                        onClick = {
+                            UsabilityTracker.startIntent("trigger_logged")
+                            UsabilityTracker.endIntent(context, "trigger_logged", outcome = key.lowercase(Locale.ROOT))
+                            onLogTrigger(key)
+                        },
+                        modifier = Modifier.heightIn(min = 38.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
                             text = label,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }

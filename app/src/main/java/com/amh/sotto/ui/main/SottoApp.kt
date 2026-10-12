@@ -17,6 +17,7 @@ import android.speech.tts.Voice
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -126,7 +127,8 @@ fun SottoApp(
     onPmfSurveyAnswered: (String, String, String) -> Unit = { _, _, _ -> },
     onPmfSurveyDismissed: () -> Unit = {},
     initialOpenPartnerMode: Boolean = false,
-    onPartnerModeOpened: () -> Unit = {}
+    onPartnerModeOpened: () -> Unit = {},
+    onEnterPip: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
@@ -395,6 +397,7 @@ fun SottoApp(
                             }
                         }
                         val listenModeCd = stringResource(R.string.cd_listen_mode)
+                        // Partner Mode CTA
                         IconButton(
                             onClick = {
                                 UsabilityTracker.startIntent("TwoWay")
@@ -402,7 +405,36 @@ fun SottoApp(
                             },
                             modifier = Modifier.semantics { contentDescription = listenModeCd }
                         ) {
-                            Text("🤝", fontSize = 20.sp)
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_partner_mode),
+                                        contentDescription = listenModeCd,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        // Picture-in-Picture Trigger
+                        if (voiceSettings.enablePip) {
+                            val pipCd = stringResource(R.string.cd_enter_pip)
+                            IconButton(
+                                onClick = onEnterPip,
+                                modifier = Modifier.semantics { contentDescription = pipCd }
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_pip),
+                                    contentDescription = pipCd,
+                                    modifier = Modifier.size(22.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
 
                         // Voice & App Settings (Always visible)
@@ -416,8 +448,13 @@ fun SottoApp(
 
                         // Edit List / Done Pill Button
                         Surface(
-                            onClick = { isEditMode = !isEditMode },
-                            shape = RoundedCornerShape(18.dp),
+                            onClick = {
+                                val entering = !isEditMode
+                                isEditMode = entering
+                                UsabilityTracker.startIntent("edit_mode_toggle")
+                                UsabilityTracker.endIntent(context, "edit_mode_toggle", outcome = if (entering) "enter" else "exit")
+                            },
+                            shape = RoundedCornerShape(12.dp),
                             color = if (isEditMode) SottoColors.SuccessGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant,
                             border = BorderStroke(
                                 1.dp,
@@ -427,22 +464,28 @@ fun SottoApp(
                                 .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                                 .padding(start = 4.dp, end = 8.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = if (isEditMode) "✓" else "✏️",
-                                    fontSize = 13.sp,
-                                    color = if (isEditMode) SottoColors.ActiveGreen else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = if (isEditMode) stringResource(R.string.action_done) else stringResource(R.string.action_edit_list),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (isEditMode) SottoColors.ActiveGreen else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            AnimatedContent(
+                                targetState = isEditMode,
+                                label = "editPillTransition"
+                            ) { editModeActive ->
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(if (editModeActive) R.drawable.ic_check else R.drawable.ic_edit),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = if (editModeActive) SottoColors.ActiveGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = if (editModeActive) stringResource(R.string.action_done) else stringResource(R.string.action_edit_list),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (editModeActive) SottoColors.ActiveGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
 
@@ -516,37 +559,20 @@ fun SottoApp(
                             modifier = Modifier.sizeIn(minHeight = 48.dp),
                             leadingIcon = if (isEmergency) {
                                 {
-                                    Text(
-                                        text = "🛡️",
-                                        fontSize = 12.sp
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_shield),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = if (isSelected) SottoColors.EmergencyAccent else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                     )
                                 }
                             } else null,
                             label = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = getCategoryDisplayName(catName),
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                    if (isEditMode && !isProtectedFromRename) {
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = "✏️",
-                                            fontSize = 11.sp
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = getCategoryDisplayName(catName),
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
                             },
-                            trailingIcon = if (isEditMode && !isProtectedFromDelete) {
-                                {
-                                    IconButton(
-                                        onClick = { categoryToDeleteConfirm = catName },
-                                        modifier = Modifier.size(18.dp)
-                                    ) {
-                                        Text("✕", fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
-                                    }
-                                }
-                            } else null,
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = if (isEmergency) SottoColors.EmergencyChipBackground else MaterialTheme.colorScheme.surfaceVariant,
                                 selectedLabelColor = if (isEmergency) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurface,
@@ -563,14 +589,18 @@ fun SottoApp(
                         item {
                             FilterChip(
                                 selected = false,
-                                onClick = { showManageCategoriesDialog = true },
+                                onClick = {
+                                    UsabilityTracker.startIntent("manage_categories_open")
+                                    UsabilityTracker.endIntent(context, "manage_categories_open", outcome = "opened")
+                                    showManageCategoriesDialog = true
+                                },
                                 modifier = Modifier.sizeIn(minHeight = 48.dp),
                                 leadingIcon = {
-                                    Text(
-                                        "↕",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_tune),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 },
                                 label = {
@@ -591,11 +621,11 @@ fun SottoApp(
                                 onClick = { showAddCategoryDialog = true },
                                 modifier = Modifier.sizeIn(minHeight = 48.dp),
                                 leadingIcon = {
-                                    Text(
-                                        "+",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_add),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 },
                                 label = {
@@ -718,7 +748,7 @@ fun SottoApp(
                 fun handleQuickSpeak(text: String) {
                     stopQuickListening()
                     if (text.isBlank()) return
-                    UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "completed", contextTag = "len_${text.length}")
+                    UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "completed", contextTag = "dock_v2 len_${text.length}")
                     if (voiceSettings.showLanguageSwitcher && activeSpeechTarget == "secondary") {
                         isQuickTranslating = true
                         val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
@@ -745,7 +775,7 @@ fun SottoApp(
 
                 fun handleQuickFullscreen(text: String) {
                     if (text.isBlank()) return
-                    UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "shown_fullscreen", contextTag = "len_${text.length}")
+                    UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "shown_fullscreen", contextTag = "dock_v2 len_${text.length}")
                     expandedPhrase = Phrase(text = text, language = LocaleHelper.LANG_AUTO)
                     if (voiceSettings.showLanguageSwitcher) {
                         val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
@@ -766,175 +796,193 @@ fun SottoApp(
                     }
                 }
 
-                Column(
+                val saveCardCd = stringResource(R.string.cd_save_as_card)
+                val showFullscreenCd = stringResource(R.string.cd_show_fullscreen)
+                val quickSpeakCd = stringResource(R.string.cd_quick_speak)
+                val stopVoiceInputCd = stringResource(R.string.cd_stop_voice_input)
+                val clearTextCd = stringResource(R.string.cd_clear_text)
+
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = quickText,
-                        onValueChange = {
-                            if (quickText.isBlank() && it.isNotBlank()) {
-                                UsabilityTracker.startIntent("QuickSpeak")
-                            }
-                            quickText = it
-                        },
-                        placeholder = {
-                            Text(
-                                stringResource(R.string.hint_quick_speak),
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = false,
-                        minLines = 1,
-                        maxLines = 4,
-                        trailingIcon = {
-                            val stopVoiceInputCd = stringResource(R.string.cd_stop_voice_input)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (isQuickListening) {
-                                    IconButton(
-                                        onClick = { stopQuickListening() },
-                                        modifier = Modifier.semantics { contentDescription = stopVoiceInputCd }
-                                    ) {
-                                        Text(
-                                            "⏹",
-                                            fontSize = 18.sp,
-                                            color = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
-                                if (quickText.isNotBlank()) {
-                                    val clearTextCd = stringResource(R.string.cd_clear_text)
-                                    IconButton(
-                                        onClick = {
-                                            stopQuickListening()
-                                            UsabilityTracker.endIntent(
-                                                context,
-                                                "QuickSpeak",
-                                                outcome = "aborted",
-                                                frictionTag = "cleared_text",
-                                                contextTag = "len_${quickText.length}"
-                                            )
-                                            quickText = ""
-                                        },
-                                        modifier = Modifier.semantics { contentDescription = clearTextCd }
-                                    ) {
-                                        Text(
-                                            "✕",
-                                            fontSize = 16.sp,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                        )
-                                    }
-                                } else if (!isQuickListening) {
-                                    IconButton(
-                                        onClick = { toggleQuickListening() },
-                                        modifier = Modifier.semantics { contentDescription = voiceInputPrompt }
-                                    ) {
-                                        Text("🎤", fontSize = 18.sp)
-                                    }
-                                }
-                            }
-                        },
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                stopQuickListening()
-                                if (quickText.isNotBlank()) {
-                                    handleQuickSpeak(quickText.trim())
-                                }
-                            }
-                        ),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
-                    )
-
-                    val saveCardCd = stringResource(R.string.cd_save_as_card)
-                    val showFullscreenCd = stringResource(R.string.cd_show_fullscreen)
-                    val quickSpeakCd = stringResource(R.string.cd_quick_speak)
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Surface(
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 52.dp, max = 56.dp)
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Fullscreen Button
-                            TooltipBox(
-                                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                                tooltip = {
-                                    PlainTooltip {
-                                        Text(showFullscreenCd)
+                            IconButton(
+                                onClick = {
+                                    stopQuickListening()
+                                    if (quickText.isNotBlank()) {
+                                        handleQuickFullscreen(quickText.trim())
                                     }
                                 },
-                                state = rememberTooltipState()
+                                enabled = quickText.isNotBlank(),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .semantics { contentDescription = showFullscreenCd }
                             ) {
-                                IconButton(
-                                    onClick = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_fullscreen),
+                                    contentDescription = showFullscreenCd,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = if (quickText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                )
+                            }
+
+                            TextField(
+                                value = quickText,
+                                onValueChange = {
+                                    if (quickText.isBlank() && it.isNotBlank()) {
+                                        UsabilityTracker.startIntent("QuickSpeak")
+                                    }
+                                    quickText = it
+                                },
+                                placeholder = {
+                                    Text(
+                                        stringResource(R.string.hint_quick_speak),
+                                        fontSize = 14.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    )
+                                },
+                                modifier = Modifier.weight(1f),
+                                singleLine = true,
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
                                         stopQuickListening()
                                         if (quickText.isNotBlank()) {
-                                            handleQuickFullscreen(quickText.trim())
+                                            handleQuickSpeak(quickText.trim())
                                         }
-                                    },
-                                    enabled = quickText.isNotBlank(),
-                                    modifier = Modifier.semantics { contentDescription = showFullscreenCd }
+                                    }
+                                ),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                            )
+
+                            if (isQuickListening) {
+                                IconButton(
+                                    onClick = { stopQuickListening() },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .semantics { contentDescription = stopVoiceInputCd }
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_fullscreen),
-                                        contentDescription = showFullscreenCd,
-                                        modifier = Modifier.size(22.dp),
-                                        tint = if (quickText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    Text(
+                                        "⏹",
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colorScheme.error
                                     )
                                 }
                             }
 
-                            // Save as Card Button (visible when text is entered)
                             if (quickText.isNotBlank()) {
                                 IconButton(
                                     onClick = {
                                         stopQuickListening()
-                                        UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "saved_as_card", contextTag = "len_${quickText.trim().length}")
+                                        UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "saved_as_card", contextTag = "dock_v2 len_${quickText.trim().length}")
                                         initialAddText = quickText.trim()
                                         showAddDialog = true
                                     },
-                                    modifier = Modifier.semantics { contentDescription = saveCardCd }
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .semantics { contentDescription = saveCardCd }
                                 ) {
-                                    Text(
-                                        "+",
-                                        fontSize = 24.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_add),
+                                        contentDescription = saveCardCd,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = {
+                                        stopQuickListening()
+                                        UsabilityTracker.endIntent(
+                                            context,
+                                            "QuickSpeak",
+                                            outcome = "aborted",
+                                            frictionTag = "cleared_text",
+                                            contextTag = "dock_v2 len_${quickText.length}"
+                                        )
+                                        quickText = ""
+                                    },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .semantics { contentDescription = clearTextCd }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_close),
+                                        contentDescription = clearTextCd,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
+                            } else if (!isQuickListening) {
+                                IconButton(
+                                    onClick = { toggleQuickListening() },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .semantics { contentDescription = voiceInputPrompt }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_mic),
+                                        contentDescription = voiceInputPrompt,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                     )
                                 }
                             }
                         }
+                    }
 
-                        // Speak Button
-                        FilledIconButton(
-                            onClick = {
-                                if (quickText.isNotBlank()) {
-                                    handleQuickSpeak(quickText.trim())
-                                }
-                            },
-                            enabled = quickText.isNotBlank() && !isQuickTranslating,
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            modifier = Modifier.semantics { contentDescription = quickSpeakCd }
-                        ) {
-                            if (isQuickTranslating) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(18.dp),
-                                    strokeWidth = 2.dp,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            } else {
-                                Text("🔊", fontSize = 18.sp)
+                    FilledIconButton(
+                        onClick = {
+                            if (quickText.isNotBlank()) {
+                                handleQuickSpeak(quickText.trim())
                             }
+                        },
+                        enabled = quickText.isNotBlank() && !isQuickTranslating,
+                        modifier = Modifier
+                            .size(52.dp)
+                            .semantics { contentDescription = quickSpeakCd },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        if (isQuickTranslating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_volume_up),
+                                contentDescription = quickSpeakCd,
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                     }
                 }
@@ -947,7 +995,10 @@ fun SottoApp(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
-                    Text("+", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_add),
+                        contentDescription = stringResource(R.string.cd_add_phrase)
+                    )
                 }
             }
         }
@@ -981,6 +1032,8 @@ fun SottoApp(
                         .then(
                             if (phrase.isEmergency) {
                                 Modifier.wrapContentHeight()
+                            } else if (voiceSettings.compactCardLayout) {
+                                Modifier.aspectRatio(1.25f)
                             } else {
                                 Modifier.aspectRatio(1f)
                             }
@@ -1087,14 +1140,32 @@ fun SottoApp(
                                             )
                                             .padding(horizontal = 10.dp, vertical = 4.dp)
                                     ) {
-                                        Text(
-                                            text = "🛡️ " + stringResource(R.string.emergency_badge),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = SottoColors.EmergencyAccent
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_shield),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(14.dp),
+                                                tint = SottoColors.EmergencyAccent
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.emergency_badge),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = SottoColors.EmergencyAccent
+                                            )
+                                        }
                                     }
-                                    if (!isEditMode) {
+                                    if (isEditMode) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_drag_indicator),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp),
+                                            tint = SottoColors.EmergencyAccent.copy(alpha = 0.6f)
+                                        )
+                                    } else {
                                         Row(
                                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                                             verticalAlignment = Alignment.CenterVertically
@@ -1114,7 +1185,12 @@ fun SottoApp(
                                                 onClick = { performSpeak(phrase) },
                                                 modifier = Modifier.size(40.dp)
                                             ) {
-                                                Text("🔊", fontSize = 16.sp)
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_volume_up),
+                                                    contentDescription = stringResource(R.string.action_speak),
+                                                    modifier = Modifier.size(20.dp),
+                                                    tint = SottoColors.EmergencyAccent
+                                                )
                                             }
                                         }
                                     }
@@ -1135,7 +1211,12 @@ fun SottoApp(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
-                                        Text("🗣️", fontSize = 12.sp)
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_record_voice_over),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp),
+                                            tint = SottoColors.EmergencyTextSecondary.copy(alpha = 0.8f)
+                                        )
                                         Text(
                                             text = phrase.spokenText,
                                             style = MaterialTheme.typography.bodySmall,
@@ -1151,41 +1232,56 @@ fun SottoApp(
                             val hasCardSpoken = voiceSettings.showLanguageSwitcher &&
                                 !phrase.spokenText.isNullOrBlank() &&
                                 phrase.spokenText != LocaleHelper.LANG_AUTO
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(12.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = phrase.text,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = if (hasCardSpoken) 3 else 4,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                if (hasCardSpoken) {
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        modifier = Modifier.padding(horizontal = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = "🗣️",
-                                            fontSize = 11.sp
-                                        )
-                                        Text(
-                                            text = phrase.spokenText,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                            textAlign = TextAlign.Center,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                if (isEditMode) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_drag_indicator),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(6.dp)
+                                            .size(18.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                                    )
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(if (voiceSettings.compactCardLayout) 8.dp else 12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = phrase.text,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = if (hasCardSpoken) 3 else 4,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    if (hasCardSpoken) {
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            modifier = Modifier.padding(horizontal = 4.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_record_voice_over),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(12.dp),
+                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                            )
+                                            Text(
+                                                text = phrase.spokenText,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
                                     }
                                 }
                             }

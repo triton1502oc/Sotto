@@ -43,6 +43,8 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns false
         every { sharedPreferences.getString("app_theme", VoiceSettings.THEME_CHARCOAL) } returns VoiceSettings.THEME_CHARCOAL
         every { sharedPreferences.getBoolean("show_safety_cards", true) } returns true
+        every { sharedPreferences.getBoolean("compact_card_layout", false) } returns false
+        every { sharedPreferences.getBoolean("enable_pip", true) } returns true
 
         val settings = repository.getVoiceSettings()
 
@@ -55,6 +57,8 @@ class VoiceSettingsRepositoryTest {
         assertEquals(false, settings.shareUsabilityMetrics)
         assertEquals(VoiceSettings.THEME_CHARCOAL, settings.appTheme)
         assertEquals(true, settings.showSafetyCards)
+        assertEquals(false, settings.compactCardLayout)
+        assertEquals(true, settings.enablePip)
     }
 
     @Test
@@ -68,6 +72,8 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns true
         every { sharedPreferences.getString("app_theme", VoiceSettings.THEME_CHARCOAL) } returns VoiceSettings.THEME_WARM_AMBER
         every { sharedPreferences.getBoolean("show_safety_cards", true) } returns false
+        every { sharedPreferences.getBoolean("compact_card_layout", false) } returns true
+        every { sharedPreferences.getBoolean("enable_pip", true) } returns false
 
         val settings = repository.getVoiceSettings()
 
@@ -80,6 +86,8 @@ class VoiceSettingsRepositoryTest {
         assertEquals(true, settings.shareUsabilityMetrics)
         assertEquals(VoiceSettings.THEME_WARM_AMBER, settings.appTheme)
         assertEquals(false, settings.showSafetyCards)
+        assertEquals(true, settings.compactCardLayout)
+        assertEquals(false, settings.enablePip)
     }
 
     @Test
@@ -93,7 +101,9 @@ class VoiceSettingsRepositoryTest {
             secondaryLanguage = "id",
             shareUsabilityMetrics = true,
             appTheme = VoiceSettings.THEME_SLATE_NAVY,
-            showSafetyCards = false
+            showSafetyCards = false,
+            compactCardLayout = true,
+            enablePip = false
         )
 
         repository.saveVoiceSettings(newSettings)
@@ -108,6 +118,8 @@ class VoiceSettingsRepositoryTest {
             editor.putBoolean("share_usability_metrics", true)
             editor.putString("app_theme", VoiceSettings.THEME_SLATE_NAVY)
             editor.putBoolean("show_safety_cards", false)
+            editor.putBoolean("compact_card_layout", true)
+            editor.putBoolean("enable_pip", false)
             editor.apply()
         }
     }

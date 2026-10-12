@@ -294,4 +294,77 @@ class PhraseBackupHelperTest {
         assertEquals(4, fromPrefixed.phrases.size)
         assertEquals("I cannot speak right now. Please read my screen.", fromPrefixed.phrases[0].text)
     }
+
+    @Test
+    fun `export and import round trip preserves full fidelity for phrases, categories, tree, and logs`() {
+        val tree = com.amh.sotto.data.WhyTree(
+            areas = listOf(
+                com.amh.sotto.data.WhyArea(
+                    id = "sensory",
+                    question = "Is the environment overwhelming?",
+                    questions = listOf(
+                        com.amh.sotto.data.WhyQuestion("q1", "Too noisy?", com.amh.sotto.data.WhyQuestionType.YES_NO),
+                        com.amh.sotto.data.WhyQuestion("q2", "Too bright?", com.amh.sotto.data.WhyQuestionType.YES_NO),
+                        com.amh.sotto.data.WhyQuestion("q3", "Where does it hurt?", com.amh.sotto.data.WhyQuestionType.BODY_MAP)
+                    )
+                )
+            )
+        )
+        val logs = listOf(
+            com.amh.sotto.data.WhyLogEntry(
+                id = "roundtrip-log-1",
+                startedAt = 1700000000000L,
+                endedAt = 1700000045000L,
+                outcome = com.amh.sotto.data.WhyOutcome.FOUND,
+                areaId = "sensory",
+                causeText = "Too noisy",
+                bodyPart = "head",
+                intensity = 4,
+                note = "Calmed down with ear defenders"
+            )
+        )
+
+        // Export
+        val exportedJson = PhraseBackupHelper.exportToJson(
+            phrases = samplePhrases,
+            categories = sampleCategories,
+            whyTree = tree,
+            whyLog = logs
+        )
+
+        // Parse (Import)
+        val importedData = PhraseBackupHelper.parseBackupJson(exportedJson)
+
+        assertEquals(samplePhrases.size, importedData.phrases.size)
+        samplePhrases.forEachIndexed { i, original ->
+            val imported = importedData.phrases[i]
+            assertEquals(original.text, imported.text)
+            assertEquals(original.spokenText, imported.spokenText)
+            assertEquals(original.spokenLanguage, imported.spokenLanguage)
+            assertEquals(original.category, imported.category)
+            assertEquals(original.isEmergency, imported.isEmergency)
+        }
+
+        assertEquals(sampleCategories, importedData.categories)
+
+        assertNotNull(importedData.whyTree)
+        assertEquals(1, importedData.whyTree?.areas?.size)
+        val importedArea = importedData.whyTree?.areas?.first()
+        assertEquals("sensory", importedArea?.id)
+        assertEquals("Is the environment overwhelming?", importedArea?.question)
+        assertEquals(3, importedArea?.questions?.size)
+        assertEquals("q3", importedArea?.questions?.get(2)?.id)
+        assertEquals(com.amh.sotto.data.WhyQuestionType.BODY_MAP, importedArea?.questions?.get(2)?.type)
+
+        assertNotNull(importedData.whyLog)
+        assertEquals(1, importedData.whyLog?.size)
+        val importedLog = importedData.whyLog?.first()
+        assertEquals("roundtrip-log-1", importedLog?.id)
+        assertEquals(com.amh.sotto.data.WhyOutcome.FOUND, importedLog?.outcome)
+        assertEquals("sensory", importedLog?.areaId)
+        assertEquals("Too noisy", importedLog?.causeText)
+        assertEquals("head", importedLog?.bodyPart)
+        assertEquals(4, importedLog?.intensity)
+        assertEquals("Calmed down with ear defenders", importedLog?.note)
+    }
 }

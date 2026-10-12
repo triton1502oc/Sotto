@@ -18,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -115,12 +116,23 @@ fun WhyTreeEditorDialog(
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(
-                            text = "🌳 " + stringResource(R.string.why_tree_editor_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_account_tree),
+                                contentDescription = null,
+                                modifier = Modifier.size(22.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = stringResource(R.string.why_tree_editor_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                         Text(
                             text = "Customise yes/no narrowing questions",
                             style = MaterialTheme.typography.labelSmall,
@@ -169,7 +181,12 @@ fun WhyTreeEditorDialog(
                                         )
                                     },
                                     leadingIcon = {
-                                        Text("↺", color = MaterialTheme.colorScheme.error, fontSize = 16.sp)
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_replay),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
                                     },
                                     onClick = {
                                         showOverflowMenu = false
@@ -236,7 +253,18 @@ fun WhyTreeEditorDialog(
                                     onClick = { editingAreaQuestion = currentArea },
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                                 ) {
-                                    Text("✏️ Edit", fontSize = 12.sp)
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_edit),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(stringResource(R.string.action_edit_question), fontSize = 12.sp)
+                                    }
                                 }
                             }
                             Text(
@@ -267,7 +295,17 @@ fun WhyTreeEditorDialog(
                             shape = RoundedCornerShape(16.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
-                            Text("+ " + stringResource(R.string.action_add_question), fontSize = 13.sp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_add),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(stringResource(R.string.action_add_question), fontSize = 13.sp)
+                            }
                         }
                     }
 
@@ -340,10 +378,11 @@ fun WhyTreeEditorDialog(
                                             enabled = !isFirst,
                                             modifier = Modifier.size(30.dp)
                                         ) {
-                                            Text(
-                                                "▲",
-                                                fontSize = 11.sp,
-                                                color = if (!isFirst) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_arrow_up),
+                                                contentDescription = stringResource(R.string.cd_move_up),
+                                                modifier = Modifier.size(16.dp),
+                                                tint = if (!isFirst) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
                                             )
                                         }
 
@@ -363,10 +402,11 @@ fun WhyTreeEditorDialog(
                                             enabled = !isLast,
                                             modifier = Modifier.size(30.dp)
                                         ) {
-                                            Text(
-                                                "▼",
-                                                fontSize = 11.sp,
-                                                color = if (!isLast) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_arrow_down),
+                                                contentDescription = stringResource(R.string.cd_move_down),
+                                                modifier = Modifier.size(16.dp),
+                                                tint = if (!isLast) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
                                             )
                                         }
 
@@ -374,14 +414,24 @@ fun WhyTreeEditorDialog(
                                             onClick = { questionToEdit = question },
                                             modifier = Modifier.size(30.dp)
                                         ) {
-                                            Text("✏️", fontSize = 14.sp)
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_edit),
+                                                contentDescription = stringResource(R.string.action_edit_question),
+                                                modifier = Modifier.size(16.dp),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
                                         }
                                         if (currentArea.questions.size > 1) {
                                             IconButton(
                                                 onClick = { questionToDelete = question },
                                                 modifier = Modifier.size(30.dp)
                                             ) {
-                                                Text("🗑️", fontSize = 14.sp)
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_delete),
+                                                    contentDescription = stringResource(R.string.action_delete),
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+                                                )
                                             }
                                         }
                                     }
@@ -409,7 +459,12 @@ fun WhyTreeEditorDialog(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (editText.isNotBlank()) {
                                 IconButton(onClick = { editText = "" }, modifier = Modifier.size(32.dp)) {
-                                    Text("✕", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_close),
+                                        contentDescription = stringResource(R.string.cd_clear_text),
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                             IconButton(
@@ -420,7 +475,12 @@ fun WhyTreeEditorDialog(
                                 },
                                 modifier = Modifier.size(32.dp)
                             ) {
-                                Text("🎤", fontSize = 14.sp)
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_mic),
+                                    contentDescription = stringResource(R.string.cd_voice_input),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
                     },
@@ -469,7 +529,12 @@ fun WhyTreeEditorDialog(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (newText.isNotBlank()) {
                                 IconButton(onClick = { newText = "" }, modifier = Modifier.size(32.dp)) {
-                                    Text("✕", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_close),
+                                        contentDescription = stringResource(R.string.cd_clear_text),
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                             IconButton(
@@ -480,7 +545,12 @@ fun WhyTreeEditorDialog(
                                 },
                                 modifier = Modifier.size(32.dp)
                             ) {
-                                Text("🎤", fontSize = 14.sp)
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_mic),
+                                    contentDescription = stringResource(R.string.cd_voice_input),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
                     },
@@ -531,7 +601,12 @@ fun WhyTreeEditorDialog(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (editOpeningText.isNotBlank()) {
                                 IconButton(onClick = { editOpeningText = "" }, modifier = Modifier.size(32.dp)) {
-                                    Text("✕", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_close),
+                                        contentDescription = stringResource(R.string.cd_clear_text),
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                             IconButton(
@@ -542,7 +617,12 @@ fun WhyTreeEditorDialog(
                                 },
                                 modifier = Modifier.size(32.dp)
                             ) {
-                                Text("🎤", fontSize = 14.sp)
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_mic),
+                                    contentDescription = stringResource(R.string.cd_voice_input),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
                     },

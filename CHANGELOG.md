@@ -3,6 +3,28 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.2] - 2026-10-12
+
+### Added
+- **Picture-in-Picture (PiP) AAC Communicator**: Low-friction floating AAC mode enabling continuous communication while navigating maps, videos, or other apps. Built around Android PiP's system overlay architecture with 3 dedicated system `RemoteAction` buttons (`Yes`, `No`, `Wait`), an auto-enter capability on navigation/home, a high-contrast glanceable communicator surface, and opt-in settings toggle ([#45](https://github.com/triton1502oc/Sotto/issues/45)).
+- **Material 3 Unified 4-Card Response Dock**: Elevated 2x2 grid response dock with `RoundedCornerShape(20.dp)`, tactile haptics, vector icons (`ic_check_circle`, `ic_cancel`, `ic_hourglass_empty`, `ic_replay`), and differentiated primary tonal vs secondary tonal elevation ([#51](https://github.com/triton1502oc/Sotto/issues/51), [#47](https://github.com/triton1502oc/Sotto/issues/47)).
+- **Post-Resolution Trigger Logger LazyRow**: Inline horizontal chip selector following binary crisis resolution with vector iconography (`ic_note_alt`, `ic_close`) for fast on-device logging ([#52](https://github.com/triton1502oc/Sotto/issues/52), [#47](https://github.com/triton1502oc/Sotto/issues/47)).
+- **Animated 180° Partner Flip Rotation**: Smooth 300ms rotational perspective flip animation for caregiver view toggling with vector iconography ([#53](https://github.com/triton1502oc/Sotto/issues/53), [#47](https://github.com/triton1502oc/Sotto/issues/47)).
+- **Main Screen Modern Top App Bar & Quick Actions**: Streamlined TopAppBar with direct PiP communicator action, animated edit mode toggle pill, and simplified branding ([#54](https://github.com/triton1502oc/Sotto/issues/54), [#48](https://github.com/triton1502oc/Sotto/issues/48)).
+- **Single-Row QuickSpeak Dock Capsule**: Modernized ~56dp QuickSpeak dock capsule (`RoundedCornerShape(28.dp)`) with embedded inline triggers (mic, fullscreen, clear, add card) and filled speak CTA ([#56](https://github.com/triton1502oc/Sotto/issues/56), [#48](https://github.com/triton1502oc/Sotto/issues/48)).
+- **Compact Card Density Option & Modernized Phrases**: User-configurable compact card layout option (`1.25:1` aspect ratio) saving screen real estate, drag grip indicators in edit mode, and vector badges replacing system emojis ([#57](https://github.com/triton1502oc/Sotto/issues/57), [#48](https://github.com/triton1502oc/Sotto/issues/48)).
+- **Categorized 3-Tab Settings Dialog**: Reorganized Voice Settings into 3 focused Material 3 tabs ("Voice & Speech", "Appearance & Safety", "Data & Backup") with session persistence and telemetry ([#59](https://github.com/triton1502oc/Sotto/issues/59), [#49](https://github.com/triton1502oc/Sotto/issues/49)).
+- **Settings Vector Badges & Tool Tiles**: Replaced emoji section headers with 32dp tonal vector badges, converted secondary tools to Material 3 `ListItem` tiles with trailing chevrons ([#58](https://github.com/triton1502oc/Sotto/issues/58), [#49](https://github.com/triton1502oc/Sotto/issues/49)).
+- **Modernized Sub-Dialogs**: Polished Why Log, Why Tree Editor, and Backup/Restore dialogs with vector iconography, selection tiles, and drag handles ([#60](https://github.com/triton1502oc/Sotto/issues/60), [#49](https://github.com/triton1502oc/Sotto/issues/49)).
+- **Streamlined Category Strip & Category Manager**: Category filter strip with anchored customize button (`ic_tune`) and modernized modal bottom sheet dialog ([#55](https://github.com/triton1502oc/Sotto/issues/55), [#48](https://github.com/triton1502oc/Sotto/issues/48)).
+
+### Assets
+- `Sotto-v1.7.2.apk`: Universal release APK for all architectures.
+- `Sotto-v1.7.2-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.7.2-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.7.2-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.7.1] - 2026-10-12
 
 ### Added

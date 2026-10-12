@@ -14,11 +14,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -68,6 +70,10 @@ fun VoiceSettingsDialog(
     var userRole by remember { mutableStateOf(currentSettings.userRole) }
     var appTheme by remember { mutableStateOf(currentSettings.appTheme) }
     var showSafetyCards by remember { mutableStateOf(currentSettings.showSafetyCards) }
+    var compactCardLayout by remember { mutableStateOf(currentSettings.compactCardLayout) }
+    var enablePip by remember { mutableStateOf(currentSettings.enablePip) }
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+
     var secondaryLangDropdownExpanded by remember { mutableStateOf(false) }
     var langDropdownExpanded by remember { mutableStateOf(false) }
     var voiceDropdownExpanded by remember { mutableStateOf(false) }
@@ -85,7 +91,9 @@ fun VoiceSettingsDialog(
         newShareMetrics: Boolean = shareMetrics,
         newUserRole: String = userRole,
         newAppTheme: String = appTheme,
-        newShowSafetyCards: Boolean = showSafetyCards
+        newShowSafetyCards: Boolean = showSafetyCards,
+        newCompactCardLayout: Boolean = compactCardLayout,
+        newEnablePip: Boolean = enablePip
     ) {
         rate = newRate
         pitch = newPitch
@@ -97,6 +105,8 @@ fun VoiceSettingsDialog(
         userRole = newUserRole
         appTheme = newAppTheme
         showSafetyCards = newShowSafetyCards
+        compactCardLayout = newCompactCardLayout
+        enablePip = newEnablePip
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
@@ -108,7 +118,9 @@ fun VoiceSettingsDialog(
                 shareUsabilityMetrics = newShareMetrics,
                 userRole = newUserRole,
                 appTheme = newAppTheme,
-                showSafetyCards = newShowSafetyCards
+                showSafetyCards = newShowSafetyCards,
+                compactCardLayout = newCompactCardLayout,
+                enablePip = newEnablePip
             )
         )
     }
@@ -223,9 +235,48 @@ fun VoiceSettingsDialog(
                         }
                     }
 
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+                    // 3 Categorized Settings Tabs
+                    val tabTitles = listOf(
+                        stringResource(R.string.tab_settings_voice),
+                        stringResource(R.string.tab_settings_appearance),
+                        stringResource(R.string.tab_settings_data)
+                    )
 
-                    // Scrollable Settings Sections
+                    PrimaryTabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)) }
+                    ) {
+                        tabTitles.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = {
+                                    if (selectedTabIndex != index) {
+                                        val outcome = when (index) {
+                                            0 -> "voice"
+                                            1 -> "appearance"
+                                            else -> "data"
+                                        }
+                                        UsabilityTracker.startIntent("settings_tab_view")
+                                        UsabilityTracker.endIntent(context, "settings_tab_view", outcome = outcome)
+                                        selectedTabIndex = index
+                                    }
+                                },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
+                                        fontSize = 13.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    // Scrollable Settings Content for Selected Tab
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -234,1031 +285,1172 @@ fun VoiceSettingsDialog(
                             .padding(horizontal = 16.dp, vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Section 1: Speech & Voice
-                        SettingsCard {
-                            SettingsSectionHeader(
-                                icon = "🗣️",
-                                title = stringResource(R.string.label_speech_section)
-                            )
+                        when (selectedTabIndex) {
+                            0 -> {
+                                // Tab 0: Voice & Speech
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_record_voice_over,
+                                        title = stringResource(R.string.label_speech_section)
+                                    )
 
-                            // App Language Dropdown
-                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(
-                                    text = stringResource(R.string.label_language),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                    // App Language Dropdown
+                                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Text(
+                                            text = stringResource(R.string.label_language),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
 
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    Surface(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .clickable { langDropdownExpanded = true },
-                                        color = MaterialTheme.colorScheme.surface,
-                                        shape = RoundedCornerShape(10.dp),
-                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                                    ) {
+                                        Box(modifier = Modifier.fillMaxWidth()) {
+                                            Surface(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(10.dp))
+                                                    .clickable { langDropdownExpanded = true },
+                                                color = MaterialTheme.colorScheme.surface,
+                                                shape = RoundedCornerShape(10.dp),
+                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = selectedLanguageLabel,
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        fontWeight = FontWeight.Medium,
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.ic_arrow_down),
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(16.dp),
+                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
+                                            }
+
+                                            DropdownMenu(
+                                                expanded = langDropdownExpanded,
+                                                onDismissRequest = {
+                                                    langDropdownExpanded = false
+                                                    langSearchQuery = ""
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth(0.85f)
+                                                    .heightIn(max = 360.dp)
+                                                    .background(MaterialTheme.colorScheme.surface)
+                                            ) {
+                                                OutlinedTextField(
+                                                    value = langSearchQuery,
+                                                    onValueChange = { langSearchQuery = it },
+                                                    placeholder = { Text(stringResource(R.string.search_language), fontSize = 14.sp) },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                                    singleLine = true
+                                                )
+                                                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                                filteredLanguages.forEach { (code, label) ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
+                                                        onClick = {
+                                                            onLanguageChanged(code)
+                                                            langDropdownExpanded = false
+                                                            langSearchQuery = ""
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        if (currentLanguage != LocaleHelper.LANG_SYSTEM && !isTtsLanguageInstalled(currentLanguage)) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.warn_voice_pack_missing),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = SottoColors.WarningOrange,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                TextButton(
+                                                    onClick = onInstallTtsVoice,
+                                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.action_install_voice),
+                                                        style = MaterialTheme.typography.labelSmall
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Voice Selection Dropdown (if matching voices available)
+                                    if (matchingVoices.isNotEmpty()) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text(
+                                                text = stringResource(R.string.label_voice_model),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+
+                                            Box(modifier = Modifier.fillMaxWidth()) {
+                                                Surface(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .clip(RoundedCornerShape(10.dp))
+                                                    .clickable { voiceDropdownExpanded = true },
+                                                    color = MaterialTheme.colorScheme.surface,
+                                                    shape = RoundedCornerShape(10.dp),
+                                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                                ) {
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(
+                                                            text = selectedVoiceLabel,
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            fontWeight = FontWeight.Medium,
+                                                            color = MaterialTheme.colorScheme.onSurface,
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis,
+                                                            modifier = Modifier.weight(1f, fill = false)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.ic_arrow_down),
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(16.dp),
+                                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        )
+                                                    }
+                                                }
+
+                                                DropdownMenu(
+                                                    expanded = voiceDropdownExpanded,
+                                                    onDismissRequest = { voiceDropdownExpanded = false },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(0.85f)
+                                                        .heightIn(max = 300.dp)
+                                                        .background(MaterialTheme.colorScheme.surface)
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = {
+                                                            Text(
+                                                                defaultVoiceLabel,
+                                                                fontWeight = if (voiceName == null) FontWeight.Bold else FontWeight.Normal,
+                                                                color = MaterialTheme.colorScheme.onSurface
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            updateSettings(newVoiceName = null)
+                                                            voiceDropdownExpanded = false
+                                                        }
+                                                    )
+                                                    matchingVoices.forEach { voice ->
+                                                        DropdownMenuItem(
+                                                            text = {
+                                                                Text(
+                                                                    formatVoiceName(voice),
+                                                                    fontWeight = if (voiceName == voice.name) FontWeight.Bold else FontWeight.Normal,
+                                                                    color = MaterialTheme.colorScheme.onSurface
+                                                                )
+                                                            },
+                                                            onClick = {
+                                                                updateSettings(newVoiceName = voice.name)
+                                                                voiceDropdownExpanded = false
+                                                            }
+                                                        )
+                                                    }
+                                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                                    DropdownMenuItem(
+                                                        text = {
+                                                            Text(
+                                                                text = stringResource(R.string.action_add_more_voices),
+                                                                color = MaterialTheme.colorScheme.primary,
+                                                                style = MaterialTheme.typography.bodyMedium,
+                                                                fontWeight = FontWeight.Medium
+                                                            )
+                                                        },
+                                                        leadingIcon = {
+                                                            Icon(
+                                                                painter = painterResource(R.drawable.ic_add),
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(16.dp),
+                                                                tint = MaterialTheme.colorScheme.primary
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            voiceDropdownExpanded = false
+                                                            try {
+                                                                val intent = Intent("com.android.settings.TTS_SETTINGS")
+                                                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                                context.startActivity(intent)
+                                                            } catch (_: Exception) {
+                                                                try {
+                                                                    val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                                    context.startActivity(intent)
+                                                                } catch (_: Exception) {}
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Speech Rate (Speed)
+                                    Column {
+                                        val rateText = when {
+                                            rate <= 0.7f -> stringResource(R.string.speed_slower)
+                                            rate in 0.9f..1.1f -> stringResource(R.string.speed_normal)
+                                            rate >= 1.3f -> stringResource(R.string.speed_faster)
+                                            else -> ""
+                                        }
+                                        val speedDisplay = String.format(Locale.US, "%.1fx", rate)
                                         Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                                            modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = selectedLanguageLabel,
+                                                text = stringResource(R.string.label_speed),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 fontWeight = FontWeight.Medium,
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                text = "▼",
-                                                fontSize = 11.sp,
+                                                text = "$speedDisplay ${if (rateText.isNotEmpty()) "($rateText)" else ""}".trim(),
+                                                style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
-                                    }
-
-                                    DropdownMenu(
-                                        expanded = langDropdownExpanded,
-                                        onDismissRequest = {
-                                            langDropdownExpanded = false
-                                            langSearchQuery = ""
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth(0.85f)
-                                            .heightIn(max = 360.dp)
-                                            .background(MaterialTheme.colorScheme.surface)
-                                    ) {
-                                        OutlinedTextField(
-                                            value = langSearchQuery,
-                                            onValueChange = { langSearchQuery = it },
-                                            placeholder = { Text(stringResource(R.string.search_language), fontSize = 14.sp) },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 8.dp, vertical = 4.dp),
-                                            singleLine = true
-                                        )
-                                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                                        filteredLanguages.forEach { (code, label) ->
-                                            DropdownMenuItem(
-                                                text = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
-                                                onClick = {
-                                                    onLanguageChanged(code)
-                                                    langDropdownExpanded = false
-                                                    langSearchQuery = ""
-                                                }
+                                        Slider(
+                                            value = rate,
+                                            onValueChange = { updateSettings(newRate = it) },
+                                            valueRange = 0.5f..2.0f,
+                                            steps = 14,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = MaterialTheme.colorScheme.primary,
+                                                activeTrackColor = MaterialTheme.colorScheme.primary
                                             )
-                                        }
-                                    }
-                                }
-
-                                if (currentLanguage != LocaleHelper.LANG_SYSTEM && !isTtsLanguageInstalled(currentLanguage)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.warn_voice_pack_missing),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = SottoColors.WarningOrange,
-                                            modifier = Modifier.weight(1f)
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        TextButton(
-                                            onClick = onInstallTtsVoice,
-                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                    }
+
+                                    // Speech Pitch
+                                    Column {
+                                        val pitchText = when {
+                                            pitch <= 0.8f -> stringResource(R.string.pitch_lower)
+                                            pitch in 0.95f..1.05f -> stringResource(R.string.pitch_normal)
+                                            pitch >= 1.2f -> stringResource(R.string.pitch_higher)
+                                            else -> ""
+                                        }
+                                        val pitchDisplay = String.format(Locale.US, "%.1fx", pitch)
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = stringResource(R.string.action_install_voice),
-                                                style = MaterialTheme.typography.labelSmall
+                                                text = stringResource(R.string.label_pitch),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = "$pitchDisplay ${if (pitchText.isNotEmpty()) "($pitchText)" else ""}".trim(),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
-                                    }
-                                }
-                            }
-
-                            // Voice Selection Dropdown (if matching voices available)
-                            if (matchingVoices.isNotEmpty()) {
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(
-                                        text = stringResource(R.string.label_voice_model),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-
-                                    Box(modifier = Modifier.fillMaxWidth()) {
-                                        Surface(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clip(RoundedCornerShape(10.dp))
-                                                .clickable { voiceDropdownExpanded = true },
-                                            color = MaterialTheme.colorScheme.surface,
-                                            shape = RoundedCornerShape(10.dp),
-                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                                        ) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    text = selectedVoiceLabel,
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    fontWeight = FontWeight.Medium,
-                                                    color = MaterialTheme.colorScheme.onSurface,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    modifier = Modifier.weight(1f, fill = false)
-                                                )
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Text(
-                                                    text = "▼",
-                                                    fontSize = 11.sp,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-
-                                        DropdownMenu(
-                                            expanded = voiceDropdownExpanded,
-                                            onDismissRequest = { voiceDropdownExpanded = false },
-                                            modifier = Modifier
-                                                .fillMaxWidth(0.85f)
-                                                .heightIn(max = 300.dp)
-                                                .background(MaterialTheme.colorScheme.surface)
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(
-                                                        defaultVoiceLabel,
-                                                        fontWeight = if (voiceName == null) FontWeight.Bold else FontWeight.Normal,
-                                                        color = MaterialTheme.colorScheme.onSurface
-                                                    )
-                                                },
-                                                onClick = {
-                                                    updateSettings(newVoiceName = null)
-                                                    voiceDropdownExpanded = false
-                                                }
+                                        Slider(
+                                            value = pitch,
+                                            onValueChange = { updateSettings(newPitch = it) },
+                                            valueRange = 0.7f..1.3f,
+                                            steps = 5,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = MaterialTheme.colorScheme.primary,
+                                                activeTrackColor = MaterialTheme.colorScheme.primary
                                             )
-                                            matchingVoices.forEach { voice ->
-                                                DropdownMenuItem(
-                                                    text = {
-                                                        Text(
-                                                            formatVoiceName(voice),
-                                                            fontWeight = if (voiceName == voice.name) FontWeight.Bold else FontWeight.Normal,
-                                                            color = MaterialTheme.colorScheme.onSurface
-                                                        )
-                                                    },
-                                                    onClick = {
-                                                        updateSettings(newVoiceName = voice.name)
-                                                        voiceDropdownExpanded = false
-                                                    }
-                                                )
-                                            }
-                                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(
-                                                        text = stringResource(R.string.action_add_more_voices),
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        fontWeight = FontWeight.Medium
-                                                    )
-                                                },
-                                                leadingIcon = {
-                                                    Text("➕", fontSize = 14.sp)
-                                                },
-                                                onClick = {
-                                                    voiceDropdownExpanded = false
-                                                    try {
-                                                        val intent = Intent("com.android.settings.TTS_SETTINGS")
-                                                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                                        context.startActivity(intent)
-                                                    } catch (_: Exception) {
-                                                        try {
-                                                            val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                                                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                                            context.startActivity(intent)
-                                                        } catch (_: Exception) {}
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Speech Rate (Speed)
-                            Column {
-                                val rateText = when {
-                                    rate <= 0.7f -> stringResource(R.string.speed_slower)
-                                    rate in 0.9f..1.1f -> stringResource(R.string.speed_normal)
-                                    rate >= 1.3f -> stringResource(R.string.speed_faster)
-                                    else -> ""
-                                }
-                                val speedDisplay = String.format(Locale.US, "%.1fx", rate)
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.label_speed),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "$speedDisplay ${if (rateText.isNotEmpty()) "($rateText)" else ""}".trim(),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Slider(
-                                    value = rate,
-                                    onValueChange = { updateSettings(newRate = it) },
-                                    valueRange = 0.5f..2.0f,
-                                    steps = 14,
-                                    colors = SliderDefaults.colors(
-                                        thumbColor = MaterialTheme.colorScheme.primary,
-                                        activeTrackColor = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                            }
-
-                            // Speech Pitch
-                            Column {
-                                val pitchText = when {
-                                    pitch <= 0.8f -> stringResource(R.string.pitch_lower)
-                                    pitch in 0.95f..1.05f -> stringResource(R.string.pitch_normal)
-                                    pitch >= 1.2f -> stringResource(R.string.pitch_higher)
-                                    else -> ""
-                                }
-                                val pitchDisplay = String.format(Locale.US, "%.1fx", pitch)
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.label_pitch),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "$pitchDisplay ${if (pitchText.isNotEmpty()) "($pitchText)" else ""}".trim(),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Slider(
-                                    value = pitch,
-                                    onValueChange = { updateSettings(newPitch = it) },
-                                    valueRange = 0.7f..1.3f,
-                                    steps = 5,
-                                    colors = SliderDefaults.colors(
-                                        thumbColor = MaterialTheme.colorScheme.primary,
-                                        activeTrackColor = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                            }
-
-                            // Attention Chime Toggle
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        val nextState = !attentionChime
-                                        updateSettings(newChime = nextState)
-                                        if (nextState) {
-                                            ChimePlayer.play(context)
-                                        }
-                                    }
-                                    .padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 12.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.label_attention_chime),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.label_attention_chime_desc),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Switch(
-                                    checked = attentionChime,
-                                    onCheckedChange = {
-                                        updateSettings(newChime = it)
-                                        if (it) {
-                                            ChimePlayer.play(context)
-                                        }
-                                    },
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                    )
-                                )
-                            }
-
-                            // Immediate Test Voice Action
-                            OutlinedButton(
-                                onClick = {
-                                    onTestVoice(
-                                        VoiceSettings(
-                                            speechRate = ((rate * 10).roundToInt() / 10f),
-                                            speechPitch = ((pitch * 10).roundToInt() / 10f),
-                                            voiceName = voiceName,
-                                            playAttentionChime = attentionChime,
-                                            showLanguageSwitcher = showLangSwitcher,
-                                            secondaryLanguage = secondaryLang,
-                                            shareUsabilityMetrics = shareMetrics,
-                                            userRole = userRole,
-                                            appTheme = appTheme,
-                                            showSafetyCards = showSafetyCards
                                         )
-                                    )
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                Text("🔊  " + stringResource(R.string.action_test_voice))
-                            }
-                        }
-
-                        // Section 2: Appearance
-                        SettingsCard {
-                            SettingsSectionHeader(
-                                icon = "🎨",
-                                title = stringResource(R.string.label_appearance_section)
-                            )
-
-                            val themes = listOf(
-                                VoiceSettings.THEME_CHARCOAL to Pair(R.string.theme_charcoal, R.string.theme_charcoal_desc),
-                                VoiceSettings.THEME_OLED_BLACK to Pair(R.string.theme_oled_black, R.string.theme_oled_black_desc),
-                                VoiceSettings.THEME_WARM_AMBER to Pair(R.string.theme_warm_amber, R.string.theme_warm_amber_desc),
-                                VoiceSettings.THEME_SLATE_NAVY to Pair(R.string.theme_slate_navy, R.string.theme_slate_navy_desc),
-                                VoiceSettings.THEME_SOFT_PARCHMENT to Pair(R.string.theme_soft_parchment, R.string.theme_soft_parchment_desc)
-                            )
-
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                themes.forEach { (themeKey, strings) ->
-                                    val (nameRes, descRes) = strings
-                                    val isSelected = appTheme == themeKey
-
-                                    val (previewBg, previewSurface, previewBorder) = when (themeKey) {
-                                        VoiceSettings.THEME_OLED_BLACK -> Triple(Color(0xFF000000), Color(0xFFFFFFFF), Color(0xFF333333))
-                                        VoiceSettings.THEME_WARM_AMBER -> Triple(Color(0xFF191512), Color(0xFFD4A373), Color(0xFF483C34))
-                                        VoiceSettings.THEME_SLATE_NAVY -> Triple(Color(0xFF0F141C), Color(0xFF8FA8C8), Color(0xFF2B3A50))
-                                        VoiceSettings.THEME_SOFT_PARCHMENT -> Triple(Color(0xFFF5F2EB), Color(0xFF1A1A1A), Color(0xFFCCC5B8))
-                                        else -> Triple(Color(0xFF121212), Color(0xFFE0E0E0), Color(0xFF424242))
                                     }
 
-                                    Surface(
+                                    // Attention Chime Toggle
+                                    Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(12.dp))
+                                            .clip(RoundedCornerShape(8.dp))
                                             .clickable {
-                                                updateSettings(newAppTheme = themeKey)
-                                                UsabilityTracker.recordThemeSelected(context, themeKey)
+                                                val nextState = !attentionChime
+                                                updateSettings(newChime = nextState)
+                                                if (nextState) {
+                                                    ChimePlayer.play(context)
+                                                }
+                                            }
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.label_attention_chime),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.label_attention_chime_desc),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Switch(
+                                            checked = attentionChime,
+                                            onCheckedChange = {
+                                                updateSettings(newChime = it)
+                                                if (it) {
+                                                    ChimePlayer.play(context)
+                                                }
                                             },
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface,
-                                        border = BorderStroke(
-                                            width = if (isSelected) 2.dp else 1.dp,
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                            )
+                                        )
+                                    }
+
+                                    // Immediate Test Voice Action
+                                    OutlinedButton(
+                                        onClick = {
+                                            onTestVoice(
+                                                VoiceSettings(
+                                                    speechRate = ((rate * 10).roundToInt() / 10f),
+                                                    speechPitch = ((pitch * 10).roundToInt() / 10f),
+                                                    voiceName = voiceName,
+                                                    playAttentionChime = attentionChime,
+                                                    showLanguageSwitcher = showLangSwitcher,
+                                                    secondaryLanguage = secondaryLang,
+                                                    shareUsabilityMetrics = shareMetrics,
+                                                    userRole = userRole,
+                                                    appTheme = appTheme,
+                                                    showSafetyCards = showSafetyCards,
+                                                    compactCardLayout = compactCardLayout,
+                                                    enablePip = enablePip
+                                                )
+                                            )
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.primary
                                         )
                                     ) {
                                         Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 14.dp, vertical = 10.dp),
                                             verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(28.dp)
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .background(previewBg)
-                                                    .border(1.dp, previewBorder, RoundedCornerShape(8.dp)),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Box(
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_volume_up),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                            Text(stringResource(R.string.action_test_voice))
+                                        }
+                                    }
+                                }
+
+                                // Dual-Language Section
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_language,
+                                        title = stringResource(R.string.label_dual_language_section)
+                                    )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable {
+                                                val nextState = !showLangSwitcher
+                                                updateSettings(newShowLangSwitcher = nextState)
+                                            }
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.label_show_lang_switcher),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.label_show_lang_switcher_desc),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Switch(
+                                            checked = showLangSwitcher,
+                                            onCheckedChange = {
+                                                updateSettings(newShowLangSwitcher = it)
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                            )
+                                        )
+                                    }
+
+                                    if (showLangSwitcher) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(
+                                                text = stringResource(R.string.label_secondary_language),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+
+                                            val secondaryLanguagesList = remember(availableLanguages) {
+                                                availableLanguages.filter { it.first != LocaleHelper.LANG_SYSTEM }
+                                            }
+                                            val secondaryLanguageLabel = remember(secondaryLang, secondaryLanguagesList) {
+                                                secondaryLanguagesList.firstOrNull { it.first == secondaryLang }?.second
+                                                    ?: LocaleHelper.getLanguageDisplayName(secondaryLang)
+                                            }
+
+                                            Box(modifier = Modifier.fillMaxWidth()) {
+                                                Surface(
                                                     modifier = Modifier
-                                                        .size(10.dp)
-                                                        .clip(RoundedCornerShape(3.dp))
-                                                        .background(previewSurface)
-                                                )
+                                                        .fillMaxWidth()
+                                                        .clip(RoundedCornerShape(10.dp))
+                                                        .clickable { secondaryLangDropdownExpanded = true },
+                                                    color = MaterialTheme.colorScheme.surface,
+                                                    shape = RoundedCornerShape(10.dp),
+                                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                                ) {
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(
+                                                            text = secondaryLanguageLabel,
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            color = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.ic_arrow_down),
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(16.dp),
+                                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        )
+                                                    }
+                                                }
+
+                                                DropdownMenu(
+                                                    expanded = secondaryLangDropdownExpanded,
+                                                    onDismissRequest = { secondaryLangDropdownExpanded = false },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(0.85f)
+                                                        .heightIn(max = 280.dp)
+                                                        .background(MaterialTheme.colorScheme.surface)
+                                                ) {
+                                                    secondaryLanguagesList.forEach { (code, label) ->
+                                                        DropdownMenuItem(
+                                                            text = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
+                                                            onClick = {
+                                                                updateSettings(newSecondaryLang = code)
+                                                                secondaryLangDropdownExpanded = false
+                                                            }
+                                                        )
+                                                    }
+                                                }
                                             }
 
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Text(
-                                                    text = stringResource(nameRes),
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = stringResource(descRes),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
+                                            // Translation model status & download
+                                            var isModelDownloaded by remember(secondaryLang) { mutableStateOf<Boolean?>(null) }
+                                            var isDownloadingModel by remember { mutableStateOf(false) }
+                                            var downloadErrorResId by remember { mutableStateOf<Int?>(null) }
+
+                                            LaunchedEffect(secondaryLang) {
+                                                TranslationHelper.isModelDownloaded(secondaryLang) { downloaded ->
+                                                    isModelDownloaded = downloaded
+                                                }
                                             }
 
-                                            if (isSelected) {
+                                            Surface(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                color = MaterialTheme.colorScheme.surface,
+                                                shape = RoundedCornerShape(10.dp),
+                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = stringResource(R.string.label_language_model, LocaleHelper.getLanguageDisplayName(secondaryLang)),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.Medium,
+                                                            color = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                        Text(
+                                                            text = if (isModelDownloaded == true) {
+                                                                stringResource(R.string.label_model_downloaded)
+                                                            } else if (isDownloadingModel) {
+                                                                stringResource(R.string.status_downloading_model)
+                                                            } else {
+                                                                stringResource(R.string.label_model_not_downloaded)
+                                                            },
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = if (isModelDownloaded == true) SottoColors.DownloadedGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                                                        )
+                                                        if (downloadErrorResId != null) {
+                                                            Text(
+                                                                text = stringResource(downloadErrorResId!!),
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                color = SottoColors.DestructiveRed
+                                                            )
+                                                        }
+                                                    }
+                                                    if (isModelDownloaded == false) {
+                                                        OutlinedButton(
+                                                            onClick = {
+                                                                if (!isDownloadingModel) {
+                                                                    downloadErrorResId = null
+                                                                    isDownloadingModel = true
+                                                                    TranslationHelper.downloadModel(
+                                                                        langCode = secondaryLang,
+                                                                        onProgress = { isDownloadingModel = it },
+                                                                        onSuccess = {
+                                                                            isDownloadingModel = false
+                                                                            isModelDownloaded = true
+                                                                        },
+                                                                        onError = {
+                                                                            isDownloadingModel = false
+                                                                            downloadErrorResId = R.string.error_model_download_network
+                                                                        }
+                                                                    )
+                                                                }
+                                                            },
+                                                            enabled = !isDownloadingModel,
+                                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                                        ) {
+                                                            if (isDownloadingModel) {
+                                                                CircularProgressIndicator(
+                                                                    modifier = Modifier.size(12.dp),
+                                                                    strokeWidth = 2.dp,
+                                                                    color = MaterialTheme.colorScheme.primary
+                                                                )
+                                                            } else {
+                                                                Text(
+                                                                    text = stringResource(R.string.action_download_model),
+                                                                    style = MaterialTheme.typography.labelMedium
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            // TTS voice pack status & download
+                                            val isVoicePackInstalled = isTtsLanguageInstalled(secondaryLang)
+                                            Surface(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                color = MaterialTheme.colorScheme.surface,
+                                                shape = RoundedCornerShape(10.dp),
+                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = stringResource(R.string.label_tts_voice_pack, LocaleHelper.getLanguageDisplayName(secondaryLang)),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.Medium,
+                                                            color = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                        Text(
+                                                            text = if (isVoicePackInstalled) {
+                                                                stringResource(R.string.label_voice_pack_installed)
+                                                            } else {
+                                                                stringResource(R.string.label_voice_pack_missing)
+                                                            },
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = if (isVoicePackInstalled) SottoColors.DownloadedGreen else SottoColors.WarningOrange
+                                                        )
+                                                    }
+                                                    if (!isVoicePackInstalled) {
+                                                        OutlinedButton(
+                                                            onClick = onInstallTtsVoice,
+                                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = stringResource(R.string.action_install_voice),
+                                                                style = MaterialTheme.typography.labelMedium
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            1 -> {
+                                // Tab 1: Appearance & Safety
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_palette,
+                                        title = stringResource(R.string.label_appearance_section)
+                                    )
+
+                                    val themes = listOf(
+                                        VoiceSettings.THEME_CHARCOAL to Pair(R.string.theme_charcoal, R.string.theme_charcoal_desc),
+                                        VoiceSettings.THEME_OLED_BLACK to Pair(R.string.theme_oled_black, R.string.theme_oled_black_desc),
+                                        VoiceSettings.THEME_WARM_AMBER to Pair(R.string.theme_warm_amber, R.string.theme_warm_amber_desc),
+                                        VoiceSettings.THEME_SLATE_NAVY to Pair(R.string.theme_slate_navy, R.string.theme_slate_navy_desc),
+                                        VoiceSettings.THEME_SOFT_PARCHMENT to Pair(R.string.theme_soft_parchment, R.string.theme_soft_parchment_desc)
+                                    )
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        themes.forEach { (themeKey, strings) ->
+                                            val (nameRes, descRes) = strings
+                                            val isSelected = appTheme == themeKey
+
+                                            val (previewBg, previewSurface, previewBorder) = when (themeKey) {
+                                                VoiceSettings.THEME_OLED_BLACK -> Triple(Color(0xFF000000), Color(0xFFFFFFFF), Color(0xFF333333))
+                                                VoiceSettings.THEME_WARM_AMBER -> Triple(Color(0xFF191512), Color(0xFFD4A373), Color(0xFF483C34))
+                                                VoiceSettings.THEME_SLATE_NAVY -> Triple(Color(0xFF0F141C), Color(0xFF8FA8C8), Color(0xFF2B3A50))
+                                                VoiceSettings.THEME_SOFT_PARCHMENT -> Triple(Color(0xFFF5F2EB), Color(0xFF1A1A1A), Color(0xFFCCC5B8))
+                                                else -> Triple(Color(0xFF121212), Color(0xFFE0E0E0), Color(0xFF424242))
+                                            }
+
+                                            Surface(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .clickable {
+                                                        updateSettings(newAppTheme = themeKey)
+                                                        UsabilityTracker.recordThemeSelected(context, themeKey)
+                                                    },
+                                                shape = RoundedCornerShape(12.dp),
+                                                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface,
+                                                border = BorderStroke(
+                                                    width = if (isSelected) 2.dp else 1.dp,
+                                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                                )
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(28.dp)
+                                                            .clip(RoundedCornerShape(8.dp))
+                                                            .background(previewBg)
+                                                            .border(1.dp, previewBorder, RoundedCornerShape(8.dp)),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(10.dp)
+                                                                .clip(RoundedCornerShape(3.dp))
+                                                                .background(previewSurface)
+                                                        )
+                                                    }
+
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = stringResource(nameRes),
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                        Text(
+                                                            text = stringResource(descRes),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        )
+                                                    }
+
+                                                    if (isSelected) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.ic_check_bold),
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(18.dp),
+                                                            tint = MaterialTheme.colorScheme.primary
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Card Proportions Setting (#57)
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_cards,
+                                        title = stringResource(R.string.label_card_layout),
+                                        subtitle = stringResource(R.string.label_card_layout_desc)
+                                    )
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        val options = listOf(
+                                            false to stringResource(R.string.card_layout_square),
+                                            true to stringResource(R.string.card_layout_compact)
+                                        )
+                                        options.forEach { (isCompact, label) ->
+                                            val isSelected = compactCardLayout == isCompact
+                                            Surface(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clip(RoundedCornerShape(10.dp))
+                                                    .clickable {
+                                                        if (compactCardLayout != isCompact) {
+                                                            UsabilityTracker.startIntent("card_layout_changed")
+                                                            UsabilityTracker.endIntent(
+                                                                context,
+                                                                "card_layout_changed",
+                                                                outcome = if (isCompact) "compact" else "square"
+                                                            )
+                                                            updateSettings(newCompactCardLayout = isCompact)
+                                                        }
+                                                    },
+                                                shape = RoundedCornerShape(10.dp),
+                                                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface,
+                                                border = BorderStroke(
+                                                    width = if (isSelected) 2.dp else 1.dp,
+                                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                                )
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 10.dp, vertical = 12.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Text(
+                                                        text = label,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                        color = MaterialTheme.colorScheme.onSurface,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    if (isSelected) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.ic_check_bold),
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(16.dp),
+                                                            tint = MaterialTheme.colorScheme.primary
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Picture-in-Picture Setting (#45)
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_pip,
+                                        title = stringResource(R.string.label_pip_setting),
+                                        subtitle = stringResource(R.string.label_pip_setting_desc)
+                                    )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable {
+                                                val nextState = !enablePip
+                                                updateSettings(newEnablePip = nextState)
+                                            }
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.label_pip_setting),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.label_pip_setting_desc),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Switch(
+                                            checked = enablePip,
+                                            onCheckedChange = {
+                                                updateSettings(newEnablePip = it)
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                            )
+                                        )
+                                    }
+                                }
+
+                                // Safety Cards Setting
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_shield,
+                                        title = stringResource(R.string.label_safety_section)
+                                    )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable {
+                                                val nextState = !showSafetyCards
+                                                updateSettings(newShowSafetyCards = nextState)
+                                            }
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.label_show_safety_cards),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.label_show_safety_cards_desc),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Switch(
+                                            checked = showSafetyCards,
+                                            onCheckedChange = {
+                                                updateSettings(newShowSafetyCards = it)
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+
+                            2 -> {
+                                // Tab 2: Data & Backup (#58)
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_explore,
+                                        title = stringResource(R.string.why_finder_title)
+                                    )
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        SettingsToolTile(
+                                            iconRes = R.drawable.ic_list_alt,
+                                            title = stringResource(R.string.action_view_why_log),
+                                            onClick = {
+                                                UsabilityTracker.startIntent("settings_tool_open")
+                                                UsabilityTracker.endIntent(context, "settings_tool_open", outcome = "why_log")
+                                                onOpenWhyLog()
+                                            }
+                                        )
+
+                                        SettingsToolTile(
+                                            iconRes = R.drawable.ic_account_tree,
+                                            title = stringResource(R.string.action_edit_why_tree),
+                                            onClick = {
+                                                UsabilityTracker.startIntent("settings_tool_open")
+                                                UsabilityTracker.endIntent(context, "settings_tool_open", outcome = "tree_editor")
+                                                onOpenWhyTreeEditor()
+                                            }
+                                        )
+                                    }
+                                }
+
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_backup,
+                                        title = stringResource(R.string.label_backup_section),
+                                        subtitle = stringResource(R.string.label_backup_desc)
+                                    )
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        SettingsToolTile(
+                                            iconRes = R.drawable.ic_file_upload,
+                                            title = stringResource(R.string.action_export_phrases),
+                                            onClick = {
+                                                UsabilityTracker.startIntent("settings_tool_open")
+                                                UsabilityTracker.endIntent(context, "settings_tool_open", outcome = "export")
+                                                onExportPhrases()
+                                            }
+                                        )
+
+                                        SettingsToolTile(
+                                            iconRes = R.drawable.ic_file_download,
+                                            title = stringResource(R.string.action_import_phrases),
+                                            onClick = {
+                                                UsabilityTracker.startIntent("settings_tool_open")
+                                                UsabilityTracker.endIntent(context, "settings_tool_open", outcome = "import")
+                                                onImportPhrases()
+                                            }
+                                        )
+
+                                        SettingsToolTile(
+                                            iconRes = R.drawable.ic_qr_code_scanner,
+                                            title = stringResource(R.string.action_scan_qr),
+                                            onClick = {
+                                                UsabilityTracker.startIntent("settings_tool_open")
+                                                UsabilityTracker.endIntent(context, "settings_tool_open", outcome = "scan_qr")
+                                                onOpenQRScanner()
+                                            }
+                                        )
+                                    }
+                                }
+
+                                // Analytics & Privacy
+                                SettingsCard {
+                                    SettingsSectionHeader(
+                                        iconRes = R.drawable.ic_analytics,
+                                        title = stringResource(R.string.label_metrics_section)
+                                    )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable {
+                                                val nextState = !shareMetrics
+                                                updateSettings(newShareMetrics = nextState)
+                                            }
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.label_metrics_toggle),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.label_metrics_desc),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Switch(
+                                            checked = shareMetrics,
+                                            onCheckedChange = {
+                                                updateSettings(newShareMetrics = it)
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                            )
+                                        )
+                                    }
+
+                                    if (shareMetrics) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(
+                                                text = stringResource(R.string.label_user_role),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                val roles = listOf(
+                                                    VoiceSettings.ROLE_CAREGIVER to stringResource(R.string.role_caregiver),
+                                                    VoiceSettings.ROLE_SELF to stringResource(R.string.role_self),
+                                                    VoiceSettings.ROLE_PROFESSIONAL to stringResource(R.string.role_professional)
+                                                )
+                                                roles.forEach { (rKey, rLabel) ->
+                                                    val isSelected = userRole == rKey
+                                                    FilterChip(
+                                                        selected = isSelected,
+                                                        onClick = {
+                                                            updateSettings(newUserRole = rKey)
+                                                            UsabilityTracker.recordRoleSet(context, rKey)
+                                                        },
+                                                        modifier = Modifier.weight(1f),
+                                                        label = {
+                                                            Text(
+                                                                text = rLabel,
+                                                                fontSize = 12.sp,
+                                                                maxLines = 1,
+                                                                textAlign = TextAlign.Center,
+                                                                modifier = Modifier.fillMaxWidth()
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            }
+
+                                            var showSharedDataDialog by remember { mutableStateOf(false) }
+                                            TextButton(
+                                                onClick = { showSharedDataDialog = true },
+                                                modifier = Modifier.align(Alignment.End),
+                                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.ic_explore),
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(14.dp)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.action_view_shared_data),
+                                                        fontSize = 12.sp
+                                                    )
+                                                }
+                                            }
+
+                                            if (showSharedDataDialog) {
+                                                val previewText = remember { UsabilityTracker.generatePreviewPayload(context) }
+                                                AlertDialog(
+                                                    onDismissRequest = { showSharedDataDialog = false },
+                                                    title = { Text(stringResource(R.string.dialog_shared_data_title)) },
+                                                    text = {
+                                                        Column(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .heightIn(max = 350.dp)
+                                                                .verticalScroll(rememberScrollState())
+                                                        ) {
+                                                            androidx.compose.foundation.text.selection.SelectionContainer {
+                                                                Text(
+                                                                    text = previewText,
+                                                                    style = MaterialTheme.typography.bodySmall,
+                                                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                                                )
+                                                            }
+                                                        }
+                                                    },
+                                                    confirmButton = {
+                                                        TextButton(onClick = { showSharedDataDialog = false }) {
+                                                            Text(stringResource(R.string.cd_dismiss))
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // About & Feedback
+                                SettingsCard {
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        TextButton(
+                                            onClick = {
+                                                try {
+                                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/triton1502oc/Sotto/issues"))
+                                                    context.startActivity(intent)
+                                                } catch (_: ActivityNotFoundException) {
+                                                } catch (_: Exception) {}
+                                            },
+                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_note_alt),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
                                                 Text(
-                                                    text = "✓",
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    fontWeight = FontWeight.Bold,
+                                                    text = stringResource(R.string.action_feedback),
+                                                    style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
                                             }
                                         }
                                     }
-                                }
-                            }
-                        }
-
-                        // Section 3: Safety & Bystander
-                        SettingsCard {
-                            SettingsSectionHeader(
-                                icon = "🛡️",
-                                title = stringResource(R.string.label_safety_section)
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        val nextState = !showSafetyCards
-                                        updateSettings(newShowSafetyCards = nextState)
-                                    }
-                                    .padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 12.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.label_show_safety_cards),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.label_show_safety_cards_desc),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Switch(
-                                    checked = showSafetyCards,
-                                    onCheckedChange = {
-                                        updateSettings(newShowSafetyCards = it)
-                                    },
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                    )
-                                )
-                            }
-                        }
-
-                        // Section 2: Dual-Language
-                        SettingsCard {
-                            SettingsSectionHeader(
-                                icon = "🌐",
-                                title = stringResource(R.string.label_dual_language_section)
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        val nextState = !showLangSwitcher
-                                        updateSettings(newShowLangSwitcher = nextState)
-                                    }
-                                    .padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 12.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.label_show_lang_switcher),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.label_show_lang_switcher_desc),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Switch(
-                                    checked = showLangSwitcher,
-                                    onCheckedChange = {
-                                        updateSettings(newShowLangSwitcher = it)
-                                    },
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                    )
-                                )
-                            }
-
-                            if (showLangSwitcher) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(
-                                        text = stringResource(R.string.label_secondary_language),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-
-                                    val secondaryLanguagesList = remember(availableLanguages) {
-                                        availableLanguages.filter { it.first != LocaleHelper.LANG_SYSTEM }
-                                    }
-                                    val secondaryLanguageLabel = remember(secondaryLang, secondaryLanguagesList) {
-                                        secondaryLanguagesList.firstOrNull { it.first == secondaryLang }?.second
-                                            ?: LocaleHelper.getLanguageDisplayName(secondaryLang)
-                                    }
-
-                                    Box(modifier = Modifier.fillMaxWidth()) {
-                                        Surface(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clip(RoundedCornerShape(10.dp))
-                                                .clickable { secondaryLangDropdownExpanded = true },
-                                            color = MaterialTheme.colorScheme.surface,
-                                            shape = RoundedCornerShape(10.dp),
-                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                                        ) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    text = secondaryLanguageLabel,
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = "▼",
-                                                    fontSize = 11.sp,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-
-                                        DropdownMenu(
-                                            expanded = secondaryLangDropdownExpanded,
-                                            onDismissRequest = { secondaryLangDropdownExpanded = false },
-                                            modifier = Modifier
-                                                .fillMaxWidth(0.85f)
-                                                .heightIn(max = 280.dp)
-                                                .background(MaterialTheme.colorScheme.surface)
-                                        ) {
-                                            secondaryLanguagesList.forEach { (code, label) ->
-                                                DropdownMenuItem(
-                                                    text = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
-                                                    onClick = {
-                                                        updateSettings(newSecondaryLang = code)
-                                                        secondaryLangDropdownExpanded = false
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    // Translation model status & download
-                                    var isModelDownloaded by remember(secondaryLang) { mutableStateOf<Boolean?>(null) }
-                                    var isDownloadingModel by remember { mutableStateOf(false) }
-                                    var downloadErrorResId by remember { mutableStateOf<Int?>(null) }
-
-                                    LaunchedEffect(secondaryLang) {
-                                        TranslationHelper.isModelDownloaded(secondaryLang) { downloaded ->
-                                            isModelDownloaded = downloaded
-                                        }
-                                    }
-
-                                    Surface(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        color = MaterialTheme.colorScheme.surface,
-                                        shape = RoundedCornerShape(10.dp),
-                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Text(
-                                                    text = stringResource(R.string.label_language_model, LocaleHelper.getLanguageDisplayName(secondaryLang)),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    fontWeight = FontWeight.Medium,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = if (isModelDownloaded == true) {
-                                                        stringResource(R.string.label_model_downloaded)
-                                                    } else if (isDownloadingModel) {
-                                                        stringResource(R.string.status_downloading_model)
-                                                    } else {
-                                                        stringResource(R.string.label_model_not_downloaded)
-                                                    },
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = if (isModelDownloaded == true) SottoColors.DownloadedGreen else MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                                if (downloadErrorResId != null) {
-                                                    Text(
-                                                        text = stringResource(downloadErrorResId!!),
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = SottoColors.DestructiveRed
-                                                    )
-                                                }
-                                            }
-                                            if (isModelDownloaded == false) {
-                                                OutlinedButton(
-                                                    onClick = {
-                                                        if (!isDownloadingModel) {
-                                                            downloadErrorResId = null
-                                                            isDownloadingModel = true
-                                                            TranslationHelper.downloadModel(
-                                                                langCode = secondaryLang,
-                                                                onProgress = { isDownloadingModel = it },
-                                                                onSuccess = {
-                                                                    isDownloadingModel = false
-                                                                    isModelDownloaded = true
-                                                                },
-                                                                onError = {
-                                                                    isDownloadingModel = false
-                                                                    downloadErrorResId = R.string.error_model_download_network
-                                                                }
-                                                            )
-                                                        }
-                                                    },
-                                                    enabled = !isDownloadingModel,
-                                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
-                                                ) {
-                                                    if (isDownloadingModel) {
-                                                        CircularProgressIndicator(
-                                                            modifier = Modifier.size(12.dp),
-                                                            strokeWidth = 2.dp,
-                                                            color = MaterialTheme.colorScheme.primary
-                                                        )
-                                                    } else {
-                                                        Text(
-                                                            text = stringResource(R.string.action_download_model),
-                                                            style = MaterialTheme.typography.labelMedium
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // TTS voice pack status & download
-                                    val isVoicePackInstalled = isTtsLanguageInstalled(secondaryLang)
-                                    Surface(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        color = MaterialTheme.colorScheme.surface,
-                                        shape = RoundedCornerShape(10.dp),
-                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Text(
-                                                    text = stringResource(R.string.label_tts_voice_pack, LocaleHelper.getLanguageDisplayName(secondaryLang)),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    fontWeight = FontWeight.Medium,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = if (isVoicePackInstalled) {
-                                                        stringResource(R.string.label_voice_pack_installed)
-                                                    } else {
-                                                        stringResource(R.string.label_voice_pack_missing)
-                                                    },
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = if (isVoicePackInstalled) SottoColors.DownloadedGreen else SottoColors.WarningOrange
-                                                )
-                                            }
-                                            if (!isVoicePackInstalled) {
-                                                OutlinedButton(
-                                                    onClick = onInstallTtsVoice,
-                                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
-                                                ) {
-                                                    Text(
-                                                        text = stringResource(R.string.action_install_voice),
-                                                        style = MaterialTheme.typography.labelMedium
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // Section 3: Guided Tools & Backup
-                        SettingsCard {
-                            SettingsSectionHeader(
-                                icon = "🧭",
-                                title = stringResource(R.string.why_finder_title)
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = onOpenWhyLog,
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                                ) {
-                                    Text("📋 ", fontSize = 14.sp)
-                                    Text(
-                                        text = stringResource(R.string.action_view_why_log),
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                }
-                                OutlinedButton(
-                                    onClick = onOpenWhyTreeEditor,
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                                ) {
-                                    Text("🌳 ", fontSize = 14.sp)
-                                    Text(
-                                        text = stringResource(R.string.action_edit_why_tree),
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                }
-                            }
-
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 4.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                            )
-
-                            SettingsSectionHeader(
-                                icon = "💾",
-                                title = stringResource(R.string.label_backup_section),
-                                subtitle = stringResource(R.string.label_backup_desc)
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = onExportPhrases,
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                                ) {
-                                    Text("↑ ", fontSize = 14.sp)
-                                    Text(
-                                        text = stringResource(R.string.action_export_phrases),
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                }
-                                OutlinedButton(
-                                    onClick = onImportPhrases,
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                                ) {
-                                    Text("↓ ", fontSize = 14.sp)
-                                    Text(
-                                        text = stringResource(R.string.action_import_phrases),
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                }
-                            }
-
-                            OutlinedButton(
-                                onClick = onOpenQRScanner,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 44.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                            ) {
-                                Text("📷  ", fontSize = 14.sp)
-                                Text(
-                                    text = stringResource(R.string.action_scan_qr),
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
-                        }
-
-                        // Section 4: Analytics & Privacy
-                        SettingsCard {
-                            SettingsSectionHeader(
-                                icon = "📊",
-                                title = stringResource(R.string.label_metrics_section)
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        val nextState = !shareMetrics
-                                        updateSettings(newShareMetrics = nextState)
-                                    }
-                                    .padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 12.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.label_metrics_toggle),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.label_metrics_desc),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Switch(
-                                    checked = shareMetrics,
-                                    onCheckedChange = {
-                                        updateSettings(newShareMetrics = it)
-                                    },
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                    )
-                                )
-                            }
-
-                            if (shareMetrics) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(
-                                        text = stringResource(R.string.label_user_role),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-
-                                    // Equal-width chips that fit cleanly on screen
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        val roles = listOf(
-                                            VoiceSettings.ROLE_CAREGIVER to stringResource(R.string.role_caregiver),
-                                            VoiceSettings.ROLE_SELF to stringResource(R.string.role_self),
-                                            VoiceSettings.ROLE_PROFESSIONAL to stringResource(R.string.role_professional)
-                                        )
-                                        roles.forEach { (rKey, rLabel) ->
-                                            val isSelected = userRole == rKey
-                                            FilterChip(
-                                                selected = isSelected,
-                                                onClick = {
-                                                    updateSettings(newUserRole = rKey)
-                                                    UsabilityTracker.recordRoleSet(context, rKey)
-                                                },
-                                                modifier = Modifier.weight(1f),
-                                                label = {
-                                                    Text(
-                                                        text = rLabel,
-                                                        fontSize = 12.sp,
-                                                        maxLines = 1,
-                                                        textAlign = TextAlign.Center,
-                                                        modifier = Modifier.fillMaxWidth()
-                                                    )
-                                                }
-                                            )
-                                        }
-                                    }
-
-                                    var showSharedDataDialog by remember { mutableStateOf(false) }
-                                    TextButton(
-                                        onClick = { showSharedDataDialog = true },
-                                        modifier = Modifier.align(Alignment.End),
-                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-                                    ) {
-                                        Text(
-                                            text = "🔍 " + stringResource(R.string.action_view_shared_data),
-                                            fontSize = 12.sp
-                                        )
-                                    }
-
-                                    if (showSharedDataDialog) {
-                                        val previewText = remember { UsabilityTracker.generatePreviewPayload(context) }
-                                        AlertDialog(
-                                            onDismissRequest = { showSharedDataDialog = false },
-                                            title = { Text(stringResource(R.string.dialog_shared_data_title)) },
-                                            text = {
-                                                Column(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .heightIn(max = 350.dp)
-                                                        .verticalScroll(rememberScrollState())
-                                                ) {
-                                                    androidx.compose.foundation.text.selection.SelectionContainer {
-                                                        Text(
-                                                            text = previewText,
-                                                            style = MaterialTheme.typography.bodySmall,
-                                                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                                                        )
-                                                    }
-                                                }
-                                            },
-                                            confirmButton = {
-                                                TextButton(onClick = { showSharedDataDialog = false }) {
-                                                    Text(stringResource(R.string.cd_dismiss))
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // Section 5: About & Feedback
-                        SettingsCard {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                TextButton(
-                                    onClick = {
-                                        try {
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/triton1502oc/Sotto/issues"))
-                                            context.startActivity(intent)
-                                        } catch (e: ActivityNotFoundException) {
-                                            // Ignore if no browser
-                                        } catch (e: Exception) {
-                                            // Protect against any unexpected exception
-                                        }
-                                    },
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                                ) {
-                                    Text(
-                                        text = "💬 " + stringResource(R.string.action_feedback),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
                                 }
                             }
                         }
@@ -1292,29 +1484,93 @@ private fun SettingsCard(
 
 @Composable
 private fun SettingsSectionHeader(
-    icon: String,
+    iconRes: Int,
     title: String,
     subtitle: String? = null
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+            modifier = Modifier.size(32.dp)
         ) {
-            Text(icon, fontSize = 16.sp)
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
-        if (subtitle != null) {
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+    }
+}
+
+@Composable
+private fun SettingsToolTile(
+    iconRes: Int,
+    title: String,
+    subtitle: String? = null,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+    ) {
+        ListItem(
+            modifier = Modifier.heightIn(min = 56.dp),
+            leadingContent = {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            headlineContent = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            },
+            supportingContent = if (subtitle != null) {
+                { Text(text = subtitle, style = MaterialTheme.typography.bodySmall) }
+            } else null,
+            trailingContent = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_chevron_right),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent
             )
-        }
+        )
     }
 }

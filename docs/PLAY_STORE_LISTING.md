@@ -48,9 +48,12 @@ Sotto is not a medical device and does not provide medical advice, diagnosis, or
 github.com/triton1502oc/Sotto | iOS version available
 ```
 
-### What's New
+### What's New (v1.7.2)
 ```text
-First production release — built from real family use. Direct Yes/No crisis cards now primary: You hold your phone during meltdown, he taps Yes/No/Wait to pinpoint and resolve. Why Finder moved to post-crisis explorer. Added QR offline sharing between Android & iOS.
+• Picture-in-Picture (PiP) AAC Communicator: Floating glanceable communicator with Yes/No/Wait system buttons while using other apps.
+• Main Screen Harmonization: Modern top bar, single-row QuickSpeak capsule dock, streamlined category strip, and compact phrase cards.
+• Material 3 Crisis Response Dock: Tactile elevated Yes/No dock, smooth 180° flip animation, and responsive trigger logger strip.
+• Categorized Settings: Reorganized into 3 Material 3 tabs (Voice, Appearance, Data) with polished sub-dialogs.
 ```
 
 ---

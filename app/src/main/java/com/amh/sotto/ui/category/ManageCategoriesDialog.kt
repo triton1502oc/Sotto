@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -98,10 +99,11 @@ fun ManageCategoriesDialog(
                                             .size(36.dp)
                                             .draggableHandle()
                                     ) {
-                                        Text(
-                                            "☰",
-                                            fontSize = 18.sp,
-                                            color = if (isEmergency) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_drag_handle),
+                                            contentDescription = stringResource(R.string.cd_drag_reorder),
+                                            modifier = Modifier.size(20.dp),
+                                            tint = if (isEmergency) SottoColors.EmergencyTextSecondary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
 
@@ -117,10 +119,11 @@ fun ManageCategoriesDialog(
                                             enabled = index > 0,
                                             modifier = Modifier.size(24.dp)
                                         ) {
-                                            Text(
-                                                "▲",
-                                                fontSize = 11.sp,
-                                                color = if (index > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_arrow_up),
+                                                contentDescription = stringResource(R.string.cd_move_up),
+                                                modifier = Modifier.size(16.dp),
+                                                tint = if (index > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                                             )
                                         }
                                         IconButton(
@@ -130,10 +133,11 @@ fun ManageCategoriesDialog(
                                             enabled = index < categories.size - 1,
                                             modifier = Modifier.size(24.dp)
                                         ) {
-                                            Text(
-                                                "▼",
-                                                fontSize = 11.sp,
-                                                color = if (index < categories.size - 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_arrow_down),
+                                                contentDescription = stringResource(R.string.cd_move_down),
+                                                modifier = Modifier.size(16.dp),
+                                                tint = if (index < categories.size - 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                                             )
                                         }
                                     }
@@ -169,7 +173,12 @@ fun ManageCategoriesDialog(
                                             onClick = { onRenameCategory(catName) },
                                             modifier = Modifier.size(36.dp)
                                         ) {
-                                            Text("✏️", fontSize = 14.sp)
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_edit),
+                                                contentDescription = stringResource(R.string.action_rename_category),
+                                                modifier = Modifier.size(18.dp),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
                                         }
                                     }
 
@@ -179,7 +188,12 @@ fun ManageCategoriesDialog(
                                             onClick = { onDeleteCategory(catName) },
                                             modifier = Modifier.size(36.dp)
                                         ) {
-                                            Text("✕", fontSize = 16.sp, color = MaterialTheme.colorScheme.error)
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_delete),
+                                                contentDescription = stringResource(R.string.action_delete_category),
+                                                modifier = Modifier.size(18.dp),
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
                                         }
                                     }
                                 }
@@ -194,7 +208,13 @@ fun ManageCategoriesDialog(
                     onClick = onAddCategory,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("+ ${stringResource(R.string.action_add_category)}")
+                    Icon(
+                        painter = painterResource(R.drawable.ic_add),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(stringResource(R.string.action_add_category))
                 }
             }
         },

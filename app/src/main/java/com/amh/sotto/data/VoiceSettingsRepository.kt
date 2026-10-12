@@ -14,7 +14,9 @@ data class VoiceSettings(
     val shareUsabilityMetrics: Boolean = false,
     val userRole: String = ROLE_UNSET,
     val appTheme: String = THEME_CHARCOAL,
-    val showSafetyCards: Boolean = true
+    val showSafetyCards: Boolean = true,
+    val compactCardLayout: Boolean = false,
+    val enablePip: Boolean = true
 ) {
     companion object {
         const val ROLE_UNSET = "unset"
@@ -70,6 +72,8 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         private const val KEY_PMF_SURVEY_PROMPTED = "pmf_survey_prompted"
         private const val KEY_APP_THEME = "app_theme"
         private const val KEY_SHOW_SAFETY_CARDS = "show_safety_cards"
+        private const val KEY_COMPACT_CARD_LAYOUT = "compact_card_layout"
+        private const val KEY_ENABLE_PIP = "enable_pip"
     }
 
     override fun getVoiceSettings(): VoiceSettings {
@@ -84,6 +88,8 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         val rawTheme = prefs.getString(KEY_APP_THEME, VoiceSettings.THEME_CHARCOAL)
         val theme = if (rawTheme.isNullOrBlank()) VoiceSettings.THEME_CHARCOAL else rawTheme
         val safetyCards = prefs.getBoolean(KEY_SHOW_SAFETY_CARDS, true)
+        val compactCardLayout = prefs.getBoolean(KEY_COMPACT_CARD_LAYOUT, false)
+        val enablePip = prefs.getBoolean(KEY_ENABLE_PIP, true)
         return VoiceSettings(
             speechRate = rate,
             speechPitch = pitch,
@@ -94,7 +100,9 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
             shareUsabilityMetrics = shareMetrics,
             userRole = role,
             appTheme = theme,
-            showSafetyCards = safetyCards
+            showSafetyCards = safetyCards,
+            compactCardLayout = compactCardLayout,
+            enablePip = enablePip
         )
     }
 
@@ -111,6 +119,8 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         editor.putString(KEY_USER_ROLE, settings.userRole)
         editor.putString(KEY_APP_THEME, settings.appTheme)
         editor.putBoolean(KEY_SHOW_SAFETY_CARDS, settings.showSafetyCards)
+        editor.putBoolean(KEY_COMPACT_CARD_LAYOUT, settings.compactCardLayout)
+        editor.putBoolean(KEY_ENABLE_PIP, settings.enablePip)
         editor.apply()
 
         if (settings.shareUsabilityMetrics) {

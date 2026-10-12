@@ -417,4 +417,30 @@
     <string name="trigger_emotion">Emotion</string>
     <string name="trigger_other">Other</string>
     <string name="msg_trigger_logged">Trigger logged: %1$s ✓</string>
+
+    <!-- Settings Tabs -->
+    <string name="tab_settings_voice">Voice &amp; Speech</string>
+    <string name="tab_settings_appearance">Appearance &amp; Safety</string>
+    <string name="tab_settings_data">Data &amp; Backup</string>
+
+    <!-- Card Proportions / Density -->
+    <string name="label_card_layout">Phrase Card Proportions</string>
+    <string name="label_card_layout_desc">Choose between classic square or compact rectangular cards (+25% density)</string>
+    <string name="card_layout_square">Classic Square (1:1)</string>
+    <string name="card_layout_compact">Compact Rectangular (1.25:1)</string>
+
+    <!-- Picture-in-Picture -->
+    <string name="action_pip">Picture-in-Picture</string>
+    <string name="cd_enter_pip">Enter Picture-in-Picture</string>
+    <string name="label_pip_setting">Picture-in-Picture Communicator</string>
+    <string name="label_pip_setting_desc">Keep a floating QuickSpeak communicator dock active over other apps</string>
+    <string name="pip_tap_hint">Tap window for speech buttons • Double-tap to expand</string>
+    <string name="pip_status_ready">Ready</string>
+    <string name="pip_status_speaking">Speaking…</string>
+    <string name="pip_action_yes">Yes</string>
+    <string name="pip_action_no">No</string>
+    <string name="pip_action_wait">Wait</string>
+
+    <!-- Drag / Reorder Accessibility -->
+    <string name="cd_drag_reorder">Drag to reorder</string>
 </resources>
