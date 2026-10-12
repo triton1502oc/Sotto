@@ -124,27 +124,21 @@ When completing the Google Play **Data Safety** questionnaire:
 
 ---
 
-## 5. Closed Testing & Google Group (`sotto-testers`)
+## 5. Open Testing & Google Play Store
 
-### Google Group Welcome Message
-*Copy and paste directly into **Google Groups > Group settings > General > Welcome message**:*
+Sotto is published in **Open Testing** on Google Play. Testers no longer need to join a closed testing Google Group or email list; anyone with an Android device can install the app directly from the Google Play Store.
 
-```text
-Welcome to Sotto Closed Testing!
+### Store & Testing Links
+* **Google Play Store Listing (Android):**  
+  https://play.google.com/store/apps/details?id=com.amh.sotto
+* **Web Opt-In Link (Web):**  
+  https://play.google.com/apps/testing/com.amh.sotto
 
-To install the app and help us meet Google Play's 14-day testing requirement:
+### Tester Instructions & Feedback
+1. Install Sotto directly from [Google Play](https://play.google.com/store/apps/details?id=com.amh.sotto) or opt in via the web testing link.
+2. Test daily AAC features (phrase cards, single-row QuickSpeak dock, sensory themes, offline ML Kit translation) and caregiver Two-Way mode (180° animated flip, rapid Yes/No/Wait responses, post-crisis Why Finder & trigger logger).
+3. Provide feedback directly through Google Play or open an issue on GitHub:  
+   https://github.com/triton1502oc/Sotto/issues
 
-1. Join the test on Google Play:
-   https://play.google.com/apps/testing/com.amh.sotto
-
-2. Download & install Sotto from Google Play (via Android or the link above).
-
-3. Keep the app installed on your device for at least 14 days and test basic features (tap cards to speak, quick-speak bar, offline speech).
-
-• App overview & README: https://github.com/triton1502oc/Sotto#readme
-• Feedback & Bug reports: Post here or open an issue at https://github.com/triton1502oc/Sotto/issues
-
-Thank you for helping us launch Sotto!
-```
 
 

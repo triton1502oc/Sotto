@@ -147,7 +147,7 @@ def main():
         "• Dual-Language Speech & On-Device ML Kit Auto-Translation\n"
         "• Configurable Voice Settings & Two-Tone Attention Chime\n\n"
         "GitHub: https://github.com/triton1502oc/Sotto\n"
-        "Google Play: https://play.google.com/apps/testing/com.amh.sotto"
+        "Google Play: https://play.google.com/store/apps/details?id=com.amh.sotto"
     )
     en_tags = ["AAC", "Autism", "Assistive Communication", "Text to Speech", "TTS", "Speech Impairment", "Nonverbal", "Accessibility", "Android"]
     new_en_id = upload_video(
@@ -171,7 +171,7 @@ def main():
         "• Pengalihan Bahasa Instan (TopBar Switcher) & Terjemahan On-Device\n"
         "• Pengaturan Suara & Nada Perhatian Dua Nada (Attention Chime)\n\n"
         "GitHub: https://github.com/triton1502oc/Sotto\n"
-        "Google Play: https://play.google.com/apps/testing/com.amh.sotto"
+        "Google Play: https://play.google.com/store/apps/details?id=com.amh.sotto"
     )
     id_tags = ["AAC", "Autisme", "Aplikasi Komunikasi", "Text to Speech", "TTS", "Gangguan Bicara", "Aksesibilitas", "Android", "Bahasa Indonesia"]
     new_id_id = upload_video(

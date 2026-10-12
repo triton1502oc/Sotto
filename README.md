@@ -5,6 +5,12 @@
 </p>
 
 <p align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.amh.sotto">
+    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="58"/>
+  </a>
+</p>
+
+<p align="center">
   🎬 <b>Video Demo:</b> 
   <a href="https://youtu.be/Kd9qPu3F-Gg">YouTube (Play Store Preview)</a>
 </p>
@@ -129,18 +135,15 @@ Sotto/
 
 ## Installation
 
-### Option 1: Google Play Beta (Closed Testing)
-Receive automatic background updates through Google Play:
+### Option 1: Google Play Store (Open Testing)
+Install directly from Google Play with automatic updates:
 
-1. **Join the Testers Group**:  
-   Join with the Google account used on your Android device:  
-   👉 [**Join Sotto Testers Group**](https://groups.google.com/g/sotto-testers) *(tap "Join group")*
-2. **Opt In & Download**:  
-   After joining the group, opt in and install via Google Play:  
-   👉 [**Join on Android (Play Store)**](https://play.google.com/store/apps/details?id=com.amh.sotto) or [**Join on the Web**](https://play.google.com/apps/testing/com.amh.sotto)
-3. Tap **"Become a tester"**, then install Sotto directly from Google Play.
+👉 [**Get it on Google Play**](https://play.google.com/store/apps/details?id=com.amh.sotto)  
+*(Web testing opt-in: [Join on the Web](https://play.google.com/apps/testing/com.amh.sotto))*
 
-> **Tip**: If Google Play shows *"App not available"*, ensure you are signed into the Play Store with the same Google account that joined the Google Group.
+1. Open the [Google Play Store listing](https://play.google.com/store/apps/details?id=com.amh.sotto) on your Android device.
+2. Tap **Install** (or tap **Become a tester** if viewing via the web link).
+3. Sotto installs directly to your device and receives automatic updates as new improvements are released.
 
 ---
 
