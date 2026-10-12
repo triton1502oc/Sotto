@@ -49,4 +49,5 @@ demo/events*.txt
 
 # Local scratch & analysis data
 .local/
+.gemini/
 

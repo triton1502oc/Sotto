@@ -12,7 +12,9 @@
     <string name="action_speak_aloud">Bicara</string>
     <string name="action_test_voice">Tes Suara</string>
     <string name="action_stop">Berhenti</string>
+    <string name="action_mic">Mic</string>
     <string name="cd_stop_voice_input">Berhenti merekam suara</string>
+    <string name="cd_close">Tutup</string>
 
     <!-- Status -->
     <string name="status_initializing">Memuat...</string>

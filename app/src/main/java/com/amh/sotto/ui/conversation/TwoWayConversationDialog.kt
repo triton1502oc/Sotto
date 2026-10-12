@@ -11,6 +11,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -38,8 +39,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -120,14 +123,19 @@ fun TwoWayConversationDialog(
         null
     }
 
+    val configuration = LocalConfiguration.current
+    val isTabletOrFoldable = configuration.smallestScreenWidthDp >= 600
+
     DisposableEffect(isFlipped) {
         val originalOrientation = activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         if (isFlipped) {
-            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+            if (!isTabletOrFoldable) {
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+            }
             UsabilityTracker.recordActivation(context, "partner_mode_flip")
         }
         onDispose {
-            if (isFlipped) {
+            if (isFlipped && !isTabletOrFoldable) {
                 activity?.requestedOrientation = originalOrientation
             }
         }
@@ -934,42 +942,91 @@ private fun CaregiverBottomMenu(
                     }
                 }
 
-                // Global Controls
+                // Global Controls: Material 3 Tool Capsule + Standalone Dismissal (#46)
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (activeTab == CaregiverTab.FREEFORM && hasWhyFinder && onToggleTriggerLogger != null) {
-                        val strLogTrigger = stringResource(R.string.label_log_trigger)
-                        IconButton(
-                            onClick = onToggleTriggerLogger,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .semantics {
-                                    role = Role.Button
-                                    contentDescription = strLogTrigger
-                                }
+                    val context = LocalContext.current
+                    val flipRotation by animateFloatAsState(
+                        targetValue = if (isFlipped) 180f else 0f,
+                        label = "flipIconRotation"
+                    )
+
+                    // Utility Capsule: Log (if available) + Flip
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(2.dp)
                         ) {
-                            Text("📝", fontSize = 16.sp)
+                            if (activeTab == CaregiverTab.FREEFORM && hasWhyFinder && onToggleTriggerLogger != null) {
+                                val strLogTrigger = stringResource(R.string.label_log_trigger)
+                                IconButton(
+                                    onClick = {
+                                        UsabilityTracker.startIntent("partner_tool")
+                                        UsabilityTracker.endIntent(context, "partner_tool", outcome = "log")
+                                        onToggleTriggerLogger()
+                                    },
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .semantics {
+                                            role = Role.Button
+                                            contentDescription = strLogTrigger
+                                        }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_note_alt),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            val flipDesc = if (isFlipped) stringResource(R.string.action_flip_back) else stringResource(R.string.action_flip)
+                            val flipBg = if (isFlipped) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                            val flipContentColor = if (isFlipped) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+
+                            Box(
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(flipBg)
+                                    .clickable {
+                                        UsabilityTracker.startIntent("partner_tool")
+                                        UsabilityTracker.endIntent(context, "partner_tool", outcome = "flip")
+                                        onToggleFlip()
+                                    }
+                                    .semantics {
+                                        role = Role.Button
+                                        contentDescription = flipDesc
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_flip_partner),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .graphicsLayer { rotationZ = flipRotation },
+                                    tint = flipContentColor
+                                )
+                            }
                         }
                     }
 
-                    val flipDesc = if (isFlipped) stringResource(R.string.action_flip_back) else stringResource(R.string.action_flip)
-                    IconButton(
-                        onClick = onToggleFlip,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .semantics {
-                                role = Role.Button
-                                contentDescription = flipDesc
-                            }
-                    ) {
-                        Text("🔄", fontSize = 16.sp)
-                    }
-
+                    // Standalone Modal Dismissal
                     val dismissDesc = stringResource(R.string.cd_dismiss)
                     IconButton(
-                        onClick = onDismiss,
+                        onClick = {
+                            UsabilityTracker.startIntent("partner_tool")
+                            UsabilityTracker.endIntent(context, "partner_tool", outcome = "close")
+                            onDismiss()
+                        },
                         modifier = Modifier
                             .size(36.dp)
                             .semantics {
@@ -977,114 +1034,240 @@ private fun CaregiverBottomMenu(
                                 contentDescription = dismissDesc
                             }
                     ) {
-                        Text("✕", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
 
-            // Line 2: Mode Actions
+            // Line 2: Mode Actions (#50: Asymmetric Dock & Vector Icons)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val context = LocalContext.current
                 if (activeTab == CaregiverTab.WHY_FINDER) {
                     FilledTonalButton(
-                        onClick = onSpeakPrompt,
+                        onClick = {
+                            UsabilityTracker.startIntent("caregiver_action")
+                            UsabilityTracker.endIntent(context, "caregiver_action", outcome = "speak")
+                            onSpeakPrompt()
+                        },
                         enabled = canSpeakPrompt,
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("🔊 " + stringResource(R.string.action_speak), style = MaterialTheme.typography.labelMedium)
+                        Icon(
+                            painter = painterResource(R.drawable.ic_volume_up),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.action_speak),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
 
                     OutlinedButton(
-                        onClick = onPickCard,
+                        onClick = {
+                            UsabilityTracker.startIntent("caregiver_action")
+                            UsabilityTracker.endIntent(context, "caregiver_action", outcome = "cards")
+                            onPickCard()
+                        },
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("📋 " + stringResource(R.string.action_cards), style = MaterialTheme.typography.labelMedium)
+                        Icon(
+                            painter = painterResource(R.drawable.ic_cards),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.action_cards),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
 
                     if (canStepBack) {
                         OutlinedButton(
                             onClick = onStepBack,
                             shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                         ) {
-                            Text("↩️ " + stringResource(R.string.action_step_back), style = MaterialTheme.typography.labelMedium)
+                            Icon(
+                                painter = painterResource(R.drawable.ic_replay),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = stringResource(R.string.action_step_back),
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
                 } else {
+                    val configuration = LocalConfiguration.current
+                    val isCompactScreen = configuration.screenWidthDp <= 360 || configuration.fontScale > 1.15f
+                    val speakCd = stringResource(R.string.action_speak)
+                    val cardsCd = stringResource(R.string.action_cards)
+                    val typeCd = stringResource(R.string.action_type)
+
+                    // Companion 1: Speak
                     FilledTonalButton(
-                        onClick = onReadAloudFreeform,
+                        onClick = {
+                            UsabilityTracker.startIntent("caregiver_action")
+                            UsabilityTracker.endIntent(context, "caregiver_action", outcome = "speak")
+                            onReadAloudFreeform()
+                        },
                         enabled = canReadAloudFreeform,
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
-                        modifier = Modifier.weight(1f)
+                        contentPadding = PaddingValues(horizontal = if (isCompactScreen) 0.dp else 6.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = speakCd
+                            }
                     ) {
-                        Text(
-                            text = "🔊 " + stringResource(R.string.action_speak),
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        Icon(
+                            painter = painterResource(R.drawable.ic_volume_up),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
                         )
+                        if (!isCompactScreen) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = speakCd,
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
 
+                    // Companion 2: Cards
                     OutlinedButton(
-                        onClick = onPickCard,
+                        onClick = {
+                            UsabilityTracker.startIntent("caregiver_action")
+                            UsabilityTracker.endIntent(context, "caregiver_action", outcome = "cards")
+                            onPickCard()
+                        },
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(horizontal = if (isCompactScreen) 0.dp else 6.dp, vertical = 8.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = cardsCd
+                            }
                     ) {
-                        Text(
-                            text = "📋 " + stringResource(R.string.action_cards),
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        Icon(
+                            painter = painterResource(R.drawable.ic_cards),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
                         )
+                        if (!isCompactScreen) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = cardsCd,
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
 
+                    // HERO: Listen / Mic (weight 1.5f)
                     val micColor by animateColorAsState(
                         targetValue = if (isListening) SottoColors.RecordingPulseRed else MaterialTheme.colorScheme.primaryContainer,
                         label = "micBg"
                     )
+                    val micContentColor = if (isListening) Color.White else MaterialTheme.colorScheme.onPrimaryContainer
+                    val micLabel = if (isListening) stringResource(R.string.action_stop) else stringResource(R.string.action_mic)
+
                     FilledTonalButton(
-                        onClick = onToggleListening,
+                        onClick = {
+                            UsabilityTracker.startIntent("caregiver_action")
+                            UsabilityTracker.endIntent(context, "caregiver_action", outcome = "listen")
+                            onToggleListening()
+                        },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = micColor,
-                            contentColor = if (isListening) Color.White else MaterialTheme.colorScheme.onPrimaryContainer
+                            contentColor = micContentColor
                         ),
                         contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1.5f)
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = micLabel
+                            }
                     ) {
+                        Icon(
+                            painter = painterResource(if (isListening) R.drawable.ic_close_bold else R.drawable.ic_mic),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = if (isListening) "⏹ Stop" else "🎤 Mic",
+                            text = micLabel,
                             style = MaterialTheme.typography.labelMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
 
+                    // Companion 3: Type
                     OutlinedButton(
-                        onClick = onToggleKeyboard,
+                        onClick = {
+                            UsabilityTracker.startIntent("caregiver_action")
+                            UsabilityTracker.endIntent(context, "caregiver_action", outcome = "type")
+                            onToggleKeyboard()
+                        },
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(horizontal = if (isCompactScreen) 0.dp else 6.dp, vertical = 8.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = typeCd
+                            }
                     ) {
-                        Text(
-                            text = "⌨️ " + stringResource(R.string.action_type),
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        Icon(
+                            painter = painterResource(R.drawable.ic_keyboard),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
                         )
+                        if (!isCompactScreen) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = typeCd,
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }

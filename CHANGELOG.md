@@ -3,6 +3,27 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.1] - 2026-10-12
+
+### Added
+- **Shared Material Vector Icon Foundation**: Integrated 35 crisp, Apache-2.0 Material Symbols Rounded vector XML drawables in `res/drawable/` across common actions, Partner Mode, Main screen, and Settings, eliminating system emoji inconsistencies across Android OEM skins ([#61](https://github.com/triton1502oc/Sotto/issues/61)).
+- **Material 3 Partner Mode Tool Capsule**: Grouped Partner Mode utility controls (`Log` and `Flip`) into a unified rounded M3 Surface capsule with active container highlighting, smooth 180° icon rotation micro-interaction, and standalone modal dismissal separation ([#46](https://github.com/triton1502oc/Sotto/issues/46)).
+
+### Changed
+- **Asymmetric Caregiver Action Dock**: Modernized Line 2 actions in `CaregiverBottomMenu` into an asymmetric layout prioritizing a prominent `Listen/Mic` hero button (`weight(1.5f)`) with clean vector iconography ([#50](https://github.com/triton1502oc/Sotto/issues/50)).
+- **Modernized Edge-to-Edge Theme Compliance**: Explicitly configured `Theme.Sotto` and `Theme.Sotto.Capture` with transparent status and navigation bars, eliminating deprecated Holo/Fullscreen window flag warnings flagged by Google Play Console ([#43](https://github.com/triton1502oc/Sotto/issues/43)).
+
+### Fixed
+- **Caregiver Action Bar Label Truncation**: Fixed button label truncation on compact handsets ($\le 360\text{dp}$) and elevated font scales ($\ge 1.3\times$) by collapsing companion actions (`Speak`, `Cards`, `Type`) to icon-first controls with complete localized accessibility semantics ([#50](https://github.com/triton1502oc/Sotto/issues/50)).
+- **Large-Screen Orientation & Resizability**: Lifted orientation lock restrictions on tablets and foldables ($\ge 600\text{dp}$) to allow free system rotation, and overrode ZXing `CaptureActivity` with `fullSensor` orientation to resolve Google Play Console large screen recommendations ([#44](https://github.com/triton1502oc/Sotto/issues/44)).
+
+### Assets
+- `Sotto-v1.7.1.apk`: Universal release APK for all architectures.
+- `Sotto-v1.7.1-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.7.1-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.7.1-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.7.0] - 2026-10-11
 
 ### Added

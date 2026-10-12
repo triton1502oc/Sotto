@@ -1,15 +1,17 @@
 # Sotto
 
-**TL;DR**: Sotto (*"under one's breath"*) is a calm yes/no tool for caregivers to reach autistic teens & adults in meltdowns and verbal shutdowns, paired with a dignified, low-stimulation AAC speech board for self-expression.
-
 <p align="center">
-  <img src="assets/screenshot.png" alt="Sotto Interface" width="300"/>
+  <img src="assets/play_store_feature_graphic.png" alt="Sotto Banner" width="100%"/>
 </p>
 
 <p align="center">
   🎬 <b>Video Demo:</b> 
-  <a href="https://youtu.be/Kd9qPu3F-Gg">YouTube</a>
+  <a href="https://youtu.be/Kd9qPu3F-Gg">YouTube (Play Store Preview)</a>
 </p>
+
+**TL;DR**: Sotto (*"under one's breath"*) is a calm yes/no tool for caregivers to reach autistic teens & adults in meltdowns and verbal shutdowns, paired with a dignified, low-stimulation AAC speech board for self-expression.
+
+Native Android app with 100% offline core, zero cloud accounts, and 1:1 feature parity with [Sotto for iOS](https://github.com/triton1502oc/Sotto-iOS).
 
 ---
 
@@ -46,18 +48,75 @@ We use Sotto in two distinct modes:
 - **Customizable Inquiry Tree (`🌳`)**: Personalize questions and areas with voice dictation (`🎤`), sequence reordering, and one-tap defaults reset.
 
 ### 2. Dignified Self-Expression (AAC Phrase Board)
-- **Low-Stimulus UI**: Dark-neutral Material 3 theme with high contrast, calm earth tones, and zero cartoon animations or visual distractions.
+- **Low-Stimulus UI & Sensory Color Themes**: Curated sensory-friendly color palettes accessible from Voice & Language Settings (`Appearance` section) to accommodate neurodivergent needs, photophobia, and astigmatism halation while upholding WCAG 2.1 AAA contrast: **Charcoal** (default low-stimulus dark neutral), **OLED Pure Black** (maximum contrast and power efficiency), **Warm Amber / Low Strain** (low blue light dark sepia), **Slate Navy** (calm focus), and **Soft Parchment** (anti-halation muted daylight).
 - **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
-- **Safety Bystander Card**: Prominent high-contrast card and fullscreen banner for non-verbal episodes, local contacts, and support personnel.
-- **Quick-Speak Bar**: Docked bottom bar for spontaneous speech (`🔊`), fullscreen expand, voice dictation (`🎤`), and 1-tap card creation (`+`).
-- **Contextual & Custom Categories**: Filter cards by situation (**Safety**, **Needs**, **Social**, **Care**, **General**), or customize your own categories.
+- **Safety Bystander Card**: Dedicated full-width hero card for non-verbal episodes and shutdowns. Features a distinct `🛡️ Safety` badge, digit-by-digit phone number TTS formatting so emergency numbers are read naturally, and a specialized fullscreen view with high-contrast amber styling (`#251E14` / `#FFB74D`) for bystanders, doctors, or first responders.
+- **Multi-Line Quick-Speak Bar & Card Saving**: Spontaneous communication bar docked at the bottom with multi-line text input (1 to 4 lines), instant speech (`🔊`), fullscreen expansion (`⛶`), voice dictation (`🎤`), smart clear toggle (`✕`), and 1-tap card saving (`+`).
+- **Contextual Categories & Reordering**: Filter cards by situation (**Safety**, **Needs**, **Social**, **Care**, **General**), or customize your own categories with fine-motor single-step ▲/▼ reordering and safe fallback reassignment upon deletion.
 - **High-Visibility Fullscreen**: Long-press any card to show giant text for silent, readable communication in loud spaces.
+- **Attention Chime & Haptics**: Built-in two-tone musical chime (D5 at 587.33 Hz for 90ms followed by A5 at 880.00 Hz for 160ms with harmonic overtone and exponential decay) and haptic vibration alert to capture listener attention before speech begins.
 - **Dual-Language & On-Device Translation**: Display cards in one language while speaking in another, with 100% offline ML Kit models.
 
 ### 3. Privacy & Offline Guarantee
 - **100% Offline Core**: Zero cloud accounts, zero ads, and zero third-party tracking SDKs. Audio, phrases, Why Finder trees, and Why logs stay strictly on-device.
-- **Backup & Restore v2**: Full JSON backup with selective checkboxes for phrases, Why tree, and private Why log. Easily export a customized tree to a therapist or teacher without sharing private crisis notes.
-- **Optional Usability Telemetry**: Strictly opt-in (default OFF) anonymous interaction telemetry to help diagnose accessibility friction (zero text, audio, or phrase hashes collected).
+- **Instant Offline QR Code Deck Sharing**: Share and import phrase decks instantaneously offline using high-density QR codes (`SOTTO:v1:...` / compact JSON) and an integrated camera scanner between Android and iOS devices—zero accounts, cloud, or pairing required.
+- **Backup & Restore v2**: Full JSON backup with selective checkboxes for phrases, Why tree, and private Why log with merge and replace restore strategies. Easily export a customized tree to a therapist or teacher without sharing private crisis notes.
+- **Privacy-Preserving Telemetry & 14-Day PMF Survey (Opt-In)**: Strictly opt-in (default OFF) anonymous interaction telemetry measuring accessibility latency and hesitation to assess product-market fit, complete with category scrubbing (`custom`), payload inspection preview sheet, and a 14-day PMF survey modal (zero text, audio, or phrase hashes collected).
+
+---
+
+## Demo Videos
+
+High-definition demo videos and reproduction scripts showcasing Sotto's assistive communication and crisis navigation features on Android:
+
+- **Google Play Preview (Master)**: [`demo/sotto_google_play_preview.mp4`](demo/sotto_google_play_preview.mp4) (60s, 1920×1080 Landscape, Neural Baritone + Andrew + Ambient Bed + Chime) — [Watch on YouTube](https://youtu.be/Kd9qPu3F-Gg)
+- **Shorts / Reels / TikTok (Vertical)**: [`demo/sotto_vertical_preview.mp4`](demo/sotto_vertical_preview.mp4) (60s, 1080×1920 Portrait 9:16)
+- **English Device Demo**: [`demo/sotto_demo_en.mp4`](demo/sotto_demo_en.mp4) (~54s, 720×1600 Portrait, Samantha)
+- **Indonesian Device Demo**: [`demo/sotto_demo_id.mp4`](demo/sotto_demo_id.mp4) (~54s, 720×1600 Portrait, Damayanti)
+
+For full details on the automated motion generator and reproduction instructions, see [demo/README.md](demo/README.md).
+
+---
+
+## Project Structure
+
+```
+Sotto/
+├── AGENTS.md                       # Universal AI agent guidelines & flight rules
+├── CHANGELOG.md                    # Project release notes & version history
+├── CODE_OF_CONDUCT.md              # Contributor Covenant Code of Conduct v2.1
+├── CONTRIBUTING.md                 # Design philosophy, architecture, & contribution guide
+├── GEMINI.md                       # Local Gemini preferences & workflow rules
+├── LICENSE                         # GNU General Public License v3.0
+├── PRIVACY_POLICY.md               # Offline privacy policy
+├── SECURITY.md                     # Vulnerability disclosure & offline privacy policy
+├── app/
+│   ├── src/main/java/com/amh/sotto/
+│   │   ├── MainActivity.kt         # Single-activity Compose entry point & lifecycle
+│   │   ├── data/                   # Data repositories & settings persistence
+│   │   │   ├── PhraseRepository.kt # SharedPreferences phrase storage & seed data
+│   │   │   ├── VoiceSettingsRepository.kt # TTS pitch, rate, theme & PMF survey state
+│   │   │   └── WhyFinderRepository.kt # Crisis inquiry tree & offline session logs
+│   │   ├── model/                  # Core domain models
+│   │   │   ├── Phrase.kt           # Phrase item, category, & emergency flags
+│   │   │   ├── VoiceSettings.kt    # Voice configuration & sensory theme presets
+│   │   │   └── WhyFinder.kt        # Question tree, node navigation & crisis log
+│   │   ├── ui/
+│   │   │   ├── conversation/       # Two-Way Partner Mode dialogs & 180° flip HUD
+│   │   │   ├── main/               # Main phrase board, Quick-Speak bar, QR dialogs & settings
+│   │   │   ├── theme/              # Material 3 sensory themes (Charcoal, OLED, Amber, Navy, Parchment)
+│   │   │   └── whyfinder/          # Why Finder crisis inquiry dialogs & tree editor
+│   │   └── util/                   # Offline utilities
+│   │       ├── ChimePlayer.kt      # Two-tone musical chime & haptic synthesizer
+│   │       ├── LocaleHelper.kt     # Language detection & digit-by-digit phone TTS
+│   │       ├── PhraseBackupHelper.kt # JSON v2 backup, restore & optical QR encoder/decoder
+│   │       ├── TranslationHelper.kt # ML Kit offline on-device translation
+│   │       └── UsabilityTracker.kt # Privacy-preserving opt-in telemetry & PMF survey
+│   └── src/test/java/com/amh/sotto/ # Unit test suites for models, backup & detection
+├── assets/                         # Visual graphics, screenshots & store icons
+├── demo/                           # Synchronized demo videos & recording pipeline
+└── docs/                           # Guides, Play Store listing & scenario QR decks
+```
 
 ---
 
@@ -85,14 +144,23 @@ For offline devices, deGoogled systems, or quick testing without a Google accoun
 2. Open the downloaded file (allow "Install Unknown Apps" if prompted by Android).
 3. Tap **Install** and launch Sotto.
 
-### For Developers & Documentation
+---
+
+## Documentation & Development
+
 ```bash
 ./gradlew assembleDebug
 ```
-- **Caregiver & User Guide**: See [docs/CAREGIVER_GUIDE.md](docs/CAREGIVER_GUIDE.md).
-- **Language & Localization**: See [docs/LANGUAGE_AND_LOCALIZATION.md](docs/LANGUAGE_AND_LOCALIZATION.md).
-- **Device Debugging**: See [docs/RUNNING_ON_DEVICE.md](docs/RUNNING_ON_DEVICE.md).
-- **Contributing & Guidelines**: See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+- **Caregiver & User Guide**: See [docs/CAREGIVER_GUIDE.md](docs/CAREGIVER_GUIDE.md) for Two-Way Mode, phrase cards, and emergency protocols.
+- **Curated Scenario Decks**: See [docs/SCENARIO_DECKS.md](docs/SCENARIO_DECKS.md) for scannable QR codes and printable phrase packs (Medical, Transit, School, Dental).
+- **Language & Localization**: See [docs/LANGUAGE_AND_LOCALIZATION.md](docs/LANGUAGE_AND_LOCALIZATION.md) for language models, TTS voice data, and offline translation.
+- **Device Debugging**: See [docs/RUNNING_ON_DEVICE.md](docs/RUNNING_ON_DEVICE.md) for physical device testing.
+- **Play Store Listing**: See [docs/PLAY_STORE_LISTING.md](docs/PLAY_STORE_LISTING.md) for store metadata and release notes.
+- **Contributing & Guidelines**: See [CONTRIBUTING.md](CONTRIBUTING.md) for design philosophy and architectural guardrails.
+- **AI Agent Guidelines**: See [AGENTS.md](AGENTS.md) for universal flight rules for AI coding assistants.
+- **Changelog & Releases**: See [CHANGELOG.md](CHANGELOG.md) for version history.
+- **Companion iOS App**: See [Sotto for iOS](https://github.com/triton1502oc/Sotto-iOS) for the native SwiftUI port.
 
 ---
 

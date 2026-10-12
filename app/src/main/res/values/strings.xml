@@ -12,7 +12,9 @@
     <string name="action_speak_aloud">Speak Aloud</string>
     <string name="action_test_voice">Test Voice</string>
     <string name="action_stop">Stop</string>
+    <string name="action_mic">Mic</string>
     <string name="cd_stop_voice_input">Stop voice recording</string>
+    <string name="cd_close">Close</string>
 
     <!-- Status -->
     <string name="status_initializing">Initializing</string>
