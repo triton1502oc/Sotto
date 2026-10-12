@@ -50,10 +50,10 @@ github.com/triton1502oc/Sotto | iOS version available
 
 ### What's New (v1.7.2)
 ```text
-• Picture-in-Picture (PiP) AAC Communicator: Floating glanceable communicator with Yes/No/Wait system buttons while using other apps.
-• Main Screen Harmonization: Modern top bar, single-row QuickSpeak capsule dock, streamlined category strip, and compact phrase cards.
-• Material 3 Crisis Response Dock: Tactile elevated Yes/No dock, smooth 180° flip animation, and responsive trigger logger strip.
-• Categorized Settings: Reorganized into 3 Material 3 tabs (Voice, Appearance, Data) with polished sub-dialogs.
+• Floating PiP communicator with Yes/No/Wait buttons over other apps.
+• Single-row QuickSpeak dock and compact phrase cards.
+• Tactile Material 3 Yes/No response dock with 180° flip.
+• Simplified 3-tab Settings (Voice, Appearance, Data).
 ```
 
 ---
