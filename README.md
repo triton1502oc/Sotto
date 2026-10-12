@@ -135,14 +135,14 @@ Sotto/
 
 ## Installation
 
-### Option 1: Google Play Store (Open Testing)
+### Option 1: Google Play Store
 Install directly from Google Play with automatic updates:
 
 👉 [**Get it on Google Play**](https://play.google.com/store/apps/details?id=com.amh.sotto)  
 *(Web testing opt-in: [Join on the Web](https://play.google.com/apps/testing/com.amh.sotto))*
 
 1. Open the [Google Play Store listing](https://play.google.com/store/apps/details?id=com.amh.sotto) on your Android device.
-2. Tap **Install** (or tap **Become a tester** if viewing via the web link).
+2. Tap **Install**.
 3. Sotto installs directly to your device and receives automatic updates as new improvements are released.
 
 ---

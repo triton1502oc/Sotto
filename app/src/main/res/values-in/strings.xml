@@ -186,6 +186,11 @@
     <string name="action_allow">Izinkan</string>
     <string name="action_not_now">Nanti Saja</string>
 
+    <!-- Offline Speech Model Required -->
+    <string name="dialog_title_offline_speech_missing">Paket Suara Offline Diperlukan</string>
+    <string name="dialog_desc_offline_speech_missing">Sotto menjalankan pengenalan suara 100%% di perangkat demi menjaga privasi Anda. Dikte dalam %1$s memerlukan pengunduhan model suara offline di setelan perangkat Anda.</string>
+    <string name="action_open_voice_settings">Buka Setelan Suara</string>
+
     <!-- Phrase Backup & Restore -->
     <string name="label_backup_section">Cadangan &amp; Pemulihan</string>
     <string name="label_backup_desc">Ekspor atau pulihkan perpustakaan frasa dan data Anda.</string>

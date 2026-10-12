@@ -152,6 +152,8 @@ fun SottoApp(
     var isListeningTwoWay by remember { mutableStateOf(false) }
     var liveSpokenTextTwoWay by remember { mutableStateOf("") }
     var showAudioRationaleDialog by rememberSaveable { mutableStateOf(false) }
+    var showMissingOfflineSpeechDialog by rememberSaveable { mutableStateOf(false) }
+    var missingOfflineLanguageName by rememberSaveable { mutableStateOf("") }
     val whyFinderRepository = remember { SharedPreferencesWhyFinderRepository(context) }
     var showWhyLogDialog by rememberSaveable { mutableStateOf(false) }
     var showWhyTreeEditorDialog by rememberSaveable { mutableStateOf(false) }
@@ -195,7 +197,6 @@ fun SottoApp(
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
             putExtra(RecognizerIntent.EXTRA_PROMPT, listenModePrompt)
-            putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         }
         try {
             twoWaySpeechLauncher.launch(intent)
@@ -223,7 +224,12 @@ fun SottoApp(
                 },
                 onError = { errorCode ->
                     isListeningTwoWay = false
-                    if (errorCode != SpeechRecognizer.ERROR_NO_MATCH && errorCode != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+                    if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
+                        speechHelper.triggerModelDownload(locale)
+                        missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
+                        showMissingOfflineSpeechDialog = true
+                        UsabilityTracker.recordOfflineSpeechModelMissing(context, effectiveLang)
+                    } else if (errorCode != SpeechRecognizer.ERROR_NO_MATCH && errorCode != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
                         launchSystemSpeechFallback()
                     }
                 }
@@ -693,8 +699,14 @@ fun SottoApp(
                                 quickText = if (quickBaseText.isEmpty()) final else "$quickBaseText $final"
                                 isQuickListening = false
                             },
-                            onError = {
+                            onError = { errorCode ->
                                 isQuickListening = false
+                                if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
+                                    speechHelper.triggerModelDownload(locale)
+                                    missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
+                                    showMissingOfflineSpeechDialog = true
+                                    UsabilityTracker.recordOfflineSpeechModelMissing(context, effectiveLang)
+                                }
                             }
                         )
                     } else {
@@ -715,7 +727,6 @@ fun SottoApp(
                                     putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
                                     putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
                                     putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                                    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
                                 }
                                 try {
                                     quickSpeechLauncher.launch(intent)
@@ -735,8 +746,14 @@ fun SottoApp(
                                     quickText = if (quickBaseText.isEmpty()) final else "$quickBaseText $final"
                                     isQuickListening = false
                                 },
-                                onError = {
+                                onError = { errorCode ->
                                     isQuickListening = false
+                                    if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
+                                        speechHelper.triggerModelDownload(locale)
+                                        missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
+                                        showMissingOfflineSpeechDialog = true
+                                        UsabilityTracker.recordOfflineSpeechModelMissing(context, effectiveLang)
+                                    }
                                 }
                             )
                         } else {
@@ -1555,6 +1572,31 @@ fun SottoApp(
         )
     }
 
+    // Missing Offline Speech Model Dialog
+    if (showMissingOfflineSpeechDialog) {
+        val targetLangName = missingOfflineLanguageName.ifBlank {
+            LocaleHelper.getLanguageDisplayName(LocaleHelper.getEffectiveLanguage(context))
+        }
+        AlertDialog(
+            onDismissRequest = { showMissingOfflineSpeechDialog = false },
+            title = { Text(stringResource(R.string.dialog_title_offline_speech_missing)) },
+            text = { Text(stringResource(R.string.dialog_desc_offline_speech_missing, targetLangName)) },
+            confirmButton = {
+                Button(onClick = {
+                    showMissingOfflineSpeechDialog = false
+                    SpeechRecognitionHelper.openOfflineSpeechSettings(context)
+                }) {
+                    Text(stringResource(R.string.action_open_voice_settings))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showMissingOfflineSpeechDialog = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+
     // Two-Way Caregiver & Receptive Communication Mode Dialog
     if (showTwoWayDialog) {
         TwoWayConversationDialog(
@@ -1914,7 +1956,6 @@ fun SottoApp(
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
                                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
                                         putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                                        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
                                     }
                                     try {
                                         speechLauncher.launch(intent)
@@ -2046,7 +2087,6 @@ fun SottoApp(
                                                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
                                                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
                                                 putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                                                putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
                                             }
                                             try {
                                                 spokenSpeechLauncher.launch(intent)

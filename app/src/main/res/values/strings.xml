@@ -186,6 +186,11 @@
     <string name="action_allow">Allow</string>
     <string name="action_not_now">Not Now</string>
 
+    <!-- Offline Speech Model Required -->
+    <string name="dialog_title_offline_speech_missing">Offline Voice Model Required</string>
+    <string name="dialog_desc_offline_speech_missing">Sotto runs speech recognition 100%% on-device to protect your privacy. Dictation in %1$s requires downloading the offline language model in your device settings.</string>
+    <string name="action_open_voice_settings">Open Voice Settings</string>
+
     <!-- Phrase Backup & Restore -->
     <string name="label_backup_section">Backup &amp; Restore</string>
     <string name="label_backup_desc">Export or restore your phrase library and settings.</string>

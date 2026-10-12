@@ -442,6 +442,20 @@ object UsabilityTracker {
         )
     }
 
+    fun recordOfflineSpeechModelMissing(context: Context, languageCode: String) {
+        val repo = SharedPreferencesVoiceSettingsRepository(context)
+        if (!repo.getVoiceSettings().shareUsabilityMetrics) return
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "SpeechRecognition",
+                durationMs = 0L,
+                outcome = "missing_offline_model",
+                contextTag = "lang_$languageCode"
+            )
+        )
+    }
+
     private fun recordEventInternal(context: Context, event: UsabilityEvent) {
         val file = getBufferFile(context)
         val currentList = readEventsFromFile(file).toMutableList()

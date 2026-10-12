@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -65,8 +66,30 @@ class SpeechRecognitionHelper(private val context: Context) {
         }
     }
 
+    private enum class RecognitionStage {
+        ON_DEVICE_OFFLINE,
+        STANDARD_OFFLINE,
+        STANDARD_ONLINE
+    }
+
     fun startListening(
         locale: Locale,
+        onPartialResult: (String) -> Unit,
+        onFinalResult: (String) -> Unit,
+        onError: (Int) -> Unit
+    ) {
+        startListeningInternal(
+            locale = locale,
+            stage = RecognitionStage.ON_DEVICE_OFFLINE,
+            onPartialResult = onPartialResult,
+            onFinalResult = onFinalResult,
+            onError = onError
+        )
+    }
+
+    private fun startListeningInternal(
+        locale: Locale,
+        stage: RecognitionStage,
         onPartialResult: (String) -> Unit,
         onFinalResult: (String) -> Unit,
         onError: (Int) -> Unit
@@ -75,7 +98,10 @@ class SpeechRecognitionHelper(private val context: Context) {
             try {
                 cleanupInternal()
 
-                val recognizer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(context)) {
+                val recognizer = if (stage == RecognitionStage.ON_DEVICE_OFFLINE &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    SpeechRecognizer.isOnDeviceRecognitionAvailable(context)
+                ) {
                     SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
                 } else {
                     SpeechRecognizer.createSpeechRecognizer(context)
@@ -89,14 +115,16 @@ class SpeechRecognitionHelper(private val context: Context) {
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
                     putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-                    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+                    if (stage != RecognitionStage.STANDARD_ONLINE) {
+                        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+                    }
                     putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, autoStopDelayMs)
                     putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, autoStopDelayMs)
                 }
 
                 recognizer.setRecognitionListener(object : RecognitionListener {
                     override fun onReadyForSpeech(params: Bundle?) {
-                        android.util.Log.d("SottoSpeech", "onReadyForSpeech")
+                        android.util.Log.d("SottoSpeech", "onReadyForSpeech (stage=$stage)")
                         isListening = true
                     }
 
@@ -117,7 +145,32 @@ class SpeechRecognitionHelper(private val context: Context) {
                     override fun onError(error: Int) {
                         isListening = false
                         cancelSilenceTimer()
-                        android.util.Log.e("SottoSpeech", "SpeechRecognizer onError: $error")
+                        android.util.Log.e("SottoSpeech", "SpeechRecognizer onError: $error (stage=$stage)")
+
+                        if (stage == RecognitionStage.ON_DEVICE_OFFLINE && isMissingOfflineModelError(error)) {
+                            android.util.Log.i("SottoSpeech", "Falling back from ON_DEVICE_OFFLINE to STANDARD_OFFLINE for $locale")
+                            startListeningInternal(
+                                locale = locale,
+                                stage = RecognitionStage.STANDARD_OFFLINE,
+                                onPartialResult = onPartialResult,
+                                onFinalResult = onFinalResult,
+                                onError = onError
+                            )
+                            return
+                        }
+
+                        if (stage == RecognitionStage.STANDARD_OFFLINE && isMissingOfflineModelError(error)) {
+                            android.util.Log.i("SottoSpeech", "Falling back from STANDARD_OFFLINE to STANDARD_ONLINE for $locale")
+                            startListeningInternal(
+                                locale = locale,
+                                stage = RecognitionStage.STANDARD_ONLINE,
+                                onPartialResult = onPartialResult,
+                                onFinalResult = onFinalResult,
+                                onError = onError
+                            )
+                            return
+                        }
+
                         onError(error)
                     }
 
@@ -149,10 +202,32 @@ class SpeechRecognitionHelper(private val context: Context) {
                 recognizer.startListening(intent)
                 isListening = true
             } catch (e: Exception) {
-                android.util.Log.e("SottoSpeech", "SpeechRecognizer exception on startListening", e)
+                android.util.Log.e("SottoSpeech", "SpeechRecognizer exception on startListening (stage=$stage)", e)
                 isListening = false
                 cancelSilenceTimer()
-                onError(SpeechRecognizer.ERROR_CLIENT)
+                when (stage) {
+                    RecognitionStage.ON_DEVICE_OFFLINE -> {
+                        startListeningInternal(
+                            locale = locale,
+                            stage = RecognitionStage.STANDARD_OFFLINE,
+                            onPartialResult = onPartialResult,
+                            onFinalResult = onFinalResult,
+                            onError = onError
+                        )
+                    }
+                    RecognitionStage.STANDARD_OFFLINE -> {
+                        startListeningInternal(
+                            locale = locale,
+                            stage = RecognitionStage.STANDARD_ONLINE,
+                            onPartialResult = onPartialResult,
+                            onFinalResult = onFinalResult,
+                            onError = onError
+                        )
+                    }
+                    RecognitionStage.STANDARD_ONLINE -> {
+                        onError(SpeechRecognizer.ERROR_CLIENT)
+                    }
+                }
             }
         }
     }
@@ -163,9 +238,55 @@ class SpeechRecognitionHelper(private val context: Context) {
         }
     }
 
+    fun triggerModelDownload(locale: Locale) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            try {
+                val downloadIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale.toLanguageTag())
+                }
+                speechRecognizer?.triggerModelDownload(downloadIntent)
+            } catch (e: Exception) {
+                android.util.Log.e("SottoSpeech", "Failed to trigger model download", e)
+            }
+        }
+    }
+
     fun destroy() {
         runOnMainThread {
             cleanupInternal()
+        }
+    }
+
+    companion object {
+        const val ERROR_SERVER_DISCONNECTED = 11
+        const val ERROR_LANGUAGE_NOT_SUPPORTED = 12
+        const val ERROR_LANGUAGE_UNAVAILABLE = 13
+
+        fun isMissingOfflineModelError(errorCode: Int): Boolean {
+            return errorCode == ERROR_LANGUAGE_UNAVAILABLE ||
+                errorCode == ERROR_LANGUAGE_NOT_SUPPORTED ||
+                errorCode == ERROR_SERVER_DISCONNECTED
+        }
+
+        fun openOfflineSpeechSettings(context: Context) {
+            val intent = Intent("com.google.android.speech.embedded.MANAGE_LANGUAGES").apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            try {
+                context.startActivity(intent)
+            } catch (_: Exception) {
+                try {
+                    context.startActivity(Intent(Settings.ACTION_VOICE_INPUT_SETTINGS).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                } catch (_: Exception) {
+                    try {
+                        context.startActivity(Intent(Settings.ACTION_SETTINGS).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        })
+                    } catch (_: Exception) {}
+                }
+            }
         }
     }
 }
