@@ -438,7 +438,11 @@
     <string name="action_pip">Picture-in-Picture</string>
     <string name="cd_enter_pip">Enter Picture-in-Picture</string>
     <string name="label_pip_setting">Picture-in-Picture Communicator</string>
-    <string name="label_pip_setting_desc">Keep a floating QuickSpeak communicator dock active over other apps</string>
+    <string name="label_pip_setting_desc">Keep a floating QuickSpeak communicator dock active over other apps (automatically docks on Home or app switch)</string>
+    <string name="label_show_pip_in_top_bar">Show shortcut in top bar</string>
+    <string name="label_show_pip_in_top_bar_desc">Pin Picture-in-Picture button to the top navigation bar</string>
+    <string name="action_enter_pip_now">Enter PiP Now</string>
+    <string name="cd_enter_pip_now">Enter Picture-in-Picture mode now</string>
     <string name="pip_tap_hint">Tap window for speech buttons • Double-tap to expand</string>
     <string name="pip_status_ready">Ready</string>
     <string name="pip_status_speaking">Speaking…</string>

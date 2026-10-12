@@ -45,6 +45,7 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("show_safety_cards", true) } returns true
         every { sharedPreferences.getBoolean("compact_card_layout", false) } returns false
         every { sharedPreferences.getBoolean("enable_pip", true) } returns true
+        every { sharedPreferences.getBoolean("show_pip_in_top_bar", false) } returns false
 
         val settings = repository.getVoiceSettings()
 
@@ -59,6 +60,7 @@ class VoiceSettingsRepositoryTest {
         assertEquals(true, settings.showSafetyCards)
         assertEquals(false, settings.compactCardLayout)
         assertEquals(true, settings.enablePip)
+        assertEquals(false, settings.showPipInTopBar)
     }
 
     @Test
@@ -74,6 +76,7 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("show_safety_cards", true) } returns false
         every { sharedPreferences.getBoolean("compact_card_layout", false) } returns true
         every { sharedPreferences.getBoolean("enable_pip", true) } returns false
+        every { sharedPreferences.getBoolean("show_pip_in_top_bar", false) } returns true
 
         val settings = repository.getVoiceSettings()
 
@@ -88,6 +91,7 @@ class VoiceSettingsRepositoryTest {
         assertEquals(false, settings.showSafetyCards)
         assertEquals(true, settings.compactCardLayout)
         assertEquals(false, settings.enablePip)
+        assertEquals(true, settings.showPipInTopBar)
     }
 
     @Test
@@ -103,7 +107,8 @@ class VoiceSettingsRepositoryTest {
             appTheme = VoiceSettings.THEME_SLATE_NAVY,
             showSafetyCards = false,
             compactCardLayout = true,
-            enablePip = false
+            enablePip = false,
+            showPipInTopBar = true
         )
 
         repository.saveVoiceSettings(newSettings)
@@ -120,6 +125,7 @@ class VoiceSettingsRepositoryTest {
             editor.putBoolean("show_safety_cards", false)
             editor.putBoolean("compact_card_layout", true)
             editor.putBoolean("enable_pip", false)
+            editor.putBoolean("show_pip_in_top_bar", true)
             editor.apply()
         }
     }

@@ -155,7 +155,7 @@ For autistic teens and adults, as well as individuals with unclear, slurred, or 
 
 ### D. Floating Picture-in-Picture (PiP) Communicator
 - Keep vital crisis affirmations (`Yes`, `No`, `Wait`) accessible as a floating overlay above maps, videos, or external tasks.
-- Toggle PiP directly from the top app bar icon or enable auto-enter in Settings.
+- Enters automatically when returning to the Home screen or switching apps (or trigger manually via Settings, with an optional top bar shortcut).
 
 ---
 

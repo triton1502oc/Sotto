@@ -427,8 +427,8 @@ fun SottoApp(
                             }
                         }
 
-                        // Picture-in-Picture Trigger
-                        if (voiceSettings.enablePip) {
+                        // Picture-in-Picture Trigger (optional top bar shortcut #64)
+                        if (voiceSettings.enablePip && voiceSettings.showPipInTopBar) {
                             val pipCd = stringResource(R.string.cd_enter_pip)
                             IconButton(
                                 onClick = onEnterPip,
@@ -1336,6 +1336,10 @@ fun SottoApp(
             },
             onOpenWhyLog = { showWhyLogDialog = true },
             onOpenWhyTreeEditor = { showWhyTreeEditorDialog = true },
+            onEnterPip = {
+                showVoiceDialog = false
+                onEnterPip()
+            },
             onDismiss = {
                 showVoiceDialog = false
                 val defaultTexts = try {

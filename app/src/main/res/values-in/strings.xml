@@ -438,7 +438,11 @@
     <string name="action_pip">Gambar-dalam-Gambar (PiP)</string>
     <string name="cd_enter_pip">Buka Gambar-dalam-Gambar</string>
     <string name="label_pip_setting">Komunikator Gambar-dalam-Gambar (PiP)</string>
-    <string name="label_pip_setting_desc">Pertahankan komunikator QuickSpeak melayang di atas aplikasi lain</string>
+    <string name="label_pip_setting_desc">Pertahankan komunikator QuickSpeak melayang di atas aplikasi lain (otomatis saat ke Layar Utama atau beralih aplikasi)</string>
+    <string name="label_show_pip_in_top_bar">Tampilkan pintasan di bilah atas</string>
+    <string name="label_show_pip_in_top_bar_desc">Sematkan tombol Gambar-dalam-Gambar ke bilah navigasi atas</string>
+    <string name="action_enter_pip_now">Buka PiP Sekarang</string>
+    <string name="cd_enter_pip_now">Buka mode Gambar-dalam-Gambar sekarang</string>
     <string name="pip_tap_hint">Ketuk jendela untuk tombol bicara • Ketuk dua kali untuk perbesar</string>
     <string name="pip_status_ready">Siap</string>
     <string name="pip_status_speaking">Berbicara…</string>

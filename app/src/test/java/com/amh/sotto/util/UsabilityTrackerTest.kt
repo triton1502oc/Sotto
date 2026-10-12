@@ -262,6 +262,8 @@ class UsabilityTrackerTest {
         assertTrue(event.contextTag.contains("cust=6_20"))
         assertTrue(event.contextTag.contains("theme=warm_amber"))
         assertTrue(event.contextTag.contains("safety_cards_visible=1"))
+        assertTrue(event.contextTag.contains("pip=1"))
+        assertTrue(event.contextTag.contains("pip_bar=0"))
     }
 
     @Test

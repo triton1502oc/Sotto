@@ -16,7 +16,8 @@ data class VoiceSettings(
     val appTheme: String = THEME_CHARCOAL,
     val showSafetyCards: Boolean = true,
     val compactCardLayout: Boolean = false,
-    val enablePip: Boolean = true
+    val enablePip: Boolean = true,
+    val showPipInTopBar: Boolean = false
 ) {
     companion object {
         const val ROLE_UNSET = "unset"
@@ -74,6 +75,7 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         private const val KEY_SHOW_SAFETY_CARDS = "show_safety_cards"
         private const val KEY_COMPACT_CARD_LAYOUT = "compact_card_layout"
         private const val KEY_ENABLE_PIP = "enable_pip"
+        private const val KEY_SHOW_PIP_IN_TOP_BAR = "show_pip_in_top_bar"
     }
 
     override fun getVoiceSettings(): VoiceSettings {
@@ -90,6 +92,7 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         val safetyCards = prefs.getBoolean(KEY_SHOW_SAFETY_CARDS, true)
         val compactCardLayout = prefs.getBoolean(KEY_COMPACT_CARD_LAYOUT, false)
         val enablePip = prefs.getBoolean(KEY_ENABLE_PIP, true)
+        val showPipInTopBar = prefs.getBoolean(KEY_SHOW_PIP_IN_TOP_BAR, false)
         return VoiceSettings(
             speechRate = rate,
             speechPitch = pitch,
@@ -102,7 +105,8 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
             appTheme = theme,
             showSafetyCards = safetyCards,
             compactCardLayout = compactCardLayout,
-            enablePip = enablePip
+            enablePip = enablePip,
+            showPipInTopBar = showPipInTopBar
         )
     }
 
@@ -121,6 +125,7 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         editor.putBoolean(KEY_SHOW_SAFETY_CARDS, settings.showSafetyCards)
         editor.putBoolean(KEY_COMPACT_CARD_LAYOUT, settings.compactCardLayout)
         editor.putBoolean(KEY_ENABLE_PIP, settings.enablePip)
+        editor.putBoolean(KEY_SHOW_PIP_IN_TOP_BAR, settings.showPipInTopBar)
         editor.apply()
 
         if (settings.shareUsabilityMetrics) {

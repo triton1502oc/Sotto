@@ -57,6 +57,7 @@ fun VoiceSettingsDialog(
     onOpenQRScanner: () -> Unit = {},
     onOpenWhyLog: () -> Unit = {},
     onOpenWhyTreeEditor: () -> Unit = {},
+    onEnterPip: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -72,6 +73,7 @@ fun VoiceSettingsDialog(
     var showSafetyCards by remember { mutableStateOf(currentSettings.showSafetyCards) }
     var compactCardLayout by remember { mutableStateOf(currentSettings.compactCardLayout) }
     var enablePip by remember { mutableStateOf(currentSettings.enablePip) }
+    var showPipInTopBar by remember { mutableStateOf(currentSettings.showPipInTopBar) }
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     var secondaryLangDropdownExpanded by remember { mutableStateOf(false) }
@@ -93,7 +95,8 @@ fun VoiceSettingsDialog(
         newAppTheme: String = appTheme,
         newShowSafetyCards: Boolean = showSafetyCards,
         newCompactCardLayout: Boolean = compactCardLayout,
-        newEnablePip: Boolean = enablePip
+        newEnablePip: Boolean = enablePip,
+        newShowPipInTopBar: Boolean = showPipInTopBar
     ) {
         rate = newRate
         pitch = newPitch
@@ -107,6 +110,7 @@ fun VoiceSettingsDialog(
         showSafetyCards = newShowSafetyCards
         compactCardLayout = newCompactCardLayout
         enablePip = newEnablePip
+        showPipInTopBar = newShowPipInTopBar
         onSettingsChanged(
             VoiceSettings(
                 speechRate = ((newRate * 10).roundToInt() / 10f),
@@ -120,7 +124,8 @@ fun VoiceSettingsDialog(
                 appTheme = newAppTheme,
                 showSafetyCards = newShowSafetyCards,
                 compactCardLayout = newCompactCardLayout,
-                enablePip = newEnablePip
+                enablePip = newEnablePip,
+                showPipInTopBar = newShowPipInTopBar
             )
         )
     }
@@ -655,7 +660,8 @@ fun VoiceSettingsDialog(
                                                     appTheme = appTheme,
                                                     showSafetyCards = showSafetyCards,
                                                     compactCardLayout = compactCardLayout,
-                                                    enablePip = enablePip
+                                                    enablePip = enablePip,
+                                                    showPipInTopBar = showPipInTopBar
                                                 )
                                             )
                                         },
@@ -1098,7 +1104,7 @@ fun VoiceSettingsDialog(
                                     }
                                 }
 
-                                // Picture-in-Picture Setting (#45)
+                                // Picture-in-Picture Setting (#45, #64)
                                 SettingsCard {
                                     SettingsSectionHeader(
                                         iconRes = R.drawable.ic_pip,
@@ -1145,6 +1151,88 @@ fun VoiceSettingsDialog(
                                                 checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                                             )
                                         )
+                                    }
+
+                                    if (enablePip) {
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(vertical = 6.dp),
+                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                        )
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .clickable {
+                                                    val nextState = !showPipInTopBar
+                                                    UsabilityTracker.startIntent("setting_pip_top_bar")
+                                                    UsabilityTracker.endIntent(context, "setting_pip_top_bar", outcome = if (nextState) "enabled" else "disabled")
+                                                    updateSettings(newShowPipInTopBar = nextState)
+                                                }
+                                                .padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(end = 12.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.label_show_pip_in_top_bar),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.label_show_pip_in_top_bar_desc),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                            Switch(
+                                                checked = showPipInTopBar,
+                                                onCheckedChange = {
+                                                    UsabilityTracker.startIntent("setting_pip_top_bar")
+                                                    UsabilityTracker.endIntent(context, "setting_pip_top_bar", outcome = if (it) "enabled" else "disabled")
+                                                    updateSettings(newShowPipInTopBar = it)
+                                                },
+                                                colors = SwitchDefaults.colors(
+                                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                                    checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                                )
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        OutlinedButton(
+                                            onClick = {
+                                                UsabilityTracker.startIntent("pip_manual_launch")
+                                                UsabilityTracker.endIntent(context, "pip_manual_launch", outcome = "settings")
+                                                onEnterPip()
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.outlinedButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_pip),
+                                                    contentDescription = stringResource(R.string.cd_enter_pip_now),
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.action_enter_pip_now),
+                                                    style = MaterialTheme.typography.labelLarge
+                                                )
+                                            }
+                                        }
                                     }
                                 }
 
