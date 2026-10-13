@@ -212,7 +212,16 @@ class UsabilityTrackerTest {
         assertNotNull(whyEvent)
         assertEquals("found", whyEvent!!.outcome)
         assertEquals(25000L, whyEvent.durationMs)
-        assertTrue(whyEvent.contextTag.contains("area_senses_d3_ns1"))
+        assertTrue(whyEvent.contextTag.contains("area_senses_depth_3_ns_1_outcome_found"))
+        assertFalse(whyEvent.contextTag.contains("bp_"))
+        assertFalse(whyEvent.contextTag.contains("int_"))
+    }
+
+    @Test
+    fun `generatePreviewPayload provides non-empty valid JSON even when no events queued`() {
+        val payload = UsabilityTracker.generatePreviewPayload(context)
+        assertTrue(payload.contains("\"schema\": 3"))
+        assertTrue(payload.contains("\"events\""))
     }
 
     @Test

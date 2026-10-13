@@ -235,9 +235,9 @@
     <!-- Anonymous Usability Analytics -->
     <string name="label_metrics_section">Analytics &amp; Privacy</string>
     <string name="label_metrics_toggle">Help improve Sotto</string>
-    <string name="label_metrics_desc">Share anonymous interaction timings to help improve usability. Never collects text or speech.</string>
+    <string name="label_metrics_desc">Share anonymous interaction timings to help improve usability. Never collects text, speech, or health data.</string>
     <string name="dialog_metrics_optin_title">Help Improve Sotto</string>
-    <string name="dialog_metrics_optin_message">Help us make Sotto easier to use by sharing anonymous button timings and latency. We never collect typed text, phrases, or speech. You can change this anytime in Settings.</string>
+    <string name="dialog_metrics_optin_message">Help us make Sotto easier to use by sharing anonymous interaction latency, screen navigation duration, user role, and app version. We never collect typed text, phrases, speech, or health/body information. You can inspect sample payloads or change this anytime in Settings.</string>
     <string name="action_help_improve">Help Improve</string>
     <string name="action_view_shared_data">View shared data</string>
     <string name="dialog_shared_data_title">Pending Telemetry Payload</string>

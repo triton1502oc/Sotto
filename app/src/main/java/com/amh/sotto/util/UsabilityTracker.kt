@@ -248,8 +248,6 @@ object UsabilityTracker {
         areaId: String?,
         depth: Int,
         notSureCount: Int,
-        bodyPart: String?,
-        intensity: Int?,
         durationMs: Long
     ) {
         val safeArea = if (areaId != null && SharedPreferencesWhyFinderRepository.BUILT_IN_AREAS.contains(areaId)) {
@@ -259,18 +257,29 @@ object UsabilityTracker {
         } else {
             "none"
         }
-        val safePart = bodyPart ?: "none"
-        val safeIntensity = intensity?.toString() ?: "none"
         recordEvent(
             context,
             UsabilityEvent(
                 intent = "WhyFinder",
                 durationMs = durationMs,
                 outcome = outcome,
-                contextTag = "area_${safeArea}_d${depth}_ns${notSureCount}_bp_${safePart}_int_${safeIntensity}"
+                contextTag = "area_${safeArea}_depth_${depth}_ns_${notSureCount}_outcome_${outcome}"
             )
         )
         recordActivation(context, "why_finder")
+    }
+
+    fun recordWhyFinder(
+        context: Context,
+        outcome: String,
+        areaId: String?,
+        depth: Int,
+        notSureCount: Int,
+        bodyPart: String?,
+        intensity: Int?,
+        durationMs: Long
+    ) {
+        recordWhyFinder(context, outcome, areaId, depth, notSureCount, durationMs)
     }
 
     fun recordWhyFinderAction(context: Context, action: String) {
@@ -515,14 +524,36 @@ object UsabilityTracker {
         val role = repo.getUserRole()
         val events = getPendingEvents(context)
 
+        val previewEvents = if (events.isNotEmpty()) {
+            events
+        } else {
+            listOf(
+                UsabilityEvent(
+                    intent = "SpeakCard",
+                    durationMs = 120L,
+                    outcome = "completed",
+                    frictionTag = "none",
+                    contextTag = "cat_needs"
+                ),
+                UsabilityEvent(
+                    intent = "WhyFinder",
+                    durationMs = 15000L,
+                    outcome = "found",
+                    frictionTag = "none",
+                    contextTag = "area_senses_depth_2_ns_0_outcome_found"
+                )
+            )
+        }
+
         val root = JSONObject().apply {
             put("schema", 3)
-            put("installId", installId)
+            put("installId", if (installId != "none") installId else "[Sample UUID generated on opt-in]")
             put("role", role)
             put("uiLang", LocaleHelper.getLanguage(context))
-            put("eventsCount", events.size)
+            put("eventsCount", if (events.isNotEmpty()) events.size else 0)
+            put("isSamplePreview", events.isEmpty())
             val jsonEvents = JSONArray()
-            events.forEach { jsonEvents.put(it.toJsonArray()) }
+            previewEvents.forEach { jsonEvents.put(it.toJsonArray()) }
             put("events", jsonEvents)
         }
         return root.toString(2)

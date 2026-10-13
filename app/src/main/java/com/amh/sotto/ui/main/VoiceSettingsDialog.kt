@@ -1444,58 +1444,58 @@ fun VoiceSettingsDialog(
                                                     )
                                                 }
                                             }
+                                        }
+                                    }
 
-                                            var showSharedDataDialog by remember { mutableStateOf(false) }
-                                            TextButton(
-                                                onClick = { showSharedDataDialog = true },
-                                                modifier = Modifier.align(Alignment.End),
-                                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-                                            ) {
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    var showSharedDataDialog by remember { mutableStateOf(false) }
+                                    TextButton(
+                                        onClick = { showSharedDataDialog = true },
+                                        modifier = Modifier.align(Alignment.End),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_explore),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.action_view_shared_data),
+                                                fontSize = 12.sp
+                                            )
+                                        }
+                                    }
+
+                                    if (showSharedDataDialog) {
+                                        val previewText = remember(shareMetrics) { UsabilityTracker.generatePreviewPayload(context) }
+                                        AlertDialog(
+                                            onDismissRequest = { showSharedDataDialog = false },
+                                            title = { Text(stringResource(R.string.dialog_shared_data_title)) },
+                                            text = {
+                                                Column(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .heightIn(max = 350.dp)
+                                                        .verticalScroll(rememberScrollState())
                                                 ) {
-                                                    Icon(
-                                                        painter = painterResource(R.drawable.ic_explore),
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(14.dp)
-                                                    )
-                                                    Text(
-                                                        text = stringResource(R.string.action_view_shared_data),
-                                                        fontSize = 12.sp
-                                                    )
+                                                    androidx.compose.foundation.text.selection.SelectionContainer {
+                                                        Text(
+                                                            text = previewText,
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                                        )
+                                                    }
+                                                }
+                                            },
+                                            confirmButton = {
+                                                TextButton(onClick = { showSharedDataDialog = false }) {
+                                                    Text(stringResource(R.string.cd_dismiss))
                                                 }
                                             }
-
-                                            if (showSharedDataDialog) {
-                                                val previewText = remember { UsabilityTracker.generatePreviewPayload(context) }
-                                                AlertDialog(
-                                                    onDismissRequest = { showSharedDataDialog = false },
-                                                    title = { Text(stringResource(R.string.dialog_shared_data_title)) },
-                                                    text = {
-                                                        Column(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .heightIn(max = 350.dp)
-                                                                .verticalScroll(rememberScrollState())
-                                                        ) {
-                                                            androidx.compose.foundation.text.selection.SelectionContainer {
-                                                                Text(
-                                                                    text = previewText,
-                                                                    style = MaterialTheme.typography.bodySmall,
-                                                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                                                                )
-                                                            }
-                                                        }
-                                                    },
-                                                    confirmButton = {
-                                                        TextButton(onClick = { showSharedDataDialog = false }) {
-                                                            Text(stringResource(R.string.cd_dismiss))
-                                                        }
-                                                    }
-                                                )
-                                            }
-                                        }
+                                        )
                                     }
                                 }
 

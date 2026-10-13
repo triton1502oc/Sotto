@@ -345,6 +345,15 @@ class MainViewModelTest {
     }
 
     @Test
+    fun `shouldPromptMetrics returns false when already prompted even if version bumped`() {
+        every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(shareUsabilityMetrics = false)
+        every { voiceSettingsRepository.getLastPromptedMetricsVersion() } returns 10 // older version code
+
+        val vm = MainViewModel(repository, voiceSettingsRepository)
+        assertFalse(vm.shouldPromptMetrics())
+    }
+
+    @Test
     fun `onMetricsPromptAnswered with optIn true saves version and enables metrics`() {
         viewModel.onMetricsPromptAnswered(optIn = true)
 

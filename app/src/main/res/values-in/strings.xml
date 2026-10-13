@@ -235,9 +235,9 @@
     <!-- Anonymous Usability Analytics -->
     <string name="label_metrics_section">Analisis &amp; Privasi</string>
     <string name="label_metrics_toggle">Bantu menyempurnakan Sotto</string>
-    <string name="label_metrics_desc">Bagikan waktu interaksi anonim untuk perbaikan aplikasi. Tidak pernah mengumpulkan teks atau suara.</string>
+    <string name="label_metrics_desc">Bagikan waktu interaksi anonim untuk perbaikan aplikasi. Tidak pernah mengumpulkan teks, suara, atau data kesehatan.</string>
     <string name="dialog_metrics_optin_title">Bantu Menyempurnakan Sotto</string>
-    <string name="dialog_metrics_optin_message">Bantu kami membuat Sotto lebih mudah digunakan dengan membagikan durasi interaksi tombol dan latensi anonim. Kami tidak pernah mengumpulkan teks yang diketik, frasa, atau rekaman suara. Anda dapat mengubah ini kapan saja di Pengaturan.</string>
+    <string name="dialog_metrics_optin_message">Bantu kami menyempurnakan Sotto dengan membagikan data anonim seperti latensi interaksi, durasi navigasi, peran pengguna, dan versi aplikasi. Kami tidak pernah mengumpulkan teks, frasa, rekaman suara, atau informasi kesehatan/tubuh. Anda dapat memeriksa contoh data atau mengubahnya kapan saja di Pengaturan.</string>
     <string name="action_help_improve">Bantu Sempurnakan</string>
     <string name="action_view_shared_data">Lihat data yang dibagikan</string>
     <string name="dialog_shared_data_title">Data Telemetri yang Mengantre</string>

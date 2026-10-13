@@ -185,10 +185,9 @@ class MainViewModel(
     }
 
     fun shouldPromptMetrics(): Boolean {
-        val currentVersion = com.amh.sotto.BuildConfig.VERSION_CODE
         val lastPrompted = voiceSettingsRepository.getLastPromptedMetricsVersion()
         val isOptedIn = _voiceSettings.value.shareUsabilityMetrics
-        return !isOptedIn && lastPrompted < currentVersion
+        return !isOptedIn && lastPrompted == 0
     }
 
     fun onMetricsPromptAnswered(optIn: Boolean) {
