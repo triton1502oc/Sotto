@@ -430,7 +430,7 @@
 
     <!-- Card Proportions / Density -->
     <string name="label_card_layout">Phrase Card Proportions</string>
-    <string name="label_card_layout_desc">Choose between classic square or compact rectangular cards (+25% density)</string>
+    <string name="label_card_layout_desc">Choose between compact rectangular (+25% density) or classic square cards</string>
     <string name="card_layout_square">Classic Square (1:1)</string>
     <string name="card_layout_compact">Compact Rectangular (1.25:1)</string>
 

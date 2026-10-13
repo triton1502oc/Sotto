@@ -430,7 +430,7 @@
 
     <!-- Card Proportions / Density -->
     <string name="label_card_layout">Proporsi Kartu Frasa</string>
-    <string name="label_card_layout_desc">Pilih antara kartu persegi klasik atau persegi panjang ringkas (+25% kepadatan)</string>
+    <string name="label_card_layout_desc">Pilih antara kartu persegi panjang ringkas (+25% kepadatan) atau persegi klasik</string>
     <string name="card_layout_square">Persegi Klasik (1:1)</string>
     <string name="card_layout_compact">Persegi Panjang Ringkas (1.25:1)</string>
 

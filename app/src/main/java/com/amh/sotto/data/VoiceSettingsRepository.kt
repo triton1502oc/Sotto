@@ -15,7 +15,7 @@ data class VoiceSettings(
     val userRole: String = ROLE_UNSET,
     val appTheme: String = THEME_CHARCOAL,
     val showSafetyCards: Boolean = true,
-    val compactCardLayout: Boolean = false,
+    val compactCardLayout: Boolean = true,
     val enablePip: Boolean = true,
     val showPipInTopBar: Boolean = false
 ) {
@@ -90,7 +90,7 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         val rawTheme = prefs.getString(KEY_APP_THEME, VoiceSettings.THEME_CHARCOAL)
         val theme = if (rawTheme.isNullOrBlank()) VoiceSettings.THEME_CHARCOAL else rawTheme
         val safetyCards = prefs.getBoolean(KEY_SHOW_SAFETY_CARDS, true)
-        val compactCardLayout = prefs.getBoolean(KEY_COMPACT_CARD_LAYOUT, false)
+        val compactCardLayout = prefs.getBoolean(KEY_COMPACT_CARD_LAYOUT, true)
         val enablePip = prefs.getBoolean(KEY_ENABLE_PIP, true)
         val showPipInTopBar = prefs.getBoolean(KEY_SHOW_PIP_IN_TOP_BAR, false)
         return VoiceSettings(

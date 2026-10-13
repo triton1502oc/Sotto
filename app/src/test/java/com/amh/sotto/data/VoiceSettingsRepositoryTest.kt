@@ -43,7 +43,7 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns false
         every { sharedPreferences.getString("app_theme", VoiceSettings.THEME_CHARCOAL) } returns VoiceSettings.THEME_CHARCOAL
         every { sharedPreferences.getBoolean("show_safety_cards", true) } returns true
-        every { sharedPreferences.getBoolean("compact_card_layout", false) } returns false
+        every { sharedPreferences.getBoolean("compact_card_layout", true) } returns true
         every { sharedPreferences.getBoolean("enable_pip", true) } returns true
         every { sharedPreferences.getBoolean("show_pip_in_top_bar", false) } returns false
 
@@ -58,7 +58,7 @@ class VoiceSettingsRepositoryTest {
         assertEquals(false, settings.shareUsabilityMetrics)
         assertEquals(VoiceSettings.THEME_CHARCOAL, settings.appTheme)
         assertEquals(true, settings.showSafetyCards)
-        assertEquals(false, settings.compactCardLayout)
+        assertEquals(true, settings.compactCardLayout)
         assertEquals(true, settings.enablePip)
         assertEquals(false, settings.showPipInTopBar)
     }
@@ -74,7 +74,7 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("share_usability_metrics", false) } returns true
         every { sharedPreferences.getString("app_theme", VoiceSettings.THEME_CHARCOAL) } returns VoiceSettings.THEME_WARM_AMBER
         every { sharedPreferences.getBoolean("show_safety_cards", true) } returns false
-        every { sharedPreferences.getBoolean("compact_card_layout", false) } returns true
+        every { sharedPreferences.getBoolean("compact_card_layout", true) } returns false
         every { sharedPreferences.getBoolean("enable_pip", true) } returns false
         every { sharedPreferences.getBoolean("show_pip_in_top_bar", false) } returns true
 
@@ -89,7 +89,7 @@ class VoiceSettingsRepositoryTest {
         assertEquals(true, settings.shareUsabilityMetrics)
         assertEquals(VoiceSettings.THEME_WARM_AMBER, settings.appTheme)
         assertEquals(false, settings.showSafetyCards)
-        assertEquals(true, settings.compactCardLayout)
+        assertEquals(false, settings.compactCardLayout)
         assertEquals(false, settings.enablePip)
         assertEquals(true, settings.showPipInTopBar)
     }

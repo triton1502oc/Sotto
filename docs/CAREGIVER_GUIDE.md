@@ -171,7 +171,7 @@ For autistic teens and adults, as well as individuals with unclear, slurred, or 
 ### Categorized 3-Tab Settings
 Tap the settings icon in the top app bar to configure:
 - **Voice & Speech**: Speech speed, voice pitch, voice picker with Android Settings shortcut, attention chime, and dual-language translation.
-- **Appearance & Safety**: Sensory color themes (Charcoal, OLED Pure Black, Warm Amber, Slate Navy, Soft Parchment), card layout density (Square default vs Compact), and safety bystander card visibility.
+- **Appearance & Safety**: Sensory color themes (Charcoal, OLED Pure Black, Warm Amber, Slate Navy, Soft Parchment), card layout density (Compact rectangular default vs classic Square), and safety bystander card visibility.
 - **Data & Backup**: Instant offline QR code deck sharing, JSON v2 selective backup & restore, Why Log historical insights, Why Tree editor, and optional usability telemetry.
 
 ---

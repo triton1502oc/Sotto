@@ -1049,8 +1049,8 @@ fun VoiceSettingsDialog(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         val options = listOf(
-                                            false to stringResource(R.string.card_layout_square),
-                                            true to stringResource(R.string.card_layout_compact)
+                                            true to stringResource(R.string.card_layout_compact),
+                                            false to stringResource(R.string.card_layout_square)
                                         )
                                         options.forEach { (isCompact, label) ->
                                             val isSelected = compactCardLayout == isCompact

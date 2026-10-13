@@ -264,6 +264,7 @@ class UsabilityTrackerTest {
         assertTrue(event.contextTag.contains("safety_cards_visible=1"))
         assertTrue(event.contextTag.contains("pip=1"))
         assertTrue(event.contextTag.contains("pip_bar=0"))
+        assertTrue(event.contextTag.contains("layout=compact"))
     }
 
     @Test

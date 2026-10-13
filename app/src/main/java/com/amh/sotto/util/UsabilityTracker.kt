@@ -418,6 +418,7 @@ object UsabilityTracker {
         val customVoice = if (settings.voiceName != null) 1 else 0
         val pip = if (settings.enablePip) 1 else 0
         val pipBar = if (settings.showPipInTopBar) 1 else 0
+        val layout = if (settings.compactCardLayout) "compact" else "square"
 
         recordEvent(
             context,
@@ -425,7 +426,7 @@ object UsabilityTracker {
                 intent = "SettingsState",
                 durationMs = 0L,
                 outcome = "active",
-                contextTag = "chime=${chime};bi=${bilingual};sec=${secLang};rate=${rateBucket};cust=${customBucket};theme=${settings.appTheme};safety_cards_visible=${safety};custom_voice=${customVoice};pip=${pip};pip_bar=${pipBar}"
+                contextTag = "chime=${chime};bi=${bilingual};sec=${secLang};rate=${rateBucket};cust=${customBucket};theme=${settings.appTheme};safety_cards_visible=${safety};custom_voice=${customVoice};pip=${pip};pip_bar=${pipBar};layout=${layout}"
             )
         )
     }
