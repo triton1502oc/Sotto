@@ -68,6 +68,7 @@ import com.amh.sotto.data.WhyFinderRepository
 import com.amh.sotto.theme.SottoColors
 import com.amh.sotto.ui.category.ManageCategoriesDialog
 import com.amh.sotto.ui.category.getCategoryDisplayName
+import com.amh.sotto.ui.conversation.CaregiverTab
 import com.amh.sotto.ui.conversation.TwoWayConversationDialog
 import com.amh.sotto.ui.main.ExportBackupDialog
 import com.amh.sotto.ui.main.ImportBackupDialog
@@ -159,10 +160,12 @@ fun SottoApp(
     var showWhyTreeEditorDialog by rememberSaveable { mutableStateOf(false) }
     var activeQRShareString by remember { mutableStateOf<String?>(null) }
     var showQRScannerDialog by rememberSaveable { mutableStateOf(false) }
+    var partnerModeInitialTab by remember { mutableStateOf<CaregiverTab?>(null) }
 
     LaunchedEffect(initialOpenPartnerMode) {
         if (initialOpenPartnerMode) {
             UsabilityTracker.startIntent("TwoWay")
+            partnerModeInitialTab = CaregiverTab.WHY_FINDER
             showTwoWayDialog = true
             onPartnerModeOpened()
         }
@@ -1623,11 +1626,13 @@ fun SottoApp(
             categories = effectiveCategories,
             customCategories = effectiveCategories,
             whyFinderRepository = whyFinderRepository,
+            initialTab = partnerModeInitialTab,
             onDismiss = {
                 UsabilityTracker.endIntent(context, "TwoWay", outcome = "aborted", frictionTag = "dismissed")
                 stopTwoWayListening()
                 liveSpokenTextTwoWay = ""
                 showTwoWayDialog = false
+                partnerModeInitialTab = null
             }
         )
     }

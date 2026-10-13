@@ -54,8 +54,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.os.SystemClock
+import android.view.WindowManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import com.amh.sotto.R
 import com.amh.sotto.data.Phrase
 import com.amh.sotto.data.SharedPreferencesWhyFinderRepository
@@ -102,13 +106,36 @@ fun TwoWayConversationDialog(
     categories: List<String> = emptyList(),
     customCategories: List<String> = emptyList(),
     whyFinderRepository: WhyFinderRepository? = null,
+    initialTab: CaregiverTab? = null,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
 
+    val partnerPrefs = remember(context) {
+        context.getSharedPreferences("sotto_partner_prefs", Context.MODE_PRIVATE)
+    }
+
     var activeTab by rememberSaveable {
-        mutableStateOf(CaregiverTab.FREEFORM)
+        mutableStateOf(
+            initialTab ?: run {
+                val saved = partnerPrefs.getString("saved_partner_tab", null)
+                if (saved != null) {
+                    try {
+                        CaregiverTab.valueOf(saved)
+                    } catch (e: Exception) {
+                        CaregiverTab.FREEFORM
+                    }
+                } else {
+                    CaregiverTab.FREEFORM
+                }
+            }
+        )
+    }
+
+    fun selectTab(tab: CaregiverTab) {
+        activeTab = tab
+        partnerPrefs.edit().putString("saved_partner_tab", tab.name).apply()
     }
 
     var displayedText by rememberSaveable { mutableStateOf("") }
@@ -121,6 +148,18 @@ fun TwoWayConversationDialog(
             current = current.baseContext
         }
         null
+    }
+
+    // Keep screen continuously illuminated during crisis sessions (#68)
+    val view = LocalView.current
+    DisposableEffect(view, activity) {
+        val dialogWindow = (view.parent as? DialogWindowProvider)?.window
+        dialogWindow?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose {
+            dialogWindow?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     val configuration = LocalConfiguration.current
@@ -298,6 +337,33 @@ fun TwoWayConversationDialog(
         triggerLoggedFeedback = triggerKey
     }
 
+    val launchTime = remember { SystemClock.elapsedRealtime() }
+    var hasRecordedFirstAnswer by rememberSaveable { mutableStateOf(false) }
+    var autoSpeakQuestions by rememberSaveable {
+        mutableStateOf(partnerPrefs.getBoolean("auto_speak_questions", true))
+    }
+    var showExitConfirmDialog by remember { mutableStateOf(false) }
+
+    fun handleDismissAttempt() {
+        val isActiveGuided = activeTab == CaregiverTab.WHY_FINDER &&
+            whyState !is WhyFinderState.Finished &&
+            (whySession.steps.isNotEmpty() || whySession.canStepBack())
+        if (isActiveGuided) {
+            showExitConfirmDialog = true
+        } else {
+            onStopListening()
+            val outcome = if (whyState is WhyFinderState.Finished) "completed" else "dismissed"
+            UsabilityTracker.recordPartnerExit(context, outcome, SystemClock.elapsedRealtime() - launchTime)
+            onDismiss()
+        }
+    }
+
+    LaunchedEffect(whyPromptText, autoSpeakQuestions, activeTab) {
+        if (activeTab == CaregiverTab.WHY_FINDER && autoSpeakQuestions && whyState !is WhyFinderState.Finished && whyPromptText.isNotBlank()) {
+            onSpeakResponse(whyPromptText)
+        }
+    }
+
     // Reusable response strings
     val strYes = stringResource(R.string.response_yes)
     val strNo = stringResource(R.string.response_no)
@@ -316,6 +382,16 @@ fun TwoWayConversationDialog(
             UsabilityTracker.endIntent(context, "partner_response", outcome = responseOutcome)
             UsabilityTracker.recordPartnerResponse(context, responseOutcome)
         }
+        if (!hasRecordedFirstAnswer) {
+            hasRecordedFirstAnswer = true
+            val timeToFirstAnswer = (SystemClock.elapsedRealtime() - launchTime).coerceAtLeast(0L)
+            UsabilityTracker.recordPartnerTimeToFirstAnswer(
+                context = context,
+                durationMs = timeToFirstAnswer,
+                outcome = responseOutcome ?: "answered",
+                tab = activeTab.name.lowercase(Locale.ROOT)
+            )
+        }
         if (activeTab == CaregiverTab.FREEFORM && (displayText == strYes || displayText == strNo)) {
             showPostResolutionPrompt = true
         }
@@ -330,8 +406,7 @@ fun TwoWayConversationDialog(
 
     Dialog(
         onDismissRequest = {
-            onStopListening()
-            onDismiss()
+            handleDismissAttempt()
         },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
@@ -467,9 +542,27 @@ fun TwoWayConversationDialog(
                         )
                     }
 
+                    CaregiverMirrorHUD(
+                        activeTab = activeTab,
+                        whyState = whyState,
+                        currentPrompt = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText,
+                        lastReply = lastReply,
+                        onRestartWhyTree = {
+                            whySession.restart()
+                            savedSessionId = null
+                            UsabilityTracker.recordWhyFinderAction(context, "restart")
+                        },
+                        onDone = {
+                            val outcome = if (whyState is WhyFinderState.Finished) "completed" else "dismissed"
+                            UsabilityTracker.recordPartnerExit(context, outcome, SystemClock.elapsedRealtime() - launchTime)
+                            onDismiss()
+                        },
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+
                     CaregiverBottomMenu(
                         activeTab = activeTab,
-                        onTabChange = { activeTab = it },
+                        onTabChange = { selectTab(it) },
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = true,
                         onToggleFlip = {
@@ -490,6 +583,11 @@ fun TwoWayConversationDialog(
                                 UsabilityTracker.recordWhyFinderAction(context, "correction")
                             }
                         },
+                        autoSpeakQuestions = autoSpeakQuestions,
+                        onToggleAutoSpeak = {
+                            autoSpeakQuestions = !autoSpeakQuestions
+                            partnerPrefs.edit().putBoolean("auto_speak_questions", autoSpeakQuestions).apply()
+                        },
                         isListening = isListening,
                         onToggleListening = {
                             if (isListening) {
@@ -504,8 +602,7 @@ fun TwoWayConversationDialog(
                         onReadAloudFreeform = { onSpeakResponse(activeFreeformText) },
                         onToggleKeyboard = { showKeyboardInput = !showKeyboardInput },
                         onDismiss = {
-                            onStopListening()
-                            onDismiss()
+                            handleDismissAttempt()
                         }
                     )
                 }
@@ -628,7 +725,7 @@ fun TwoWayConversationDialog(
 
                     CaregiverBottomMenu(
                         activeTab = activeTab,
-                        onTabChange = { activeTab = it },
+                        onTabChange = { selectTab(it) },
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = false,
                         onToggleFlip = {
@@ -649,6 +746,11 @@ fun TwoWayConversationDialog(
                                 UsabilityTracker.recordWhyFinderAction(context, "correction")
                             }
                         },
+                        autoSpeakQuestions = autoSpeakQuestions,
+                        onToggleAutoSpeak = {
+                            autoSpeakQuestions = !autoSpeakQuestions
+                            partnerPrefs.edit().putBoolean("auto_speak_questions", autoSpeakQuestions).apply()
+                        },
                         isListening = isListening,
                         onToggleListening = {
                             if (isListening) {
@@ -663,13 +765,38 @@ fun TwoWayConversationDialog(
                         onReadAloudFreeform = { onSpeakResponse(activeFreeformText) },
                         onToggleKeyboard = { showKeyboardInput = !showKeyboardInput },
                         onDismiss = {
-                            onStopListening()
-                            onDismiss()
+                            handleDismissAttempt()
                         }
                     )
                 }
             }
         }
+    }
+
+    if (showExitConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirmDialog = false },
+            title = { Text(stringResource(R.string.title_exit_partner_mode)) },
+            text = { Text(stringResource(R.string.msg_exit_partner_mode_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitConfirmDialog = false
+                        whySession.stop()
+                        onStopListening()
+                        UsabilityTracker.recordPartnerExit(context, "cancelled", SystemClock.elapsedRealtime() - launchTime)
+                        onDismiss()
+                    }
+                ) {
+                    Text(stringResource(R.string.action_exit), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitConfirmDialog = false }) {
+                    Text(stringResource(R.string.action_continue))
+                }
+            }
+        )
     }
 
     // Card Picker Sheet (Why Tree Questions in Guided mode or Phrase Cards in Talk mode)
@@ -904,6 +1031,102 @@ fun TwoWayConversationDialog(
 }
 
 @Composable
+private fun CaregiverMirrorHUD(
+    activeTab: CaregiverTab,
+    whyState: WhyFinderState,
+    currentPrompt: String,
+    lastReply: String?,
+    onRestartWhyTree: () -> Unit,
+    onDone: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+    ) {
+        if (activeTab == CaregiverTab.WHY_FINDER && whyState is WhyFinderState.Finished) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                val outcomeLabel = if (whyState.outcome == WhyOutcome.FOUND) {
+                    stringResource(R.string.why_finder_found_title) + (whyState.causeText?.let { ": $it" } ?: "")
+                } else if (whyState.outcome == WhyOutcome.STOPPED) {
+                    stringResource(R.string.why_finder_stopped_title)
+                } else {
+                    stringResource(R.string.why_finder_not_found_title)
+                }
+                Text(
+                    text = outcomeLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                TextButton(
+                    onClick = onRestartWhyTree,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text(stringResource(R.string.action_restart), style = MaterialTheme.typography.labelSmall)
+                }
+                Button(
+                    onClick = onDone,
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp)
+                ) {
+                    Text(stringResource(R.string.action_done), style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(if (activeTab == CaregiverTab.WHY_FINDER) R.drawable.ic_help else R.drawable.ic_partner_mode),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = currentPrompt.ifBlank { stringResource(R.string.listen_mode_hint) },
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                if (lastReply != null) {
+                    Surface(
+                        color = SottoColors.SuccessGreen,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = lastReply,
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun CaregiverBottomMenu(
     activeTab: CaregiverTab,
     onTabChange: (CaregiverTab) -> Unit,
@@ -915,6 +1138,8 @@ private fun CaregiverBottomMenu(
     onPickCard: () -> Unit,
     canStepBack: Boolean,
     onStepBack: () -> Unit,
+    autoSpeakQuestions: Boolean = true,
+    onToggleAutoSpeak: () -> Unit = {},
     isListening: Boolean,
     onToggleListening: () -> Unit,
     canReadAloudFreeform: Boolean,
@@ -972,9 +1197,9 @@ private fun CaregiverBottomMenu(
                     }
                 }
 
-                // Global Controls: Material 3 Tool Capsule + Standalone Dismissal (#46)
+                // Global Controls: Material 3 Tool Capsule + Standalone Dismissal (#46, #68)
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val context = LocalContext.current
@@ -985,7 +1210,7 @@ private fun CaregiverBottomMenu(
 
                     // Utility Capsule: Log (if available) + Flip
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
@@ -1002,7 +1227,7 @@ private fun CaregiverBottomMenu(
                                         onToggleTriggerLogger()
                                     },
                                     modifier = Modifier
-                                        .size(34.dp)
+                                        .size(48.dp)
                                         .semantics {
                                             role = Role.Button
                                             contentDescription = strLogTrigger
@@ -1011,7 +1236,7 @@ private fun CaregiverBottomMenu(
                                     Icon(
                                         painter = painterResource(R.drawable.ic_note_alt),
                                         contentDescription = null,
-                                        modifier = Modifier.size(18.dp),
+                                        modifier = Modifier.size(20.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -1023,8 +1248,8 @@ private fun CaregiverBottomMenu(
 
                             Box(
                                 modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(RoundedCornerShape(10.dp))
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
                                     .background(flipBg)
                                     .clickable {
                                         UsabilityTracker.startIntent("partner_tool")
@@ -1041,7 +1266,7 @@ private fun CaregiverBottomMenu(
                                     painter = painterResource(R.drawable.ic_flip_partner),
                                     contentDescription = null,
                                     modifier = Modifier
-                                        .size(18.dp)
+                                        .size(22.dp)
                                         .graphicsLayer { rotationZ = flipRotation },
                                     tint = flipContentColor
                                 )
@@ -1049,7 +1274,7 @@ private fun CaregiverBottomMenu(
                         }
                     }
 
-                    // Standalone Modal Dismissal
+                    // Standalone Modal Dismissal (>= 48dp target)
                     val dismissDesc = stringResource(R.string.cd_dismiss)
                     IconButton(
                         onClick = {
@@ -1058,7 +1283,7 @@ private fun CaregiverBottomMenu(
                             onDismiss()
                         },
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(48.dp)
                             .semantics {
                                 role = Role.Button
                                 contentDescription = dismissDesc
@@ -1067,7 +1292,7 @@ private fun CaregiverBottomMenu(
                         Icon(
                             painter = painterResource(R.drawable.ic_close),
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(24.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -1153,6 +1378,17 @@ private fun CaregiverBottomMenu(
                             )
                         }
                     }
+
+                    FilterChip(
+                        selected = autoSpeakQuestions,
+                        onClick = onToggleAutoSpeak,
+                        label = {
+                            Text(
+                                text = stringResource(R.string.action_auto_speak),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    )
                 } else {
                     val configuration = LocalConfiguration.current
                     val isCompactScreen = configuration.screenWidthDp <= 360 || configuration.fontScale > 1.15f

@@ -336,4 +336,24 @@ class UsabilityTrackerTest {
         assertEquals("not_sure", pending[1].outcome)
         assertEquals("other", pending[2].outcome)
     }
+
+    @Test
+    fun `recordPartnerExit and recordPartnerTimeToFirstAnswer sanitize values`() {
+        UsabilityTracker.recordPartnerTimeToFirstAnswer(context, 1200L, "yes", "why_finder")
+        UsabilityTracker.recordPartnerTimeToFirstAnswer(context, 2500L, "unknown_resp", "custom_tab")
+        UsabilityTracker.recordPartnerExit(context, "completed", 5000L)
+        UsabilityTracker.recordPartnerExit(context, "random_exit", 1000L)
+
+        val firstAnswerEvents = UsabilityTracker.getPendingEvents(context).filter { it.intent == "PartnerTimeToFirstAnswer" }
+        assertEquals(2, firstAnswerEvents.size)
+        assertEquals("yes", firstAnswerEvents[0].outcome)
+        assertEquals("tab_why_finder", firstAnswerEvents[0].contextTag)
+        assertEquals("other", firstAnswerEvents[1].outcome)
+        assertEquals("tab_unknown", firstAnswerEvents[1].contextTag)
+
+        val exitEvents = UsabilityTracker.getPendingEvents(context).filter { it.intent == "PartnerExit" }
+        assertEquals(2, exitEvents.size)
+        assertEquals("completed", exitEvents[0].outcome)
+        assertEquals("other", exitEvents[1].outcome)
+    }
 }

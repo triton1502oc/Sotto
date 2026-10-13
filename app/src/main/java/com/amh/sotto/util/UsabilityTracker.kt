@@ -380,6 +380,42 @@ object UsabilityTracker {
         )
     }
 
+    fun recordPartnerExit(context: Context, outcome: String, durationMs: Long) {
+        val safeOutcome = when (outcome.lowercase(Locale.ROOT)) {
+            "completed", "cancelled", "dismissed", "timeout" -> outcome.lowercase(Locale.ROOT)
+            else -> "other"
+        }
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "PartnerExit",
+                durationMs = durationMs.coerceAtLeast(0L),
+                outcome = safeOutcome,
+                contextTag = safeOutcome
+            )
+        )
+    }
+
+    fun recordPartnerTimeToFirstAnswer(context: Context, durationMs: Long, outcome: String, tab: String) {
+        val safeOutcome = when (outcome.lowercase(Locale.ROOT)) {
+            "yes", "no", "wait", "not_sure", "stop", "repeat" -> outcome.lowercase(Locale.ROOT)
+            else -> "other"
+        }
+        val safeTab = when (tab.lowercase(Locale.ROOT)) {
+            "why_finder", "freeform" -> tab.lowercase(Locale.ROOT)
+            else -> "unknown"
+        }
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "PartnerTimeToFirstAnswer",
+                durationMs = durationMs.coerceAtLeast(0L),
+                outcome = safeOutcome,
+                contextTag = "tab_$safeTab"
+            )
+        )
+    }
+
     private val inMemoryTapCounts = ConcurrentHashMap<String, Int>()
     private var inMemoryAggDay: String? = null
     private var inMemoryAggHour: Int = -1

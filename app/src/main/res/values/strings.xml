@@ -453,4 +453,11 @@
 
     <!-- Drag / Reorder Accessibility -->
     <string name="cd_drag_reorder">Drag to reorder</string>
+
+    <!-- Partner Mode Crisis Refinements (#68) -->
+    <string name="action_auto_speak">Auto-speak</string>
+    <string name="title_exit_partner_mode">Exit Partner Mode?</string>
+    <string name="msg_exit_partner_mode_confirm">An active check-in is in progress. Do you want to exit? Your session will be saved as stopped.</string>
+    <string name="action_exit">Exit</string>
+    <string name="action_continue">Continue</string>
 </resources>

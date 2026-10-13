@@ -453,4 +453,11 @@
 
     <!-- Drag / Reorder Accessibility -->
     <string name="cd_drag_reorder">Tarik untuk urutkan</string>
+
+    <!-- Partner Mode Crisis Refinements (#68) -->
+    <string name="action_auto_speak">Bicara otomatis</string>
+    <string name="title_exit_partner_mode">Keluar Mode Mitra?</string>
+    <string name="msg_exit_partner_mode_confirm">Pemeriksaan aktif sedang berlangsung. Ingin keluar? Sesi akan disimpan sebagai berhenti.</string>
+    <string name="action_exit">Keluar</string>
+    <string name="action_continue">Lanjutkan</string>
 </resources>
