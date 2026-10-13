@@ -418,8 +418,8 @@ fun SottoApp(
                                 }
                             }
                         }
-                        val listenModeCd = stringResource(R.string.cd_listen_mode)
-                        // Partner Mode CTA
+                        val listenModeCd = stringResource(R.string.title_partner_mode)
+                        // Partner Mode High-Visibility Squircle Badge
                         IconButton(
                             onClick = {
                                 UsabilityTracker.startIntent("TwoWay", contextTag = "topbar")
@@ -429,15 +429,16 @@ fun SottoApp(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.size(36.dp)
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
+                                modifier = Modifier.size(38.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_partner_mode),
                                         contentDescription = listenModeCd,
-                                        modifier = Modifier.size(20.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        modifier = Modifier.size(22.dp),
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
                                 }
                             }
@@ -531,51 +532,6 @@ fun SottoApp(
                         titleContentColor = MaterialTheme.colorScheme.onBackground
                     )
                 )
-
-                // Hero Partner Mode Entry Banner
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.section_my_board),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
-                        modifier = Modifier.clickable {
-                            UsabilityTracker.startIntent("TwoWay", contextTag = "hero")
-                            partnerModeInitialTab = null
-                            showTwoWayDialog = true
-                        }
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_partner_mode),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(R.string.title_partner_mode),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                }
 
                 // Category Filter Chips
                 val mainBarCategories = effectiveCategories
