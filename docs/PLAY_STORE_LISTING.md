@@ -50,12 +50,13 @@ Sotto is not a medical device and does not provide medical advice, diagnosis, or
 github.com/triton1502oc/Sotto | iOS version available
 ```
 
-### What's New (v1.7.2)
+### What's New (v1.7.3)
 ```text
-• Floating PiP communicator with Yes/No/Wait buttons over other apps.
-• Single-row QuickSpeak dock and compact phrase cards.
-• Tactile Material 3 Yes/No response dock with 180° flip.
-• Simplified 3-tab Settings (Voice, Appearance, Data).
+• 3-step welcome onboarding and skippable setup.
+• Interactive emergency safety card setup with natural spoken digits.
+• Upright Caregiver Mirror HUD in 180° flip mode and screen wake lock.
+• Tactile response dock with calming terracotta palette and vector icons.
+• Quick Settings tile discovery and offline stability fixes.
 ```
 
 ---

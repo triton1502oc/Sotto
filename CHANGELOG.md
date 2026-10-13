@@ -3,6 +3,33 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.3] - 2026-10-14
+
+### Added
+- **Value-First 3-Step Welcome Onboarding**: Replaced cold double-modal gate on fresh installs with a dignified, skippable 3-step onboarding flow (Role & Intent, Emergency Safety Setup, Ready) with deferred telemetry consent until initial value delivery ([#70](https://github.com/triton1502oc/Sotto/issues/70)).
+- **Interactive Emergency Safety Card Setup**: Tap-to-configure sheet for emergency safety cards featuring dedicated numeric keyboard input, natural spoken digit pacing via `LocaleHelper.formatDigitsForSpeech`, and bracket placeholder sanitization so Android TTS never vocalizes raw `[...]` placeholders aloud ([#70](https://github.com/triton1502oc/Sotto/issues/70)).
+- **Upright Caregiver Mirror HUD & Screen Wake**: Dedicated upright status bar facing the caregiver in 180° flip mode displaying live selections and check-in depth; active screen wake lock (`FLAG_KEEP_SCREEN_ON`) during Partner Mode; safe exit confirmation protecting active check-ins; and remembered tab preference ([#68](https://github.com/triton1502oc/Sotto/issues/68)).
+- **Quick Settings Tile Discovery**: Guided prompt on API 33+ following Partner Mode sessions offering direct notification shade tile access for sub-3-second emergency launch ([#69](https://github.com/triton1502oc/Sotto/issues/69)).
+- **Graceful 3-Tier Speech Recognition Fallback**: Resilient speech engine with seamless automatic recovery across in-app speech recognizer, system intent, and localized offline voice model installation guidance ([#63](https://github.com/triton1502oc/Sotto/issues/63)).
+
+### Changed
+- **Calming Terracotta Crisis Palette & Vector Icons**: Replaced alarming red with a dignified, WCAG AAA compliant terracotta container (`#5A3030`) for "No"; standardized 80dp Yes/No dock with tactile haptics; and replaced text labels with crisp vector icons for Wait (`ic_hourglass`), Not Sure (`ic_help`), and Stop (`ic_stop_circle`) ([#72](https://github.com/triton1502oc/Sotto/issues/72)).
+- **Streamlined Top Bar & Vertical Space Reclamation**: Replaced duplicate sub-headers with an elevated high-visibility squircle badge for Partner Mode in the top app bar, reclaiming 44dp of vertical height for speech tiles ([#69](https://github.com/triton1502oc/Sotto/issues/69)).
+- **Default Compact Card Density**: Set compact 1.25:1 card density by default to maximize speech tile visibility on mobile screens ([#65](https://github.com/triton1502oc/Sotto/issues/65)).
+- **Optional Top Bar PiP Shortcut**: Relocated floating PiP toggle into Voice Settings by default to prevent top-bar clutter ([#64](https://github.com/triton1502oc/Sotto/issues/64)).
+
+### Fixed
+- **Duplicate Phrase Grid Crash**: Implemented case-insensitive deduplication across Add/Edit phrase dialog, QuickSpeak save card toast, and JSON/QR backup import ([#66](https://github.com/triton1502oc/Sotto/issues/66)).
+- **Why Finder Session ID Regeneration & Upsert**: Generated fresh session IDs on restart; preserved body parts and step indices on "Not Sure" intensity; resolved desynced session logs via upsert ([#67](https://github.com/triton1502oc/Sotto/issues/67)).
+- **Telemetry Sanitization & Pre-Consent Data Preview**: Purged health-adjacent metrics (`bodyPart`, pain intensity) from telemetry payloads; enabled "View shared data" preview prior to opt-in; and persisted "Not Now" consent across version bumps ([#71](https://github.com/triton1502oc/Sotto/issues/71)).
+
+### Assets
+- `Sotto-v1.7.3.apk`: Universal release APK for all architectures.
+- `Sotto-v1.7.3-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.7.3-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.7.3-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.7.2] - 2026-10-12
 
 ### Added
