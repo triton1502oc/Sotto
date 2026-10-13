@@ -460,4 +460,11 @@
     <string name="msg_exit_partner_mode_confirm">An active check-in is in progress. Do you want to exit? Your session will be saved as stopped.</string>
     <string name="action_exit">Exit</string>
     <string name="action_continue">Continue</string>
+
+    <!-- Navigation & QS Tile Discovery (#69) -->
+    <string name="section_my_board">My AAC Board</string>
+    <string name="title_partner_mode">Partner Mode</string>
+    <string name="prompt_add_qs_tile_title">Add Quick Settings Tile?</string>
+    <string name="prompt_add_qs_tile_msg">Add Sotto Partner to your Quick Settings for sub-3-second crisis access from anywhere, even when your phone is locked.</string>
+    <string name="action_add_tile">Add Tile</string>
 </resources>

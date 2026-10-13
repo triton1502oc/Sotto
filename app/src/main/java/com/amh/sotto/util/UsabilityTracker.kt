@@ -112,8 +112,15 @@ object UsabilityTracker {
         }
     }
 
-    fun startIntent(name: String) {
+    private val intentContextTags = ConcurrentHashMap<String, String>()
+
+    fun startIntent(name: String, contextTag: String = "") {
         activeIntents[name] = SystemClock.elapsedRealtime()
+        if (contextTag.isNotEmpty()) {
+            intentContextTags[name] = contextTag
+        } else {
+            intentContextTags.remove(name)
+        }
     }
 
     fun hasActiveIntent(name: String): Boolean = activeIntents.containsKey(name)
@@ -126,6 +133,8 @@ object UsabilityTracker {
         contextTag: String = ""
     ) {
         val startTime = activeIntents.remove(name) ?: return
+        val initialContextTag = intentContextTags.remove(name) ?: ""
+        val resolvedContextTag = if (contextTag.isNotEmpty()) contextTag else initialContextTag
         val duration = (SystemClock.elapsedRealtime() - startTime).coerceAtLeast(0L)
 
         // Flag high hesitation if duration exceeds threshold and no specific friction was set
@@ -135,7 +144,7 @@ object UsabilityTracker {
             frictionTag
         }
 
-        recordEvent(context, UsabilityEvent(name, duration, outcome, resolvedFriction, contextTag))
+        recordEvent(context, UsabilityEvent(name, duration, outcome, resolvedFriction, resolvedContextTag))
     }
 
     /**

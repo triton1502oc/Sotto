@@ -460,4 +460,11 @@
     <string name="msg_exit_partner_mode_confirm">Pemeriksaan aktif sedang berlangsung. Ingin keluar? Sesi akan disimpan sebagai berhenti.</string>
     <string name="action_exit">Keluar</string>
     <string name="action_continue">Lanjutkan</string>
+
+    <!-- Navigation & QS Tile Discovery (#69) -->
+    <string name="section_my_board">Papan AAC Saya</string>
+    <string name="title_partner_mode">Mode Mitra</string>
+    <string name="prompt_add_qs_tile_title">Tambah Ubin Pengaturan Cepat?</string>
+    <string name="prompt_add_qs_tile_msg">Tambahkan Sotto Mitra ke Pengaturan Cepat untuk akses krisis kurang dari 3 detik dari mana saja, bahkan saat ponsel terkunci.</string>
+    <string name="action_add_tile">Tambah Ubin</string>
 </resources>

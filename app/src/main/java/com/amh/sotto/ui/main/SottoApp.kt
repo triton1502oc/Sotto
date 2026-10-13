@@ -2,9 +2,12 @@ package com.amh.sotto.ui.main
 
 import android.Manifest
 import android.app.Activity
+import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import com.amh.sotto.service.EmergencyTileService
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Build
@@ -161,10 +164,11 @@ fun SottoApp(
     var activeQRShareString by remember { mutableStateOf<String?>(null) }
     var showQRScannerDialog by rememberSaveable { mutableStateOf(false) }
     var partnerModeInitialTab by remember { mutableStateOf<CaregiverTab?>(null) }
+    var showQsTileDiscoveryDialog by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(initialOpenPartnerMode) {
         if (initialOpenPartnerMode) {
-            UsabilityTracker.startIntent("TwoWay")
+            UsabilityTracker.startIntent("TwoWay", contextTag = "tile")
             partnerModeInitialTab = CaregiverTab.WHY_FINDER
             showTwoWayDialog = true
             onPartnerModeOpened()
@@ -409,7 +413,7 @@ fun SottoApp(
                         // Partner Mode CTA
                         IconButton(
                             onClick = {
-                                UsabilityTracker.startIntent("TwoWay")
+                                UsabilityTracker.startIntent("TwoWay", contextTag = "topbar")
                                 showTwoWayDialog = true
                             },
                             modifier = Modifier.semantics { contentDescription = listenModeCd }
@@ -518,6 +522,51 @@ fun SottoApp(
                         titleContentColor = MaterialTheme.colorScheme.onBackground
                     )
                 )
+
+                // Hero Partner Mode Entry Banner
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.section_my_board),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
+                        modifier = Modifier.clickable {
+                            UsabilityTracker.startIntent("TwoWay", contextTag = "hero")
+                            partnerModeInitialTab = null
+                            showTwoWayDialog = true
+                        }
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_partner_mode),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.title_partner_mode),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
 
                 // Category Filter Chips
                 val mainBarCategories = effectiveCategories
@@ -1633,6 +1682,75 @@ fun SottoApp(
                 liveSpokenTextTwoWay = ""
                 showTwoWayDialog = false
                 partnerModeInitialTab = null
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val prefs = context.getSharedPreferences("sotto_partner_prefs", Context.MODE_PRIVATE)
+                    val promptShown = prefs.getBoolean("qs_tile_prompt_shown", false)
+                    val tileAdded = prefs.getBoolean("qs_tile_added", false)
+                    if (!promptShown && !tileAdded) {
+                        showQsTileDiscoveryDialog = true
+                    }
+                }
+            }
+        )
+    }
+
+    // Quick Settings Tile Discovery Dialog (API 33+)
+    if (showQsTileDiscoveryDialog && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        AlertDialog(
+            onDismissRequest = {
+                val prefs = context.getSharedPreferences("sotto_partner_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putBoolean("qs_tile_prompt_shown", true).apply()
+                showQsTileDiscoveryDialog = false
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.prompt_add_qs_tile_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.prompt_add_qs_tile_msg),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val prefs = context.getSharedPreferences("sotto_partner_prefs", Context.MODE_PRIVATE)
+                        prefs.edit().putBoolean("qs_tile_prompt_shown", true).apply()
+                        showQsTileDiscoveryDialog = false
+                        try {
+                            val statusBarManager = context.getSystemService(StatusBarManager::class.java)
+                            val component = ComponentName(context, EmergencyTileService::class.java)
+                            statusBarManager?.requestAddTileService(
+                                component,
+                                context.getString(R.string.tile_partner_mode),
+                                android.graphics.drawable.Icon.createWithResource(context, R.drawable.ic_qs_sotto_partner),
+                                context.mainExecutor
+                            ) { statusCode ->
+                                if (statusCode == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED) {
+                                    prefs.edit().putBoolean("qs_tile_added", true).apply()
+                                    UsabilityTracker.recordActivation(context, "qs_tile_added")
+                                }
+                            }
+                        } catch (_: Exception) { }
+                    }
+                ) {
+                    Text(stringResource(R.string.action_add_tile))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        val prefs = context.getSharedPreferences("sotto_partner_prefs", Context.MODE_PRIVATE)
+                        prefs.edit().putBoolean("qs_tile_prompt_shown", true).apply()
+                        showQsTileDiscoveryDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.action_not_now))
+                }
             }
         )
     }
