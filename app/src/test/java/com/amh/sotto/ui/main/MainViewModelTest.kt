@@ -110,6 +110,27 @@ class MainViewModelTest {
     }
 
     @Test
+    fun `addPhrase rejects duplicate phrase text`() {
+        val duplicatePhrase = Phrase("Phrase 1", "en")
+        val result = viewModel.addPhrase(duplicatePhrase)
+
+        assertEquals(false, result)
+        assertEquals(initialPhrases, viewModel.phrases.value)
+        verify(exactly = 0) { repository.savePhrases(any()) }
+    }
+
+    @Test
+    fun `editPhrase rejects updating to existing phrase text`() {
+        val oldPhrase = Phrase("Phrase 2", "en")
+        val duplicatePhrase = Phrase("Phrase 1", "en")
+        val result = viewModel.editPhrase(oldPhrase, duplicatePhrase)
+
+        assertEquals(false, result)
+        assertEquals(initialPhrases, viewModel.phrases.value)
+        verify(exactly = 0) { repository.savePhrases(any()) }
+    }
+
+    @Test
     fun `deletePhrase removes phrase and saves to repository`() {
         val phraseToDelete = Phrase("Phrase 2", "en")
         viewModel.deletePhrase(phraseToDelete)

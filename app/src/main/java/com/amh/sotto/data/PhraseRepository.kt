@@ -146,10 +146,10 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
                     val isEmergency = item.optBoolean("isEmergency", false)
                     val rawCategory = item.optString("category", if (isEmergency) Phrase.CATEGORY_EMERGENCY else Phrase.CATEGORY_GENERAL)
                     val category = if (isEmergency) Phrase.CATEGORY_EMERGENCY else if (rawCategory == Phrase.CATEGORY_EMERGENCY) Phrase.CATEGORY_GENERAL else rawCategory
-                    if (text.isNotBlank()) {
+                    if (text.isNotBlank() && !list.any { it.text.trim().equals(text.trim(), ignoreCase = true) }) {
                         list.add(
                             Phrase(
-                                text = text,
+                                text = text.trim(),
                                 language = lang,
                                 spokenText = spokenText,
                                 spokenLanguage = spokenLanguage,
@@ -158,8 +158,8 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
                             )
                         )
                     }
-                } else if (item is String && item.isNotBlank()) {
-                    list.add(Phrase(text = item, language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_GENERAL))
+                } else if (item is String && item.isNotBlank() && !list.any { it.text.trim().equals(item.trim(), ignoreCase = true) }) {
+                    list.add(Phrase(text = item.trim(), language = LocaleHelper.LANG_AUTO, isEmergency = false, category = Phrase.CATEGORY_GENERAL))
                 }
             }
 
@@ -223,8 +223,15 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
     }
 
     override fun savePhrases(phrases: List<Phrase>) {
-        val jsonArray = JSONArray()
+        val deduplicated = mutableListOf<Phrase>()
         phrases.forEach { phrase ->
+            val trimmed = phrase.text.trim()
+            if (trimmed.isNotBlank() && !deduplicated.any { it.text.trim().equals(trimmed, ignoreCase = true) }) {
+                deduplicated.add(phrase.copy(text = trimmed))
+            }
+        }
+        val jsonArray = JSONArray()
+        deduplicated.forEach { phrase ->
             val obj = JSONObject()
             obj.put("text", phrase.text)
             if (!phrase.spokenText.isNullOrBlank()) {

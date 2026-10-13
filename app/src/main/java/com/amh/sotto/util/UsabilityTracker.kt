@@ -331,6 +331,18 @@ object UsabilityTracker {
         )
     }
 
+    fun recordFriction(context: Context, frictionTag: String) {
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "Friction",
+                durationMs = 0L,
+                outcome = "blocked",
+                frictionTag = frictionTag
+            )
+        )
+    }
+
     private val inMemoryTapCounts = ConcurrentHashMap<String, Int>()
     private var inMemoryAggDay: String? = null
     private var inMemoryAggHour: Int = -1

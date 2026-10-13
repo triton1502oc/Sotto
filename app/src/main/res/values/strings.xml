@@ -86,6 +86,7 @@
     <string name="hint_category_name">Category name</string>
     <string name="error_category_exists">A category with this name already exists</string>
     <string name="error_category_reserved">This is a reserved system category</string>
+    <string name="error_phrase_exists">A card with this text already exists</string>
     <string name="action_rename_category">Rename</string>
     <string name="action_delete_category">Delete</string>
     <string name="badge_emergency_locked">Safety (Locked)</string>

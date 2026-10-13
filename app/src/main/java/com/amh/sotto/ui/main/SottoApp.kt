@@ -916,8 +916,14 @@ fun SottoApp(
                                 IconButton(
                                     onClick = {
                                         stopQuickListening()
-                                        UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "saved_as_card", contextTag = "dock_v2 len_${quickText.trim().length}")
-                                        initialAddText = quickText.trim()
+                                        val trimmed = quickText.trim()
+                                        val alreadyExists = phrases.any { it.text.trim().equals(trimmed, ignoreCase = true) }
+                                        if (alreadyExists) {
+                                            UsabilityTracker.recordFriction(context, "duplicate_phrase_blocked")
+                                            android.widget.Toast.makeText(context, context.getString(R.string.error_phrase_exists), android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                        UsabilityTracker.endIntent(context, "QuickSpeak", outcome = if (alreadyExists) "duplicate_blocked" else "saved_as_card", contextTag = "dock_v2 len_${trimmed.length}")
+                                        initialAddText = trimmed
                                         showAddDialog = true
                                     },
                                     modifier = Modifier
@@ -1854,6 +1860,13 @@ fun SottoApp(
             )
         }
         val isEditModeDialog = phraseToEdit != null
+        val isDuplicateText = remember(textValue, phraseToEdit, phrases) {
+            val trimmed = textValue.trim()
+            trimmed.isNotBlank() && phrases.any { p ->
+                p.text.trim().equals(trimmed, ignoreCase = true) &&
+                    (phraseToEdit == null || !p.text.trim().equals(phraseToEdit?.text?.trim(), ignoreCase = true))
+            }
+        }
 
         fun executeTranslation(targetLang: String, sourceLang: String) {
             translationErrorResId = null
@@ -1971,6 +1984,10 @@ fun SottoApp(
                                 Text("🎤", fontSize = 20.sp)
                             }
                         },
+                        isError = isDuplicateText,
+                        supportingText = if (isDuplicateText) {
+                            { Text(stringResource(R.string.error_phrase_exists), color = MaterialTheme.colorScheme.error) }
+                        } else null,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = false,
                         minLines = 2
@@ -2161,33 +2178,40 @@ fun SottoApp(
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    if (textValue.isNotBlank()) {
-                        val isEmergency = selectedCat == Phrase.CATEGORY_EMERGENCY
-                        val newPhrase = Phrase(
-                            text = textValue.trim(),
-                            spokenText = if (voiceSettings.showLanguageSwitcher) spokenTextValue.trim().takeIf { it.isNotBlank() } else phraseToEdit?.spokenText,
-                            spokenLanguage = if (voiceSettings.showLanguageSwitcher) spokenLangValue.takeIf { spokenTextValue.isNotBlank() } else phraseToEdit?.spokenLanguage,
-                            language = LocaleHelper.LANG_AUTO,
-                            isEmergency = isEmergency,
-                            category = selectedCat
-                        )
-                        if (isEditModeDialog) {
-                            onEditPhrase(phraseToEdit!!, newPhrase)
-                        } else {
-                            onAddPhrase(newPhrase)
-                            if (initialAddText.isNotBlank()) {
-                                quickText = ""
+                Button(
+                    onClick = {
+                        if (isDuplicateText) {
+                            UsabilityTracker.recordFriction(context, "duplicate_phrase_blocked")
+                            return@Button
+                        }
+                        if (textValue.isNotBlank()) {
+                            val isEmergency = selectedCat == Phrase.CATEGORY_EMERGENCY
+                            val newPhrase = Phrase(
+                                text = textValue.trim(),
+                                spokenText = if (voiceSettings.showLanguageSwitcher) spokenTextValue.trim().takeIf { it.isNotBlank() } else phraseToEdit?.spokenText,
+                                spokenLanguage = if (voiceSettings.showLanguageSwitcher) spokenLangValue.takeIf { spokenTextValue.isNotBlank() } else phraseToEdit?.spokenLanguage,
+                                language = LocaleHelper.LANG_AUTO,
+                                isEmergency = isEmergency,
+                                category = selectedCat
+                            )
+                            if (isEditModeDialog) {
+                                onEditPhrase(phraseToEdit!!, newPhrase)
+                            } else {
+                                onAddPhrase(newPhrase)
+                                if (initialAddText.isNotBlank()) {
+                                    quickText = ""
+                                }
+                            }
+                            if (newPhrase.isEmergency) {
+                                UsabilityTracker.recordSafetyCardSaved(context)
                             }
                         }
-                        if (newPhrase.isEmergency) {
-                            UsabilityTracker.recordSafetyCardSaved(context)
-                        }
-                    }
-                    showAddDialog = false
-                    phraseToEdit = null
-                    initialAddText = ""
-                }) {
+                        showAddDialog = false
+                        phraseToEdit = null
+                        initialAddText = ""
+                    },
+                    enabled = textValue.isNotBlank() && !isDuplicateText
+                ) {
                     Text(stringResource(R.string.action_save))
                 }
             },

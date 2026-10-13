@@ -86,6 +86,7 @@
     <string name="hint_category_name">Nama kategori</string>
     <string name="error_category_exists">Kategori dengan nama ini sudah ada</string>
     <string name="error_category_reserved">Ini adalah kategori sistem yang dilindungi</string>
+    <string name="error_phrase_exists">Kartu dengan teks ini sudah ada</string>
     <string name="action_rename_category">Ubah nama</string>
     <string name="action_delete_category">Hapus</string>
     <string name="badge_emergency_locked">Keselamatan (Terkunci)</string>

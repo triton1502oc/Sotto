@@ -237,7 +237,7 @@ object PhraseBackupHelper {
             val item = array.get(i)
             if (item is JSONObject) {
                 val text = item.optString("text", "").trim()
-                if (text.isNotBlank()) {
+                if (text.isNotBlank() && !targetList.any { it.text.trim().equals(text, ignoreCase = true) }) {
                     val spokenText = item.optString("spokenText", "").trim().takeIf { it.isNotBlank() && it != LocaleHelper.LANG_AUTO }
                     val spokenLanguage = item.optString("spokenLanguage", "").trim().takeIf { it.isNotBlank() && it != LocaleHelper.LANG_AUTO }
                     val lang = item.optString("language", LocaleHelper.LANG_AUTO).ifBlank { LocaleHelper.LANG_AUTO }
@@ -263,14 +263,17 @@ object PhraseBackupHelper {
                     )
                 }
             } else if (item is String && item.isNotBlank()) {
-                targetList.add(
-                    Phrase(
-                        text = item.trim(),
-                        language = LocaleHelper.LANG_AUTO,
-                        isEmergency = false,
-                        category = Phrase.CATEGORY_GENERAL
+                val text = item.trim()
+                if (!targetList.any { it.text.trim().equals(text, ignoreCase = true) }) {
+                    targetList.add(
+                        Phrase(
+                            text = text,
+                            language = LocaleHelper.LANG_AUTO,
+                            isEmergency = false,
+                            category = Phrase.CATEGORY_GENERAL
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -311,8 +314,7 @@ object PhraseBackupHelper {
         val mergedPhrases = currentPhrases.toMutableList()
         backup.phrases.forEach { newPhrase ->
             val exists = mergedPhrases.any { existing ->
-                existing.text.trim().equals(newPhrase.text.trim(), ignoreCase = true) &&
-                    existing.category.equals(newPhrase.category, ignoreCase = true)
+                existing.text.trim().equals(newPhrase.text.trim(), ignoreCase = true)
             }
             if (!exists) {
                 mergedPhrases.add(newPhrase)
@@ -365,7 +367,15 @@ object PhraseBackupHelper {
             }
         }
 
-        return Pair(newPhrases, newCategories)
+        val deduplicatedPhrases = mutableListOf<Phrase>()
+        newPhrases.forEach { p ->
+            val trimmed = p.text.trim()
+            if (trimmed.isNotBlank() && !deduplicatedPhrases.any { it.text.trim().equals(trimmed, ignoreCase = true) }) {
+                deduplicatedPhrases.add(p.copy(text = trimmed))
+            }
+        }
+
+        return Pair(deduplicatedPhrases, newCategories)
     }
 
     /**

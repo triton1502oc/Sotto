@@ -367,4 +367,42 @@ class PhraseBackupHelperTest {
         assertEquals(4, importedLog?.intensity)
         assertEquals("Calmed down with ear defenders", importedLog?.note)
     }
+
+    @Test
+    fun `parseBackupJson deduplicates duplicate phrases in imported JSON`() {
+        val jsonWithDuplicates = """
+            {
+                "version": 2,
+                "categories": ["General"],
+                "phrases": [
+                    {"text": "Hello.", "category": "General"},
+                    {"text": "Hello.", "category": "General"},
+                    {"text": "hello.", "category": "Social"},
+                    {"text": "Different", "category": "General"}
+                ]
+            }
+        """.trimIndent()
+
+        val parsed = PhraseBackupHelper.parseBackupJson(jsonWithDuplicates)
+        assertEquals(2, parsed.phrases.size)
+        assertEquals("Hello.", parsed.phrases[0].text)
+        assertEquals("Different", parsed.phrases[1].text)
+    }
+
+    @Test
+    fun `mergeData deduplicates phrases against current phrases regardless of case`() {
+        val current = listOf(Phrase("Hello.", category = "General"))
+        val backup = BackupData(
+            categories = listOf("General"),
+            phrases = listOf(
+                Phrase("hello.", category = "Social"),
+                Phrase("New Phrase", category = "General")
+            )
+        )
+
+        val (mergedPhrases, _) = PhraseBackupHelper.mergeData(current, listOf("Emergency", "General"), backup)
+        assertEquals(2, mergedPhrases.size)
+        assertEquals("Hello.", mergedPhrases[0].text)
+        assertEquals("New Phrase", mergedPhrases[1].text)
+    }
 }

@@ -118,21 +118,35 @@ class MainViewModel(
     fun renameCustomCategory(oldName: String, newName: String): Boolean = renameCategory(oldName, newName)
     fun deleteCustomCategory(name: String): Boolean = deleteCategory(name)
 
-    fun addPhrase(newPhrase: Phrase) {
+    fun addPhrase(newPhrase: Phrase): Boolean {
+        val trimmedText = newPhrase.text.trim()
+        if (trimmedText.isBlank()) return false
         val currentList = _phrases.value.toMutableList()
-        currentList.add(newPhrase)
+        if (currentList.any { it.text.trim().equals(trimmedText, ignoreCase = true) }) {
+            return false
+        }
+        currentList.add(newPhrase.copy(text = trimmedText))
         _phrases.value = currentList
         repository.savePhrases(currentList)
+        return true
     }
 
-    fun editPhrase(oldPhrase: Phrase, newPhrase: Phrase) {
+    fun editPhrase(oldPhrase: Phrase, newPhrase: Phrase): Boolean {
         val currentList = _phrases.value.toMutableList()
         val index = currentList.indexOf(oldPhrase)
         if (index != -1) {
-            currentList[index] = newPhrase
+            val targetText = newPhrase.text.trim()
+            if (targetText.isBlank()) return false
+            val duplicateExists = currentList.indices.any { i ->
+                i != index && currentList[i].text.trim().equals(targetText, ignoreCase = true)
+            }
+            if (duplicateExists) return false
+            currentList[index] = newPhrase.copy(text = targetText)
             _phrases.value = currentList
             repository.savePhrases(currentList)
+            return true
         }
+        return false
     }
 
     fun deletePhrase(phrase: Phrase) {
