@@ -364,6 +364,22 @@ object UsabilityTracker {
         )
     }
 
+    fun recordPartnerResponse(context: Context, response: String) {
+        val safeResponse = when (response.lowercase(Locale.ROOT)) {
+            "yes", "no", "wait", "not_sure", "stop", "repeat" -> response.lowercase(Locale.ROOT)
+            else -> "other"
+        }
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "PartnerResponse",
+                durationMs = 0L,
+                outcome = safeResponse,
+                contextTag = safeResponse
+            )
+        )
+    }
+
     private val inMemoryTapCounts = ConcurrentHashMap<String, Int>()
     private var inMemoryAggDay: String? = null
     private var inMemoryAggHour: Int = -1

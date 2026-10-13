@@ -323,4 +323,17 @@ class UsabilityTrackerTest {
         val deserialized = UsabilityTracker.UsabilityEvent.fromJsonArray(array)
         assertEquals(event, deserialized)
     }
+
+    @Test
+    fun `recordPartnerResponse records sanitized outcome and context tag`() {
+        UsabilityTracker.recordPartnerResponse(context, "yes")
+        UsabilityTracker.recordPartnerResponse(context, "Not_Sure")
+        UsabilityTracker.recordPartnerResponse(context, "ArbitraryText")
+
+        val pending = UsabilityTracker.getPendingEvents(context).filter { it.intent == "PartnerResponse" }
+        assertEquals(3, pending.size)
+        assertEquals("yes", pending[0].outcome)
+        assertEquals("not_sure", pending[1].outcome)
+        assertEquals("other", pending[2].outcome)
+    }
 }

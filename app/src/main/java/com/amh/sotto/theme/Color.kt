@@ -35,6 +35,8 @@ object SottoColors {
     val DestructiveRed = Color(0xFFEF5350) // Delete buttons, error text
     val CrisisStopContainer = Color(0xFF7F1D1D) // Deep red container
     val CrisisStopText = Color(0xFFFFEBEE) // Pale pink text
+    val CrisisNoContainer = Color(0xFF5A3030) // Muted warm terracotta for "No" (non-alarming, passes AAA)
+    val CrisisNoText = Color(0xFFFBEBE8)
     val RecordingPulseRed = Color(0xFFC62828) // Listening pulse animation
     val RecordingDotRed = Color(0xFFE53935) // Recording active indicator
 

@@ -314,6 +314,7 @@ fun TwoWayConversationDialog(
         if (responseOutcome != null) {
             UsabilityTracker.startIntent("partner_response")
             UsabilityTracker.endIntent(context, "partner_response", outcome = responseOutcome)
+            UsabilityTracker.recordPartnerResponse(context, responseOutcome)
         }
         if (activeTab == CaregiverTab.FREEFORM && (displayText == strYes || displayText == strNo)) {
             showPostResolutionPrompt = true
@@ -399,15 +400,12 @@ fun TwoWayConversationDialog(
                                 onWait = {
                                     handleUserResponse(strWait, ttsWait, "wait")
                                 },
-                                onRepeat = {
-                                    handleUserResponse(strRepeat, ttsRepeat, "repeat")
-                                },
                                 onNotSure = {
-                                    handleUserResponse(strNotSure, strNotSure)
+                                    handleUserResponse(strNotSure, strNotSure, "not_sure")
                                     if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNotSure()
                                 },
                                 onStop = {
-                                    handleUserResponse(strStop, strStop)
+                                    handleUserResponse(strStop, strStop, "stop")
                                     if (activeTab == CaregiverTab.WHY_FINDER) whySession.stop()
                                 },
                                 onSelectBodyPart = { partKey ->
@@ -563,15 +561,12 @@ fun TwoWayConversationDialog(
                         onWait = {
                             handleUserResponse(strWait, ttsWait, "wait")
                         },
-                        onRepeat = {
-                            handleUserResponse(strRepeat, ttsRepeat, "repeat")
-                        },
                         onNotSure = {
-                            handleUserResponse(strNotSure, strNotSure)
+                            handleUserResponse(strNotSure, strNotSure, "not_sure")
                             if (activeTab == CaregiverTab.WHY_FINDER) whySession.answerNotSure()
                         },
                         onStop = {
-                            handleUserResponse(strStop, strStop)
+                            handleUserResponse(strStop, strStop, "stop")
                             if (activeTab == CaregiverTab.WHY_FINDER) whySession.stop()
                         },
                         onSelectBodyPart = { partKey ->
@@ -1452,34 +1447,26 @@ private fun CaregiverDisplayCard(
 }
 
 @Composable
-private fun UnifiedFourCardResponseDock(
+private fun UnifiedTactileResponseDock(
     onYes: () -> Unit,
     onNo: () -> Unit,
-    secondaryLeftText: String,
-    onSecondaryLeft: () -> Unit,
-    secondaryRightText: String,
-    onSecondaryRight: () -> Unit,
-    secondaryLeftIcon: Int? = null,
-    secondaryRightIcon: Int? = null,
-    secondaryLeftColors: ButtonColors = ButtonDefaults.buttonColors(
-        containerColor = SottoColors.NeutralDarkContainer,
-        contentColor = SottoColors.NeutralDarkText
-    ),
-    secondaryRightColors: ButtonColors = ButtonDefaults.buttonColors(
-        containerColor = SottoColors.NeutralDarkContainer,
-        contentColor = SottoColors.NeutralDarkText
-    ),
+    onWait: () -> Unit,
+    onNotSure: () -> Unit,
+    onStop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
     val strYes = stringResource(R.string.response_yes)
     val strNo = stringResource(R.string.response_no)
+    val strWait = stringResource(R.string.response_wait)
+    val strNotSure = stringResource(R.string.why_finder_btn_not_sure)
+    val strStop = stringResource(R.string.why_finder_btn_stop)
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Row 1: YES & NO (Primary Crisis Buttons >= 80dp touch target with tactile haptics)
+        // Row 1: YES & NO (Primary Tactile Crisis Buttons >= 80dp touch target with tactile haptics)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -1538,8 +1525,8 @@ private fun UnifiedFourCardResponseDock(
                     },
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SottoColors.CrisisStopContainer,
-                    contentColor = SottoColors.CrisisStopText
+                    containerColor = SottoColors.CrisisNoContainer,
+                    contentColor = SottoColors.CrisisNoText
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
@@ -1563,15 +1550,16 @@ private fun UnifiedFourCardResponseDock(
             }
         }
 
-        // Row 2: Secondary actions (Wait / Repeat in Talk mode vs Not sure / Stop in Guided mode)
+        // Row 2: Regulatory Actions (Wait, Not Sure, Stop) with Vector Icons and AAA Contrast
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Button 1: WAIT
             Button(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onSecondaryLeft()
+                    onWait()
                 },
                 modifier = Modifier
                     .weight(1f)
@@ -1579,36 +1567,41 @@ private fun UnifiedFourCardResponseDock(
                     .height(54.dp)
                     .semantics {
                         role = Role.Button
-                        contentDescription = secondaryLeftText
+                        contentDescription = strWait
                     },
-                shape = RoundedCornerShape(20.dp),
-                colors = secondaryLeftColors
+                shape = RoundedCornerShape(18.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SottoColors.NeutralDarkContainer,
+                    contentColor = SottoColors.NeutralDarkText
+                )
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    if (secondaryLeftIcon != null) {
-                        Icon(
-                            painter = painterResource(secondaryLeftIcon),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_hourglass),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = secondaryLeftText,
-                        fontSize = 18.sp,
+                        text = strWait,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
+            // Button 2: NOT SURE
             Button(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onSecondaryRight()
+                    onNotSure()
                 },
                 modifier = Modifier
                     .weight(1f)
@@ -1616,27 +1609,73 @@ private fun UnifiedFourCardResponseDock(
                     .height(54.dp)
                     .semantics {
                         role = Role.Button
-                        contentDescription = secondaryRightText
+                        contentDescription = strNotSure
                     },
-                shape = RoundedCornerShape(20.dp),
-                colors = secondaryRightColors
+                shape = RoundedCornerShape(18.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SottoColors.NeutralDarkContainer,
+                    contentColor = SottoColors.NeutralDarkText
+                )
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    if (secondaryRightIcon != null) {
-                        Icon(
-                            painter = painterResource(secondaryRightIcon),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_help),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = secondaryRightText,
-                        fontSize = 18.sp,
+                        text = strNotSure,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            // Button 3: STOP
+            Button(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onStop()
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 54.dp)
+                    .height(54.dp)
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = strStop
+                    },
+                shape = RoundedCornerShape(18.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SottoColors.NeutralStoppedContainer,
+                    contentColor = SottoColors.NeutralStoppedText
+                )
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_stop_circle),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = strStop,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -1652,18 +1691,12 @@ private fun CaregiverResponseDock(
     onYes: () -> Unit,
     onNo: () -> Unit,
     onWait: () -> Unit,
-    onRepeat: () -> Unit,
     onNotSure: () -> Unit,
     onStop: () -> Unit,
     onSelectBodyPart: (String) -> Unit,
     onSelectIntensity: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val strWait = stringResource(R.string.response_wait)
-    val strRepeat = stringResource(R.string.response_repeat)
-    val strNotSure = stringResource(R.string.why_finder_btn_not_sure)
-    val strStop = stringResource(R.string.why_finder_btn_stop)
-
     if (activeTab == CaregiverTab.WHY_FINDER) {
         when (whyState) {
             is WhyFinderState.SelectingBodyPart -> {
@@ -1684,44 +1717,24 @@ private fun CaregiverResponseDock(
                 // Handled in Finished card
             }
             else -> {
-                UnifiedFourCardResponseDock(
+                UnifiedTactileResponseDock(
                     onYes = onYes,
                     onNo = onNo,
-                    secondaryLeftText = strNotSure,
-                    onSecondaryLeft = onNotSure,
-                    secondaryRightText = strStop,
-                    onSecondaryRight = onStop,
-                    secondaryLeftColors = ButtonDefaults.buttonColors(
-                        containerColor = SottoColors.WarningHighContainer,
-                        contentColor = SottoColors.WarningHighText
-                    ),
-                    secondaryRightColors = ButtonDefaults.buttonColors(
-                        containerColor = SottoColors.NeutralStoppedContainer,
-                        contentColor = SottoColors.NeutralStoppedText
-                    ),
+                    onWait = onWait,
+                    onNotSure = onNotSure,
+                    onStop = onStop,
                     modifier = modifier
                 )
             }
         }
     } else {
-        // Freeform / Talk mode: Wait & Repeat
-        UnifiedFourCardResponseDock(
+        // Freeform / Talk mode
+        UnifiedTactileResponseDock(
             onYes = onYes,
             onNo = onNo,
-            secondaryLeftText = strWait,
-            onSecondaryLeft = onWait,
-            secondaryRightText = strRepeat,
-            onSecondaryRight = onRepeat,
-            secondaryLeftIcon = R.drawable.ic_hourglass,
-            secondaryRightIcon = R.drawable.ic_replay,
-            secondaryLeftColors = ButtonDefaults.buttonColors(
-                containerColor = SottoColors.NeutralDarkContainer,
-                contentColor = SottoColors.NeutralDarkText
-            ),
-            secondaryRightColors = ButtonDefaults.buttonColors(
-                containerColor = SottoColors.NeutralDarkContainer,
-                contentColor = SottoColors.NeutralDarkText
-            ),
+            onWait = onWait,
+            onNotSure = onNotSure,
+            onStop = onStop,
             modifier = modifier
         )
     }
