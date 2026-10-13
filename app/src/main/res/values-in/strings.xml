@@ -251,6 +251,36 @@
     <string name="role_self">Saya Sendiri</string>
     <string name="role_professional">Profesional</string>
     <string name="action_skip">Lewati</string>
+    <string name="action_back">Kembali</string>
+
+    <!-- Welcome Onboarding & Emergency Safety Setup Flow -->
+    <string name="onboarding_step_role_title">Selamat Datang di Sotto</string>
+    <string name="onboarding_step_role_desc">Untuk siapa Sotto digunakan pada perangkat ini?</string>
+    <string name="role_self_title">Untuk Saya / AAC</string>
+    <string name="role_self_desc">Komunikasi mandiri dengan kartu wicara kontras tinggi</string>
+    <string name="role_caregiver_title">Pendamping / Mitra</string>
+    <string name="role_caregiver_desc">Komunikasi terbantu dengan Mode Pendamping &amp; Why Finder</string>
+    <string name="role_professional_title">Tenaga Kesehatan / Terapis</string>
+    <string name="role_professional_desc">Terapi wicara dan dukungan klinis AAC</string>
+    <string name="onboarding_step_safety_title">Kartu Kontak Darurat</string>
+    <string name="onboarding_step_safety_desc">Atur kartu darurat agar penolong atau pendamping tahu lokasi dan kontak darurat Anda.</string>
+    <string name="label_neighborhood_area">Area / Lingkungan</string>
+    <string name="hint_neighborhood_area">cth. Jakarta Selatan atau Menteng</string>
+    <string name="label_contact_name">Nama Kontak / Hubungan</string>
+    <string name="hint_contact_name">cth. Ibu, dr. Alex (opsional)</string>
+    <string name="label_emergency_phone">Nomor Telepon Darurat</string>
+    <string name="hint_emergency_phone">cth. 08123456789</string>
+    <string name="action_save_safety_card">Simpan Kartu Darurat</string>
+    <string name="action_skip_for_later">Lewati Sekarang</string>
+    <string name="onboarding_step_ready_title">Semua Siap!</string>
+    <string name="onboarding_step_ready_caregiver_desc">Mode Pendamping tersedia di bagian atas papan untuk bantuan krisis dan percakapan dua arah.</string>
+    <string name="onboarding_step_ready_self_desc">Papan AAC Anda siap. Ketuk kartu apa pun untuk berbicara, atau tekan lama untuk layar penuh.</string>
+    <string name="action_get_started">Mulai Gunakan</string>
+    <string name="safety_card_setup_title">Atur Kontak Darurat</string>
+    <string name="safety_card_setup_msg">Tambahkan area dan nomor telepon darurat agar kartu ini membacakan detail nyata saat darurat.</string>
+    <string name="safety_card_unconfigured_badge">Ketuk untuk mengatur</string>
+    <string name="emergency_contact_phrase_format">Saya tinggal di sekitar %1$s, tolong hubungi kontak darurat saya%2$s: %3$s</string>
+    <string name="onboarding_step_indicator">Langkah %1$d dari %2$d</string>
 
     <!-- Why Finder & Caregiver Guided Tools -->
     <string name="action_why_finder">Why Finder</string>

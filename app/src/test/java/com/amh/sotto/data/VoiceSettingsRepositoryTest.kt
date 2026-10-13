@@ -226,5 +226,19 @@ class VoiceSettingsRepositoryTest {
         every { sharedPreferences.getBoolean("pmf_survey_prompted", false) } returns true
         assertEquals(false, repository.shouldPromptPmfSurvey())
     }
+
+    @Test
+    fun `getInteractionCount returns saved count`() {
+        every { sharedPreferences.getInt("interaction_count", 0) } returns 7
+        assertEquals(7, repository.getInteractionCount())
+    }
+
+    @Test
+    fun `incrementInteractionCount increments count by 1`() {
+        every { sharedPreferences.getInt("interaction_count", 0) } returns 2
+        repository.incrementInteractionCount()
+        verify { editor.putInt("interaction_count", 3) }
+        verify { editor.apply() }
+    }
 }
 

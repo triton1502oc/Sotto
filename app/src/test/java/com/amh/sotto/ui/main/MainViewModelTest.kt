@@ -318,12 +318,30 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `shouldPromptMetrics returns true when tracking is off and not prompted for current version`() {
+    fun `shouldPromptMetrics returns true when tracking is off and not prompted and sufficient interactions`() {
         every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(shareUsabilityMetrics = false)
         every { voiceSettingsRepository.getLastPromptedMetricsVersion() } returns 0
+        every { voiceSettingsRepository.getInteractionCount() } returns 3
 
         val vm = MainViewModel(repository, voiceSettingsRepository)
         assertTrue(vm.shouldPromptMetrics())
+    }
+
+    @Test
+    fun `shouldPromptMetrics returns false on fresh install before sufficient interactions`() {
+        every { voiceSettingsRepository.getVoiceSettings() } returns VoiceSettings(shareUsabilityMetrics = false)
+        every { voiceSettingsRepository.getLastPromptedMetricsVersion() } returns 0
+        every { voiceSettingsRepository.getInteractionCount() } returns 0
+        every { voiceSettingsRepository.getActiveDayCount() } returns 1
+
+        val vm = MainViewModel(repository, voiceSettingsRepository)
+        assertFalse(vm.shouldPromptMetrics())
+    }
+
+    @Test
+    fun `recordInteraction increments interaction count in repository`() {
+        viewModel.recordInteraction()
+        verify { voiceSettingsRepository.incrementInteractionCount() }
     }
 
     @Test

@@ -251,6 +251,36 @@
     <string name="role_self">Myself</string>
     <string name="role_professional">Professional</string>
     <string name="action_skip">Skip</string>
+    <string name="action_back">Back</string>
+
+    <!-- Welcome Onboarding & Emergency Safety Setup Flow -->
+    <string name="onboarding_step_role_title">Welcome to Sotto</string>
+    <string name="onboarding_step_role_desc">Who is Sotto for on this device?</string>
+    <string name="role_self_title">For myself / AAC</string>
+    <string name="role_self_desc">Direct communication with high-contrast speech tiles</string>
+    <string name="role_caregiver_title">Caregiver / Partner</string>
+    <string name="role_caregiver_desc">Assisted communication with Partner Mode &amp; Why Finder</string>
+    <string name="role_professional_title">Healthcare / Therapist</string>
+    <string name="role_professional_desc">Speech therapy and clinical AAC support</string>
+    <string name="onboarding_step_safety_title">Emergency Safety Card</string>
+    <string name="onboarding_step_safety_desc">Set up your emergency card so first responders or caregivers know where you live and who to contact.</string>
+    <string name="label_neighborhood_area">Area / Neighborhood</string>
+    <string name="hint_neighborhood_area">e.g. South Jakarta or Brooklyn</string>
+    <string name="label_contact_name">Contact Name / Relationship</string>
+    <string name="hint_contact_name">e.g. Mom, Dr. Alex (optional)</string>
+    <string name="label_emergency_phone">Emergency Phone Number</string>
+    <string name="hint_emergency_phone">e.g. 08123456789</string>
+    <string name="action_save_safety_card">Save Emergency Card</string>
+    <string name="action_skip_for_later">Skip for Later</string>
+    <string name="onboarding_step_ready_title">You\'re All Set!</string>
+    <string name="onboarding_step_ready_caregiver_desc">Partner Mode is available at the top of your board for crisis support and two-way conversations.</string>
+    <string name="onboarding_step_ready_self_desc">Your AAC board is ready. Tap any card to speak, or long press to view in full screen.</string>
+    <string name="action_get_started">Get Started</string>
+    <string name="safety_card_setup_title">Set Up Emergency Contact</string>
+    <string name="safety_card_setup_msg">Add your area and emergency contact phone number so this card can speak your real details in distress.</string>
+    <string name="safety_card_unconfigured_badge">Tap to configure</string>
+    <string name="emergency_contact_phrase_format">I live around %1$s, please call my emergency contact%2$s: %3$s</string>
+    <string name="onboarding_step_indicator">Step %1$d of %2$d</string>
 
     <!-- Why Finder & Caregiver Guided Tools -->
     <string name="action_why_finder">Why Finder</string>

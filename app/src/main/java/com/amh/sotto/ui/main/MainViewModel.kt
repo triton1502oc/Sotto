@@ -187,7 +187,13 @@ class MainViewModel(
     fun shouldPromptMetrics(): Boolean {
         val lastPrompted = voiceSettingsRepository.getLastPromptedMetricsVersion()
         val isOptedIn = _voiceSettings.value.shareUsabilityMetrics
-        return !isOptedIn && lastPrompted == 0
+        if (isOptedIn || lastPrompted > 0) return false
+        // Defer telemetry consent prompt until after initial value delivery (3 interactions or 2 active days)
+        return voiceSettingsRepository.getInteractionCount() >= 3 || voiceSettingsRepository.getActiveDayCount() >= 2
+    }
+
+    fun recordInteraction() {
+        voiceSettingsRepository.incrementInteractionCount()
     }
 
     fun onMetricsPromptAnswered(optIn: Boolean) {

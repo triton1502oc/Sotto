@@ -51,6 +51,8 @@ interface VoiceSettingsRepository {
     fun hasPromptedPmfSurvey(): Boolean
     fun setPromptedPmfSurvey(prompted: Boolean)
     fun shouldPromptPmfSurvey(): Boolean
+    fun getInteractionCount(): Int
+    fun incrementInteractionCount()
 }
 
 class SharedPreferencesVoiceSettingsRepository(private val context: Context) : VoiceSettingsRepository {
@@ -76,6 +78,7 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         private const val KEY_COMPACT_CARD_LAYOUT = "compact_card_layout"
         private const val KEY_ENABLE_PIP = "enable_pip"
         private const val KEY_SHOW_PIP_IN_TOP_BAR = "show_pip_in_top_bar"
+        private const val KEY_INTERACTION_COUNT = "interaction_count"
     }
 
     override fun getVoiceSettings(): VoiceSettings {
@@ -211,5 +214,14 @@ class SharedPreferencesVoiceSettingsRepository(private val context: Context) : V
         val installAge = System.currentTimeMillis() - getFirstInstalledAt()
         val days14Ms = 14L * 24 * 60 * 60 * 1000L
         return installAge >= days14Ms && getActiveDayCount() >= 5
+    }
+
+    override fun getInteractionCount(): Int {
+        return prefs.getInt(KEY_INTERACTION_COUNT, 0)
+    }
+
+    override fun incrementInteractionCount() {
+        val current = prefs.getInt(KEY_INTERACTION_COUNT, 0)
+        prefs.edit().putInt(KEY_INTERACTION_COUNT, current + 1).apply()
     }
 }

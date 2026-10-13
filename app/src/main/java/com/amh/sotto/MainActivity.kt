@@ -95,6 +95,7 @@ import com.amh.sotto.ui.whyfinder.WhyLogDialog
 import com.amh.sotto.ui.whyfinder.WhyTreeEditorDialog
 import com.amh.sotto.util.BackupData
 import com.amh.sotto.util.ChimePlayer
+import com.amh.sotto.util.EmergencySafetyHelper
 import com.amh.sotto.util.ImportResult
 import com.amh.sotto.util.LocaleHelper
 import com.amh.sotto.util.PhraseBackupHelper
@@ -126,6 +127,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     private var isInPip by mutableStateOf(false)
     private var pipLastSpokenText by mutableStateOf<String?>(null)
     private var isPipSpeaking by mutableStateOf(false)
+    private lateinit var viewModel: MainViewModel
 
     private val pipActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -167,7 +169,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         val phraseRepository = SharedPreferencesPhraseRepository(applicationContext)
         val voiceSettingsRepository = SharedPreferencesVoiceSettingsRepository(applicationContext)
         voiceSettingsRepository.recordActiveDay(UsabilityTracker.getTodayDate())
-        val viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+        viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return MainViewModel(phraseRepository, voiceSettingsRepository) as T
@@ -452,12 +454,14 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     private fun speakUtterance(text: String, language: String? = null) {
         if (ttsReady && text.isNotBlank()) {
             pipLastSpokenText = text
+            viewModel.recordInteraction()
             if (latestVoiceSettings.playAttentionChime) {
                 playAttentionChime()
             }
+            val cleanedText = EmergencySafetyHelper.cleanPlaceholdersForSpeech(text)
             val effectiveLang = LocaleHelper.getEffectiveLanguage(this)
-            val targetLocale = LocaleHelper.resolvePhraseLocale(language ?: LocaleHelper.LANG_AUTO, text, effectiveLang)
-            val speechText = LocaleHelper.formatDigitsForSpeech(text, targetLocale)
+            val targetLocale = LocaleHelper.resolvePhraseLocale(language ?: LocaleHelper.LANG_AUTO, cleanedText, effectiveLang)
+            val speechText = LocaleHelper.formatDigitsForSpeech(cleanedText, targetLocale)
             tts?.setLanguage(targetLocale)
             applyVoiceSettings(latestVoiceSettings, targetLocale)
             val utteranceId = "utterance_${System.currentTimeMillis()}"

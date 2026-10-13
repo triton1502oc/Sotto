@@ -81,6 +81,7 @@ import com.amh.sotto.ui.whyfinder.WhyLogDialog
 import com.amh.sotto.ui.whyfinder.WhyTreeEditorDialog
 import com.amh.sotto.util.BackupData
 import com.amh.sotto.util.ChimePlayer
+import com.amh.sotto.util.EmergencySafetyHelper
 import com.amh.sotto.util.ImportResult
 import com.amh.sotto.util.LocaleHelper
 import com.amh.sotto.util.PhraseBackupHelper
@@ -165,6 +166,14 @@ fun SottoApp(
     var showQRScannerDialog by rememberSaveable { mutableStateOf(false) }
     var partnerModeInitialTab by remember { mutableStateOf<CaregiverTab?>(null) }
     var showQsTileDiscoveryDialog by rememberSaveable { mutableStateOf(false) }
+    var showSafetySetupDialog by rememberSaveable { mutableStateOf(false) }
+    var phraseForSafetySetup by remember { mutableStateOf<Phrase?>(null) }
+
+    LaunchedEffect(shouldPromptMetrics) {
+        if (shouldPromptMetrics) {
+            showMetricsOptInDialog = true
+        }
+    }
 
     LaunchedEffect(initialOpenPartnerMode) {
         if (initialOpenPartnerMode) {
@@ -1117,9 +1126,21 @@ fun SottoApp(
                         
                     val speakActionLabel = stringResource(R.string.action_speak)
                     val fullscreenActionLabel = stringResource(R.string.cd_show_fullscreen)
-                    val cardCd = if (phrase.isEmergency) "Safety: ${phrase.text}" else phrase.text
+                    val isUnresolvedSafety = phrase.isEmergency && EmergencySafetyHelper.hasUnresolvedPlaceholders(phrase.text)
+                    val cardCd = if (isUnresolvedSafety) {
+                        stringResource(R.string.safety_card_setup_title)
+                    } else if (phrase.isEmergency) {
+                        "Safety: ${phrase.text}"
+                    } else {
+                        phrase.text
+                    }
 
                     fun performSpeak(p: Phrase) {
+                        if (p.isEmergency && EmergencySafetyHelper.hasUnresolvedPlaceholders(p.text)) {
+                            phraseForSafetySetup = p
+                            showSafetySetupDialog = true
+                            return
+                        }
                         UsabilityTracker.recordCardTap(context, p.category, p.isEmergency, System.identityHashCode(p))
                         if (voiceSettings.showLanguageSwitcher) {
                             if (activeSpeechTarget == "secondary") {
@@ -1278,6 +1299,32 @@ fun SottoApp(
                                     color = SottoColors.EmergencyText,
                                     lineHeight = 24.sp
                                 )
+                                if (isUnresolvedSafety) {
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = SottoColors.EmergencyAccent.copy(alpha = 0.15f),
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_edit),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(14.dp),
+                                                tint = SottoColors.EmergencyAccent
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = stringResource(R.string.safety_card_unconfigured_badge),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = SottoColors.EmergencyAccent
+                                            )
+                                        }
+                                    }
+                                }
                                 val hasEmergencySpoken = voiceSettings.showLanguageSwitcher &&
                                     !phrase.spokenText.isNullOrBlank() &&
                                     phrase.spokenText != LocaleHelper.LANG_AUTO
@@ -1483,59 +1530,42 @@ fun SottoApp(
         )
     }
 
-    // One-Time First-Launch Role Selection Dialog
+    // Value-First 3-Step Welcome Onboarding Dialog
     if (showRolePromptDialog && !showMetricsOptInDialog) {
-        AlertDialog(
-            onDismissRequest = {
+        val emergencyPhrase = phrases.firstOrNull { it.isEmergency }
+        WelcomeOnboardingDialog(
+            initialRole = voiceSettings.userRole,
+            emergencyPhrase = emergencyPhrase,
+            onSaveEmergencyPhrase = { updatedPhrase ->
+                if (emergencyPhrase != null) {
+                    onEditPhrase(emergencyPhrase, updatedPhrase)
+                } else {
+                    onAddPhrase(updatedPhrase)
+                }
+            },
+            onFinish = { role ->
                 showRolePromptDialog = false
-                onRolePromptAnswered("")
+                onRolePromptAnswered(role)
             },
-            title = {
-                Text(
-                    text = stringResource(R.string.dialog_role_title),
-                    style = MaterialTheme.typography.titleLarge
-                )
+            onDismiss = {
+                showRolePromptDialog = false
+                onRolePromptAnswered(voiceSettings.userRole.ifBlank { VoiceSettings.ROLE_SELF })
+            }
+        )
+    }
+
+    // Interactive Emergency Contact Setup Dialog
+    if (showSafetySetupDialog && phraseForSafetySetup != null) {
+        EmergencySafetySetupDialog(
+            phrase = phraseForSafetySetup!!,
+            onSavePhrase = { updatedPhrase ->
+                onEditPhrase(phraseForSafetySetup!!, updatedPhrase)
+                showSafetySetupDialog = false
+                phraseForSafetySetup = null
             },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.dialog_role_desc),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    val roleOptions = listOf(
-                        VoiceSettings.ROLE_CAREGIVER to stringResource(R.string.role_caregiver),
-                        VoiceSettings.ROLE_SELF to stringResource(R.string.role_self),
-                        VoiceSettings.ROLE_PROFESSIONAL to stringResource(R.string.role_professional)
-                    )
-                    roleOptions.forEach { (roleKey, roleLabel) ->
-                        OutlinedButton(
-                            onClick = {
-                                showRolePromptDialog = false
-                                onRolePromptAnswered(roleKey)
-                                UsabilityTracker.recordRoleSet(context, roleKey)
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(roleLabel, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                        }
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showRolePromptDialog = false
-                        onRolePromptAnswered("")
-                    }
-                ) {
-                    Text(stringResource(R.string.action_skip))
-                }
+            onDismiss = {
+                showSafetySetupDialog = false
+                phraseForSafetySetup = null
             }
         )
     }
@@ -1891,7 +1921,15 @@ fun SottoApp(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Button(
-                                onClick = { onSpeakText(phrase.text, phrase.language) },
+                                onClick = {
+                                    if (phrase.isEmergency && EmergencySafetyHelper.hasUnresolvedPlaceholders(phrase.text)) {
+                                        phraseForSafetySetup = phrase
+                                        showSafetySetupDialog = true
+                                        expandedPhrase = null
+                                    } else {
+                                        onSpeakText(phrase.text, phrase.language)
+                                    }
+                                },
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp),
@@ -1939,7 +1977,15 @@ fun SottoApp(
                         }
                     } else {
                         Button(
-                            onClick = { onSpeak(phrase) },
+                            onClick = {
+                                if (phrase.isEmergency && EmergencySafetyHelper.hasUnresolvedPlaceholders(phrase.text)) {
+                                    phraseForSafetySetup = phrase
+                                    showSafetySetupDialog = true
+                                    expandedPhrase = null
+                                } else {
+                                    onSpeak(phrase)
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(64.dp),
