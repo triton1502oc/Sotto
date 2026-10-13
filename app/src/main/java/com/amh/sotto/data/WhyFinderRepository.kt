@@ -239,7 +239,12 @@ class SharedPreferencesWhyFinderRepository(
 
     override fun addLog(entry: WhyLogEntry) {
         val current = getLogs().toMutableList()
-        current.add(0, entry)
+        val existingIndex = current.indexOfFirst { it.id == entry.id }
+        if (existingIndex != -1) {
+            current[existingIndex] = entry
+        } else {
+            current.add(0, entry)
+        }
         if (current.size > MAX_LOG_ENTRIES) {
             val truncated = current.take(MAX_LOG_ENTRIES)
             saveLogsInternal(truncated)

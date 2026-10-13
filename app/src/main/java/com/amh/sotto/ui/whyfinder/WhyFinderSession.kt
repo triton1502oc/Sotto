@@ -59,9 +59,12 @@ sealed class WhyFinderState {
 
 class WhyFinderSession(
     val tree: WhyTree,
-    val startedAt: Long = System.currentTimeMillis()
+    initialStartedAt: Long = System.currentTimeMillis()
 ) {
-    val sessionId: String = UUID.randomUUID().toString()
+    var startedAt: Long = initialStartedAt
+        private set
+    var sessionId: String = UUID.randomUUID().toString()
+        private set
     private val recordedSteps = mutableListOf<WhyStep>()
     private val historyStack = mutableListOf<WhyFinderState>()
 
@@ -197,19 +200,24 @@ class WhyFinderSession(
                     moveToNextArea(state.areaIndex)
                 }
             }
-            is WhyFinderState.SelectingBodyPart,
+            is WhyFinderState.SelectingBodyPart -> {
+                historyStack.add(state)
+                currentState = WhyFinderState.ConfirmingCause(
+                    areaIndex = state.areaIndex,
+                    questionIndex = state.questionIndex,
+                    causeText = state.question.text,
+                    bodyPart = null,
+                    intensity = null
+                )
+            }
             is WhyFinderState.SelectingIntensity -> {
                 historyStack.add(state)
-                val cause = (currentState as? WhyFinderState.SelectingBodyPart)?.question?.text
-                    ?: (currentState as? WhyFinderState.SelectingIntensity)?.question?.text
-                    ?: ""
-                val areaId = (currentState as? WhyFinderState.SelectingBodyPart)?.areaIndex
-                    ?: (currentState as? WhyFinderState.SelectingIntensity)?.areaIndex
-                    ?: 0
                 currentState = WhyFinderState.ConfirmingCause(
-                    areaIndex = areaId,
-                    questionIndex = 0,
-                    causeText = cause
+                    areaIndex = state.areaIndex,
+                    questionIndex = state.questionIndex,
+                    causeText = state.question.text,
+                    bodyPart = state.bodyPart,
+                    intensity = null
                 )
             }
             is WhyFinderState.Finished -> {
@@ -329,6 +337,8 @@ class WhyFinderSession(
     }
 
     fun restart() {
+        sessionId = UUID.randomUUID().toString()
+        startedAt = System.currentTimeMillis()
         recordedSteps.clear()
         historyStack.clear()
         currentState = determineInitialState()

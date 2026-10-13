@@ -151,7 +151,8 @@ fun TwoWayConversationDialog(
     val whySession = remember { WhyFinderSession(tree) }
     val whyState = whySession.currentState
 
-    var whySessionSaved by rememberSaveable { mutableStateOf(false) }
+    var savedSessionId by rememberSaveable { mutableStateOf<String?>(null) }
+    val whySessionSaved = savedSessionId == whySession.sessionId
 
     val activeFreeformText = displayedText.ifBlank { liveSpokenText }
 
@@ -210,7 +211,7 @@ fun TwoWayConversationDialog(
         val entry = whySession.toLogEntry(null)
         if (entry != null) {
             whyFinderRepository?.addLog(entry)
-            whySessionSaved = true
+            savedSessionId = whySession.sessionId
             UsabilityTracker.recordWhyFinder(
                 context = context,
                 outcome = entry.outcome.name.lowercase(Locale.ROOT),
@@ -369,7 +370,8 @@ fun TwoWayConversationDialog(
                                 isListening = isListening,
                                 onRestartWhyTree = {
                                     whySession.restart()
-                                    whySessionSaved = false
+                                    savedSessionId = null
+                                    UsabilityTracker.recordWhyFinderAction(context, "restart")
                                 },
                                 onFinish = onDismiss,
                                 onReadAloudPrompt = {
@@ -482,7 +484,14 @@ fun TwoWayConversationDialog(
                         onSpeakPrompt = { onSpeakResponse(whyPromptText) },
                         onPickCard = { showQuestionsSheet = true },
                         canStepBack = whySession.canStepBack(),
-                        onStepBack = { whySession.stepBack() },
+                        onStepBack = {
+                            val wasFinished = whyState is WhyFinderState.Finished
+                            whySession.stepBack()
+                            savedSessionId = null
+                            if (wasFinished) {
+                                UsabilityTracker.recordWhyFinderAction(context, "correction")
+                            }
+                        },
                         isListening = isListening,
                         onToggleListening = {
                             if (isListening) {
@@ -524,7 +533,8 @@ fun TwoWayConversationDialog(
                         isListening = isListening,
                         onRestartWhyTree = {
                             whySession.restart()
-                            whySessionSaved = false
+                            savedSessionId = null
+                            UsabilityTracker.recordWhyFinderAction(context, "restart")
                         },
                         onFinish = onDismiss,
                         onReadAloudPrompt = {
@@ -636,7 +646,14 @@ fun TwoWayConversationDialog(
                         onSpeakPrompt = { onSpeakResponse(whyPromptText) },
                         onPickCard = { showQuestionsSheet = true },
                         canStepBack = whySession.canStepBack(),
-                        onStepBack = { whySession.stepBack() },
+                        onStepBack = {
+                            val wasFinished = whyState is WhyFinderState.Finished
+                            whySession.stepBack()
+                            savedSessionId = null
+                            if (wasFinished) {
+                                UsabilityTracker.recordWhyFinderAction(context, "correction")
+                            }
+                        },
                         isListening = isListening,
                         onToggleListening = {
                             if (isListening) {

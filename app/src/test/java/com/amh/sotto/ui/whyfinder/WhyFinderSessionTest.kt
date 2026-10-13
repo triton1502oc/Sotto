@@ -202,12 +202,29 @@ class WhyFinderSessionTest {
     }
 
     @Test
-    fun `restart resets session to initial state`() {
+    fun `restart resets session to initial state and generates new session ID`() {
         val session = WhyFinderSession(testTree)
+        val initialId = session.sessionId
         session.answerYes()
         session.restart()
         assertTrue(session.currentState is WhyFinderState.AskingArea)
         assertEquals("body", (session.currentState as WhyFinderState.AskingArea).area.id)
         assertEquals(0, session.steps.size)
+        org.junit.Assert.assertNotEquals(initialId, session.sessionId)
+    }
+
+    @Test
+    fun `not sure on intensity preserves bodyPart in ConfirmingCause`() {
+        val session = WhyFinderSession(testTree)
+        session.answerYes() // to Area 0 (body) -> AskingQuestion 0 (body_pain, BODY_MAP)
+        session.answerYes() // to Question 0 -> SelectingBodyPart
+        session.selectBodyPart("head")
+        assertTrue(session.currentState is WhyFinderState.SelectingIntensity)
+
+        session.answerNotSure()
+        val state = session.currentState as WhyFinderState.ConfirmingCause
+        assertEquals("head", state.bodyPart)
+        assertEquals(0, state.questionIndex)
+        assertEquals("Are you in pain?", state.causeText)
     }
 }

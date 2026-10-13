@@ -153,4 +153,32 @@ class WhyFinderRepositoryTest {
         assertEquals(1, saved.steps.size)
         assertEquals("yes", saved.steps[0].answer)
     }
+
+    @Test
+    fun `addLog upserts log entries with matching id instead of duplicating`() {
+        val repo = SharedPreferencesWhyFinderRepository(context)
+        val initialEntry = WhyLogEntry(
+            id = "session_123",
+            startedAt = 1000L,
+            endedAt = 2000L,
+            outcome = WhyOutcome.NOT_FOUND,
+            areaId = "body"
+        )
+        repo.addLog(initialEntry)
+        assertEquals(1, repo.getLogs().size)
+        assertEquals(WhyOutcome.NOT_FOUND, repo.getLogs()[0].outcome)
+
+        val updatedEntry = initialEntry.copy(
+            endedAt = 3000L,
+            outcome = WhyOutcome.FOUND,
+            causeText = "Headache"
+        )
+        repo.addLog(updatedEntry)
+
+        val logs = repo.getLogs()
+        assertEquals(1, logs.size)
+        assertEquals("session_123", logs[0].id)
+        assertEquals(WhyOutcome.FOUND, logs[0].outcome)
+        assertEquals("Headache", logs[0].causeText)
+    }
 }

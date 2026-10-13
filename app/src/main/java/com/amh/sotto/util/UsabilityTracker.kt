@@ -273,6 +273,18 @@ object UsabilityTracker {
         recordActivation(context, "why_finder")
     }
 
+    fun recordWhyFinderAction(context: Context, action: String) {
+        recordEvent(
+            context,
+            UsabilityEvent(
+                intent = "WhyFinder",
+                durationMs = 0L,
+                outcome = action,
+                contextTag = action
+            )
+        )
+    }
+
     fun recordWhyLogViewed(context: Context, count: Int) {
         val bucket = when {
             count == 0 -> "0"
