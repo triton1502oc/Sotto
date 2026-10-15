@@ -3,6 +3,26 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.4] - 2026-10-15
+
+### Added
+- **Direct Crisis Shortcut to Talk Mode**: Quick Settings shade tile (`EmergencyTileService`) now routes directly to Partner Mode Talk (freeform) mode for sub-3-second direct 1-tap rapid responses (Yes / No / Wait / Not Sure / Stop) during acute sensory meltdowns and speech shutdowns ([#73](https://github.com/triton1502oc/Sotto/issues/73)).
+- **Keyboard Done Action in Phrase Editor**: Added `ImeAction.Done` to phrase and spoken text fields, allowing users to save phrase additions and edits directly from the soft keyboard checkmark key ([#75](https://github.com/triton1502oc/Sotto/issues/75)).
+
+### Changed
+- **Compact Category Strip & Single Save Action in Phrase Editor**: Replaced multi-line wrapping category chips with a compact 1-line horizontal scrolling row and tightened vertical spacing, ensuring dialog content and the primary Material 3 Save button remain visible and accessible above virtual keyboards on compact screens ([#75](https://github.com/triton1502oc/Sotto/issues/75)).
+
+### Fixed
+- **Resilient Small-Screen Mode Chip Layout**: Enforced single-line rendering, ellipsis overflow, and responsive control density on compact screens (<= 360dp width or high font scaling), eliminating character-by-character vertical text wrapping on the "Talk" chip ([#74](https://github.com/triton1502oc/Sotto/issues/74)).
+- **Activity Recreation on Language Switch**: Stripped `EXTRA_OPEN_PARTNER_MODE` intent extra upon consumption and during `savedInstanceState` restorations, preventing language switches in Settings from unexpectedly re-triggering Partner Mode ([#73](https://github.com/triton1502oc/Sotto/issues/73)).
+
+### Assets
+- `Sotto-v1.7.4.apk`: Universal release APK for all architectures.
+- `Sotto-v1.7.4-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.7.4-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.7.4-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.7.3] - 2026-10-14
 
 ### Added

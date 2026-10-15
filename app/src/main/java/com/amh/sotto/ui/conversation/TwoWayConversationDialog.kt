@@ -1149,6 +1149,9 @@ private fun CaregiverBottomMenu(
     onToggleTriggerLogger: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val configuration = LocalConfiguration.current
+    val isCompactScreen = configuration.screenWidthDp <= 360 || configuration.fontScale > 1.15f
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
@@ -1158,7 +1161,7 @@ private fun CaregiverBottomMenu(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = if (isCompactScreen) 8.dp else 14.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Line 1: Mode Switcher Tabs & Global Controls (Flip & Close)
@@ -1170,7 +1173,7 @@ private fun CaregiverBottomMenu(
                 // Tabs: Guided / Mic
                 Row(
                     modifier = Modifier.weight(1f, fill = false),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(if (isCompactScreen) 4.dp else 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (hasWhyFinder) {
@@ -1180,7 +1183,10 @@ private fun CaregiverBottomMenu(
                             label = {
                                 Text(
                                     text = "🧭 " + stringResource(R.string.mode_why_finder),
-                                    style = MaterialTheme.typography.labelMedium
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         )
@@ -1190,7 +1196,10 @@ private fun CaregiverBottomMenu(
                             label = {
                                 Text(
                                     text = "💬 " + stringResource(R.string.mode_freeform),
-                                    style = MaterialTheme.typography.labelMedium
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         )
@@ -1199,7 +1208,7 @@ private fun CaregiverBottomMenu(
 
                 // Global Controls: Material 3 Tool Capsule + Standalone Dismissal (#46, #68)
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(if (isCompactScreen) 8.dp else 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val context = LocalContext.current
@@ -1227,7 +1236,7 @@ private fun CaregiverBottomMenu(
                                         onToggleTriggerLogger()
                                     },
                                     modifier = Modifier
-                                        .size(48.dp)
+                                        .size(if (isCompactScreen) 38.dp else 48.dp)
                                         .semantics {
                                             role = Role.Button
                                             contentDescription = strLogTrigger
@@ -1236,7 +1245,7 @@ private fun CaregiverBottomMenu(
                                     Icon(
                                         painter = painterResource(R.drawable.ic_note_alt),
                                         contentDescription = null,
-                                        modifier = Modifier.size(20.dp),
+                                        modifier = Modifier.size(if (isCompactScreen) 18.dp else 20.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -1248,7 +1257,7 @@ private fun CaregiverBottomMenu(
 
                             Box(
                                 modifier = Modifier
-                                    .size(48.dp)
+                                    .size(if (isCompactScreen) 38.dp else 48.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(flipBg)
                                     .clickable {
@@ -1266,7 +1275,7 @@ private fun CaregiverBottomMenu(
                                     painter = painterResource(R.drawable.ic_flip_partner),
                                     contentDescription = null,
                                     modifier = Modifier
-                                        .size(22.dp)
+                                        .size(if (isCompactScreen) 20.dp else 22.dp)
                                         .graphicsLayer { rotationZ = flipRotation },
                                     tint = flipContentColor
                                 )
@@ -1283,7 +1292,7 @@ private fun CaregiverBottomMenu(
                             onDismiss()
                         },
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(if (isCompactScreen) 40.dp else 48.dp)
                             .semantics {
                                 role = Role.Button
                                 contentDescription = dismissDesc
@@ -1292,7 +1301,7 @@ private fun CaregiverBottomMenu(
                         Icon(
                             painter = painterResource(R.drawable.ic_close),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(if (isCompactScreen) 22.dp else 24.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -1390,8 +1399,6 @@ private fun CaregiverBottomMenu(
                         }
                     )
                 } else {
-                    val configuration = LocalConfiguration.current
-                    val isCompactScreen = configuration.screenWidthDp <= 360 || configuration.fontScale > 1.15f
                     val speakCd = stringResource(R.string.action_speak)
                     val cardsCd = stringResource(R.string.action_cards)
                     val typeCd = stringResource(R.string.action_type)

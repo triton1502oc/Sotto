@@ -147,8 +147,9 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         currentLanguage = LocaleHelper.getLanguage(this)
-        if (intent?.getBooleanExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE, false) == true) {
+        if (savedInstanceState == null && intent?.getBooleanExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE, false) == true) {
             initialOpenPartnerMode = true
+            intent?.removeExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE)
         }
         tts = TextToSpeech(this, this)
         UsabilityTracker.recordAppOpen(this)
@@ -288,7 +289,10 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             },
                             onPmfSurveyDismissed = { viewModel.onPmfSurveyDismissed() },
                             initialOpenPartnerMode = initialOpenPartnerMode,
-                            onPartnerModeOpened = { initialOpenPartnerMode = false },
+                            onPartnerModeOpened = {
+                                initialOpenPartnerMode = false
+                                intent?.removeExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE)
+                            },
                             onEnterPip = { enterPipMode() }
                         )
                     }
@@ -302,6 +306,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         setIntent(intent)
         if (intent.getBooleanExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE, false)) {
             initialOpenPartnerMode = true
+            intent.removeExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE)
         }
     }
 

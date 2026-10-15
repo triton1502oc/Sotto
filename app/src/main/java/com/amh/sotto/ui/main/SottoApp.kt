@@ -35,9 +35,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -52,6 +55,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -178,7 +182,7 @@ fun SottoApp(
     LaunchedEffect(initialOpenPartnerMode) {
         if (initialOpenPartnerMode) {
             UsabilityTracker.startIntent("TwoWay", contextTag = "tile")
-            partnerModeInitialTab = CaregiverTab.WHY_FINDER
+            partnerModeInitialTab = CaregiverTab.FREEFORM
             showTwoWayDialog = true
             onPartnerModeOpened()
         }
@@ -937,7 +941,7 @@ fun SottoApp(
                                         val alreadyExists = phrases.any { it.text.trim().equals(trimmed, ignoreCase = true) }
                                         if (alreadyExists) {
                                             UsabilityTracker.recordFriction(context, "duplicate_phrase_blocked")
-                                            android.widget.Toast.makeText(context, context.getString(R.string.error_phrase_exists), android.widget.Toast.LENGTH_SHORT).show()
+                                            android.widget.Toast.makeText(context, R.string.error_phrase_exists, android.widget.Toast.LENGTH_SHORT).show()
                                         }
                                         UsabilityTracker.endIntent(context, "QuickSpeak", outcome = if (alreadyExists) "duplicate_blocked" else "saved_as_card", contextTag = "dock_v2 len_${trimmed.length}")
                                         initialAddText = trimmed
@@ -1682,6 +1686,7 @@ fun SottoApp(
 
     // Quick Settings Tile Discovery Dialog (API 33+)
     if (showQsTileDiscoveryDialog && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val tilePartnerModeLabel = stringResource(R.string.tile_partner_mode)
         AlertDialog(
             onDismissRequest = {
                 val prefs = context.getSharedPreferences("sotto_partner_prefs", Context.MODE_PRIVATE)
@@ -1712,7 +1717,7 @@ fun SottoApp(
                             val component = ComponentName(context, EmergencyTileService::class.java)
                             statusBarManager?.requestAddTileService(
                                 component,
-                                context.getString(R.string.tile_partner_mode),
+                                tilePartnerModeLabel,
                                 android.graphics.drawable.Icon.createWithResource(context, R.drawable.ic_qs_sotto_partner),
                                 context.mainExecutor
                             ) { statusCode ->
@@ -2064,6 +2069,36 @@ fun SottoApp(
             }
         }
 
+        val onSavePhrase: () -> Unit = {
+            if (isDuplicateText) {
+                UsabilityTracker.recordFriction(context, "duplicate_phrase_blocked")
+            } else if (textValue.isNotBlank()) {
+                val isEmergency = selectedCat == Phrase.CATEGORY_EMERGENCY
+                val newPhrase = Phrase(
+                    text = textValue.trim(),
+                    spokenText = if (voiceSettings.showLanguageSwitcher) spokenTextValue.trim().takeIf { it.isNotBlank() } else phraseToEdit?.spokenText,
+                    spokenLanguage = if (voiceSettings.showLanguageSwitcher) spokenLangValue.takeIf { spokenTextValue.isNotBlank() } else phraseToEdit?.spokenLanguage,
+                    language = LocaleHelper.LANG_AUTO,
+                    isEmergency = isEmergency,
+                    category = selectedCat
+                )
+                if (isEditModeDialog) {
+                    onEditPhrase(phraseToEdit!!, newPhrase)
+                } else {
+                    onAddPhrase(newPhrase)
+                    if (initialAddText.isNotBlank()) {
+                        quickText = ""
+                    }
+                }
+                if (newPhrase.isEmergency) {
+                    UsabilityTracker.recordSafetyCardSaved(context)
+                }
+                showAddDialog = false
+                phraseToEdit = null
+                initialAddText = ""
+            }
+        }
+
         AlertDialog(
             onDismissRequest = {
                 showAddDialog = false
@@ -2072,22 +2107,34 @@ fun SottoApp(
             },
             title = {
                 Text(
-                    if (isEditModeDialog) {
+                    text = if (isEditModeDialog) {
                         stringResource(R.string.dialog_edit_phrase_title)
                     } else {
                         stringResource(R.string.dialog_add_phrase_title)
-                    }
+                    },
+                    style = MaterialTheme.typography.titleLarge
                 )
             },
             text = {
                 Column(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 ) {
                     // Phrase Text Field with Voice Input (Microphone button)
                     OutlinedTextField(
                         value = textValue,
                         onValueChange = { textValue = it },
                         label = { Text(stringResource(R.string.label_phrase_text)) },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                onSavePhrase()
+                            }
+                        ),
                         trailingIcon = {
                             IconButton(
                                 onClick = {
@@ -2223,6 +2270,15 @@ fun SottoApp(
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                     )
                                 },
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        onSavePhrase()
+                                    }
+                                ),
                                 trailingIcon = {
                                     IconButton(
                                         onClick = {
@@ -2251,21 +2307,23 @@ fun SottoApp(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     // Category Selection
                     Text(
                         text = stringResource(R.string.label_category),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         effectiveCategories.forEach { catName ->
                             val isSelected = selectedCat == catName
@@ -2304,37 +2362,7 @@ fun SottoApp(
             },
             confirmButton = {
                 Button(
-                    onClick = {
-                        if (isDuplicateText) {
-                            UsabilityTracker.recordFriction(context, "duplicate_phrase_blocked")
-                            return@Button
-                        }
-                        if (textValue.isNotBlank()) {
-                            val isEmergency = selectedCat == Phrase.CATEGORY_EMERGENCY
-                            val newPhrase = Phrase(
-                                text = textValue.trim(),
-                                spokenText = if (voiceSettings.showLanguageSwitcher) spokenTextValue.trim().takeIf { it.isNotBlank() } else phraseToEdit?.spokenText,
-                                spokenLanguage = if (voiceSettings.showLanguageSwitcher) spokenLangValue.takeIf { spokenTextValue.isNotBlank() } else phraseToEdit?.spokenLanguage,
-                                language = LocaleHelper.LANG_AUTO,
-                                isEmergency = isEmergency,
-                                category = selectedCat
-                            )
-                            if (isEditModeDialog) {
-                                onEditPhrase(phraseToEdit!!, newPhrase)
-                            } else {
-                                onAddPhrase(newPhrase)
-                                if (initialAddText.isNotBlank()) {
-                                    quickText = ""
-                                }
-                            }
-                            if (newPhrase.isEmergency) {
-                                UsabilityTracker.recordSafetyCardSaved(context)
-                            }
-                        }
-                        showAddDialog = false
-                        phraseToEdit = null
-                        initialAddText = ""
-                    },
+                    onClick = onSavePhrase,
                     enabled = textValue.isNotBlank() && !isDuplicateText
                 ) {
                     Text(stringResource(R.string.action_save))

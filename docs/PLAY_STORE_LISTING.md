@@ -50,13 +50,12 @@ Sotto is not a medical device and does not provide medical advice, diagnosis, or
 github.com/triton1502oc/Sotto | iOS version available
 ```
 
-### What's New (v1.7.3)
+### What's New (v1.7.4)
 ```text
-• 3-step welcome onboarding and skippable setup.
-• Interactive emergency safety card setup with natural spoken digits.
-• Upright Caregiver Mirror HUD in 180° flip mode and screen wake lock.
-• Tactile response dock with calming terracotta palette and vector icons.
-• Quick Settings tile discovery and offline stability fixes.
+• Direct Quick Settings tile launch into Partner Talk mode during crisis.
+• Compact phrase edit dialog with keyboard-accessible Save action and Done key.
+• Resilient small-screen Talk chip layout and navigation typography.
+• Preserved screen state and fixed language change recreation flow.
 ```
 
 ---
