@@ -1,53 +1,110 @@
 # Google Play Store Listing & Compliance Guide
 
 ### TL;DR
-Ready-to-use metadata, descriptions, graphics specifications, and policy questionnaire answers for submitting Sotto to the Google Play Console.
+Ready-to-use metadata, descriptions, graphics specifications, and policy questionnaire answers for submitting Sotto to the Google Play Console in both English (Default) and Indonesian (`id`).
 
 ---
 
 ## 1. Store Listing Metadata
 
-### App Details
-* **App Name:** `Sotto: Calm Meltdown Yes/No` *(27 / 30 characters; Google Play console title limit is 30 characters)*  
+### App Details (Default: English - United States)
+* **App Name:** `Sotto: AAC Autism Talk Yes/No` *(29 / 30 characters; Google Play console title limit is 30 characters)*  
 * **Short Description:**  
-  `He uses cards for complex info. During meltdown I operate, he taps Yes/No.` *(74 / 80 characters)*  
+  `Calm AAC communication for autism & meltdowns. Tap cards or giant Yes/No.` *(73 / 80 characters)*  
 * **Preview Video (YouTube URL):**  
   - **English:** `https://www.youtube.com/watch?v=Kd9qPu3F-Gg`  
-  *(Note: Enter the standard `https://www.youtube.com/watch?v=...` format; Play Console may reject `/shorts/` URLs).*
+  *(Note: Enter standard `https://www.youtube.com/watch?v=...` format; Play Console may reject `/shorts/` URLs).*
 
-### Full Description *(Plain Text & Markdown compliant)*
+### Full Description (English) *(Plain Text & Markdown compliant)*
 ```text
 When speech is hard, tap instead.
 
-Built by a father in Singapore for his two autistic sons (22 & 15) who can speak but not always. During meltdown, operating a phone is too hard. So I operate Sotto on MY phone, they tap Yes/No/Wait to pinpoint the problem — issue resolved.
+Sotto is a dignified, low-stimulus AAC (Augmentative and Alternative Communication) app built for autism, speech delays, sensory overload, and crisis meltdowns.
 
-We use Sotto in two modes:
+Built by a father in Singapore for his two autistic sons (22 & 15) who can speak but not always. During sensory overload or a meltdown, operating a phone is too hard. So the caregiver operates Sotto on their phone, flips the screen, and the communicator taps Yes, No, or Wait to pinpoint the problem — issue resolved with zero friction.
 
-MODE 1 - DAILY (He holds his phone):
-For complex information, noisy places, or new people. He opens Sotto himself and taps cards — Needs, Social, Care, General — or types in Quick-Speak Bar. One-tap speech, long-press for giant fullscreen text readable without speaking.
+We use Sotto in two distinct AAC modes:
 
-MODE 2 - MELTDOWN (You hold YOUR phone):
-This is what stops meltdowns at home. You open Sotto on YOUR phone, tap partner mode, flip the screen 180° to show giant text to him, and he taps Yes / No / Wait / Repeat. No branching, no tree to navigate. That tap IS his voice right now.
+MODE 1 — DAILY INDEPENDENT AAC (He holds his phone):
+For complex information, noisy places, school, or communicating with new people. The user opens Sotto independently and taps visual cards — Needs, Social, Care, General — or types in the Quick-Speak Bar. One-tap speech with offline text-to-speech (TTS), or long-press for a giant fullscreen card readable across a room without speaking.
 
-Why this works:
-• Direct Yes/No Pinpoint Cards: Huge 80dp+ tactile buttons with haptics for shaky hands
-• Floating PiP Communicator: System overlay with Yes/No/Wait buttons over maps or YouTube
-• Sotto Partner Quick Settings Tile: Sub-3s direct launch from notification shade
-• Safety Bystander Card: High-contrast amber hero for non-verbal episodes
-• Two-Way Partner Mode: Talk HUD with dictation, preset direct questions, read aloud, and animated 180° flip
-• Single-Row QuickSpeak Dock: Spontaneous speech, fullscreen, dictation, 1-tap save
-• Low-Stimulus UI: Dark-neutral Material 3, sensory themes, compact card option, zero cartoons
-• Zero-Distraction Mode: No admin clutter during communication
-• Dual-Language Offline: Display English, speak Indonesian/Malay/etc via ML Kit — 100% offline
-• Private Pattern Log: After resolution, optional one-tap log Pain/Noise/Task/Emotion to find 30-day patterns locally
-• QR Deck Sharing: Share phrase decks offline via QR SOTTO:v1:... between Android & iOS — zero cloud
-• Backup v2: Selective export phrases, Why tree, Why log
+MODE 2 — CRISIS & MELTDOWN PARTNER MODE (Caregiver holds their phone):
+This is what stops meltdowns at home and in public. You open Sotto on YOUR phone, enter Partner Mode, and flip the screen 180° face-to-face. Your autistic loved one sees giant tactile buttons and taps Yes, No, Wait, or Repeat. No complex branching menus, no confusing symbol trees to navigate. That simple tap IS their voice when speech shuts down.
 
-100% offline core. Zero accounts, ads, trackers. Optional anonymous timing opt-in (zero text/speech ever collected). Open source.
+Why Sotto works for Autism & AAC:
+• Direct Yes/No Pinpoint Cards: Huge 80dp+ tactile buttons with haptic feedback designed for shaky or overwhelmed hands
+• Two-Way Caregiver Partner Mode: Talk HUD with voice dictation, question bank, read-aloud prompts, and 180° flip display
+• High-Contrast Safety Bystander Card: Instant amber hero card for nonverbal episodes, emergencies, and medical needs
+• Floating PiP Communicator: System overlay with Yes/No/Wait buttons over YouTube, maps, or games without switching apps
+• Sotto Partner Quick Settings Tile: Sub-3-second direct crisis launch straight from the Android notification shade
+• Single-Row Quick-Speak Dock: Spontaneous text-to-speech, fullscreen presentation, and one-tap phrase saving
+• Low-Stimulus Sensory Design: Dark-neutral Material 3 themes, sensory color palettes, compact card options, zero cartoon clutter
+• Dual-Language Offline AAC: Display English and speak Indonesian, Malay, or other languages via offline Google ML Kit
+• Private Pattern Logger: After resolution, optionally log Pain, Sensory/Noise, Task, or Emotion triggers locally to identify 30-day patterns
+• Offline QR Deck Sharing: Share custom AAC phrase decks instantly between Android and iOS via encrypted QR codes — zero cloud required
+• Flexible Backup v2: Easily export and import custom phrases, Why trees, and trigger logs
 
-Sotto is not a medical device and does not provide medical advice, diagnosis, or treatment. It is an assistive communication tool.
+Who Sotto is built for:
+• Autistic individuals, neurodivergent communicators, and those experiencing sensory overload or autistic burnout
+• Nonspeaking, minimally verbal, or situational nonverbal teens and adults
+• Children and individuals with speech delay, apraxia of speech, dysarthria, or aphasia
+• Caregivers, parents, special education teachers, and Speech-Language Pathologists (SLPs) looking for a rapid, low-stimulus communication tool
+
+100% offline core. Zero accounts, zero ads, zero trackers. Completely private. Optional anonymous interaction metrics opt-in (strictly zero phrase text or speech ever collected). Open source.
+
+Sotto is an assistive communication tool and does not provide medical advice, diagnosis, or treatment.
 
 github.com/triton1502oc/Sotto | iOS version available
+```
+
+### Localized Store Listing (Indonesian - Bahasa Indonesia `id`)
+
+* **Nama Aplikasi (App Name):** `Sotto: AAC Autisme Ya/Tidak` *(27 / 30 characters)*  
+* **Deskripsi Singkat (Short Description):**  
+  `Aplikasi AAC autisme & krisis meltdown. Kartu bicara visual & tombol Ya/Tidak.` *(78 / 80 characters)*  
+* **Preview Video (YouTube URL):**  
+  - **Indonesian:** `https://www.youtube.com/watch?v=4CvpJkjaz-k`  
+
+### Deskripsi Lengkap (Full Description - Indonesian)
+```text
+Saat bicara terasa sulit, cukup ketuk layar.
+
+Sotto adalah aplikasi komunikasi alternatif dan augmentatif (AAC) yang bermartabat dan minim stimulasi, dirancang khusus untuk autisme, keterlambatan bicara (speech delay), dan krisis meltdown.
+
+Dibuat oleh seorang ayah di Singapura untuk kedua anak laki-lakinya yang autistik (usia 22 & 15 tahun) yang bisa berbicara namun tidak selalu mampu saat stres melanda. Saat sensory overload atau meltdown, mengoperasikan ponsel sendiri menjadi terlalu berat. Maka sang pendamping (caregiver) mengoperasikan Sotto di ponselnya, memutar layar, dan anak cukup mengetuk Ya, Tidak, atau Tunggu untuk menunjukkan inti masalah — persoalan terselesaikan tanpa frustrasi.
+
+Sotto digunakan dalam 2 mode komunikasi AAC yang jelas:
+
+MODE 1 — AAC MANDIRI SEHARI-HARI (Anak memegang ponselnya sendiri):
+Untuk menyampaikan kebutuhan, saat berada di tempat bising, di sekolah, atau saat bertemu orang baru. Pengguna membuka Sotto secara mandiri dan memilih kartu visual — Kebutuhan, Sosial, Perawatan, Umum — atau mengetik di Bilah Quick-Speak. Sekali ketuk untuk berbicara dengan suara offline (TTS), atau tekan lama untuk menampilkan kartu teks raksasa layar penuh yang mudah dibaca tanpa harus bersuara.
+
+MODE 2 — MODE PENDAMPING SAAT KRISIS & MELTDOWN (Pendamping memegang ponsel):
+Inilah fitur utama yang menenangkan situasi saat krisis di rumah maupun di tempat umum. Anda membuka Sotto di ponsel ANDA, masuk ke Mode Pendamping (Partner Mode), lalu putar layar 180° berhadapan muka. Anak melihat tombol taktil berukuran besar dan cukup mengetuk Ya, Tidak, Tunggu, atau Ulangi. Tidak ada menu bertingkat yang rumit, tidak ada pohon kategori yang membingungkan. Ketukan sederhana itu menjadi suara mereka saat kemampuan bicara terhenti.
+
+Mengapa Sotto Sangat Efektif untuk Autisme & AAC:
+• Tombol Krisis Ya / Tidak Raksasa: Tombol taktil 80dp+ dengan getaran haptik yang ramah untuk tangan gemetar atau panik
+• Mode Pendamping Dua Arah: Dilengkapi dikte suara, bank pertanyaan cepat, pembacaan audio, dan tampilan putar layar 180°
+• Kartu Keselamatan Darurat: Kartu warna amber kontras tinggi untuk kondisi non-verbal darurat atau kebutuhan medis
+• Komunikator Mengambang (PiP): Tombol Ya/Tidak melayang di atas aplikasi YouTube, peta, atau game tanpa menutup layar
+• Quick Settings Tile Android: Akses kilat ke Mode Pendamping langsung dari panel notifikasi dalam waktu kurang dari 3 detik
+• Bilah Quick-Speak: Ketik bebas untuk langsung disuarakan, kartu layar penuh, dan simpan frasa dengan 1 ketukan
+• Desain Minim Stimulasi: Tampilan Material 3 bernuansa netral-gelap, warna sensorik tenang, tanpa kartun yang memicu distraksi
+• AAC Offline Dua Bahasa: Tampilkan teks bahasa Inggris dan suarakan dalam Bahasa Indonesia secara offline via Google ML Kit
+• Pencatat Pemicu Pribadi: Setelah krisis mereda, catat pemicu (Rasa Sakit, Bising, Tugas, atau Emosi) untuk melacak tren 30 hari secara lokal
+• Berbagi Kartu via QR: Bagikan dek kartu kata antar perangkat Android dan iOS melalui kode QR offline tanpa internet
+• Cadangkan & Pulihkan (Backup v2): Ekspor dan impor frasa khusus, pohon tanya, dan catatan pemicu dengan mudah
+
+Untuk Siapa Sotto Diciptakan:
+• Individu dengan spektrum autisme, neurodivergen, dan mereka yang mengalami kelelahan sensorik (autistic burnout)
+• Remaja dan dewasa non-verbal, minim bicara, atau yang kehilangan kemampuan bicara saat stres (situational mutism)
+• Anak dan individu dengan speech delay, apraxia bicara, disartria, atau afasia pasca stroke
+• Orang tua, pendamping (caregiver), guru pendidikan luar biasa (PLB), dan terapis wicara
+
+100% inti offline. Tanpa akun, tanpa iklan, tanpa pelacak. Privasi terjamin sepenuhnya. Terbuka (Open Source).
+
+Sotto adalah alat bantu komunikasi asistif dan tidak menyediakan diagnosis atau perawatan medis.
+
+github.com/triton1502oc/Sotto | Tersedia versi iOS
 ```
 
 ### What's New (v1.7.4)
