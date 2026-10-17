@@ -45,4 +45,11 @@ Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for:
     - **Surgical Diffs**: Only edit sections directly affected by code changes. Never rewrite whole documents or alter established structure and human tone.
     - **High Signal, Low Stimulus**: Strip introductory filler, conversational throat-clearing, and boilerplate. Always lead with a concise `TL;DR` or direct imperative steps.
     - **Co-Location**: Always update relevant documentation in the same commit or PR as the corresponding feature or bugfix to prevent documentation drift. Run `./scripts/sync_docs.sh --sync && ./scripts/sync_docs.sh --check` when updating features, versions, or preparing releases.
+12. **Self-Unstuck & Watchdog Recovery**:
+    - Never block indefinitely on subagents or CLI commands. Pair `invoke_subagent` with a generous `schedule` watchdog timer (`DurationSeconds: 240`, `TimerCondition: "any"`).
+    - When a watchdog timer fires, check status exclusively via `manage_subagents(Action: "list")`:
+      - **Active Progress**: If the subagent is still actively progressing (recent steps within the last 90s), do NOT kill it or dump its transcript into the Main Agent—reschedule the timer and wait.
+      - **Deadlock / Waiting for Input**: If `state == "waiting_for_input"` (e.g. subagent requested an interactive prompt or `BypassSandbox: true`), kill the subagent immediately (`manage_subagents(Action: "kill")`) because subagents cannot receive interactive user approval and must never set `BypassSandbox: true`.
+      - **Hung Command**: Only kill a subagent/task (`manage_subagents(Action: "kill")`) if it is genuinely hung (zero step progress for $>90\text{s}$).
+
 
