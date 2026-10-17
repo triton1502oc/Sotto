@@ -201,8 +201,8 @@ fun SottoApp(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            if (!matches.isNullOrEmpty()) {
-                liveSpokenTextTwoWay = matches[0]
+            if (!matches.isNullOrEmpty() && matches[0].isNotBlank()) {
+                liveSpokenTextTwoWay = SpeechRecognitionHelper.normalizeHypothesis(matches[0])
             }
         }
         isListeningTwoWay = false
@@ -224,40 +224,9 @@ fun SottoApp(
     }
 
     fun startListeningWithPermission() {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            if (!speechHelper.isAvailable()) {
-                launchSystemSpeechFallback()
-                return
-            }
-            val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-            val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
-            isListeningTwoWay = true
-            liveSpokenTextTwoWay = ""
-            speechHelper.startListening(
-                locale = locale,
-                onPartialResult = { partial ->
-                    liveSpokenTextTwoWay = SpeechRecognitionHelper.normalizeHypothesis(partial)
-                },
-                onFinalResult = { final ->
-                    liveSpokenTextTwoWay = SpeechRecognitionHelper.normalizeHypothesis(final)
-                    isListeningTwoWay = false
-                },
-                onError = { errorCode ->
-                    isListeningTwoWay = false
-                    if (liveSpokenTextTwoWay.isNotBlank()) return@startListening
-                    if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
-                        speechHelper.triggerModelDownload(locale)
-                        missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
-                        showMissingOfflineSpeechDialog = true
-                        UsabilityTracker.recordOfflineSpeechModelMissing(context, effectiveLang)
-                    } else if (errorCode != SpeechRecognizer.ERROR_NO_MATCH && errorCode != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-                        launchSystemSpeechFallback()
-                    }
-                }
-            )
-        } else {
-            showAudioRationaleDialog = true
-        }
+        isListeningTwoWay = false
+        liveSpokenTextTwoWay = ""
+        launchSystemSpeechFallback()
     }
 
     val recordAudioPermissionLauncher = rememberLauncherForActivityResult(

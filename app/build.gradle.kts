@@ -13,7 +13,7 @@ android {
         applicationId = "com.amh.sotto"
         minSdk = 26
         targetSdk = 36
-        versionCode = 32
+        versionCode = 33
         versionName = "1.7.6"
         androidResources.localeFilters += listOf("en", "in")
         ndk {
