@@ -3,6 +3,25 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.6] - 2026-10-17
+
+### Added
+- **Curated Deck & Caregiver Prompt Picker in Partner Mode**: The Freeform (Talk) card picker now provides category filter chips (`All`, `💬 Caregiver Prompts`, and curated board categories/custom decks), persists the caregiver's last-selected category in partner preferences, and includes both curated phrase decks and built-in 2nd-person caregiver questions ([#79](https://github.com/triton1502oc/Sotto/issues/79)).
+
+### Changed
+- **1st-Person Self-Advocacy Phrasing for Care Category**: Replaced 2nd-person caregiver questions in the default Care category with 1st-person self-advocacy statements ("I am in pain.", "I need water or food.", "I need the restroom.", "I feel too cold or too warm.", "I need to rest or sleep.") in English and Indonesian, and added a safe one-time upgrade migration preserving custom phrases ([#79](https://github.com/triton1502oc/Sotto/issues/79)).
+- **On-Demand Crisis Trigger Logger**: Decoupled the Post-Resolution Trigger Logger ("Log crisis trigger to Why Log") in Talk mode from card interaction endings, keeping it available on demand via the capsule note icon button without intrusive popups ([#81](https://github.com/triton1502oc/Sotto/issues/81)).
+
+### Fixed
+- **QuickSpeak Progressive STT Deduplication & Clean Fallback**: Collapsed progressive prefix compounding emitted by on-device STT engines ("I I need I need water" -> "I need water") while preserving natural reduplication, ensured seamless appending between utterances without duplicate words, committed captured partial speech before timeout errors, and guarded active recognition during text clearing ([#80](https://github.com/triton1502oc/Sotto/issues/80)).
+
+### Assets
+- `Sotto-v1.7.6.apk`: Universal release APK for all architectures.
+- `Sotto-v1.7.6-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.7.6-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.7.6-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.7.5] - 2026-10-17
 
 ### Added
