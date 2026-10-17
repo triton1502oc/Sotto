@@ -27,7 +27,7 @@ Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for:
 4. **Environment & Secrets**:
    Never commit keystores, signing keys, credentials, or personal paths. Rely on `JAVA_HOME` and `ANDROID_HOME`.
 5. **Release Checklist**:
-   Follow the 7-step release workflow in [CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow](CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow) (including building both APKs and AAB bundle via `./gradlew assembleRelease bundleRelease`, GitHub Milestone tracking, issue linking in `CHANGELOG.md`, and closing milestones). Use the clean release chore format: `chore(release): prepare v<version>`.
+   Follow the 7-step release workflow in [CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow](CONTRIBUTING.md#4-release-process-standard-pre-release--release-workflow) (including building both APKs and AAB bundle via `./gradlew assembleRelease bundleRelease`, GitHub Milestone tracking, issue linking in `CHANGELOG.md`, running `./scripts/sync_docs.sh --sync && ./scripts/sync_docs.sh --check`, and closing milestones). Use the clean release chore format: `chore(release): prepare v<version>`.
 6. **Pre-Release Device Verification Prompt (MANDATORY)**:
    When assisting with any release, version bump, or release preparation, AI agents **MUST ALWAYS explicitly ask and remind the user to install and test the Release APK on a physical device or emulator** (`./gradlew installRelease`) before creating the git tag or pushing the release. Never tag or finalize a release without prompting the user.
 7. **Autonomous Asset Rebuilding**:
@@ -44,5 +44,5 @@ Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for:
     - **Grounded & Verifiable**: Base documentation strictly on verified code, tests, and actual behaviors. Never extrapolate or assume unbuilt features, flags, or parameters.
     - **Surgical Diffs**: Only edit sections directly affected by code changes. Never rewrite whole documents or alter established structure and human tone.
     - **High Signal, Low Stimulus**: Strip introductory filler, conversational throat-clearing, and boilerplate. Always lead with a concise `TL;DR` or direct imperative steps.
-    - **Co-Location**: Always update relevant documentation in the same commit or PR as the corresponding feature or bugfix to prevent documentation drift.
+    - **Co-Location**: Always update relevant documentation in the same commit or PR as the corresponding feature or bugfix to prevent documentation drift. Run `./scripts/sync_docs.sh --sync && ./scripts/sync_docs.sh --check` when updating features, versions, or preparing releases.
 

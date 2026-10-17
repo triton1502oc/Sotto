@@ -234,10 +234,23 @@ class MainViewModel(
         exportPhrases: Boolean = true,
         exportTree: Boolean = false,
         exportLog: Boolean = false,
-        whyFinderRepository: WhyFinderRepository? = null
+        whyFinderRepository: WhyFinderRepository? = null,
+        selectedCategories: Set<String>? = null
     ): String {
-        val phrases = if (exportPhrases) _phrases.value else null
-        val categories = if (exportPhrases) _categories.value else null
+        val phrases = if (exportPhrases) {
+            if (selectedCategories != null) {
+                _phrases.value.filter { it.category in selectedCategories }
+            } else {
+                _phrases.value
+            }
+        } else null
+        val categories = if (exportPhrases) {
+            if (selectedCategories != null) {
+                _categories.value.filter { it in selectedCategories }
+            } else {
+                _categories.value
+            }
+        } else null
         val tree = if (exportTree && whyFinderRepository != null) whyFinderRepository.getTree() else null
         val log = if (exportLog && whyFinderRepository != null) whyFinderRepository.getLogs() else null
 

@@ -5,7 +5,7 @@ Sotto is built on a privacy-first, dignified foundation. Core speech synthesis, 
 
 ---
 
-**Last Updated:** October 4, 2026
+**Last Updated:** October 17, 2026
 
 ## 1. Overview
 Sotto is an assistive communication (AAC) and calm crisis navigation application designed for autistic individuals, caregivers, speech-impaired individuals, non-speaking individuals, and anyone needing text-to-speech support. Your privacy, autonomy, and emotional security are fundamental to our design philosophy.
@@ -21,19 +21,20 @@ Sotto is an assistive communication (AAC) and calm crisis navigation application
 ## 3. Optional Anonymous Usability Telemetry (Strict Opt-In)
 To help us understand interaction difficulties, optimize crisis navigation, and evaluate product-market fit without compromising privacy, Sotto includes an optional, privacy-preserving usability monitoring engine:
 
-* **Strictly Opt-In (Default OFF):** Usability telemetry is disabled out-of-the-box. Users are presented with a one-time, low-stimulus prompt upon install or upgrade, and can toggle it ON or OFF anytime in **Voice & Language Settings**.
+* **Strictly Opt-In (Default OFF):** Usability telemetry is disabled out-of-the-box. Consent is deferred until step 3 of the Welcome Onboarding flow or can be toggled anytime in **Settings > Data & Backup**, with a pre-consent data preview sheet showing exact sample JSON before opting in.
 * **Zero Text, Speech, or Phrase Hash Collection:** Telemetry strictly collects only generic interaction metadata. In v1.6.0+, phrase hashes are completely dropped — phrases are recorded solely by character length bracket or category. Verbatim words, card text, audio, and Why Log contents are **NEVER** captured or transmitted.
+* **Sanitized WhyFinder Telemetry:** WhyFinder telemetry is strictly sanitized; health-adjacent data such as `bodyPart`, specific medical conditions, or pain intensity is never recorded (only coarse area category, step depth, and session completion/abortion status).
 * **App-Assigned Random Install ID:** When opt-in is enabled, a random UUID is generated locally on your device to correlate usage patterns over time. Sotto never accesses or tracks hardware identifiers (IMEI, Android ID, MAC address, or Google Advertising ID).
 * **Coarse Temporal Bucketing:** Events record only the day of the week (`Mon`..`Sun`) and a 4-hour window (`00-04`, `04-08`, etc.). Exact timestamps and absolute calendar dates are never transmitted.
 * **User Role Context:** Users may optionally choose a general role (`Caregiver`, `Myself (Autistic Teen / Adult)`, `Professional / Therapist / Teacher`, or `Unset`) to help us understand who benefits most from Sotto.
 * **Event Types Collected:**
   - App opens (`app_open`) and active day counts.
   - Interaction events (phrase card taps by character length bracket, quick speak taps, category switches).
-  - Why Finder crisis navigation (session started, tree steps traversed, resolution vs abortion status, elapsed duration bracket).
-  - Two-Way receptive mode (mode opened, recognized question length, spoken response, completion vs dismissal).
-  - Feature activations (emergency mode triggers, backup export/import indicators, voice setting adjustments).
+  - Why Finder crisis navigation (session started, tree steps traversed, resolution vs abortion status, elapsed duration bracket; strictly sanitized without health-adjacent data).
+  - Partner Mode receptive navigation (response selection, exit outcome and duration, time-to-first-answer metrics).
+  - Feature activations & safety markers (emergency safety card saved marker, offline speech model missing marker, backup export/import indicators, voice setting adjustments).
   - 14-Day In-App Survey: Opted-in users who have used Sotto for at least 14 days across 5 active days receive a one-time 3-question survey (Sean Ellis disappointment score, primary benefit used, confirmed role).
-* **Transparent Payload Preview:** Users can inspect the exact telemetry payload queued on their device at any time from Voice & Language Settings via the **Preview Telemetry Payload** button.
+* **Transparent Payload Preview:** Users can inspect the exact telemetry payload queued on their device at any time from **Settings > Data & Backup** via the **Preview Telemetry Payload** button, or via the pre-consent preview sheet during onboarding.
 * **Network & Storage Guardrails:** Usability events are queued locally in sandboxed app storage strictly capped at 500 events (~60 KB). Batches are dispatched over unmetered Wi-Fi only when the device battery is not low.
 * **Instant Purge on Opt-Out:** Toggling the setting OFF immediately deletes the app-assigned install ID and all queued telemetry records from the device, and cancels pending background dispatches.
 

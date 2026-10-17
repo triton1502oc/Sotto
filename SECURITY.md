@@ -11,10 +11,10 @@ We provide security updates and patches for the following versions:
 
 | Version | Supported | Notes |
 | :--- | :---: | :--- |
-| `v1.6.x` | :white_check_mark: | Current active release branch |
-| `v1.5.x` | :white_check_mark: | Previous release branch (security fixes) |
+| `v1.7.x` | :white_check_mark: | Current active release branch |
+| `v1.6.x` | :white_check_mark: | Previous release branch (security fixes) |
 | `main` | :white_check_mark: | Development branch |
-| `< v1.5.0` | :x: | Unsupported; please update to the latest release |
+| `< v1.6.0` | :x: | Unsupported; please update to the latest release |
 
 ---
 

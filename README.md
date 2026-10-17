@@ -48,18 +48,20 @@ We use Sotto in two distinct modes:
 ## Key Features
 
 ### 1. Direct Yes/No Crisis Navigation & Post-Crisis Explorer (Caregiver Mode)
-- **Two-Way Partner Mode & Animated 180° Flip**: Immediate crisis support for acute meltdowns and verbal shutdowns. Caregivers speak naturally or pick preset questions, flip the display 180° with smooth animated perspective, and the individual responds with one tap on elevated 80dp+ tactile targets (`Yes`, `No`, `Wait`, `Repeat` / `Not sure`, `Stop`) with instant voice confirmation. Zero cognitive load.
+- **Two-Way Partner Mode & Animated 180° Flip**: Immediate crisis support for acute meltdowns and verbal shutdowns. Caregivers speak naturally or pick preset questions, flip the display 180° with smooth animated perspective and an Upright Caregiver Mirror HUD, active screen wake lock (`FLAG_KEEP_SCREEN_ON`), safe exit confirmation dialog, and Quick Settings Tile discovery prompt. The individual responds with one tap on elevated 80dp+ tactile targets (`Yes`, `No`, `Wait`, `Repeat` / `Not sure`, `Stop`) with instant voice confirmation. Zero cognitive load.
 - **Sotto Partner Quick Settings Tile**: Direct 1-tap launch into Partner Mode in under 3 seconds from the Android notification shade.
 - **Why Finder Post-Crisis Explorer**: When distress triggers are unknown, Why Finder provides a gentle, post-crisis binary discovery tree to systematically uncover hidden physical discomfort (with body map locator), sensory overload, emotional fatigue, or routine disruptions without demanding open-ended answers.
 - **Private Pattern Log & 30-Day Trends**: Automatically logs resolved crisis events locally in private app storage with 1-tap post-resolution trigger chips (`Pain`, `Noise`, `Task`, `Emotion`, `Other`). Highlights top 30-day root-cause patterns and peak time-of-day clusters to help families identify recurring environmental stressors.
 - **Customizable Inquiry Tree**: Personalize questions and areas with voice dictation, sequence reordering, and one-tap defaults reset.
 
 ### 2. Dignified Self-Expression (AAC Phrase Board)
+- **3-Step Welcome Onboarding & Guided Safety Setup**: Streamlined first-launch welcome flow (`WelcomeOnboardingDialog`) and guided Emergency Safety Card setup sheet (`EmergencySafetySetupDialog`) to configure emergency bystander contacts, phone numbers, and optional telemetry preferences before entering the main board.
 - **Picture-in-Picture (PiP) AAC Communicator**: Low-friction floating AAC mode enabling continuous Yes/No/Wait communication while navigating maps, videos, or external apps.
 - **Low-Stimulus UI & Sensory Color Themes**: Curated sensory-friendly color palettes accessible from Settings (Appearance) to accommodate neurodivergent needs, photophobia, and astigmatism halation while upholding WCAG 2.1 AAA contrast: **Charcoal** (default low-stimulus dark neutral), **OLED Pure Black** (maximum contrast and power efficiency), **Warm Amber / Low Strain** (low blue light dark sepia), **Slate Navy** (calm focus), and **Soft Parchment** (anti-halation muted daylight).
 - **Zero-Distraction Mode**: Administrative actions (add, edit, delete, reorder) remain hidden during communication.
 - **Safety Bystander Card**: Dedicated full-width hero card for non-verbal episodes and shutdowns. Features a distinct Safety badge, digit-by-digit phone number TTS formatting so emergency numbers are read naturally, and a specialized fullscreen view with high-contrast amber styling for bystanders, doctors, or first responders.
 - **Single-Row QuickSpeak Dock Capsule**: Streamlined ~56dp single-row dock capsule with inline speech, fullscreen expansion, voice dictation, smart clear toggle, and 1-tap card saving.
+- **Resilient 3-Tier Speech Recognition**: Voice dictation with automated 3-tier recognition fallback (on-device offline -> system default recognizer -> network retry) ensuring dependable speech-to-text across diverse devices.
 - **Compact Card Density & Contextual Categories**: Default compact rectangular card layout (`1.25:1` aspect ratio) saving +25% screen space with optional classic square mode; filter cards by situation (**Safety**, **Needs**, **Social**, **Care**, **General**), or customize your own categories with fine-motor single-step reordering and safe fallback reassignment upon deletion.
 - **Categorized 3-Tab Settings**: Clean Material 3 tabs (Voice & Speech, Appearance & Safety, Data & Backup) with vector iconography replacing legacy emoji headers.
 - **High-Visibility Fullscreen**: Long-press any card to show giant text for silent, readable communication in loud spaces.
@@ -69,7 +71,7 @@ We use Sotto in two distinct modes:
 ### 3. Privacy & Offline Guarantee
 - **100% Offline Core**: Zero cloud accounts, zero ads, and zero third-party tracking SDKs. Audio, phrases, Why Finder trees, and Why logs stay strictly on-device.
 - **Instant Offline QR Code Deck Sharing**: Share and import phrase decks instantaneously offline using high-density QR codes (`SOTTO:v1:...` / compact JSON) and an integrated camera scanner between Android and iOS devices—zero accounts, cloud, or pairing required.
-- **Backup & Restore v2**: Full JSON backup with selective checkboxes for phrases, Why tree, and private Why log with merge and replace restore strategies. Easily export a customized tree to a therapist or teacher without sharing private crisis notes.
+- **Backup & Restore v2**: Full JSON backup with selective checkboxes for phrases (including per-category filtering), Why tree, and private Why log with merge and replace restore strategies. Easily export specific category decks or a customized tree to a therapist or teacher without sharing personal categories or private crisis notes.
 - **Privacy-Preserving Telemetry & 14-Day PMF Survey (Opt-In)**: Strictly opt-in (default OFF) anonymous interaction telemetry measuring accessibility latency and hesitation to assess product-market fit, complete with category scrubbing (`custom`), payload inspection preview sheet, and a 14-day PMF survey modal (zero text, audio, or phrase hashes collected).
 
 ---
@@ -102,30 +104,42 @@ Sotto/
 ├── app/
 │   ├── src/main/java/com/amh/sotto/
 │   │   ├── MainActivity.kt         # Single-activity Compose entry point & lifecycle
-│   │   ├── data/                   # Data repositories & settings persistence
-│   │   │   ├── PhraseRepository.kt # SharedPreferences phrase storage & seed data
-│   │   │   ├── VoiceSettingsRepository.kt # TTS pitch, rate, theme & PMF survey state
+│   │   ├── data/                   # Data repositories & domain models
+│   │   │   ├── PhraseRepository.kt # SharedPreferences phrase storage, seed data & Phrase model
+│   │   │   ├── VoiceSettingsRepository.kt # TTS pitch, rate, theme & VoiceSettings model
+│   │   │   ├── WhyFinder.kt        # Question tree, node navigation & crisis log models
 │   │   │   └── WhyFinderRepository.kt # Crisis inquiry tree & offline session logs
-│   │   ├── model/                  # Core domain models
-│   │   │   ├── Phrase.kt           # Phrase item, category, & emergency flags
-│   │   │   ├── VoiceSettings.kt    # Voice configuration & sensory theme presets
-│   │   │   └── WhyFinder.kt        # Question tree, node navigation & crisis log
 │   │   ├── service/                # System services
 │   │   │   └── EmergencyTileService.kt # Sotto Partner Quick Settings notification shade tile
+│   │   ├── theme/                  # Material 3 sensory themes (Color.kt, Theme.kt)
 │   │   ├── ui/
-│   │   │   ├── category/           # Category management bottom sheet
+│   │   │   ├── category/           # Category management bottom sheet (ManageCategoriesDialog.kt)
 │   │   │   ├── conversation/       # Two-Way Partner Mode dialogs & animated 180° flip HUD
-│   │   │   ├── main/               # Main phrase board, QuickSpeak capsule, QR dialogs & settings
-│   │   │   ├── pip/                # Picture-in-Picture floating quick communicator
-│   │   │   ├── theme/              # Material 3 sensory themes (Charcoal, OLED, Amber, Navy, Parchment)
-│   │   │   └── whyfinder/          # Why Finder crisis inquiry dialogs & tree editor
+│   │   │   ├── main/               # Main phrase board, QuickSpeak, dialogs & setup flows
+│   │   │   │   ├── MainActivity.kt # Entry activity & window insets
+│   │   │   │   ├── MainScreen.kt   # Main phrase board (SottoApp.kt)
+│   │   │   │   ├── MainViewModel.kt # State container, TTS speech engine & card operations
+│   │   │   │   ├── PartnerModeOverlay.kt # Upright Caregiver Mirror HUD & flip controls
+│   │   │   │   ├── QuickSpeakOverlay.kt # Dock capsule, voice input & card quick-save
+│   │   │   │   ├── SettingsDialog.kt # 3-tab settings dialog (VoiceSettingsDialog.kt)
+│   │   │   │   ├── PhraseDialogs.kt # Add/edit phrase & category dialogs
+│   │   │   │   ├── QrShareDialog.kt # Offline QR code deck share & scanner dialogs
+│   │   │   │   ├── ExportBackupDialog.kt # Category-filtered JSON backup export
+│   │   │   │   ├── WelcomeOnboardingDialog.kt # 3-step first-launch welcome & consent flow
+│   │   │   │   ├── EmergencySafetySetupDialog.kt # Guided bystander emergency safety card setup
+│   │   │   │   └── PmfSurveyDialog.kt # 14-day product-market fit feedback dialog
+│   │   │   ├── pip/                # Picture-in-Picture floating quick communicator (PipCommunicatorScreen.kt)
+│   │   │   └── whyfinder/          # Why Finder crisis inquiry dialogs, tree editor & logs
 │   │   └── util/                   # Offline utilities
 │   │       ├── ChimePlayer.kt      # Two-tone musical chime & haptic synthesizer
+│   │       ├── EmergencySafetyHelper.kt # Emergency safety card parser & intent builder
 │   │       ├── LocaleHelper.kt     # Language detection & digit-by-digit phone TTS
 │   │       ├── PhraseBackupHelper.kt # JSON v2 backup, restore & optical QR encoder/decoder
+│   │       ├── SpeechRecognitionHelper.kt # Resilient 3-tier speech recognition fallback
 │   │       ├── TranslationHelper.kt # ML Kit offline on-device translation
-│   │       └── UsabilityTracker.kt # Privacy-preserving opt-in telemetry & PMF survey
-│   └── src/test/java/com/amh/sotto/ # Unit test suites for models, backup & detection
+│   │       ├── UsabilityTracker.kt # Privacy-preserving opt-in telemetry & PMF survey
+│   │       └── WhyFinderJson.kt    # Offline Why Finder JSON serialization & tree parsing
+│   └── src/test/java/com/amh/sotto/ # 136 unit tests across 12 test suites
 ├── assets/                         # Visual graphics, screenshots & store icons
 ├── demo/                           # Synchronized demo videos & recording pipeline
 └── docs/                           # Guides, Play Store listing & scenario QR decks

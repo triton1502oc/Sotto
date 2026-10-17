@@ -3,7 +3,9 @@ package com.amh.sotto.ui.main
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -15,21 +17,37 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.amh.sotto.R
+import com.amh.sotto.data.Phrase
+import com.amh.sotto.ui.category.getCategoryDisplayName
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ExportBackupDialog(
     phraseCount: Int,
     areaCount: Int,
     logCount: Int,
-    onConfirmExport: (exportPhrases: Boolean, exportTree: Boolean, exportLog: Boolean) -> Unit,
-    onShareQR: ((exportPhrases: Boolean, exportTree: Boolean, exportLog: Boolean) -> Unit)? = null,
+    phrases: List<Phrase> = emptyList(),
+    categories: List<String> = emptyList(),
+    onConfirmExport: (exportPhrases: Boolean, exportTree: Boolean, exportLog: Boolean, selectedCategories: Set<String>?) -> Unit,
+    onShareQR: ((exportPhrases: Boolean, exportTree: Boolean, exportLog: Boolean, selectedCategories: Set<String>?) -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     var exportPhrases by rememberSaveable { mutableStateOf(true) }
     var exportTree by rememberSaveable { mutableStateOf(true) }
     var exportLog by rememberSaveable { mutableStateOf(false) }
+    var selectedCategories by remember(categories) { mutableStateOf(categories.toSet()) }
 
-    val hasSelection = exportPhrases || exportTree || exportLog
+    val categoryCounts = remember(phrases, categories) {
+        categories.associateWith { cat -> phrases.count { it.category == cat } }
+    }
+    val effectivePhraseCount = if (categories.isNotEmpty()) {
+        phrases.count { it.category in selectedCategories }
+    } else {
+        phraseCount
+    }
+    val hasPhrasesSelected = exportPhrases && (categories.isEmpty() || selectedCategories.isNotEmpty())
+    val hasSelection = hasPhrasesSelected || exportTree || exportLog
+    val effectiveSelectedCategories = if (categories.isNotEmpty()) selectedCategories else null
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -43,7 +61,9 @@ fun ExportBackupDialog(
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
@@ -56,8 +76,71 @@ fun ExportBackupDialog(
                 SelectableBackupOptionCard(
                     checked = exportPhrases,
                     onCheckedChange = { exportPhrases = it },
-                    title = stringResource(R.string.export_opt_phrases, phraseCount),
-                    iconRes = R.drawable.ic_cards
+                    title = stringResource(R.string.export_opt_phrases, effectivePhraseCount),
+                    iconRes = R.drawable.ic_cards,
+                    extraContent = if (exportPhrases && categories.isNotEmpty()) {
+                        {
+                            val allSelected = selectedCategories.size == categories.size
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.export_select_categories),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                                    )
+                                    Text(
+                                        text = stringResource(
+                                            if (allSelected) R.string.action_deselect_all else R.string.action_select_all
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .clickable {
+                                                selectedCategories = if (allSelected) emptySet() else categories.toSet()
+                                            }
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                                FlowRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    categories.forEach { category ->
+                                        val isSelected = category in selectedCategories
+                                        val count = categoryCounts[category] ?: 0
+                                        FilterChip(
+                                            selected = isSelected,
+                                            onClick = {
+                                                selectedCategories = if (isSelected) {
+                                                    selectedCategories - category
+                                                } else {
+                                                    selectedCategories + category
+                                                }
+                                            },
+                                            label = {
+                                                Text(
+                                                    text = "${getCategoryDisplayName(category)} ($count)",
+                                                    style = MaterialTheme.typography.labelSmall
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else null
                 )
 
                 // Option 2: Question Tree Card Tile
@@ -80,8 +163,8 @@ fun ExportBackupDialog(
 
                 if (onShareQR != null) {
                     OutlinedButton(
-                        onClick = { onShareQR(exportPhrases, exportTree, exportLog) },
-                        enabled = exportPhrases,
+                        onClick = { onShareQR(hasPhrasesSelected, exportTree, exportLog, effectiveSelectedCategories) },
+                        enabled = hasPhrasesSelected && effectivePhraseCount > 0,
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 48.dp),
@@ -107,7 +190,7 @@ fun ExportBackupDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onConfirmExport(exportPhrases, exportTree, exportLog) },
+                onClick = { onConfirmExport(hasPhrasesSelected, exportTree, exportLog, effectiveSelectedCategories) },
                 enabled = hasSelection,
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -131,7 +214,8 @@ private fun SelectableBackupOptionCard(
     title: String,
     iconRes: Int,
     warning: String? = null,
-    isWarningActive: Boolean = false
+    isWarningActive: Boolean = false,
+    extraContent: (@Composable () -> Unit)? = null
 ) {
     Surface(
         modifier = Modifier
@@ -194,6 +278,9 @@ private fun SelectableBackupOptionCard(
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(start = 44.dp, end = 8.dp, bottom = 4.dp)
                 )
+            }
+            if (extraContent != null && checked) {
+                extraContent()
             }
         }
     }

@@ -147,7 +147,16 @@ class SpeechRecognitionHelper(private val context: Context) {
                         cancelSilenceTimer()
                         android.util.Log.e("SottoSpeech", "SpeechRecognizer onError: $error (stage=$stage)")
 
-                        if (stage == RecognitionStage.ON_DEVICE_OFFLINE && isMissingOfflineModelError(error)) {
+                        if (lastRecognizedText.isNotBlank()) {
+                            val finalText = lastRecognizedText
+                            lastRecognizedText = ""
+                            onFinalResult(finalText)
+                            return
+                        }
+
+                        val canFallback = canFallbackStage(error)
+
+                        if (stage == RecognitionStage.ON_DEVICE_OFFLINE && canFallback) {
                             android.util.Log.i("SottoSpeech", "Falling back from ON_DEVICE_OFFLINE to STANDARD_OFFLINE for $locale")
                             startListeningInternal(
                                 locale = locale,
@@ -159,7 +168,7 @@ class SpeechRecognitionHelper(private val context: Context) {
                             return
                         }
 
-                        if (stage == RecognitionStage.STANDARD_OFFLINE && isMissingOfflineModelError(error)) {
+                        if (stage == RecognitionStage.STANDARD_OFFLINE && canFallback) {
                             android.util.Log.i("SottoSpeech", "Falling back from STANDARD_OFFLINE to STANDARD_ONLINE for $locale")
                             startListeningInternal(
                                 locale = locale,
@@ -179,9 +188,10 @@ class SpeechRecognitionHelper(private val context: Context) {
                         cancelSilenceTimer()
                         val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         android.util.Log.d("SottoSpeech", "onResults: $matches")
-                        if (!matches.isNullOrEmpty()) {
-                            lastRecognizedText = matches[0]
-                            onFinalResult(matches[0])
+                        val recognized = resolveRecognitionResult(matches, lastRecognizedText)
+                        lastRecognizedText = ""
+                        if (recognized != null) {
+                            onFinalResult(recognized)
                         }
                     }
 
@@ -266,6 +276,15 @@ class SpeechRecognitionHelper(private val context: Context) {
             return errorCode == ERROR_LANGUAGE_UNAVAILABLE ||
                 errorCode == ERROR_LANGUAGE_NOT_SUPPORTED ||
                 errorCode == ERROR_SERVER_DISCONNECTED
+        }
+
+        fun canFallbackStage(errorCode: Int): Boolean {
+            return isMissingOfflineModelError(errorCode) || errorCode == SpeechRecognizer.ERROR_CLIENT
+        }
+
+        fun resolveRecognitionResult(matches: List<String>?, fallbackText: String = ""): String? {
+            return matches?.firstOrNull { it.isNotBlank() }
+                ?: fallbackText.takeIf { it.isNotBlank() }
         }
 
         fun openOfflineSpeechSettings(context: Context) {

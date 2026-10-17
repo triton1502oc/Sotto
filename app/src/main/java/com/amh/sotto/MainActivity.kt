@@ -275,7 +275,9 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             },
                             isTtsLanguageInstalled = { isTtsVoiceInstalled(it) },
                             onInstallTtsVoice = { openTtsInstallSettings() },
-                            onExportBackup = { phrases, tree, log, repo -> viewModel.exportBackup(phrases, tree, log, repo) },
+                            onExportBackup = { phrases, tree, log, repo, selectedCategories ->
+                                viewModel.exportBackup(phrases, tree, log, repo, selectedCategories)
+                            },
                             onImportBackup = { backup, replace, repo -> viewModel.importBackup(backup, replace, repo) },
                             shouldPromptMetrics = remember { viewModel.shouldPromptMetrics() },
                             onMetricsPromptAnswered = { viewModel.onMetricsPromptAnswered(it) },

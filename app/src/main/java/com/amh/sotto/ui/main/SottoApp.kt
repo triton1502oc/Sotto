@@ -126,7 +126,7 @@ fun SottoApp(
     onAddCustomCategory: (String) -> Boolean = { false },
     onRenameCustomCategory: (String, String) -> Boolean = { _, _ -> false },
     onDeleteCustomCategory: (String) -> Boolean = { false },
-    onExportBackup: (Boolean, Boolean, Boolean, WhyFinderRepository?) -> String = { _, _, _, _ -> "" },
+    onExportBackup: (Boolean, Boolean, Boolean, WhyFinderRepository?, Set<String>?) -> String = { _, _, _, _, _ -> "" },
     onImportBackup: (BackupData, Boolean, WhyFinderRepository?) -> ImportResult = { _, _, _ -> ImportResult(0, 0) },
     shouldPromptMetrics: Boolean = false,
     onMetricsPromptAnswered: (Boolean) -> Unit = {},
@@ -272,6 +272,7 @@ fun SottoApp(
     var pendingBackupData by remember { mutableStateOf<BackupData?>(null) }
     var showExportDialog by rememberSaveable { mutableStateOf(false) }
     var pendingExportOptions by remember { mutableStateOf(Triple(true, true, false)) }
+    var pendingSelectedCategories by remember { mutableStateOf<Set<String>?>(null) }
 
     val exportSuccessTemplate = stringResource(R.string.msg_export_success)
     val exportErrorTemplate = stringResource(R.string.error_export_failed)
@@ -284,16 +285,23 @@ fun SottoApp(
     ) { uri ->
         if (uri != null) {
             try {
+                val selectedCats = pendingSelectedCategories
                 val json = onExportBackup(
                     pendingExportOptions.first,
                     pendingExportOptions.second,
                     pendingExportOptions.third,
-                    whyFinderRepository
+                    whyFinderRepository,
+                    selectedCats
                 )
                 context.contentResolver.openOutputStream(uri)?.use { output ->
                     output.write(json.toByteArray(Charsets.UTF_8))
                 }
-                val count = if (pendingExportOptions.first) phrases.size else 0
+                val count = if (pendingExportOptions.first) {
+                    if (selectedCats != null) phrases.count { it.category in selectedCats } else phrases.size
+                } else 0
+                if (pendingExportOptions.first && selectedCats != null && selectedCats.size < effectiveCategories.size) {
+                    UsabilityTracker.recordActivation(context, "backup_category_filtered_export")
+                }
                 Toast.makeText(
                     context,
                     String.format(Locale.getDefault(), exportSuccessTemplate, count),
@@ -691,9 +699,27 @@ fun SottoApp(
                     if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                         val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                         if (!matches.isNullOrEmpty()) {
+                            if (quickText.isBlank()) {
+                                UsabilityTracker.startIntent("QuickSpeak")
+                            }
                             quickText = if (quickText.isBlank()) matches[0] else "$quickText ${matches[0]}"
                         }
                     }
+                    isQuickListening = false
+                }
+
+                fun launchQuickSpeechFallback() {
+                    val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                    val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+                        putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
+                    }
+                    try {
+                        quickSpeechLauncher.launch(intent)
+                    } catch (_: Exception) {}
                 }
 
                 fun stopQuickListening() {
@@ -703,33 +729,49 @@ fun SottoApp(
                     }
                 }
 
+                fun startQuickListeningWithPermission() {
+                    if (!speechHelper.isAvailable()) {
+                        launchQuickSpeechFallback()
+                        return
+                    }
+                    val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
+                    val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
+                    quickBaseText = quickText.trim()
+                    isQuickListening = true
+                    speechHelper.startListening(
+                        locale = locale,
+                        onPartialResult = { partial ->
+                            if (quickText.isBlank() && partial.isNotBlank()) {
+                                UsabilityTracker.startIntent("QuickSpeak")
+                            }
+                            quickText = if (quickBaseText.isEmpty()) partial else "$quickBaseText $partial"
+                        },
+                        onFinalResult = { final ->
+                            if (quickText.isBlank() && final.isNotBlank()) {
+                                UsabilityTracker.startIntent("QuickSpeak")
+                            }
+                            quickText = if (quickBaseText.isEmpty()) final else "$quickBaseText $final"
+                            isQuickListening = false
+                        },
+                        onError = { errorCode ->
+                            isQuickListening = false
+                            if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
+                                speechHelper.triggerModelDownload(locale)
+                                missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
+                                showMissingOfflineSpeechDialog = true
+                                UsabilityTracker.recordOfflineSpeechModelMissing(context, effectiveLang)
+                            } else if (errorCode != SpeechRecognizer.ERROR_NO_MATCH && errorCode != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+                                launchQuickSpeechFallback()
+                            }
+                        }
+                    )
+                }
+
                 val quickAudioPermissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestPermission()
                 ) { isGranted ->
                     if (isGranted) {
-                        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                        val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
-                        quickBaseText = quickText.trim()
-                        isQuickListening = true
-                        speechHelper.startListening(
-                            locale = locale,
-                            onPartialResult = { partial ->
-                                quickText = if (quickBaseText.isEmpty()) partial else "$quickBaseText $partial"
-                            },
-                            onFinalResult = { final ->
-                                quickText = if (quickBaseText.isEmpty()) final else "$quickBaseText $final"
-                                isQuickListening = false
-                            },
-                            onError = { errorCode ->
-                                isQuickListening = false
-                                if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
-                                    speechHelper.triggerModelDownload(locale)
-                                    missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
-                                    showMissingOfflineSpeechDialog = true
-                                    UsabilityTracker.recordOfflineSpeechModelMissing(context, effectiveLang)
-                                }
-                            }
-                        )
+                        startQuickListeningWithPermission()
                     } else {
                         isQuickListening = false
                     }
@@ -740,43 +782,7 @@ fun SottoApp(
                         stopQuickListening()
                     } else {
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                            if (!speechHelper.isAvailable()) {
-                                val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                                val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
-                                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
-                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-                                    putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                                }
-                                try {
-                                    quickSpeechLauncher.launch(intent)
-                                } catch (_: Exception) {}
-                                return
-                            }
-                            val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                            val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
-                            quickBaseText = quickText.trim()
-                            isQuickListening = true
-                            speechHelper.startListening(
-                                locale = locale,
-                                onPartialResult = { partial ->
-                                    quickText = if (quickBaseText.isEmpty()) partial else "$quickBaseText $partial"
-                                },
-                                onFinalResult = { final ->
-                                    quickText = if (quickBaseText.isEmpty()) final else "$quickBaseText $final"
-                                    isQuickListening = false
-                                },
-                                onError = { errorCode ->
-                                    isQuickListening = false
-                                    if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
-                                        speechHelper.triggerModelDownload(locale)
-                                        missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
-                                        showMissingOfflineSpeechDialog = true
-                                        UsabilityTracker.recordOfflineSpeechModelMissing(context, effectiveLang)
-                                    }
-                                }
-                            )
+                            startQuickListeningWithPermission()
                         } else {
                             quickAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                         }
@@ -890,11 +896,15 @@ fun SottoApp(
                                 },
                                 placeholder = {
                                     Text(
-                                        stringResource(R.string.hint_quick_speak),
+                                        text = if (isQuickListening) listenModePrompt else stringResource(R.string.hint_quick_speak),
                                         fontSize = 14.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                        color = if (isQuickListening) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                        }
                                     )
                                 },
                                 modifier = Modifier.weight(1f),
@@ -929,6 +939,20 @@ fun SottoApp(
                                         "⏹",
                                         fontSize = 16.sp,
                                         color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            } else {
+                                IconButton(
+                                    onClick = { toggleQuickListening() },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .semantics { contentDescription = voiceInputPrompt }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_mic),
+                                        contentDescription = voiceInputPrompt,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                     )
                                 }
                             }
@@ -980,20 +1004,6 @@ fun SottoApp(
                                         contentDescription = clearTextCd,
                                         modifier = Modifier.size(18.dp),
                                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                    )
-                                }
-                            } else if (!isQuickListening) {
-                                IconButton(
-                                    onClick = { toggleQuickListening() },
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .semantics { contentDescription = voiceInputPrompt }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_mic),
-                                        contentDescription = voiceInputPrompt,
-                                        modifier = Modifier.size(20.dp),
-                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                     )
                                 }
                             }
@@ -1430,18 +1440,34 @@ fun SottoApp(
             phraseCount = phrases.size,
             areaCount = tree.areas.size,
             logCount = logs.size,
-            onConfirmExport = { expPhrases, expTree, expLog ->
+            phrases = phrases,
+            categories = effectiveCategories,
+            onConfirmExport = { expPhrases, expTree, expLog, selectedCats ->
                 pendingExportOptions = Triple(expPhrases, expTree, expLog)
+                pendingSelectedCategories = selectedCats
                 showExportDialog = false
                 val dateStr = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
                 exportLauncher.launch("sotto_backup_$dateStr.json")
             },
-            onShareQR = { expPhrases, _, _ ->
+            onShareQR = { expPhrases, _, _, selectedCats ->
                 if (expPhrases) {
-                    val compactJson = PhraseBackupHelper.exportCompactPhrasesForQR(phrases, effectiveCategories)
+                    val filteredPhrases = if (selectedCats != null) {
+                        phrases.filter { it.category in selectedCats }
+                    } else {
+                        phrases
+                    }
+                    val filteredCategories = if (selectedCats != null) {
+                        effectiveCategories.filter { it in selectedCats }
+                    } else {
+                        effectiveCategories
+                    }
+                    val compactJson = PhraseBackupHelper.exportCompactPhrasesForQR(filteredPhrases, filteredCategories)
                     showExportDialog = false
                     activeQRShareString = compactJson
                     UsabilityTracker.recordActivation(context, "qr_deck_exported")
+                    if (selectedCats != null && selectedCats.size < effectiveCategories.size) {
+                        UsabilityTracker.recordActivation(context, "backup_category_filtered_export")
+                    }
                 }
             },
             onDismiss = { showExportDialog = false }

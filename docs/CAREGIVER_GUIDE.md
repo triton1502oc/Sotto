@@ -46,21 +46,24 @@ Caregiver asks 1 direct question ──► Giant text on screen ──► Indivi
 ### How to Use Talk Mode During an Emergency Step-by-Step
 
 1. **Open Partner Mode (<3s Launch)**:
-   - Tap **Partner Mode** in the top app bar, or tap the **Sotto Partner** Quick Settings tile directly from the Android notification shade.
+   - Tap **Partner Mode** in the top app bar, or tap the **Sotto Partner** Quick Settings tile directly from the Android notification shade (with an automatic discovery prompt to add the tile).
+   - An active screen wake lock (`FLAG_KEEP_SCREEN_ON`) keeps the display awake during crisis navigation without dimming or sleeping.
 2. **Present One Urgent Question**:
    - **Speak Naturally (Mic)**: Tap the mic button. Sotto transcribes your voice in real time into giant high-contrast text. Tap again or pause to finish.
    - **Preset Check-in Cards (Questions)**: Tap Questions to pick instant comfort and binary checks (*"Are you in pain?"*, *"Do you need water?"*, *"I need a quiet space."*).
    - **Type Manually (Type)**: Type directly if ambient noise is too loud for speech recognition.
 3. **Vocalize with Read Aloud (Speak)**:
    - If the individual has their eyes closed or head down, tap **Speak** to vocalize the prompt through the phone's speaker.
-4. **Face-to-Face 180° Flip**:
+4. **Face-to-Face 180° Flip & Upright Caregiver Mirror HUD**:
    - Rest the phone on a table or between you and tap **Flip**.
-   - The question text and the 4 response cards smoothly rotate 180° to face the person across from you, while caregiver controls remain facing you.
+   - The question text and the 4 response cards smoothly rotate 180° to face the person across from you.
+   - An **Upright Caregiver Mirror HUD** keeps the question and partner responses clearly legible right-side-up from your perspective, while caregiver controls remain facing you.
 5. **Tactile 4-Button Rapid Response**:
    - The individual taps one large, high-contrast elevated button:
      - `Yes` • `No` • `Wait` • `Repeat` (or `Not sure` • `Stop` in Guided)
    - Instant offline TTS voice confirmation plays aloud, tactile haptics pulse, and a visual confirmation badge appears.
-6. **1-Tap Post-Crisis Pattern Logger**:
+6. **Safe Exit Confirmation & 1-Tap Pattern Logger**:
+   - Tapping exit displays a safe exit confirmation prompt to prevent accidental dismissals during an ongoing crisis.
    - Following resolution, an optional horizontal strip of trigger chips (`Pain`, `Noise`, `Task`, `Emotion`, `Other`) lets caregivers record the root cause to local Why Log with a single tap.
 
 ---
@@ -97,7 +100,7 @@ When the immediate crisis is stabilized—or when an individual is showing signs
 Meltdowns rarely happen without environmental triggers. The **Private Why Log** helps families and therapists understand patterns without relying on memory during stressful moments.
 
 ### Viewing Logs & Trends
-- Tap **`📋 Log`** inside Voice & Language Settings or from Why Finder.
+- Tap **`📋 Log`** inside **Settings > Data & Backup** or from Why Finder.
 - **30-Day Pattern Insights**:
   - **Category Breakdown**: See percentage shares across Sensory, Physical, Emotional, and Routine triggers (e.g. *55% Sensory Overload, 25% Physical*).
   - **Top Specific Triggers**: Identify the most frequent culprits (e.g. *"Loud noise or crowded space"*).
@@ -107,7 +110,7 @@ Meltdowns rarely happen without environmental triggers. The **Private Why Log** 
 ### Privacy & Safe Sharing
 - **100% Local Storage**: Why Log records are stored strictly in private, sandboxed app storage. They are never sent over the internet or included in telemetry.
 - **Deduplication & 500-Entry Buffer**: Keeps local storage compact (~60 KB) and fast.
-- **Selective Backup**: When exporting a backup in **Voice & Language Settings**, the Why Log is **excluded by default** with an explicit privacy warning. You choose whether to include it or keep it local.
+- **Selective Backup & Category Export**: When exporting a backup in **Settings > Data & Backup**, you can select specific phrase categories to export (or exclude private categories). The Why Log is **excluded by default** with an explicit privacy warning. You choose whether to include it or keep it local.
 
 ---
 
@@ -116,7 +119,7 @@ Meltdowns rarely happen without environmental triggers. The **Private Why Log** 
 Every autistic individual has a unique sensory profile, communication style, and set of comfort measures.
 
 ### Using the Why Tree Editor
-1. Tap **`🌳 Edit Tree`** from Voice & Language Settings or inside Partner Mode.
+1. Tap **`🌳 Edit Tree`** from **Settings > Data & Backup** or inside Partner Mode.
 2. **Customize Branching Questions**:
    - Tap any area (Physical, Sensory, Emotional, Routine) to view and edit its questions.
    - Tap **`+ Add Question`** to add personalized triggers (e.g., *"Is the dog barking bothering you?"*, *"Are your socks uncomfortable?"*).
@@ -128,7 +131,7 @@ Every autistic individual has a unique sensory profile, communication style, and
    - Tap the 3-dot overflow menu (`⋮`) and select **`Reset to Defaults`** anytime to restore the default research-backed crisis tree without losing your phrase cards.
 
 ### Sharing Trees with Therapists & Schools
-- Through **Backup & Restore v2**, you can export **Only the Why Tree** (`Backup v2: Tree only`).
+- Through **Backup & Restore v2** in **Settings > Data & Backup**, you can selectively export phrase categories or **Only the Why Tree** (`Backup v2: Tree only`).
 - Send the JSON file to your child's speech therapist, special education teacher, or aide.
 - When they import it on their device, Sotto updates the crisis navigation tree to match your family's customized questions while keeping all private logs and personal notes completely unshared.
 

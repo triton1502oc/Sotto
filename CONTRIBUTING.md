@@ -77,12 +77,12 @@ All contributors and AI agents must follow this standard checklist before releas
    - Verify key flows (TTS speech playback, full-screen mode, settings, and auto-translate if enabled).
    - **AI Agent Rule**: AI agents assisting with a release **must explicitly ask and remind the user to test the release APK on a device** before creating the release tag.
 3. **Version Bump**:
-   - Increment `versionCode` (integer) and bump `versionName` (semver, e.g. `1.5.5`) in `app/build.gradle.kts`.
+   - Increment `versionCode` (integer) and bump `versionName` (semver, e.g. `1.7.5`) in `app/build.gradle.kts`.
 4. **Documentation & Issue Milestone Tracking**:
    - Associate planned issues and bug fixes with the target release milestone in GitHub (e.g. `gh issue edit <id> --milestone "v<version>"`).
    - Update [CHANGELOG.md](CHANGELOG.md) with new features, fixes, and release assets under the new version header, linking closed issues (e.g. `([#2](https://github.com/triton1502oc/Sotto/issues/2))`).
-   - Update [README.md](README.md) if new features, UI capabilities, or user workflows were added, and update the release asset download link.
-   - Update [docs/PLAY_STORE_LISTING.md](docs/PLAY_STORE_LISTING.md) if user-facing store descriptions or features changed.
+   - Update [README.md](README.md), [PRIVACY_POLICY.md](PRIVACY_POLICY.md), [SECURITY.md](SECURITY.md), [docs/PLAY_STORE_LISTING.md](docs/PLAY_STORE_LISTING.md) (both EN and ID What's New sections and feature lists), and [docs/CAREGIVER_GUIDE.md](docs/CAREGIVER_GUIDE.md).
+   - Run `./scripts/sync_docs.sh --sync` followed by `./scripts/sync_docs.sh --check` to automatically sync version matrices and verify all release documentation before committing `chore(release): prepare v<version>`.
 5. **Git Commit & Tag (Clean Release Chore)**:
    - Stage modified files (`build.gradle.kts`, `CHANGELOG.md`, `README.md`, etc.) and commit using the standard release chore format:
      ```bash

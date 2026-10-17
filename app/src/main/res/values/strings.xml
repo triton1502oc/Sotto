@@ -209,6 +209,9 @@
     <string name="error_import_failed">Failed to import phrases. Please ensure the file is a valid Sotto backup JSON.</string>
     <string name="dialog_export_title">Export Backup</string>
     <string name="export_opt_phrases">Phrase Library (%1$d phrases)</string>
+    <string name="export_select_categories">Categories to export:</string>
+    <string name="action_select_all">Select All</string>
+    <string name="action_deselect_all">Clear All</string>
     <string name="export_opt_why_tree">Why Finder Question Tree (%1$d areas)</string>
     <string name="export_opt_why_log">Private Why Log (%1$d entries)</string>
     <string name="export_why_log_warning">⚠️ Contains sensitive crisis history. Share with caution.</string>

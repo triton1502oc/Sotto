@@ -34,15 +34,17 @@ This is what stops meltdowns at home and in public. You open Sotto on YOUR phone
 Why Sotto works for Autism & AAC:
 • Direct Yes/No Pinpoint Cards: Huge 80dp+ tactile buttons with haptic feedback designed for shaky or overwhelmed hands
 • Two-Way Caregiver Partner Mode: Talk HUD with voice dictation, question bank, read-aloud prompts, and 180° flip display
-• High-Contrast Safety Bystander Card: Instant amber hero card for nonverbal episodes, emergencies, and medical needs
+• High-Contrast Safety Bystander Card: Guided Emergency Safety Setup and amber hero card for nonverbal episodes and medical needs
+• 3-Step Welcome Onboarding: Clear, low-stimulus setup flow to tailor voice, emergency safety contacts, and preferences
 • Floating PiP Communicator: System overlay with Yes/No/Wait buttons over YouTube, maps, or games without switching apps
 • Sotto Partner Quick Settings Tile: Sub-3-second direct crisis launch straight from the Android notification shade
 • Single-Row Quick-Speak Dock: Spontaneous text-to-speech, fullscreen presentation, and one-tap phrase saving
+• Resilient Speech Recognition: 3-tier speech-to-text fallback (offline on-device, system, and network) for reliable dictation
 • Low-Stimulus Sensory Design: Dark-neutral Material 3 themes, sensory color palettes, compact card options, zero cartoon clutter
 • Dual-Language Offline AAC: Display English and speak Indonesian, Malay, or other languages via offline Google ML Kit
 • Private Pattern Logger: After resolution, optionally log Pain, Sensory/Noise, Task, or Emotion triggers locally to identify 30-day patterns
 • Offline QR Deck Sharing: Share custom AAC phrase decks instantly between Android and iOS via encrypted QR codes — zero cloud required
-• Flexible Backup v2: Easily export and import custom phrases, Why trees, and trigger logs
+• Flexible Backup v2: Category-filtered export and import for custom phrases, Why trees, and trigger logs
 
 Who Sotto is built for:
 • Autistic individuals, neurodivergent communicators, and those experiencing sensory overload or autistic burnout
@@ -84,15 +86,17 @@ Inilah fitur utama yang menenangkan situasi saat krisis di rumah maupun di tempa
 Mengapa Sotto Sangat Efektif untuk Autisme & AAC:
 • Tombol Krisis Ya / Tidak Raksasa: Tombol taktil 80dp+ dengan getaran haptik yang ramah untuk tangan gemetar atau panik
 • Mode Pendamping Dua Arah: Dilengkapi dikte suara, bank pertanyaan cepat, pembacaan audio, dan tampilan putar layar 180°
-• Kartu Keselamatan Darurat: Kartu warna amber kontras tinggi untuk kondisi non-verbal darurat atau kebutuhan medis
+• Kartu Keselamatan Darurat: Panduan penyiapan terarah & kartu warna amber kontras tinggi untuk kondisi non-verbal darurat
+• Onboarding 3 Langkah: Penyiapan awal yang tenang untuk mengatur suara, kontak darurat, dan preferensi privasi
 • Komunikator Mengambang (PiP): Tombol Ya/Tidak melayang di atas aplikasi YouTube, peta, atau game tanpa menutup layar
 • Quick Settings Tile Android: Akses kilat ke Mode Pendamping langsung dari panel notifikasi dalam waktu kurang dari 3 detik
 • Bilah Quick-Speak: Ketik bebas untuk langsung disuarakan, kartu layar penuh, dan simpan frasa dengan 1 ketukan
+• Pengenalan Suara Tangguh: Sistem fallback 3 lapis (offline di perangkat, sistem, dan jaringan) untuk dikte suara yang andal
 • Desain Minim Stimulasi: Tampilan Material 3 bernuansa netral-gelap, warna sensorik tenang, tanpa kartun yang memicu distraksi
 • AAC Offline Dua Bahasa: Tampilkan teks bahasa Inggris dan suarakan dalam Bahasa Indonesia secara offline via Google ML Kit
 • Pencatat Pemicu Pribadi: Setelah krisis mereda, catat pemicu (Rasa Sakit, Bising, Tugas, atau Emosi) untuk melacak tren 30 hari secara lokal
 • Berbagi Kartu via QR: Bagikan dek kartu kata antar perangkat Android dan iOS melalui kode QR offline tanpa internet
-• Cadangkan & Pulihkan (Backup v2): Ekspor dan impor frasa khusus, pohon tanya, dan catatan pemicu dengan mudah
+• Cadangkan & Pulihkan (Backup v2): Ekspor dengan filter kategori dan impor frasa khusus, pohon tanya, serta catatan pemicu
 
 Untuk Siapa Sotto Diciptakan:
 • Individu dengan spektrum autisme, neurodivergen, dan mereka yang mengalami kelelahan sensorik (autistic burnout)
@@ -113,6 +117,14 @@ github.com/triton1502oc/Sotto | Tersedia versi iOS
 • Compact phrase edit dialog with keyboard-accessible Save action and Done key.
 • Resilient small-screen Talk chip layout and navigation typography.
 • Preserved screen state and fixed language change recreation flow.
+```
+
+### Apa yang Baru (v1.7.4)
+```text
+• Peluncuran langsung tile Quick Settings ke mode Partner Talk saat krisis.
+• Dialog edit frasa ringkas dengan tombol Simpan yang mudah diakses keyboard.
+• Tata letak chip Talk dan tipografi navigasi yang tangguh di layar kecil.
+• Pemulihan status layar dan stabilitas saat pergantian bahasa.
 ```
 
 ---
@@ -159,7 +171,7 @@ When completing the Google Play **Data Safety** questionnaire:
    - **Required or Optional**: **Optional** (Users must explicitly opt-in; default is OFF).
    - **Purpose**: **Analytics** (Diagnosing accessibility friction, evaluating crisis navigation effectiveness, and measuring product-market fit).
 2. **Do you provide a way for users to request that their data be deleted?**  
-   👉 Select **Yes** (Toggling the setting OFF in Voice & Language Settings immediately purges the app-assigned install ID and all queued events from local storage; uninstalling deletes all local app data).
+   👉 Select **Yes** (Toggling the setting OFF in Settings > Data & Backup immediately purges the app-assigned install ID and all queued events from local storage; uninstalling deletes all local app data).
 
 ---
 

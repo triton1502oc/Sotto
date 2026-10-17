@@ -281,6 +281,21 @@ class MainViewModelTest {
     }
 
     @Test
+    fun `exportBackup with selectedCategories exports only matching phrases and categories`() {
+        val carePhrase = Phrase("Care Phrase", category = Phrase.CATEGORY_CARE)
+        val socialPhrase = Phrase("Social Phrase", category = Phrase.CATEGORY_SOCIAL)
+        viewModel.addPhrase(carePhrase)
+        viewModel.addPhrase(socialPhrase)
+
+        val json = viewModel.exportBackup(selectedCategories = setOf(Phrase.CATEGORY_CARE))
+
+        assertTrue(json.contains("Care Phrase"))
+        assertTrue(json.contains(Phrase.CATEGORY_CARE))
+        assertFalse(json.contains("Social Phrase"))
+        assertFalse(json.contains("Phrase 1"))
+    }
+
+    @Test
     fun `importBackup with merge adds new phrases and categories without deleting existing ones`() {
         val backup = BackupData(
             version = 1,

@@ -1,7 +1,7 @@
 # Sotto Demo Videos
 
 ### TL;DR
-High-definition demo videos and reproduction scripts showcasing Sotto's flagship assistive communication features—including **Two-Way Caregiver Receptive Mode** (180° face-to-face screen flip and rapid responses), **Two-Tier Quick-Speak Bar**, **Safety Bystander Card**, **Sensory Color Themes**, and the **Two-Tone Attention Chime**.
+High-definition demo videos and reproduction scripts showcasing Sotto's flagship assistive communication features—including **Two-Way Caregiver Receptive Mode** (180° face-to-face screen flip and rapid responses), **Single-Row QuickSpeak Dock Capsule (~56dp)**, **Safety Bystander Card**, **Sensory Color Themes**, and the **Two-Tone Attention Chime**.
 
 ---
 
@@ -12,6 +12,7 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 | **Google Play Preview (Master)** | 16:9 Landscape | `en-US` | Neural Baritone Christopher + Andrew + Ambient Bed + Chime | 1920×1080 @ 30fps, 60s | [`sotto_google_play_preview.mp4`](sotto_google_play_preview.mp4) |
 | **Shorts / Reels / TikTok (Vertical)** | 9:16 Portrait | `en-US` | Neural Baritone Christopher + Andrew + Ambient Bed + Chime | 1080×1920 @ 30fps, 60s | [`sotto_vertical_preview.mp4`](sotto_vertical_preview.mp4) |
 | **English Device Demo** | 9:20 Portrait | `en-US` | Samantha | 720×1600 @ 30fps, ~54s | [`sotto_demo_en.mp4`](sotto_demo_en.mp4) |
+| **Indonesian Device Demo** | 9:20 Portrait | `id-ID` | Damayanti | 1080×2400 @ 30fps, ~54s (Bahasa Indonesia full walkthrough) | [`sotto_demo_id.mp4`](sotto_demo_id.mp4) |
 
 *Link: [YouTube Demo](https://youtu.be/Kd9qPu3F-Gg) ([Watch](https://www.youtube.com/watch?v=Kd9qPu3F-Gg))*
 
@@ -19,7 +20,7 @@ High-definition demo videos and reproduction scripts showcasing Sotto's flagship
 
 ## Featured Capabilities
 
-1. **Modern Two-Tier Quick-Speak Bar**: Spontaneous text input, instant speech playback (`🔊`), and large-card fullscreen modal (`⛶`).
+1. **Single-Row QuickSpeak Dock Capsule (~56dp)**: Spontaneous text input, instant speech playback (`🔊`), and large-card fullscreen modal (`⛶`).
 2. **Safety Bystander Mode & Dual-Language**: Category filtering and safety hero card with bilingual one-touch speech buttons.
 3. **Two-Way Caregiver Receptive Mode**: Dedicated receptive HUD (`👂`), caregiver question prompt bank (`📋`), 180° face-to-face screen flip (`🔄 Flip`), and dignified rapid-response buttons (`✓ Yes` / `✕ No` / `🔁 Repeat` / `⏳ Wait`) with instant voice confirmation.
 4. **Dual-Language TopBar Switcher**: Instant switching between primary and secondary speech languages with offline ML Kit translation.

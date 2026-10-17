@@ -209,6 +209,9 @@
     <string name="error_import_failed">Gagal mengimpor frasa. Pastikan berkas adalah JSON cadangan Sotto yang valid.</string>
     <string name="dialog_export_title">Ekspor Cadangan</string>
     <string name="export_opt_phrases">Daftar Frasa (%1$d frasa)</string>
+    <string name="export_select_categories">Kategori untuk diekspor:</string>
+    <string name="action_select_all">Pilih Semua</string>
+    <string name="action_deselect_all">Hapus Pilihan</string>
     <string name="export_opt_why_tree">Pohon Pertanyaan Why Finder (%1$d area)</string>
     <string name="export_opt_why_log">Catatan Why Privat (%1$d entri)</string>
     <string name="export_why_log_warning">⚠️ Berisi riwayat krisis sensitif. Bagikan dengan hati-hati.</string>
