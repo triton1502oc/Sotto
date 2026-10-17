@@ -115,11 +115,22 @@
     </string-array>
 
     <string-array name="default_phrases_care">
+        <item>Saya merasa sakit.</item>
+        <item>Saya butuh minum atau makan.</item>
+        <item>Saya perlu ke kamar mandi.</item>
+        <item>Saya merasa terlalu dingin atau panas.</item>
+        <item>Saya ingin istirahat atau tidur.</item>
+    </string-array>
+
+    <string-array name="caregiver_questions_freeform">
         <item>Apakah merasa sakit?</item>
         <item>Apakah butuh minum atau makan?</item>
         <item>Apakah perlu ke kamar mandi?</item>
         <item>Apakah merasa dingin atau panas?</item>
         <item>Apakah ingin istirahat atau tidur?</item>
+        <item>Apakah butuh tempat yang tenang?</item>
+        <item>Apakah butuh waktu lebih?</item>
+        <item>Apakah ingin pergi sekarang?</item>
     </string-array>
 
     <string-array name="default_phrases_general">

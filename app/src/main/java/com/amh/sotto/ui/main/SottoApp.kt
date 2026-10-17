@@ -236,14 +236,15 @@ fun SottoApp(
             speechHelper.startListening(
                 locale = locale,
                 onPartialResult = { partial ->
-                    liveSpokenTextTwoWay = partial
+                    liveSpokenTextTwoWay = SpeechRecognitionHelper.normalizeHypothesis(partial)
                 },
                 onFinalResult = { final ->
-                    liveSpokenTextTwoWay = final
+                    liveSpokenTextTwoWay = SpeechRecognitionHelper.normalizeHypothesis(final)
                     isListeningTwoWay = false
                 },
                 onError = { errorCode ->
                     isListeningTwoWay = false
+                    if (liveSpokenTextTwoWay.isNotBlank()) return@startListening
                     if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
                         speechHelper.triggerModelDownload(locale)
                         missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
@@ -690,7 +691,8 @@ fun SottoApp(
             ) {
                 var isQuickTranslating by remember { mutableStateOf(false) }
                 var isQuickListening by remember { mutableStateOf(false) }
-                var quickBaseText by remember { mutableStateOf("") }
+                var quickListenBaseText by remember { mutableStateOf("") }
+                var quickSessionCapturedText by remember { mutableStateOf(false) }
                 val voiceInputPrompt = stringResource(R.string.cd_voice_input)
 
                 val quickSpeechLauncher = rememberLauncherForActivityResult(
@@ -702,7 +704,8 @@ fun SottoApp(
                             if (quickText.isBlank()) {
                                 UsabilityTracker.startIntent("QuickSpeak")
                             }
-                            quickText = if (quickText.isBlank()) matches[0] else "$quickText ${matches[0]}"
+                            quickText = SpeechRecognitionHelper.mergeDictationText(quickListenBaseText, matches[0])
+                            quickListenBaseText = quickText.trim()
                         }
                     }
                     isQuickListening = false
@@ -727,34 +730,47 @@ fun SottoApp(
                         speechHelper.stopListening()
                         isQuickListening = false
                     }
+                    quickListenBaseText = quickText.trim()
                 }
 
                 fun startQuickListeningWithPermission() {
+                    quickListenBaseText = quickText.trim()
+                    quickSessionCapturedText = false
                     if (!speechHelper.isAvailable()) {
                         launchQuickSpeechFallback()
                         return
                     }
                     val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
                     val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
-                    quickBaseText = quickText.trim()
                     isQuickListening = true
                     speechHelper.startListening(
                         locale = locale,
                         onPartialResult = { partial ->
-                            if (quickText.isBlank() && partial.isNotBlank()) {
-                                UsabilityTracker.startIntent("QuickSpeak")
+                            if (partial.isNotBlank()) {
+                                if (quickText.isBlank()) {
+                                    UsabilityTracker.startIntent("QuickSpeak")
+                                }
+                                quickSessionCapturedText = true
+                                quickText = SpeechRecognitionHelper.mergeDictationText(quickListenBaseText, partial)
                             }
-                            quickText = if (quickBaseText.isEmpty()) partial else "$quickBaseText $partial"
                         },
                         onFinalResult = { final ->
-                            if (quickText.isBlank() && final.isNotBlank()) {
-                                UsabilityTracker.startIntent("QuickSpeak")
+                            if (final.isNotBlank()) {
+                                if (quickText.isBlank()) {
+                                    UsabilityTracker.startIntent("QuickSpeak")
+                                }
+                                quickSessionCapturedText = true
+                                quickText = SpeechRecognitionHelper.mergeDictationText(quickListenBaseText, final)
+                                quickListenBaseText = quickText.trim()
                             }
-                            quickText = if (quickBaseText.isEmpty()) final else "$quickBaseText $final"
                             isQuickListening = false
                         },
                         onError = { errorCode ->
                             isQuickListening = false
+                            if (quickSessionCapturedText) {
+                                quickListenBaseText = quickText.trim()
+                                return@startListening
+                            }
                             if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
                                 speechHelper.triggerModelDownload(locale)
                                 missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
@@ -893,6 +909,9 @@ fun SottoApp(
                                         UsabilityTracker.startIntent("QuickSpeak")
                                     }
                                     quickText = it
+                                    if (!isQuickListening) {
+                                        quickListenBaseText = it.trim()
+                                    }
                                 },
                                 placeholder = {
                                     Text(
@@ -994,6 +1013,8 @@ fun SottoApp(
                                             contextTag = "dock_v2 len_${quickText.length}"
                                         )
                                         quickText = ""
+                                        quickListenBaseText = ""
+                                        quickSessionCapturedText = false
                                     },
                                     modifier = Modifier
                                         .size(36.dp)

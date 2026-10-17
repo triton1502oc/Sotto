@@ -68,4 +68,27 @@ class SpeechRecognitionHelperTest {
         assertNull(SpeechRecognitionHelper.resolveRecognitionResult(emptyList(), "   "))
         assertNull(SpeechRecognitionHelper.resolveRecognitionResult(listOf("", "  "), ""))
     }
+
+    @Test
+    fun `normalizeHypothesis collapses progressive repetitions while preserving valid reduplications`() {
+        assertEquals("I need water", SpeechRecognitionHelper.normalizeHypothesis("I I need I need water"))
+        assertEquals("I need help", SpeechRecognitionHelper.normalizeHypothesis("I need I need help"))
+        assertEquals("no no", SpeechRecognitionHelper.normalizeHypothesis("no no"))
+        assertEquals("sama sama", SpeechRecognitionHelper.normalizeHypothesis("sama sama"))
+        assertEquals("", SpeechRecognitionHelper.normalizeHypothesis("   "))
+    }
+
+    @Test
+    fun `mergeDictationText combines base text and hypothesis without duplicate overlapping text`() {
+        assertEquals("Hello world", SpeechRecognitionHelper.mergeDictationText("", "Hello world"))
+        assertEquals("Hello world", SpeechRecognitionHelper.mergeDictationText("Hello world", ""))
+        assertEquals("Hello world", SpeechRecognitionHelper.mergeDictationText("Hello world", "Hello world"))
+        assertEquals("Hello world", SpeechRecognitionHelper.mergeDictationText("Hello", "Hello world"))
+        assertEquals("Hello world", SpeechRecognitionHelper.mergeDictationText("Hello world", "world"))
+        assertEquals(
+            "I want to go to the park",
+            SpeechRecognitionHelper.mergeDictationText("I want to go to", "go to the park")
+        )
+        assertEquals("Hello world", SpeechRecognitionHelper.mergeDictationText("Hello", "world"))
+    }
 }

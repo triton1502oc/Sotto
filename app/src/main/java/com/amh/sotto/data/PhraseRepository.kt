@@ -73,6 +73,7 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
     private val KEY_V2_MIGRATED = "v2_migrated"
     private val KEY_CARE_MIGRATED = "care_migrated"
     private val KEY_SAFETY_CONSOLIDATED_MIGRATED = "safety_consolidated_migrated"
+    private val KEY_CARE_ROLE_CLARITY_MIGRATED = "care_role_clarity_migrated"
 
     private val fallbackPhrases = listOf(
         // Safety
@@ -86,11 +87,11 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
         Phrase("No, thank you.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_SOCIAL),
         Phrase("Thank you.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_SOCIAL),
         // Care
-        Phrase("Are you in pain?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
-        Phrase("Do you need water or food?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
-        Phrase("Do you need the restroom?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
-        Phrase("Are you feeling cold or warm?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
-        Phrase("Do you want to rest or sleep?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("I am in pain.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("I need water or food.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("I need the restroom.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("I feel too cold or too warm.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+        Phrase("I need to rest or sleep.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
         // General
         Phrase("Hello.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_GENERAL),
         Phrase("Please repeat that.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_GENERAL)
@@ -129,7 +130,12 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
         if (phrasesJson == null) {
             val defaults = getDefaultPhrases()
             savePhrases(defaults)
-            prefs.edit().putBoolean(KEY_V2_MIGRATED, true).apply()
+            prefs.edit()
+                .putBoolean(KEY_V2_MIGRATED, true)
+                .putBoolean(KEY_CARE_MIGRATED, true)
+                .putBoolean(KEY_SAFETY_CONSOLIDATED_MIGRATED, true)
+                .putBoolean(KEY_CARE_ROLE_CLARITY_MIGRATED, true)
+                .apply()
             return defaults
         }
 
@@ -214,6 +220,18 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
                 }
                 prefs.edit().putBoolean(KEY_SAFETY_CONSOLIDATED_MIGRATED, true).apply()
                 savePhrases(list)
+            }
+
+            // One-time upgrade (#79 BOARD-01): Migrate unmodified 2nd-person Care phrases to 1st-person self-advocacy statements
+            val isCareRoleMigrated = prefs.getBoolean(KEY_CARE_ROLE_CLARITY_MIGRATED, false)
+            if (!isCareRoleMigrated) {
+                val (updatedList, changed) = migrateCareRoleClarityPhrases(list)
+                prefs.edit().putBoolean(KEY_CARE_ROLE_CLARITY_MIGRATED, true).apply()
+                if (changed) {
+                    list.clear()
+                    list.addAll(updatedList)
+                    savePhrases(list)
+                }
             }
 
             if (list.isNotEmpty()) list else getDefaultPhrases()
@@ -330,5 +348,33 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
             }
         }
         prefs.edit().putString(KEY_CUSTOM_CATEGORIES, jsonArray.toString()).apply()
+    }
+
+    companion object {
+        fun migrateCareRoleClarityPhrases(phrases: List<Phrase>): Pair<List<Phrase>, Boolean> {
+            val careMigrationMap = mapOf(
+                "Are you in pain?" to "I am in pain.",
+                "Do you need water or food?" to "I need water or food.",
+                "Do you need the restroom?" to "I need the restroom.",
+                "Are you feeling cold or warm?" to "I feel too cold or too warm.",
+                "Do you want to rest or sleep?" to "I need to rest or sleep.",
+                "Apakah merasa sakit?" to "Saya merasa sakit.",
+                "Apakah butuh minum atau makan?" to "Saya butuh minum atau makan.",
+                "Apakah perlu ke kamar mandi?" to "Saya perlu ke kamar mandi.",
+                "Apakah merasa dingin atau panas?" to "Saya merasa terlalu dingin atau panas.",
+                "Apakah ingin istirahat atau tidur?" to "Saya ingin istirahat atau tidur."
+            )
+            var changed = false
+            val updatedList = phrases.map { phrase ->
+                val replacement = careMigrationMap[phrase.text.trim()]
+                if (phrase.category == Phrase.CATEGORY_CARE && replacement != null) {
+                    changed = true
+                    phrase.copy(text = replacement)
+                } else {
+                    phrase
+                }
+            }
+            return Pair(updatedList, changed)
+        }
     }
 }

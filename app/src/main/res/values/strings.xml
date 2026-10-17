@@ -115,11 +115,22 @@
     </string-array>
 
     <string-array name="default_phrases_care">
+        <item>I am in pain.</item>
+        <item>I need water or food.</item>
+        <item>I need the restroom.</item>
+        <item>I feel too cold or too warm.</item>
+        <item>I need to rest or sleep.</item>
+    </string-array>
+
+    <string-array name="caregiver_questions_freeform">
         <item>Are you in pain?</item>
         <item>Do you need water or food?</item>
         <item>Do you need the restroom?</item>
         <item>Are you feeling cold or warm?</item>
         <item>Do you want to rest or sleep?</item>
+        <item>Do you need a quiet space?</item>
+        <item>Would you like more time?</item>
+        <item>Do you want to leave now?</item>
     </string-array>
 
     <string-array name="default_phrases_general">

@@ -134,6 +134,7 @@ fun TwoWayConversationDialog(
     }
 
     fun selectTab(tab: CaregiverTab) {
+        if (isListening) onStopListening()
         activeTab = tab
         partnerPrefs.edit().putString("saved_partner_tab", tab.name).apply()
     }
@@ -159,6 +160,7 @@ fun TwoWayConversationDialog(
         onDispose {
             dialogWindow?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            onStopListening()
         }
     }
 
@@ -338,11 +340,25 @@ fun TwoWayConversationDialog(
     }
 
     val launchTime = remember { SystemClock.elapsedRealtime() }
+    var hasLoggedExit by remember { mutableStateOf(false) }
     var hasRecordedFirstAnswer by rememberSaveable { mutableStateOf(false) }
     var autoSpeakQuestions by rememberSaveable {
         mutableStateOf(partnerPrefs.getBoolean("auto_speak_questions", true))
     }
     var showExitConfirmDialog by remember { mutableStateOf(false) }
+
+    fun dismissPartnerMode(outcome: String) {
+        onStopListening()
+        if (!hasLoggedExit) {
+            hasLoggedExit = true
+            UsabilityTracker.recordPartnerExit(
+                context,
+                outcome,
+                SystemClock.elapsedRealtime() - launchTime
+            )
+        }
+        onDismiss()
+    }
 
     fun handleDismissAttempt() {
         val isActiveGuided = activeTab == CaregiverTab.WHY_FINDER &&
@@ -351,10 +367,8 @@ fun TwoWayConversationDialog(
         if (isActiveGuided) {
             showExitConfirmDialog = true
         } else {
-            onStopListening()
             val outcome = if (whyState is WhyFinderState.Finished) "completed" else "dismissed"
-            UsabilityTracker.recordPartnerExit(context, outcome, SystemClock.elapsedRealtime() - launchTime)
-            onDismiss()
+            dismissPartnerMode(outcome)
         }
     }
 
@@ -391,9 +405,6 @@ fun TwoWayConversationDialog(
                 outcome = responseOutcome ?: "answered",
                 tab = activeTab.name.lowercase(Locale.ROOT)
             )
-        }
-        if (activeTab == CaregiverTab.FREEFORM && (displayText == strYes || displayText == strNo)) {
-            showPostResolutionPrompt = true
         }
         onSpeakResponse(ttsText)
     }
@@ -449,7 +460,7 @@ fun TwoWayConversationDialog(
                                     savedSessionId = null
                                     UsabilityTracker.recordWhyFinderAction(context, "restart")
                                 },
-                                onFinish = onDismiss,
+                                onFinish = { dismissPartnerMode("completed") },
                                 onReadAloudPrompt = {
                                     val promptToSpeak = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
                                     if (promptToSpeak.isNotBlank()) {
@@ -554,8 +565,7 @@ fun TwoWayConversationDialog(
                         },
                         onDone = {
                             val outcome = if (whyState is WhyFinderState.Finished) "completed" else "dismissed"
-                            UsabilityTracker.recordPartnerExit(context, outcome, SystemClock.elapsedRealtime() - launchTime)
-                            onDismiss()
+                            dismissPartnerMode(outcome)
                         },
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
@@ -566,6 +576,7 @@ fun TwoWayConversationDialog(
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = true,
                         onToggleFlip = {
+                            if (isListening) onStopListening()
                             isFlipped = false
                             UsabilityTracker.startIntent("partner_flip")
                             UsabilityTracker.endIntent(context, "partner_flip", outcome = "unflipped")
@@ -631,7 +642,7 @@ fun TwoWayConversationDialog(
                             savedSessionId = null
                             UsabilityTracker.recordWhyFinderAction(context, "restart")
                         },
-                        onFinish = onDismiss,
+                        onFinish = { dismissPartnerMode("completed") },
                         onReadAloudPrompt = {
                             val promptToSpeak = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
                             if (promptToSpeak.isNotBlank()) {
@@ -729,6 +740,7 @@ fun TwoWayConversationDialog(
                         hasWhyFinder = whyFinderRepository != null,
                         isFlipped = false,
                         onToggleFlip = {
+                            if (isListening) onStopListening()
                             isFlipped = true
                             UsabilityTracker.startIntent("partner_flip")
                             UsabilityTracker.endIntent(context, "partner_flip", outcome = "flipped")
@@ -783,9 +795,7 @@ fun TwoWayConversationDialog(
                     onClick = {
                         showExitConfirmDialog = false
                         whySession.stop()
-                        onStopListening()
-                        UsabilityTracker.recordPartnerExit(context, "cancelled", SystemClock.elapsedRealtime() - launchTime)
-                        onDismiss()
+                        dismissPartnerMode("cancelled")
                     }
                 ) {
                     Text(stringResource(R.string.action_exit), color = MaterialTheme.colorScheme.error)
@@ -801,7 +811,24 @@ fun TwoWayConversationDialog(
 
     // Card Picker Sheet (Why Tree Questions in Guided mode or Phrase Cards in Talk mode)
     if (showQuestionsSheet) {
-        var selectedPromptCategory by rememberSaveable(activeTab) { mutableStateOf("ALL") }
+        var selectedPromptCategory by rememberSaveable(activeTab) {
+            val initialCat = if (activeTab == CaregiverTab.FREEFORM) {
+                val savedCat = partnerPrefs.getString("saved_freeform_prompt_category", "ALL") ?: "ALL"
+                if (savedCat == "ALL" || savedCat == "CAREGIVER_QUESTIONS" || effectiveCategories.contains(savedCat)) {
+                    savedCat
+                } else {
+                    "ALL"
+                }
+            } else {
+                "ALL"
+            }
+            mutableStateOf(initialCat)
+        }
+
+        fun selectFreeformCategory(cat: String) {
+            selectedPromptCategory = cat
+            partnerPrefs.edit().putString("saved_freeform_prompt_category", cat).apply()
+        }
 
         AlertDialog(
             onDismissRequest = { showQuestionsSheet = false },
@@ -930,7 +957,24 @@ fun TwoWayConversationDialog(
                             }
                         }
                     } else {
-                        // Standard AAC Phrases (Talk Mode)
+                        // Curated board categories/decks + Dedicated 2nd-person caregiver prompts (#79)
+                        val freeformQuestions = remember(context) {
+                            try {
+                                context.resources.getStringArray(R.array.caregiver_questions_freeform).toList()
+                            } catch (e: Exception) {
+                                listOf(
+                                    "Are you in pain?",
+                                    "Do you need water or food?",
+                                    "Do you need the restroom?",
+                                    "Are you feeling cold or warm?",
+                                    "Do you want to rest or sleep?",
+                                    "Do you need a quiet space?",
+                                    "Would you like more time?",
+                                    "Do you want to leave now?"
+                                )
+                            }
+                        }
+
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -941,10 +985,23 @@ fun TwoWayConversationDialog(
                                 val isSelected = selectedPromptCategory == "ALL"
                                 FilterChip(
                                     selected = isSelected,
-                                    onClick = { selectedPromptCategory = "ALL" },
+                                    onClick = { selectFreeformCategory("ALL") },
                                     label = {
                                         Text(
                                             text = stringResource(R.string.category_all),
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    }
+                                )
+                            }
+                            item {
+                                val isSelected = selectedPromptCategory == "CAREGIVER_QUESTIONS"
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { selectFreeformCategory("CAREGIVER_QUESTIONS") },
+                                    label = {
+                                        Text(
+                                            text = "💬 " + stringResource(R.string.action_caregiver_prompts),
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                         )
                                     }
@@ -954,7 +1011,7 @@ fun TwoWayConversationDialog(
                                 val isSelected = selectedPromptCategory == catName
                                 FilterChip(
                                     selected = isSelected,
-                                    onClick = { selectedPromptCategory = catName },
+                                    onClick = { selectFreeformCategory(catName) },
                                     label = {
                                         Text(
                                             text = getCategoryDisplayName(catName),
@@ -965,17 +1022,16 @@ fun TwoWayConversationDialog(
                             }
                         }
 
-                        val availablePhrases = remember(allPhrases, selectedPromptCategory) {
-                            if (selectedPromptCategory == "ALL") {
-                                allPhrases
-                            } else if (selectedPromptCategory == Phrase.CATEGORY_EMERGENCY) {
-                                allPhrases.filter { it.isEmergency }
-                            } else {
-                                allPhrases.filter { !it.isEmergency && it.category == selectedPromptCategory }
+                        val availablePrompts = remember(allPhrases, freeformQuestions, selectedPromptCategory) {
+                            when (selectedPromptCategory) {
+                                "ALL" -> (allPhrases.map { it.text } + freeformQuestions).distinct()
+                                "CAREGIVER_QUESTIONS" -> freeformQuestions
+                                Phrase.CATEGORY_EMERGENCY -> allPhrases.filter { it.isEmergency }.map { it.text }
+                                else -> allPhrases.filter { !it.isEmergency && it.category == selectedPromptCategory }.map { it.text }
                             }
                         }
 
-                        if (availablePhrases.isEmpty()) {
+                        if (availablePrompts.isEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -995,19 +1051,20 @@ fun TwoWayConversationDialog(
                                     .heightIn(max = 350.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                items(availablePhrases) { phrase ->
+                                items(availablePrompts) { question ->
                                     Surface(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(12.dp))
                                             .clickable {
-                                                displayedText = phrase.text
+                                                UsabilityTracker.recordActivation(context, "partner_freeform_question_picked")
+                                                displayedText = question
                                                 showQuestionsSheet = false
                                             },
                                         color = MaterialTheme.colorScheme.surfaceVariant
                                     ) {
                                         Text(
-                                            text = phrase.text,
+                                            text = question,
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -1286,11 +1343,7 @@ private fun CaregiverBottomMenu(
                     // Standalone Modal Dismissal (>= 48dp target)
                     val dismissDesc = stringResource(R.string.cd_dismiss)
                     IconButton(
-                        onClick = {
-                            UsabilityTracker.startIntent("partner_tool")
-                            UsabilityTracker.endIntent(context, "partner_tool", outcome = "close")
-                            onDismiss()
-                        },
+                        onClick = onDismiss,
                         modifier = Modifier
                             .size(if (isCompactScreen) 40.dp else 48.dp)
                             .semantics {

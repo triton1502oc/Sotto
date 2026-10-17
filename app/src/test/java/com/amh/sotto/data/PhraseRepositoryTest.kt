@@ -73,7 +73,7 @@ class PhraseRepositoryTest {
     @Test
     fun `Phrase care category sets category correctly`() {
         val carePhrase = Phrase(
-            text = "Are you in pain?",
+            text = "I am in pain.",
             language = LocaleHelper.LANG_AUTO,
             isEmergency = false,
             category = Phrase.CATEGORY_CARE
@@ -146,5 +146,67 @@ class PhraseRepositoryTest {
 
         assertTrue(safetyPhrase.isEmergency)
         assertEquals(Phrase.CATEGORY_EMERGENCY, safetyPhrase.category)
+    }
+
+    @Test
+    fun `migrateCareRoleClarityPhrases migrates unmodified 2nd-person Care phrases to 1st-person and preserves custom care phrases`() {
+        val inputPhrases = listOf(
+            Phrase("Emergency contact", LocaleHelper.LANG_AUTO, isEmergency = true, category = Phrase.CATEGORY_EMERGENCY),
+            Phrase("Are you in pain?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Do you need water or food?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Do you need the restroom?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Are you feeling cold or warm?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Do you want to rest or sleep?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Apakah merasa sakit?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Apakah butuh minum atau makan?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Apakah perlu ke kamar mandi?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Apakah merasa dingin atau panas?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Apakah ingin istirahat atau tidur?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Check pulse every 2 hours", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Are you in pain?", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_GENERAL)
+        )
+
+        val (migratedPhrases, changed) = SharedPreferencesPhraseRepository.migrateCareRoleClarityPhrases(inputPhrases)
+
+        assertTrue(changed)
+
+        // Emergency phrase unaffected
+        assertEquals("Emergency contact", migratedPhrases[0].text)
+
+        // English 2nd-person Care phrases migrated to 1st-person self-advocacy
+        assertEquals("I am in pain.", migratedPhrases[1].text)
+        assertEquals("I need water or food.", migratedPhrases[2].text)
+        assertEquals("I need the restroom.", migratedPhrases[3].text)
+        assertEquals("I feel too cold or too warm.", migratedPhrases[4].text)
+        assertEquals("I need to rest or sleep.", migratedPhrases[5].text)
+
+        // Indonesian 2nd-person Care phrases migrated to 1st-person self-advocacy
+        assertEquals("Saya merasa sakit.", migratedPhrases[6].text)
+        assertEquals("Saya butuh minum atau makan.", migratedPhrases[7].text)
+        assertEquals("Saya perlu ke kamar mandi.", migratedPhrases[8].text)
+        assertEquals("Saya merasa terlalu dingin atau panas.", migratedPhrases[9].text)
+        assertEquals("Saya ingin istirahat atau tidur.", migratedPhrases[10].text)
+
+        // Custom Care phrase preserved intact
+        assertEquals("Check pulse every 2 hours", migratedPhrases[11].text)
+        assertEquals(Phrase.CATEGORY_CARE, migratedPhrases[11].category)
+
+        // Non-care category with same text unaffected
+        assertEquals("Are you in pain?", migratedPhrases[12].text)
+        assertEquals(Phrase.CATEGORY_GENERAL, migratedPhrases[12].category)
+    }
+
+    @Test
+    fun `migrateCareRoleClarityPhrases returns false changed when phrases are already 1st-person or custom`() {
+        val inputPhrases = listOf(
+            Phrase("I am in pain.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Saya butuh minum atau makan.", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE),
+            Phrase("Check pulse every 2 hours", LocaleHelper.LANG_AUTO, category = Phrase.CATEGORY_CARE)
+        )
+
+        val (migratedPhrases, changed) = SharedPreferencesPhraseRepository.migrateCareRoleClarityPhrases(inputPhrases)
+
+        assertFalse(changed)
+        assertEquals(inputPhrases, migratedPhrases)
     }
 }

@@ -50,7 +50,7 @@ Caregiver asks 1 direct question ──► Giant text on screen ──► Indivi
    - An active screen wake lock (`FLAG_KEEP_SCREEN_ON`) keeps the display awake during crisis navigation without dimming or sleeping.
 2. **Present One Urgent Question**:
    - **Speak Naturally (Mic)**: Tap the mic button. Sotto transcribes your voice in real time into giant high-contrast text. Tap again or pause to finish.
-   - **Preset Check-in Cards (Questions)**: Tap Questions to pick instant comfort and binary checks (*"Are you in pain?"*, *"Do you need water?"*, *"I need a quiet space."*).
+   - **Preset Check-in Cards (Questions)**: Tap Questions to pick from curated board categories/custom decks or the built-in 2nd-person **Caregiver Prompts** chip (`💬 Caregiver Prompts`), with category filters remembered between check-ins.
    - **Type Manually (Type)**: Type directly if ambient noise is too loud for speech recognition.
 3. **Vocalize with Read Aloud (Speak)**:
    - If the individual has their eyes closed or head down, tap **Speak** to vocalize the prompt through the phone's speaker.
@@ -62,9 +62,9 @@ Caregiver asks 1 direct question ──► Giant text on screen ──► Indivi
    - The individual taps one large, high-contrast elevated button:
      - `Yes` • `No` • `Wait` • `Repeat` (or `Not sure` • `Stop` in Guided)
    - Instant offline TTS voice confirmation plays aloud, tactile haptics pulse, and a visual confirmation badge appears.
-6. **Safe Exit Confirmation & 1-Tap Pattern Logger**:
+6. **Safe Exit Confirmation & On-Demand Pattern Logger**:
    - Tapping exit displays a safe exit confirmation prompt to prevent accidental dismissals during an ongoing crisis.
-   - Following resolution, an optional horizontal strip of trigger chips (`Pain`, `Noise`, `Task`, `Emotion`, `Other`) lets caregivers record the root cause to local Why Log with a single tap.
+   - In Talk mode, caregivers can tap the note icon button (**Log Trigger**) in the caregiver utility capsule at any time to open the trigger chips (`Pain`, `Noise`, `Task`, `Emotion`, `Other`) on demand without intrusive popups interrupting ongoing interaction. (Guided Why Tree sessions automatically log to Why Log upon completion).
 
 ---
 

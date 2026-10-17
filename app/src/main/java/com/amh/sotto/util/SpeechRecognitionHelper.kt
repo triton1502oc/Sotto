@@ -18,6 +18,7 @@ class SpeechRecognitionHelper(private val context: Context) {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var silenceRunnable: Runnable? = null
     private var lastRecognizedText: String = ""
+    private var activeSessionId: Int = 0
     private val autoStopDelayMs: Long = 1800L
 
     var isListening: Boolean = false
@@ -40,12 +41,13 @@ class SpeechRecognitionHelper(private val context: Context) {
         silenceRunnable = null
     }
 
-    private fun resetSilenceTimer(onFinalResult: (String) -> Unit) {
+    private fun resetSilenceTimer(sessionId: Int, onFinalResult: (String) -> Unit) {
         cancelSilenceTimer()
         val runnable = Runnable {
-            if (isListening && lastRecognizedText.isNotBlank()) {
-                val finalText = lastRecognizedText
-                stopListening()
+            if (sessionId == activeSessionId && isListening && lastRecognizedText.isNotBlank()) {
+                val finalText = normalizeHypothesis(lastRecognizedText)
+                lastRecognizedText = ""
+                cleanupInternal()
                 onFinalResult(finalText)
             }
         }
@@ -55,10 +57,11 @@ class SpeechRecognitionHelper(private val context: Context) {
 
     private fun cleanupInternal() {
         try {
+            activeSessionId++
             cancelSilenceTimer()
             lastRecognizedText = ""
             isListening = false
-            speechRecognizer?.stopListening()
+            speechRecognizer?.cancel()
             speechRecognizer?.destroy()
             speechRecognizer = null
         } catch (e: Exception) {
@@ -78,6 +81,7 @@ class SpeechRecognitionHelper(private val context: Context) {
         onFinalResult: (String) -> Unit,
         onError: (Int) -> Unit
     ) {
+        lastRecognizedText = ""
         startListeningInternal(
             locale = locale,
             stage = RecognitionStage.ON_DEVICE_OFFLINE,
@@ -97,6 +101,7 @@ class SpeechRecognitionHelper(private val context: Context) {
         runOnMainThread {
             try {
                 cleanupInternal()
+                val sessionId = activeSessionId
 
                 val recognizer = if (stage == RecognitionStage.ON_DEVICE_OFFLINE &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
@@ -124,11 +129,13 @@ class SpeechRecognitionHelper(private val context: Context) {
 
                 recognizer.setRecognitionListener(object : RecognitionListener {
                     override fun onReadyForSpeech(params: Bundle?) {
+                        if (sessionId != activeSessionId) return
                         android.util.Log.d("SottoSpeech", "onReadyForSpeech (stage=$stage)")
                         isListening = true
                     }
 
                     override fun onBeginningOfSpeech() {
+                        if (sessionId != activeSessionId) return
                         android.util.Log.d("SottoSpeech", "onBeginningOfSpeech")
                     }
 
@@ -137,19 +144,22 @@ class SpeechRecognitionHelper(private val context: Context) {
                     override fun onBufferReceived(buffer: ByteArray?) {}
 
                     override fun onEndOfSpeech() {
+                        if (sessionId != activeSessionId) return
                         android.util.Log.d("SottoSpeech", "onEndOfSpeech")
                         isListening = false
                         cancelSilenceTimer()
                     }
 
                     override fun onError(error: Int) {
+                        if (sessionId != activeSessionId) return
                         isListening = false
                         cancelSilenceTimer()
                         android.util.Log.e("SottoSpeech", "SpeechRecognizer onError: $error (stage=$stage)")
 
                         if (lastRecognizedText.isNotBlank()) {
-                            val finalText = lastRecognizedText
+                            val finalText = normalizeHypothesis(lastRecognizedText)
                             lastRecognizedText = ""
+                            activeSessionId++
                             onFinalResult(finalText)
                             return
                         }
@@ -180,29 +190,37 @@ class SpeechRecognitionHelper(private val context: Context) {
                             return
                         }
 
+                        activeSessionId++
                         onError(error)
                     }
 
                     override fun onResults(results: Bundle?) {
+                        if (sessionId != activeSessionId) return
                         isListening = false
                         cancelSilenceTimer()
                         val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         android.util.Log.d("SottoSpeech", "onResults: $matches")
                         val recognized = resolveRecognitionResult(matches, lastRecognizedText)
                         lastRecognizedText = ""
+                        activeSessionId++
                         if (recognized != null) {
                             onFinalResult(recognized)
+                        } else {
+                            onError(SpeechRecognizer.ERROR_NO_MATCH)
                         }
                     }
 
                     override fun onPartialResults(partialResults: Bundle?) {
+                        if (sessionId != activeSessionId) return
                         val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         android.util.Log.d("SottoSpeech", "onPartialResults: $matches")
                         if (!matches.isNullOrEmpty()) {
-                            val partial = matches[0]
-                            lastRecognizedText = partial
-                            onPartialResult(partial)
-                            resetSilenceTimer(onFinalResult)
+                            val partial = normalizeHypothesis(matches[0])
+                            if (partial.isNotBlank()) {
+                                lastRecognizedText = partial
+                                onPartialResult(partial)
+                                resetSilenceTimer(sessionId, onFinalResult)
+                            }
                         }
                     }
 
@@ -215,6 +233,13 @@ class SpeechRecognitionHelper(private val context: Context) {
                 android.util.Log.e("SottoSpeech", "SpeechRecognizer exception on startListening (stage=$stage)", e)
                 isListening = false
                 cancelSilenceTimer()
+                if (lastRecognizedText.isNotBlank()) {
+                    val finalText = normalizeHypothesis(lastRecognizedText)
+                    lastRecognizedText = ""
+                    activeSessionId++
+                    onFinalResult(finalText)
+                    return@runOnMainThread
+                }
                 when (stage) {
                     RecognitionStage.ON_DEVICE_OFFLINE -> {
                         startListeningInternal(
@@ -283,8 +308,87 @@ class SpeechRecognitionHelper(private val context: Context) {
         }
 
         fun resolveRecognitionResult(matches: List<String>?, fallbackText: String = ""): String? {
-            return matches?.firstOrNull { it.isNotBlank() }
+            val raw = matches?.firstOrNull { it.isNotBlank() }
                 ?: fallbackText.takeIf { it.isNotBlank() }
+            return raw?.let { normalizeHypothesis(it) }?.takeIf { it.isNotBlank() }
+        }
+
+        /**
+         * Collapses progressive prefix compounding emitted by some on-device/offline STT engines
+         * (e.g., "I I need I need water" -> "I need water") while preserving normal single-word
+         * reduplication (e.g., "no no", "sama sama").
+         */
+        fun normalizeHypothesis(raw: String): String {
+            val trimmed = raw.trim()
+            if (trimmed.isEmpty()) return ""
+            var words = trimmed.split(Regex("\\s+"))
+            var changed = true
+            while (changed && words.size >= 2) {
+                changed = false
+                val maxPrefix = words.size / 2
+                for (k in maxPrefix downTo 1) {
+                    val prefixMatches = (0 until k).all { idx ->
+                        words[idx].equals(words[k + idx], ignoreCase = true)
+                    }
+                    if (!prefixMatches) continue
+                    if (k >= 2) {
+                        words = words.drop(k)
+                        changed = true
+                        break
+                    } else {
+                        // For single-word prefix repeat (k == 1), only collapse if it's part of a
+                        // progressive multi-word buildup (e.g., "I" -> "I need" -> "I need water")
+                        val remaining = words.drop(1)
+                        val hasProgressiveFollowup = (2..(remaining.size / 2)).any { m ->
+                            (0 until m).all { idx ->
+                                remaining[idx].equals(remaining[m + idx], ignoreCase = true)
+                            }
+                        }
+                        if (hasProgressiveFollowup) {
+                            words = remaining
+                            changed = true
+                            break
+                        }
+                    }
+                }
+            }
+            return words.joinToString(" ")
+        }
+
+        /**
+         * Combines pre-existing draft text (`baseText`) with the current utterance (`hypothesis`)
+         * without duplicating overlapping prefixes/suffixes.
+         */
+        fun mergeDictationText(baseText: String, hypothesis: String): String {
+            val base = baseText.trim()
+            val hyp = normalizeHypothesis(hypothesis)
+            if (base.isEmpty()) return hyp
+            if (hyp.isEmpty()) return base
+            if (hyp.equals(base, ignoreCase = true)) return hyp
+            if (hyp.startsWith(base, ignoreCase = true) &&
+                (hyp.length == base.length || hyp[base.length].isWhitespace())
+            ) {
+                return hyp
+            }
+            if (base.endsWith(hyp, ignoreCase = true) &&
+                (base.length == hyp.length || base[base.length - hyp.length - 1].isWhitespace())
+            ) {
+                return base
+            }
+            val baseWords = base.split(Regex("\\s+"))
+            val hypWords = hyp.split(Regex("\\s+"))
+            val maxOverlap = minOf(baseWords.size, hypWords.size)
+            for (k in maxOverlap downTo 1) {
+                if (k == 1 && baseWords.size > 1) continue
+                val overlaps = (0 until k).all { idx ->
+                    baseWords[baseWords.size - k + idx].equals(hypWords[idx], ignoreCase = true)
+                }
+                if (overlaps) {
+                    val mergedWords = baseWords + hypWords.drop(k)
+                    return mergedWords.joinToString(" ")
+                }
+            }
+            return "$base $hyp"
         }
 
         fun openOfflineSpeechSettings(context: Context) {
