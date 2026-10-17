@@ -13,8 +13,8 @@ android {
         applicationId = "com.amh.sotto"
         minSdk = 26
         targetSdk = 36
-        versionCode = 29
-        versionName = "1.7.4"
+        versionCode = 30
+        versionName = "1.7.5"
         androidResources.localeFilters += listOf("en", "in")
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
@@ -119,6 +119,30 @@ androidComponents {
             val buildTypeSuffix = if (buildType == "release") "" else "-$buildType"
             out.outputFileName = "Sotto-v${android.defaultConfig.versionName}${abiSuffix}${buildTypeSuffix}.apk"
         }
+    }
+}
+
+// Upstream AARs (ML Kit Translate, AndroidX Graphics Path) ship pre-stripped .so binaries,
+// causing AGP to skip symbol extraction and omit BUNDLE-METADATA/com.android.tools.build.debugsymbols
+// from app-release.aab. Copy skipped .so files (which retain .dynsym) as .so.sym so Play Console
+// receives the symbol table metadata without requiring a separate symbol zip upload or NDK install.
+tasks.withType<com.android.build.gradle.internal.tasks.ExtractNativeDebugMetadataTask>().configureEach {
+    doLast {
+        val task = this as com.android.build.gradle.internal.tasks.ExtractNativeDebugMetadataTask
+        val inDir = task.inputDir.get().asFile
+        val outDir = task.outputDir.get().asFile
+        if (!inDir.exists()) return@doLast
+        inDir.walkTopDown()
+            .filter { it.isFile && it.extension == "so" }
+            .forEach { soFile ->
+                val abi = soFile.parentFile.name
+                val symFile = outDir.resolve("$abi/${soFile.name}.sym")
+                val dbgFile = outDir.resolve("$abi/${soFile.name}.dbg")
+                if (!symFile.exists() && !dbgFile.exists()) {
+                    symFile.parentFile.mkdirs()
+                    soFile.copyTo(symFile, overwrite = true)
+                }
+            }
     }
 }
 

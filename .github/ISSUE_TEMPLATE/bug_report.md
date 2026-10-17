@@ -20,7 +20,7 @@ A clear and concise description of what you expected to happen.
 **Device & Environment**
 - Device: [e.g. Google Pixel 7, Samsung Galaxy S23]
 - Android Version: [e.g. Android 14]
-- Sotto Version: [e.g. v1.7.4]
+- Sotto Version: [e.g. v1.7.5]
 - TTS Engine: [e.g. Google Speech Recognition & Synthesis, Samsung TTS]
 - Active Language / Voice: [e.g. English (US), Indonesian]
 

@@ -3,6 +3,26 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.5] - 2026-10-17
+
+### Added
+- **Selective Category Export for Phrase Library**: Export Backup dialog and QR sharing now support selecting specific phrase categories, live count preview, and privacy-preserving opt-in telemetry (`backup_category_filtered_export`), enabling focused deck sharing without clobbering unrelated categories during merge ([#77](https://github.com/triton1502oc/Sotto/issues/77)).
+- **Automated Documentation Synchronization**: Added `scripts/sync_docs.sh` to enforce version matrices and sync checks across `README.md`, `SECURITY.md`, `PRIVACY_POLICY.md`, and `docs/PLAY_STORE_LISTING.md` during release preparation.
+
+### Changed
+- **Persistent Quick Speak Microphone Access**: Kept the microphone button accessible when text is present in the Quick Speak bar to support dictation appending, and added dynamic "Listening..." visual placeholder feedback during active speech recognition ([#78](https://github.com/triton1502oc/Sotto/issues/78)).
+
+### Fixed
+- **Resilient Speech Recognition Fallback**: Prevented premature transcription loss on silence timeouts, gracefully fell back from on-device `ERROR_CLIENT` failures to system and cloud speech recognizers, and routed Quick Speak recognition errors to the system speech dialog fallback ([#78](https://github.com/triton1502oc/Sotto/issues/78)).
+- **Embedded Play Store Native Debug Symbols**: Added native symbol table extraction fallback in Gradle build for pre-stripped upstream AAR binaries (`libtranslate_jni.so`, `libandroidx.graphics.path.so`), ensuring App Bundles include `BUNDLE-METADATA/com.android.tools.build.debugsymbols` across all supported ABIs (`arm64-v8a`, `armeabi-v7a`, `x86_64`) without requiring an NDK installation ([#76](https://github.com/triton1502oc/Sotto/issues/76)).
+
+### Assets
+- `Sotto-v1.7.5.apk`: Universal release APK for all architectures.
+- `Sotto-v1.7.5-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.7.5-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.7.5-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.7.4] - 2026-10-15
 
 ### Added

@@ -111,20 +111,18 @@ Sotto adalah alat bantu komunikasi asistif dan tidak menyediakan diagnosis atau 
 github.com/triton1502oc/Sotto | Tersedia versi iOS
 ```
 
-### What's New (v1.7.4)
+### What's New (v1.7.5)
 ```text
-• Direct Quick Settings tile launch into Partner Talk mode during crisis.
-• Compact phrase edit dialog with keyboard-accessible Save action and Done key.
-• Resilient small-screen Talk chip layout and navigation typography.
-• Preserved screen state and fixed language change recreation flow.
+• Selective category export to backup and share custom phrase decks.
+• Persistent Quick Speak microphone with listening cue and resilient fallback.
+• Play Store native symbol generation for zero-warning App Bundles.
 ```
 
-### Apa yang Baru (v1.7.4)
+### Apa yang Baru (v1.7.5)
 ```text
-• Peluncuran langsung tile Quick Settings ke mode Partner Talk saat krisis.
-• Dialog edit frasa ringkas dengan tombol Simpan yang mudah diakses keyboard.
-• Tata letak chip Talk dan tipografi navigasi yang tangguh di layar kecil.
-• Pemulihan status layar dan stabilitas saat pergantian bahasa.
+• Ekspor dengan filter kategori untuk mencadangkan dan berbagi dek frasa pilihan.
+• Mikrofon Quick Speak tetap aktif dengan indikator mendengarkan dan fallback tangguh.
+• Pembuatan simbol debug Play Store otomatis untuk paket App Bundle tanpa peringatan.
 ```
 
 ---
