@@ -13,6 +13,7 @@ All notable changes to the Sotto project will be documented in this file. The fo
 - **On-Demand Crisis Trigger Logger**: Decoupled the Post-Resolution Trigger Logger ("Log crisis trigger to Why Log") in Talk mode from card interaction endings, keeping it available on demand via the capsule note icon button without intrusive popups ([#81](https://github.com/triton1502oc/Sotto/issues/81)).
 
 ### Fixed
+- **Quick Speak Voice Input Reliability & System Speak-to-Type**: Switched the Quick Speak bar microphone to directly launch the reliable system Speak-to-Type popup (`RecognizerIntent.ACTION_RECOGNIZE_SPEECH`) identical to Edit Mode, bypassing in-process `SpeechRecognizer` binding failures and timeout aborts while preserving clean multi-utterance dictation appending ([#78](https://github.com/triton1502oc/Sotto/issues/78)).
 - **QuickSpeak Progressive STT Deduplication & Clean Fallback**: Collapsed progressive prefix compounding emitted by on-device STT engines ("I I need I need water" -> "I need water") while preserving natural reduplication, ensured seamless appending between utterances without duplicate words, committed captured partial speech before timeout errors, and guarded active recognition during text clearing ([#80](https://github.com/triton1502oc/Sotto/issues/80)).
 
 ### Assets
@@ -29,10 +30,10 @@ All notable changes to the Sotto project will be documented in this file. The fo
 - **Automated Documentation Synchronization**: Added `scripts/sync_docs.sh` to enforce version matrices and sync checks across `README.md`, `SECURITY.md`, `PRIVACY_POLICY.md`, and `docs/PLAY_STORE_LISTING.md` during release preparation.
 
 ### Changed
-- **Persistent Quick Speak Microphone Access**: Kept the microphone button accessible when text is present in the Quick Speak bar to support dictation appending, and added dynamic "Listening..." visual placeholder feedback during active speech recognition ([#78](https://github.com/triton1502oc/Sotto/issues/78)).
+- **Persistent Quick Speak Microphone Access**: Kept the microphone button accessible when text is present in the Quick Speak bar to support dictation appending, directly launching the reliable system Speak-to-Type popup (`RecognizerIntent.ACTION_RECOGNIZE_SPEECH`) like Edit Mode ([#78](https://github.com/triton1502oc/Sotto/issues/78)).
 
 ### Fixed
-- **Resilient Speech Recognition Fallback**: Prevented premature transcription loss on silence timeouts, gracefully fell back from on-device `ERROR_CLIENT` failures to system and cloud speech recognizers, and routed Quick Speak recognition errors to the system speech dialog fallback ([#78](https://github.com/triton1502oc/Sotto/issues/78)).
+- **Resilient Speech Recognition Fallback**: Prevented premature transcription loss on silence timeouts, gracefully fell back from on-device `ERROR_CLIENT` failures to system and cloud speech recognizers, and routed Quick Speak voice input directly to the reliable system speech dialog (`ACTION_RECOGNIZE_SPEECH`) like Edit Mode for dependable speech capture ([#78](https://github.com/triton1502oc/Sotto/issues/78)).
 - **Embedded Play Store Native Debug Symbols**: Added native symbol table extraction fallback in Gradle build for pre-stripped upstream AAR binaries (`libtranslate_jni.so`, `libandroidx.graphics.path.so`), ensuring App Bundles include `BUNDLE-METADATA/com.android.tools.build.debugsymbols` across all supported ABIs (`arm64-v8a`, `armeabi-v7a`, `x86_64`) without requiring an NDK installation ([#76](https://github.com/triton1502oc/Sotto/issues/76)).
 
 ### Assets

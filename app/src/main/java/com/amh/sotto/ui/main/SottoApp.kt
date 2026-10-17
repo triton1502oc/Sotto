@@ -690,9 +690,6 @@ fun SottoApp(
                     .imePadding()
             ) {
                 var isQuickTranslating by remember { mutableStateOf(false) }
-                var isQuickListening by remember { mutableStateOf(false) }
-                var quickListenBaseText by remember { mutableStateOf("") }
-                var quickSessionCapturedText by remember { mutableStateOf(false) }
                 val voiceInputPrompt = stringResource(R.string.cd_voice_input)
 
                 val quickSpeechLauncher = rememberLauncherForActivityResult(
@@ -700,18 +697,16 @@ fun SottoApp(
                 ) { result ->
                     if (result.resultCode == Activity.RESULT_OK && result.data != null) {
                         val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                        if (!matches.isNullOrEmpty()) {
+                        if (!matches.isNullOrEmpty() && matches[0].isNotBlank()) {
                             if (quickText.isBlank()) {
                                 UsabilityTracker.startIntent("QuickSpeak")
                             }
-                            quickText = SpeechRecognitionHelper.mergeDictationText(quickListenBaseText, matches[0])
-                            quickListenBaseText = quickText.trim()
+                            quickText = SpeechRecognitionHelper.mergeDictationText(quickText, matches[0])
                         }
                     }
-                    isQuickListening = false
                 }
 
-                fun launchQuickSpeechFallback() {
+                fun launchQuickSpeechInput() {
                     val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
                     val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -725,88 +720,7 @@ fun SottoApp(
                     } catch (_: Exception) {}
                 }
 
-                fun stopQuickListening() {
-                    if (isQuickListening) {
-                        speechHelper.stopListening()
-                        isQuickListening = false
-                    }
-                    quickListenBaseText = quickText.trim()
-                }
-
-                fun startQuickListeningWithPermission() {
-                    quickListenBaseText = quickText.trim()
-                    quickSessionCapturedText = false
-                    if (!speechHelper.isAvailable()) {
-                        launchQuickSpeechFallback()
-                        return
-                    }
-                    val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                    val locale = LocaleHelper.getLocaleForLanguage(effectiveLang)
-                    isQuickListening = true
-                    speechHelper.startListening(
-                        locale = locale,
-                        onPartialResult = { partial ->
-                            if (partial.isNotBlank()) {
-                                if (quickText.isBlank()) {
-                                    UsabilityTracker.startIntent("QuickSpeak")
-                                }
-                                quickSessionCapturedText = true
-                                quickText = SpeechRecognitionHelper.mergeDictationText(quickListenBaseText, partial)
-                            }
-                        },
-                        onFinalResult = { final ->
-                            if (final.isNotBlank()) {
-                                if (quickText.isBlank()) {
-                                    UsabilityTracker.startIntent("QuickSpeak")
-                                }
-                                quickSessionCapturedText = true
-                                quickText = SpeechRecognitionHelper.mergeDictationText(quickListenBaseText, final)
-                                quickListenBaseText = quickText.trim()
-                            }
-                            isQuickListening = false
-                        },
-                        onError = { errorCode ->
-                            isQuickListening = false
-                            if (quickSessionCapturedText) {
-                                quickListenBaseText = quickText.trim()
-                                return@startListening
-                            }
-                            if (SpeechRecognitionHelper.isMissingOfflineModelError(errorCode)) {
-                                speechHelper.triggerModelDownload(locale)
-                                missingOfflineLanguageName = LocaleHelper.getLanguageDisplayName(effectiveLang)
-                                showMissingOfflineSpeechDialog = true
-                                UsabilityTracker.recordOfflineSpeechModelMissing(context, effectiveLang)
-                            } else if (errorCode != SpeechRecognizer.ERROR_NO_MATCH && errorCode != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-                                launchQuickSpeechFallback()
-                            }
-                        }
-                    )
-                }
-
-                val quickAudioPermissionLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.RequestPermission()
-                ) { isGranted ->
-                    if (isGranted) {
-                        startQuickListeningWithPermission()
-                    } else {
-                        isQuickListening = false
-                    }
-                }
-
-                fun toggleQuickListening() {
-                    if (isQuickListening) {
-                        stopQuickListening()
-                    } else {
-                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                            startQuickListeningWithPermission()
-                        } else {
-                            quickAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                        }
-                    }
-                }
-
                 fun handleQuickSpeak(text: String) {
-                    stopQuickListening()
                     if (text.isBlank()) return
                     UsabilityTracker.endIntent(context, "QuickSpeak", outcome = "completed", contextTag = "dock_v2 len_${text.length}")
                     if (voiceSettings.showLanguageSwitcher && activeSpeechTarget == "secondary") {
@@ -859,7 +773,6 @@ fun SottoApp(
                 val saveCardCd = stringResource(R.string.cd_save_as_card)
                 val showFullscreenCd = stringResource(R.string.cd_show_fullscreen)
                 val quickSpeakCd = stringResource(R.string.cd_quick_speak)
-                val stopVoiceInputCd = stringResource(R.string.cd_stop_voice_input)
                 val clearTextCd = stringResource(R.string.cd_clear_text)
 
                 Row(
@@ -884,7 +797,6 @@ fun SottoApp(
                         ) {
                             IconButton(
                                 onClick = {
-                                    stopQuickListening()
                                     if (quickText.isNotBlank()) {
                                         handleQuickFullscreen(quickText.trim())
                                     }
@@ -909,21 +821,14 @@ fun SottoApp(
                                         UsabilityTracker.startIntent("QuickSpeak")
                                     }
                                     quickText = it
-                                    if (!isQuickListening) {
-                                        quickListenBaseText = it.trim()
-                                    }
                                 },
                                 placeholder = {
                                     Text(
-                                        text = if (isQuickListening) listenModePrompt else stringResource(R.string.hint_quick_speak),
+                                        text = stringResource(R.string.hint_quick_speak),
                                         fontSize = 14.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
-                                        color = if (isQuickListening) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                        }
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                     )
                                 },
                                 modifier = Modifier.weight(1f),
@@ -938,7 +843,6 @@ fun SottoApp(
                                 ),
                                 keyboardActions = KeyboardActions(
                                     onDone = {
-                                        stopQuickListening()
                                         if (quickText.isNotBlank()) {
                                             handleQuickSpeak(quickText.trim())
                                         }
@@ -947,39 +851,23 @@ fun SottoApp(
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                             )
 
-                            if (isQuickListening) {
-                                IconButton(
-                                    onClick = { stopQuickListening() },
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .semantics { contentDescription = stopVoiceInputCd }
-                                ) {
-                                    Text(
-                                        "⏹",
-                                        fontSize = 16.sp,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            } else {
-                                IconButton(
-                                    onClick = { toggleQuickListening() },
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .semantics { contentDescription = voiceInputPrompt }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_mic),
-                                        contentDescription = voiceInputPrompt,
-                                        modifier = Modifier.size(20.dp),
-                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                    )
-                                }
+                            IconButton(
+                                onClick = { launchQuickSpeechInput() },
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .semantics { contentDescription = voiceInputPrompt }
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_mic),
+                                    contentDescription = voiceInputPrompt,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
                             }
 
                             if (quickText.isNotBlank()) {
                                 IconButton(
                                     onClick = {
-                                        stopQuickListening()
                                         val trimmed = quickText.trim()
                                         val alreadyExists = phrases.any { it.text.trim().equals(trimmed, ignoreCase = true) }
                                         if (alreadyExists) {
@@ -1004,7 +892,6 @@ fun SottoApp(
 
                                 IconButton(
                                     onClick = {
-                                        stopQuickListening()
                                         UsabilityTracker.endIntent(
                                             context,
                                             "QuickSpeak",
@@ -1013,8 +900,6 @@ fun SottoApp(
                                             contextTag = "dock_v2 len_${quickText.length}"
                                         )
                                         quickText = ""
-                                        quickListenBaseText = ""
-                                        quickSessionCapturedText = false
                                     },
                                     modifier = Modifier
                                         .size(36.dp)
