@@ -53,32 +53,13 @@ fun EmergencySafetySetupDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                OutlinedTextField(
-                    value = area,
-                    onValueChange = { area = it },
-                    label = { Text(stringResource(R.string.label_neighborhood_area)) },
-                    placeholder = { Text(stringResource(R.string.hint_neighborhood_area)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = contactName,
-                    onValueChange = { contactName = it },
-                    label = { Text(stringResource(R.string.label_contact_name)) },
-                    placeholder = { Text(stringResource(R.string.hint_contact_name)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = { Text(stringResource(R.string.label_emergency_phone)) },
-                    placeholder = { Text(stringResource(R.string.hint_emergency_phone)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                EmergencyContactFormFields(
+                    area = area,
+                    onAreaChange = { area = it },
+                    contactName = contactName,
+                    onContactNameChange = { contactName = it },
+                    phone = phone,
+                    onPhoneChange = { phone = it }
                 )
             }
         },
@@ -114,3 +95,48 @@ fun EmergencySafetySetupDialog(
         }
     )
 }
+
+@Composable
+fun EmergencyContactFormFields(
+    area: String,
+    onAreaChange: (String) -> Unit,
+    contactName: String,
+    onContactNameChange: (String) -> Unit,
+    phone: String,
+    onPhoneChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            value = area,
+            onValueChange = onAreaChange,
+            label = { Text(stringResource(R.string.label_neighborhood_area)) },
+            placeholder = { Text(stringResource(R.string.hint_neighborhood_area)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        OutlinedTextField(
+            value = contactName,
+            onValueChange = onContactNameChange,
+            label = { Text(stringResource(R.string.label_contact_name)) },
+            placeholder = { Text(stringResource(R.string.hint_contact_name)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        OutlinedTextField(
+            value = phone,
+            onValueChange = onPhoneChange,
+            label = { Text(stringResource(R.string.label_emergency_phone)) },
+            placeholder = { Text(stringResource(R.string.hint_emergency_phone)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
