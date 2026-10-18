@@ -4,7 +4,6 @@
     <!-- Actions -->
     <string name="action_done">Done</string>
     <string name="action_edit_list">Edit</string>
-    <string name="action_voice">Voice</string>
     <string name="action_settings">Settings</string>
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
@@ -13,8 +12,6 @@
     <string name="action_test_voice">Test Voice</string>
     <string name="action_stop">Stop</string>
     <string name="action_mic">Mic</string>
-    <string name="cd_stop_voice_input">Stop voice recording</string>
-    <string name="cd_close">Close</string>
 
     <!-- Status -->
     <string name="status_initializing">Initializing</string>
@@ -33,10 +30,6 @@
     <string name="label_speech_section">Speech &amp; Voice</string>
     <string name="label_language">App Language</string>
     <string name="search_language">Search language…</string>
-    <string name="label_card_language">Card Language</string>
-    <string name="lang_auto">Auto-detect</string>
-    <string name="lang_english">English</string>
-    <string name="lang_indonesian">Bahasa Indonesia</string>
     <string name="cd_voice_input">Speak to type</string>
     <string name="label_speed">Speed</string>
     <string name="label_pitch">Pitch</string>
@@ -46,9 +39,6 @@
     <string name="speed_faster">Faster</string>
     <string name="label_voice_model">Voice</string>
     <string name="voice_system_default">System Default</string>
-    <string name="title_high_quality_voices">High-Quality Voice Packs</string>
-    <string name="desc_high_quality_voices">Download natural neural speech voices in Android Accessibility &amp; Text-to-Speech settings.</string>
-    <string name="action_open_tts_settings">Voice Settings</string>
     <string name="action_add_more_voices">Add more voices in Android Settings…</string>
     <string name="pitch_lower">Lower</string>
     <string name="pitch_normal">Normal</string>
@@ -65,7 +55,6 @@
     <string name="cd_show_fullscreen">Show in fullscreen</string>
     <string name="cd_clear_text">Clear text</string>
     <string name="cd_save_as_card">Save as card</string>
-    <string name="emergency_phrase_text">I live around [Area/Neighborhood], please call my emergency contact: [phone number]</string>
     <string name="emergency_badge">Safety</string>
 
     <!-- Categories & Attention Chime (Phase 2) -->
@@ -93,7 +82,6 @@
     <string name="badge_general_default">Default fallback</string>
     <string name="cd_move_up">Move up</string>
     <string name="cd_move_down">Move down</string>
-    <string name="cd_reorder_category">Reorder category</string>
     <string name="label_attention_chime">Attention chime</string>
     <string name="label_attention_chime_desc">Plays a brief chime before speaking</string>
 
@@ -148,7 +136,6 @@
     <string name="label_secondary_language">Secondary speech language</string>
     <string name="action_speak_primary">Speak (%1$s)</string>
     <string name="action_speak_secondary">Speak (%1$s)</string>
-    <string name="cd_alternate_speech">Has alternate speech</string>
     <string name="action_auto_translate">Auto-translate</string>
     <string name="status_translating">Translating…</string>
     <string name="status_downloading_model">Downloading model (~30 MB)…</string>
@@ -168,19 +155,12 @@
     <string name="warn_voice_pack_missing">Voice pack missing. May speak with a fallback accent.</string>
 
     <!-- Two-Way Partner & Receptive Communication Mode -->
-    <string name="action_listen_mode">Partner</string>
-    <string name="cd_listen_mode">Open Partner mode for communication partner</string>
-    <string name="listen_mode_title">Partner Mode</string>
     <string name="listen_mode_hint">Tap mic to speak to user…</string>
     <string name="listen_mode_listening">Listening…</string>
-    <string name="listen_mode_tap_to_stop">Tap mic to stop</string>
     <string name="action_caregiver_prompts">Questions</string>
-    <string name="cd_flip_screen">Flip screen 180 degrees</string>
     <string name="action_flip">Flip</string>
     <string name="action_flip_back">Flip Back</string>
-    <string name="action_open_cards">Cards</string>
     <string name="action_clear">Clear</string>
-    <string name="action_read_aloud">Read Aloud</string>
     <string name="hint_no_phrases">No phrases in this category</string>
 
     <!-- Response Buttons -->
@@ -255,12 +235,9 @@
     <string name="action_help_improve">Help Improve</string>
     <string name="action_view_shared_data">View shared data</string>
     <string name="dialog_shared_data_title">Pending Telemetry Payload</string>
-    <string name="dialog_shared_data_empty">No telemetry events are currently queued for upload.</string>
     <string name="label_user_role">Primary User</string>
 
     <!-- Role Prompt Dialog -->
-    <string name="dialog_role_title">Who is Sotto for?</string>
-    <string name="dialog_role_desc">Tell us who mostly uses Sotto on this phone to help us tune the experience:</string>
     <string name="role_caregiver">Caregiver</string>
     <string name="role_self">Myself</string>
     <string name="role_professional">Professional</string>
@@ -297,8 +274,6 @@
     <string name="onboarding_step_indicator">Step %1$d of %2$d</string>
 
     <!-- Why Finder & Caregiver Guided Tools -->
-    <string name="action_why_finder">Why Finder</string>
-    <string name="cd_why_finder">Open Why Finder to narrow down causes with yes or no questions</string>
     <string name="why_finder_title">Why Finder</string>
     <string name="why_finder_btn_not_sure">Not Sure</string>
     <string name="why_finder_btn_stop">Stop</string>
@@ -308,9 +283,6 @@
     <string name="why_finder_stopped_title">Session stopped</string>
     <string name="why_finder_body_part_prompt">Where does it hurt?</string>
     <string name="why_finder_intensity_prompt">How much does it hurt? (1 to 5)</string>
-    <string name="why_finder_note_hint">Optional note (saved only on this device)</string>
-    <string name="action_save_log">Save &amp; Finish</string>
-    <string name="action_skip_note">Finish Without Note</string>
     <string name="action_view_why_log">Why Log</string>
     <string name="action_edit_why_tree">Edit Tree</string>
     <string name="why_tree_editor_title">Edit Question Tree</string>
@@ -435,7 +407,6 @@
     <string name="action_step_back">Back</string>
     <string name="action_restart">Restart</string>
     <string name="action_type">Type</string>
-    <string name="hint_edit_question">Type question to ask...</string>
 
     <!-- Appearance & Themes -->
     <string name="label_appearance_section">Appearance</string>
@@ -460,7 +431,6 @@
 
     <!-- Post-Crisis Pattern Logger -->
     <string name="label_log_trigger">Log crisis trigger to Why Log</string>
-    <string name="label_log_trigger_short">Log</string>
     <string name="trigger_pain">Pain</string>
     <string name="trigger_noise">Noise</string>
     <string name="trigger_task">Task</string>
@@ -480,7 +450,6 @@
     <string name="card_layout_compact">Compact Rectangular (1.25:1)</string>
 
     <!-- Picture-in-Picture -->
-    <string name="action_pip">Picture-in-Picture</string>
     <string name="cd_enter_pip">Enter Picture-in-Picture</string>
     <string name="label_pip_setting">Picture-in-Picture Communicator</string>
     <string name="label_pip_setting_desc">Keep a floating QuickSpeak communicator dock active over other apps (automatically docks on Home or app switch)</string>
@@ -488,7 +457,6 @@
     <string name="label_show_pip_in_top_bar_desc">Pin Picture-in-Picture button to the top navigation bar</string>
     <string name="action_enter_pip_now">Enter PiP Now</string>
     <string name="cd_enter_pip_now">Enter Picture-in-Picture mode now</string>
-    <string name="pip_tap_hint">Tap window for speech buttons • Double-tap to expand</string>
     <string name="pip_status_ready">Ready</string>
     <string name="pip_status_speaking">Speaking…</string>
     <string name="pip_action_yes">Yes</string>
@@ -506,7 +474,6 @@
     <string name="action_continue">Continue</string>
 
     <!-- Navigation & QS Tile Discovery (#69) -->
-    <string name="section_my_board">My AAC Board</string>
     <string name="title_partner_mode">Partner Mode</string>
     <string name="prompt_add_qs_tile_title">Add Quick Settings Tile?</string>
     <string name="prompt_add_qs_tile_msg">Add Sotto Partner to your Quick Settings for sub-3-second crisis access from anywhere, even when your phone is locked.</string>
