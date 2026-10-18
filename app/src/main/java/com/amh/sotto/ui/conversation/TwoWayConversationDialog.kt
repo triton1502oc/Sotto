@@ -1738,6 +1738,69 @@ private fun CaregiverDisplayCard(
                     Spacer(modifier = Modifier.height(4.dp))
                 }
             }
+
+            val context = LocalContext.current
+            val shareCd = stringResource(R.string.cd_share_card)
+            val partnerBadgeLabel = stringResource(R.string.share_card_partner_badge)
+            val brandFooter = stringResource(R.string.share_card_brand_footer)
+            val activePrompt = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
+            val isFinishedWhy = activeTab == CaregiverTab.WHY_FINDER && whyState is WhyFinderState.Finished
+            val canShareCard = isFinishedWhy || activePrompt.isNotBlank() || !lastReply.isNullOrBlank()
+
+            if (canShareCard) {
+                IconButton(
+                    onClick = {
+                        val (primaryToShare, secondaryToShare) = if (isFinishedWhy) {
+                            val titleRes = when (whyState.outcome) {
+                                WhyOutcome.FOUND -> R.string.why_finder_found_title
+                                WhyOutcome.STOPPED -> R.string.why_finder_stopped_title
+                                else -> R.string.why_finder_not_found_title
+                            }
+                            val primary = whyState.causeText?.takeIf { it.isNotBlank() } ?: context.getString(titleRes)
+                            val detail = if (!whyState.bodyPart.isNullOrBlank()) {
+                                val partLabel = getBodyRegionLabel(whyState.bodyPart, context)
+                                val intensityStr = whyState.intensity?.let { " • $it/5" } ?: ""
+                                "$partLabel$intensityStr"
+                            } else {
+                                lastReply?.takeIf { it.isNotBlank() }?.let {
+                                    context.getString(R.string.share_card_reply_format, it)
+                                }
+                            }
+                            primary to detail
+                        } else {
+                            val primary = activePrompt.ifBlank { lastReply.orEmpty() }
+                            val secondary = if (activePrompt.isNotBlank() && !lastReply.isNullOrBlank()) {
+                                context.getString(R.string.share_card_reply_format, lastReply)
+                            } else {
+                                null
+                            }
+                            primary to secondary
+                        }
+
+                        com.amh.sotto.util.CardShareHelper.shareCard(
+                            context = context,
+                            spec = com.amh.sotto.util.ShareableCardSpec(
+                                primaryText = primaryToShare,
+                                secondaryText = secondaryToShare,
+                                badgeLabel = partnerBadgeLabel,
+                                isEmergency = false,
+                                footerBrandText = brandFooter
+                            ),
+                            sourceTag = "partner_mode"
+                        )
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_share),
+                        contentDescription = shareCd,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
         }
     }
 }

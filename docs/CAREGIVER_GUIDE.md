@@ -147,7 +147,7 @@ For autistic teens and adults, as well as individuals with unclear, slurred, or 
 
 ### B. Safety Bystander Mode
 - **Hero Card**: The prominent amber/gold safety card displays your local area and emergency contact directly to bystanders or first responders.
-- **Fullscreen Mode**: Long-press any card (or tap fullscreen on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or medical personnel.
+- **Fullscreen Mode & Visual Sharing**: Long-press any card (or tap fullscreen on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or medical personnel. Tap the **Share** button on any Full-Screen Phrase Card or Partner Mode card to share a high-contrast PNG visual card (with subtle Sotto branding) + plain-text caption directly to WhatsApp or messaging apps.
 
 ### C. Single-Row QuickSpeak Dock Capsule
 - **Type Spontaneously**: Tap the docked input field (~56dp) to compose any phrase.

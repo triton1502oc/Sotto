@@ -1725,16 +1725,46 @@ fun SottoApp(
                                 )
                             }
                         }
-                        IconButton(
-                            onClick = { expandedPhrase = null },
-                            modifier = Modifier.align(Alignment.TopEnd)
+                        val shareCd = stringResource(R.string.cd_share_card)
+                        val emergencyBadgeLabel = stringResource(R.string.emergency_badge)
+                        val brandFooter = stringResource(R.string.share_card_brand_footer)
+                        Row(
+                            modifier = Modifier.align(Alignment.TopEnd),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text(
-                                text = "✕",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isEmergency) SottoColors.EmergencyAccent else MaterialTheme.colorScheme.onBackground
-                            )
+                            IconButton(
+                                onClick = {
+                                    com.amh.sotto.util.CardShareHelper.shareCard(
+                                        context = context,
+                                        spec = com.amh.sotto.util.ShareableCardSpec(
+                                            primaryText = phrase.text,
+                                            secondaryText = if (hasSpokenText) phrase.spokenText else null,
+                                            badgeLabel = if (isEmergency) emergencyBadgeLabel else null,
+                                            isEmergency = isEmergency,
+                                            footerBrandText = brandFooter
+                                        ),
+                                        sourceTag = "fullscreen_card"
+                                    )
+                                }
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_share),
+                                    contentDescription = shareCd,
+                                    tint = if (isEmergency) SottoColors.EmergencyAccent else MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            IconButton(
+                                onClick = { expandedPhrase = null }
+                            ) {
+                                Text(
+                                    text = "✕",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isEmergency) SottoColors.EmergencyAccent else MaterialTheme.colorScheme.onBackground
+                                )
+                            }
                         }
                     }
 

@@ -511,4 +511,11 @@
     <string name="prompt_add_qs_tile_title">Tambah Ubin Pengaturan Cepat?</string>
     <string name="prompt_add_qs_tile_msg">Tambahkan Sotto Mitra ke Pengaturan Cepat untuk akses krisis kurang dari 3 detik dari mana saja, bahkan saat ponsel terkunci.</string>
     <string name="action_add_tile">Tambah Ubin</string>
+
+    <!-- Share Phrase Card (#82) -->
+    <string name="cd_share_card">Bagikan kartu frasa sebagai gambar</string>
+    <string name="share_card_chooser_title">Bagikan kartu frasa</string>
+    <string name="share_card_brand_footer">Sotto • Komunikasi Asistif</string>
+    <string name="share_card_partner_badge">Percakapan Pendamping</string>
+    <string name="share_card_reply_format">Balasan: %1$s</string>
 </resources>

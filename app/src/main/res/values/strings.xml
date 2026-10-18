@@ -511,4 +511,11 @@
     <string name="prompt_add_qs_tile_title">Add Quick Settings Tile?</string>
     <string name="prompt_add_qs_tile_msg">Add Sotto Partner to your Quick Settings for sub-3-second crisis access from anywhere, even when your phone is locked.</string>
     <string name="action_add_tile">Add Tile</string>
+
+    <!-- Share Phrase Card (#82) -->
+    <string name="cd_share_card">Share phrase card as image</string>
+    <string name="share_card_chooser_title">Share phrase card</string>
+    <string name="share_card_brand_footer">Sotto • Assistive Communication</string>
+    <string name="share_card_partner_badge">Partner Exchange</string>
+    <string name="share_card_reply_format">Reply: %1$s</string>
 </resources>
