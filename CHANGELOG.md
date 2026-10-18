@@ -3,6 +3,22 @@
 ### TL;DR
 All notable changes to the Sotto project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.7] - 2026-10-18
+
+### Added
+- **Share Phrase Card as High-Contrast PNG + Caption**: Native Share button on Full-Screen Phrase Cards (`SottoApp.kt`) and Partner Mode display cards (`TwoWayConversationDialog.kt`) that renders a `1080×1080` high-contrast PNG card (with authentic Sotto icon brand footer and Safety/bilingual badges) + plain-text caption via Android's Share Sheet for WhatsApp/chat apps ([#82](https://github.com/triton1502oc/Sotto/issues/82)).
+- **Share Branded QR Deck PNG & Offline QR Image Import**: Added **Share QR Image** (`QRCodeDialog.kt`), **Pick QR Image** (`QRScannerDialog.kt`), and direct **Share to Sotto** (`Intent.ACTION_SEND` `image/*`) to share and decode QR phrase decks 100% offline over WhatsApp without requiring two phones in the same room ([#83](https://github.com/triton1502oc/Sotto/issues/83)).
+
+### Changed
+- **Safety Terminology Alignment**: Unified remaining "Emergency Card" strings and badges to "Safety Card" (`Keselamatan` in Indonesian).
+
+### Assets
+- `Sotto-v1.7.7.apk`: Universal release APK for all architectures.
+- `Sotto-v1.7.7-arm64-v8a.apk`: Optimized release APK for 64-bit ARM devices.
+- `Sotto-v1.7.7-armeabi-v7a.apk`: Optimized release APK for 32-bit ARM devices.
+- `Sotto-v1.7.7-x86_64.apk`: Optimized release APK for 64-bit x86 devices/emulators.
+- `app-release.aab`: Android App Bundle for Google Play Store.
+
 ## [v1.7.6] - 2026-10-17
 
 ### Added

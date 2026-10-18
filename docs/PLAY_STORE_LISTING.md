@@ -111,18 +111,18 @@ Sotto adalah alat bantu komunikasi asistif dan tidak menyediakan diagnosis atau 
 github.com/triton1502oc/Sotto | Tersedia versi iOS
 ```
 
-### What's New (v1.7.6)
+### What's New (v1.7.7)
 ```text
-• 1st-person self-advocacy phrases for Care cards and dedicated caregiver questions in Talk mode.
-• Improved Quick Speak dictation with speech deduplication and smooth appending.
-• On-demand crisis trigger logging in Partner Mode without intrusive popups.
+• Share high-contrast phrase cards as 1080×1080 PNG images + text captions via WhatsApp & chat apps.
+• Share branded QR deck images and import QR decks from saved photos or chat shares 100% offline.
+• Unified Safety Card terminology and badges across the app.
 ```
 
-### Apa yang Baru (v1.7.6)
+### Apa yang Baru (v1.7.7)
 ```text
-• Frasa advokasi diri orang pertama untuk kartu Perawatan dan bank pertanyaan pendamping terpisah.
-• Dikte Quick Speak lebih mulus dengan pencegah pengulangan kata otomatis.
-• Pencatatan pemicu krisis di Mode Pendamping dapat diakses sesuai kebutuhan tanpa popup mengganggu.
+• Bagikan kartu kata kontras tinggi sebagai gambar PNG 1080×1080 + teks ke WhatsApp & aplikasi obrolan.
+• Bagikan gambar QR dek dan impor dek QR dari galeri atau kiriman pesan 100% offline.
+• Penyelarasan istilah Kartu Keselamatan di seluruh aplikasi.
 ```
 
 ---
