@@ -24,10 +24,6 @@ class SpeechRecognitionHelper(private val context: Context) {
     var isListening: Boolean = false
         private set
 
-    fun isAvailable(): Boolean {
-        return SpeechRecognizer.isRecognitionAvailable(context)
-    }
-
     private fun runOnMainThread(action: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             action()

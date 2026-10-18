@@ -61,8 +61,6 @@ interface PhraseRepository {
     fun savePhrases(phrases: List<Phrase>)
     fun getCategories(): List<String>
     fun saveCategories(categories: List<String>)
-    fun getCustomCategories(): List<String>
-    fun saveCustomCategories(categories: List<String>)
 }
 
 class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRepository {
@@ -322,7 +320,7 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
         prefs.edit().putString(KEY_CATEGORY_ORDER, jsonArray.toString()).apply()
     }
 
-    override fun getCustomCategories(): List<String> {
+    private fun getCustomCategories(): List<String> {
         val json = prefs.getString(KEY_CUSTOM_CATEGORIES, null) ?: return emptyList()
         return try {
             val jsonArray = JSONArray(json)
@@ -337,17 +335,6 @@ class SharedPreferencesPhraseRepository(private val context: Context) : PhraseRe
         } catch (e: Exception) {
             emptyList()
         }
-    }
-
-    override fun saveCustomCategories(categories: List<String>) {
-        val jsonArray = JSONArray()
-        categories.forEach { cat ->
-            val trimmed = cat.trim()
-            if (trimmed.isNotBlank() && !Phrase.isUndeletableCategory(trimmed)) {
-                jsonArray.put(trimmed)
-            }
-        }
-        prefs.edit().putString(KEY_CUSTOM_CATEGORIES, jsonArray.toString()).apply()
     }
 
     companion object {
