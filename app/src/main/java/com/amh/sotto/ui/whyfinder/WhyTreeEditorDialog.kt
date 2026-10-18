@@ -3,6 +3,7 @@ package com.amh.sotto.ui.whyfinder
 import android.app.Activity
 import android.content.Intent
 import android.speech.RecognizerIntent
+import com.amh.sotto.util.SpeechRecognitionHelper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -68,14 +69,7 @@ fun WhyTreeEditorDialog(
 
     fun launchSpeech(onResult: (String) -> Unit) {
         activeSpeechCallback = onResult
-        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-        val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-            putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
-        }
+        val intent = SpeechRecognitionHelper.createSpeechIntent(context, preferOffline = true)
         try {
             speechLauncher.launch(intent)
         } catch (_: Exception) {
