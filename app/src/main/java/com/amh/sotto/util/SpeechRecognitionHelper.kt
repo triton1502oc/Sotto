@@ -387,6 +387,31 @@ class SpeechRecognitionHelper(private val context: Context) {
             return "$base $hyp"
         }
 
+        fun createSpeechIntent(
+            context: Context,
+            prompt: String? = null,
+            language: String? = null,
+            preferOffline: Boolean = false
+        ): Intent {
+            val effectiveLang = if (!language.isNullOrBlank() && language != LocaleHelper.LANG_AUTO) {
+                language
+            } else {
+                LocaleHelper.getEffectiveLanguage(context)
+            }
+            val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
+            return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
+                if (!prompt.isNullOrBlank()) {
+                    putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
+                }
+                if (preferOffline) {
+                    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+                }
+            }
+        }
+
         fun openOfflineSpeechSettings(context: Context) {
             val intent = Intent("com.google.android.speech.embedded.MANAGE_LANGUAGES").apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK

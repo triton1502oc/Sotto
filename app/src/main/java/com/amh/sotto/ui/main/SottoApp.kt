@@ -208,14 +208,7 @@ fun SottoApp(
 
     val listenModePrompt = stringResource(R.string.listen_mode_hint)
     fun launchSystemSpeechFallback() {
-        val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-        val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-            putExtra(RecognizerIntent.EXTRA_PROMPT, listenModePrompt)
-        }
+        val intent = SpeechRecognitionHelper.createSpeechIntent(context, prompt = listenModePrompt)
         try {
             twoWaySpeechLauncher.launch(intent)
         } catch (_: Exception) {}
@@ -681,14 +674,7 @@ fun SottoApp(
                 }
 
                 fun launchQuickSpeechInput() {
-                    val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                    val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
-                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-                        putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                    }
+                    val intent = SpeechRecognitionHelper.createSpeechIntent(context, prompt = voiceInputPrompt)
                     try {
                         quickSpeechLauncher.launch(intent)
                     } catch (_: Exception) {}
@@ -2073,17 +2059,10 @@ fun SottoApp(
                         trailingIcon = {
                             IconButton(
                                 onClick = {
-                                    val effectiveLang = LocaleHelper.getEffectiveLanguage(context)
-                                    val langTag = LocaleHelper.getLocaleForLanguage(effectiveLang).toLanguageTag()
-                                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
-                                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-                                        putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                                    }
+                                    val intent = SpeechRecognitionHelper.createSpeechIntent(context, prompt = voiceInputPrompt)
                                     try {
                                         speechLauncher.launch(intent)
-                                    } catch (e: Exception) {
+                                    } catch (_: Exception) {
                                         // Ignore if speech recognizer not present
                                     }
                                 }
@@ -2218,16 +2197,10 @@ fun SottoApp(
                                     IconButton(
                                         onClick = {
                                             val targetLang = if (spokenLangValue != LocaleHelper.LANG_AUTO) spokenLangValue else voiceSettings.secondaryLanguage
-                                            val langTag = LocaleHelper.getLocaleForLanguage(targetLang).toLanguageTag()
-                                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                                                putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
-                                                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, langTag)
-                                                putExtra(RecognizerIntent.EXTRA_PROMPT, voiceInputPrompt)
-                                            }
+                                            val intent = SpeechRecognitionHelper.createSpeechIntent(context, prompt = voiceInputPrompt, language = targetLang)
                                             try {
                                                 spokenSpeechLauncher.launch(intent)
-                                            } catch (e: Exception) {
+                                            } catch (_: Exception) {
                                                 // Ignore if speech recognizer not present
                                             }
                                         }
