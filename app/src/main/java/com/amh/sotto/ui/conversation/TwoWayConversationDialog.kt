@@ -104,13 +104,12 @@ fun TwoWayConversationDialog(
     onClearText: () -> Unit = {},
     onSpeakResponse: (spokenText: String) -> Unit,
     categories: List<String> = emptyList(),
-    customCategories: List<String> = emptyList(),
     whyFinderRepository: WhyFinderRepository? = null,
     initialTab: CaregiverTab? = null,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
+    val effectiveCategories = categories
 
     val partnerPrefs = remember(context) {
         context.getSharedPreferences("sotto_partner_prefs", Context.MODE_PRIVATE)

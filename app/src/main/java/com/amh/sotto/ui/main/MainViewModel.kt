@@ -23,9 +23,6 @@ class MainViewModel(
     private val _categories = MutableStateFlow<List<String>>(emptyList())
     val categories: StateFlow<List<String>> = _categories.asStateFlow()
 
-    // For backwards compatibility
-    val customCategories: StateFlow<List<String>> = _categories.asStateFlow()
-
     private val _voiceSettings = MutableStateFlow(VoiceSettings())
     val voiceSettings: StateFlow<VoiceSettings> = _voiceSettings.asStateFlow()
 
@@ -100,11 +97,6 @@ class MainViewModel(
             repository.saveCategories(current)
         }
     }
-
-    // Backwards compatibility methods
-    fun addCustomCategory(name: String): Boolean = addCategory(name)
-    fun renameCustomCategory(oldName: String, newName: String): Boolean = renameCategory(oldName, newName)
-    fun deleteCustomCategory(name: String): Boolean = deleteCategory(name)
 
     fun addPhrase(newPhrase: Phrase): Boolean {
         val trimmedText = newPhrase.text.trim()
