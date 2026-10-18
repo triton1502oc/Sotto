@@ -4,7 +4,6 @@
     <!-- Actions -->
     <string name="action_done">Selesai</string>
     <string name="action_edit_list">Ubah</string>
-    <string name="action_voice">Suara</string>
     <string name="action_settings">Pengaturan</string>
     <string name="action_save">Simpan</string>
     <string name="action_delete">Hapus</string>
@@ -13,8 +12,6 @@
     <string name="action_test_voice">Tes Suara</string>
     <string name="action_stop">Berhenti</string>
     <string name="action_mic">Mic</string>
-    <string name="cd_stop_voice_input">Berhenti merekam suara</string>
-    <string name="cd_close">Tutup</string>
 
     <!-- Status -->
     <string name="status_initializing">Memuat...</string>
@@ -33,10 +30,6 @@
     <string name="label_speech_section">Suara &amp; Pengucapan</string>
     <string name="label_language">Bahasa Aplikasi</string>
     <string name="search_language">Cari bahasa…</string>
-    <string name="label_card_language">Bahasa Frasa</string>
-    <string name="lang_auto">Deteksi otomatis</string>
-    <string name="lang_english">English</string>
-    <string name="lang_indonesian">Bahasa Indonesia</string>
     <string name="cd_voice_input">Bicara untuk mengetik</string>
     <string name="label_speed">Kecepatan</string>
     <string name="label_pitch">Nada</string>
@@ -46,9 +39,6 @@
     <string name="speed_faster">Lebih cepat</string>
     <string name="label_voice_model">Suara</string>
     <string name="voice_system_default">Bawaan Sistem</string>
-    <string name="title_high_quality_voices">Paket Suara Alami</string>
-    <string name="desc_high_quality_voices">Unduh suara alami di pengaturan Aksesibilitas &amp; Text-to-Speech Android.</string>
-    <string name="action_open_tts_settings">Pengaturan Suara</string>
     <string name="action_add_more_voices">Tambah suara lainnya di Pengaturan Android…</string>
     <string name="pitch_lower">Lebih rendah</string>
     <string name="pitch_normal">Normal</string>
@@ -65,7 +55,6 @@
     <string name="cd_show_fullscreen">Tampilkan layar penuh</string>
     <string name="cd_clear_text">Hapus teks</string>
     <string name="cd_save_as_card">Simpan sebagai kartu</string>
-    <string name="emergency_phrase_text">Saya tinggal di sekitar [Area / Lingkungan], tolong hubungi kontak darurat saya: [nomor telepon]</string>
     <string name="emergency_badge">Keselamatan</string>
 
     <!-- Categories & Attention Chime (Phase 2) -->
@@ -93,7 +82,6 @@
     <string name="badge_general_default">Bawaan</string>
     <string name="cd_move_up">Pindah ke atas</string>
     <string name="cd_move_down">Pindah ke bawah</string>
-    <string name="cd_reorder_category">Urutkan kategori</string>
     <string name="label_attention_chime">Bunyi perhatian</string>
     <string name="label_attention_chime_desc">Memutar bunyi singkat sebelum berbicara</string>
 
@@ -148,7 +136,6 @@
     <string name="label_secondary_language">Bahasa ucapan kedua</string>
     <string name="action_speak_primary">Bicara (%1$s)</string>
     <string name="action_speak_secondary">Bicara (%1$s)</string>
-    <string name="cd_alternate_speech">Memiliki ucapan alternatif</string>
     <string name="action_auto_translate">Terjemahkan otomatis</string>
     <string name="status_translating">Menerjemahkan…</string>
     <string name="status_downloading_model">Mengunduh model (~30 MB)…</string>
@@ -168,19 +155,12 @@
     <string name="warn_voice_pack_missing">Paket suara belum terpasang. Menggunakan aksen cadangan.</string>
 
     <!-- Two-Way Partner & Receptive Communication Mode -->
-    <string name="action_listen_mode">Partner</string>
-    <string name="cd_listen_mode">Buka mode Partner untuk partner komunikasi</string>
-    <string name="listen_mode_title">Mode Partner</string>
     <string name="listen_mode_hint">Ketuk mikrofon untuk bicara…</string>
     <string name="listen_mode_listening">Mendengarkan…</string>
-    <string name="listen_mode_tap_to_stop">Ketuk mikrofon untuk berhenti</string>
     <string name="action_caregiver_prompts">Pertanyaan</string>
-    <string name="cd_flip_screen">Putar layar 180 derajat</string>
     <string name="action_flip">Putar</string>
     <string name="action_flip_back">Kembali</string>
-    <string name="action_open_cards">Kartu</string>
     <string name="action_clear">Hapus</string>
-    <string name="action_read_aloud">Bacakan</string>
     <string name="hint_no_phrases">Tidak ada frasa dalam kategori ini</string>
 
     <!-- Response Buttons -->
@@ -255,12 +235,9 @@
     <string name="action_help_improve">Bantu Sempurnakan</string>
     <string name="action_view_shared_data">Lihat data yang dibagikan</string>
     <string name="dialog_shared_data_title">Data Telemetri yang Mengantre</string>
-    <string name="dialog_shared_data_empty">Tidak ada data analisis yang sedang mengantre untuk dikirim.</string>
     <string name="label_user_role">Pengguna Utama</string>
 
     <!-- Role Prompt Dialog -->
-    <string name="dialog_role_title">Untuk Siapa Sotto Digunakan?</string>
-    <string name="dialog_role_desc">Beri tahu kami siapa yang paling sering menggunakan Sotto di ponsel ini agar kami dapat menyesuaikan pengalaman penggunaan:</string>
     <string name="role_caregiver">Pengasuh</string>
     <string name="role_self">Saya Sendiri</string>
     <string name="role_professional">Profesional</string>
@@ -297,8 +274,6 @@
     <string name="onboarding_step_indicator">Langkah %1$d dari %2$d</string>
 
     <!-- Why Finder & Caregiver Guided Tools -->
-    <string name="action_why_finder">Why Finder</string>
-    <string name="cd_why_finder">Buka Why Finder untuk mempersempit penyebab dengan pertanyaan ya atau tidak</string>
     <string name="why_finder_title">Why Finder</string>
     <string name="why_finder_btn_not_sure">Kurang Tahu</string>
     <string name="why_finder_btn_stop">Berhenti</string>
@@ -308,9 +283,6 @@
     <string name="why_finder_stopped_title">Sesi dihentikan</string>
     <string name="why_finder_body_part_prompt">Di bagian mana yang sakit?</string>
     <string name="why_finder_intensity_prompt">Seberapa sakit? (Skala 1 sampai 5)</string>
-    <string name="why_finder_note_hint">Catatan opsional (hanya disimpan di perangkat ini)</string>
-    <string name="action_save_log">Simpan &amp; Selesai</string>
-    <string name="action_skip_note">Selesai Tanpa Catatan</string>
     <string name="action_view_why_log">Catatan Why</string>
     <string name="action_edit_why_tree">Ubah Pertanyaan</string>
     <string name="why_tree_editor_title">Ubah Pohon Pertanyaan</string>
@@ -435,7 +407,6 @@
     <string name="action_step_back">Kembali</string>
     <string name="action_restart">Ulangi</string>
     <string name="action_type">Ketik</string>
-    <string name="hint_edit_question">Ketik pertanyaan...</string>
 
     <!-- Appearance & Themes -->
     <string name="label_appearance_section">Tampilan</string>
@@ -460,7 +431,6 @@
 
     <!-- Post-Crisis Pattern Logger -->
     <string name="label_log_trigger">Catat pemicu krisis ke Catatan Why</string>
-    <string name="label_log_trigger_short">Catat</string>
     <string name="trigger_pain">Nyeri</string>
     <string name="trigger_noise">Bising</string>
     <string name="trigger_task">Tugas</string>
@@ -480,7 +450,6 @@
     <string name="card_layout_compact">Persegi Panjang Ringkas (1.25:1)</string>
 
     <!-- Picture-in-Picture -->
-    <string name="action_pip">Gambar-dalam-Gambar (PiP)</string>
     <string name="cd_enter_pip">Buka Gambar-dalam-Gambar</string>
     <string name="label_pip_setting">Komunikator Gambar-dalam-Gambar (PiP)</string>
     <string name="label_pip_setting_desc">Pertahankan komunikator QuickSpeak melayang di atas aplikasi lain (otomatis saat ke Layar Utama atau beralih aplikasi)</string>
@@ -488,7 +457,6 @@
     <string name="label_show_pip_in_top_bar_desc">Sematkan tombol Gambar-dalam-Gambar ke bilah navigasi atas</string>
     <string name="action_enter_pip_now">Buka PiP Sekarang</string>
     <string name="cd_enter_pip_now">Buka mode Gambar-dalam-Gambar sekarang</string>
-    <string name="pip_tap_hint">Ketuk jendela untuk tombol bicara • Ketuk dua kali untuk perbesar</string>
     <string name="pip_status_ready">Siap</string>
     <string name="pip_status_speaking">Berbicara…</string>
     <string name="pip_action_yes">Ya</string>
@@ -506,7 +474,6 @@
     <string name="action_continue">Lanjutkan</string>
 
     <!-- Navigation & QS Tile Discovery (#69) -->
-    <string name="section_my_board">Papan AAC Saya</string>
     <string name="title_partner_mode">Mode Mitra</string>
     <string name="prompt_add_qs_tile_title">Tambah Ubin Pengaturan Cepat?</string>
     <string name="prompt_add_qs_tile_msg">Tambahkan Sotto Mitra ke Pengaturan Cepat untuk akses krisis kurang dari 3 detik dari mana saja, bahkan saat ponsel terkunci.</string>
