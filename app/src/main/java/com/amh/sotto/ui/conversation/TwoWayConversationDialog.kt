@@ -54,6 +54,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import android.os.SystemClock
 import android.view.WindowManager
 import androidx.compose.ui.platform.LocalView
@@ -1831,83 +1833,41 @@ private fun UnifiedTactileResponseDock(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Button(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onYes()
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 80.dp)
-                    .height(80.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = strYes
-                    },
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SottoColors.SuccessContainer,
-                    contentColor = SottoColors.SuccessText
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_check_bold),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = strYes,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            TactileResponseButton(
+                text = strYes,
+                iconRes = R.drawable.ic_check_bold,
+                containerColor = SottoColors.SuccessContainer,
+                contentColor = SottoColors.SuccessText,
+                onClick = onYes,
+                height = 80.dp,
+                shapeRadius = 20.dp,
+                iconSize = 24.dp,
+                spacerWidth = 8.dp,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                hapticType = HapticFeedbackType.LongPress,
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+                contentPadding = ButtonDefaults.ContentPadding,
+                maxLines = Int.MAX_VALUE
+            )
 
-            Button(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onNo()
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 80.dp)
-                    .height(80.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = strNo
-                    },
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SottoColors.CrisisNoContainer,
-                    contentColor = SottoColors.CrisisNoText
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close_bold),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = strNo,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            TactileResponseButton(
+                text = strNo,
+                iconRes = R.drawable.ic_close_bold,
+                containerColor = SottoColors.CrisisNoContainer,
+                contentColor = SottoColors.CrisisNoText,
+                onClick = onNo,
+                height = 80.dp,
+                shapeRadius = 20.dp,
+                iconSize = 24.dp,
+                spacerWidth = 8.dp,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                hapticType = HapticFeedbackType.LongPress,
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+                contentPadding = ButtonDefaults.ContentPadding,
+                maxLines = Int.MAX_VALUE
+            )
         }
 
         // Row 2: Regulatory Actions (Wait, Not Sure, Stop) with Vector Icons and AAA Contrast
@@ -1915,131 +1875,91 @@ private fun UnifiedTactileResponseDock(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Button 1: WAIT
-            Button(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onWait()
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 54.dp)
-                    .height(54.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = strWait
-                    },
-                shape = RoundedCornerShape(18.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SottoColors.NeutralDarkContainer,
-                    contentColor = SottoColors.NeutralDarkText
-                )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_hourglass),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = strWait,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            TactileResponseButton(
+                text = strWait,
+                iconRes = R.drawable.ic_hourglass,
+                containerColor = SottoColors.NeutralDarkContainer,
+                contentColor = SottoColors.NeutralDarkText,
+                onClick = onWait
+            )
 
-            // Button 2: NOT SURE
-            Button(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onNotSure()
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 54.dp)
-                    .height(54.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = strNotSure
-                    },
-                shape = RoundedCornerShape(18.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SottoColors.NeutralDarkContainer,
-                    contentColor = SottoColors.NeutralDarkText
-                )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_help),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = strNotSure,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            TactileResponseButton(
+                text = strNotSure,
+                iconRes = R.drawable.ic_help,
+                containerColor = SottoColors.NeutralDarkContainer,
+                contentColor = SottoColors.NeutralDarkText,
+                onClick = onNotSure
+            )
 
-            // Button 3: STOP
-            Button(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onStop()
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 54.dp)
-                    .height(54.dp)
-                    .semantics {
-                        role = Role.Button
-                        contentDescription = strStop
-                    },
-                shape = RoundedCornerShape(18.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SottoColors.NeutralStoppedContainer,
-                    contentColor = SottoColors.NeutralStoppedText
-                )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_stop_circle),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = strStop,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            TactileResponseButton(
+                text = strStop,
+                iconRes = R.drawable.ic_stop_circle,
+                containerColor = SottoColors.NeutralStoppedContainer,
+                contentColor = SottoColors.NeutralStoppedText,
+                onClick = onStop
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowScope.TactileResponseButton(
+    text: String,
+    iconRes: Int,
+    containerColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit,
+    height: Dp = 54.dp,
+    shapeRadius: Dp = 18.dp,
+    iconSize: Dp = 18.dp,
+    spacerWidth: Dp = 4.dp,
+    fontSize: TextUnit = 15.sp,
+    fontWeight: FontWeight = FontWeight.SemiBold,
+    hapticType: HapticFeedbackType = HapticFeedbackType.TextHandleMove,
+    elevation: ButtonElevation? = null,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
+    maxLines: Int = 1
+) {
+    val haptic = LocalHapticFeedback.current
+    Button(
+        onClick = {
+            haptic.performHapticFeedback(hapticType)
+            onClick()
+        },
+        modifier = Modifier
+            .weight(1f)
+            .heightIn(min = height)
+            .height(height)
+            .semantics {
+                role = Role.Button
+                contentDescription = text
+            },
+        shape = RoundedCornerShape(shapeRadius),
+        contentPadding = contentPadding,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        ),
+        elevation = elevation
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(iconSize)
+            )
+            Spacer(modifier = Modifier.width(spacerWidth))
+            Text(
+                text = text,
+                fontSize = fontSize,
+                fontWeight = fontWeight,
+                maxLines = maxLines,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
