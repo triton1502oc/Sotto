@@ -61,19 +61,7 @@ fun VoiceSettingsDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    var rate by remember { mutableFloatStateOf(currentSettings.speechRate) }
-    var pitch by remember { mutableFloatStateOf(currentSettings.speechPitch) }
-    var voiceName by remember { mutableStateOf(currentSettings.voiceName) }
-    var attentionChime by remember { mutableStateOf(currentSettings.playAttentionChime) }
-    var showLangSwitcher by remember { mutableStateOf(currentSettings.showLanguageSwitcher) }
-    var secondaryLang by remember { mutableStateOf(currentSettings.secondaryLanguage) }
-    var shareMetrics by remember { mutableStateOf(currentSettings.shareUsabilityMetrics) }
-    var userRole by remember { mutableStateOf(currentSettings.userRole) }
-    var appTheme by remember { mutableStateOf(currentSettings.appTheme) }
-    var showSafetyCards by remember { mutableStateOf(currentSettings.showSafetyCards) }
-    var compactCardLayout by remember { mutableStateOf(currentSettings.compactCardLayout) }
-    var enablePip by remember { mutableStateOf(currentSettings.enablePip) }
-    var showPipInTopBar by remember { mutableStateOf(currentSettings.showPipInTopBar) }
+    var settings by remember { mutableStateOf(currentSettings) }
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     var secondaryLangDropdownExpanded by remember { mutableStateOf(false) }
@@ -83,51 +71,13 @@ fun VoiceSettingsDialog(
 
     val systemDefaultLabel = stringResource(R.string.system_default)
 
-    fun updateSettings(
-        newRate: Float = rate,
-        newPitch: Float = pitch,
-        newVoiceName: String? = voiceName,
-        newChime: Boolean = attentionChime,
-        newShowLangSwitcher: Boolean = showLangSwitcher,
-        newSecondaryLang: String = secondaryLang,
-        newShareMetrics: Boolean = shareMetrics,
-        newUserRole: String = userRole,
-        newAppTheme: String = appTheme,
-        newShowSafetyCards: Boolean = showSafetyCards,
-        newCompactCardLayout: Boolean = compactCardLayout,
-        newEnablePip: Boolean = enablePip,
-        newShowPipInTopBar: Boolean = showPipInTopBar
-    ) {
-        rate = newRate
-        pitch = newPitch
-        voiceName = newVoiceName
-        attentionChime = newChime
-        showLangSwitcher = newShowLangSwitcher
-        secondaryLang = newSecondaryLang
-        shareMetrics = newShareMetrics
-        userRole = newUserRole
-        appTheme = newAppTheme
-        showSafetyCards = newShowSafetyCards
-        compactCardLayout = newCompactCardLayout
-        enablePip = newEnablePip
-        showPipInTopBar = newShowPipInTopBar
-        onSettingsChanged(
-            VoiceSettings(
-                speechRate = ((newRate * 10).roundToInt() / 10f),
-                speechPitch = ((newPitch * 10).roundToInt() / 10f),
-                voiceName = newVoiceName,
-                playAttentionChime = newChime,
-                showLanguageSwitcher = newShowLangSwitcher,
-                secondaryLanguage = newSecondaryLang,
-                shareUsabilityMetrics = newShareMetrics,
-                userRole = newUserRole,
-                appTheme = newAppTheme,
-                showSafetyCards = newShowSafetyCards,
-                compactCardLayout = newCompactCardLayout,
-                enablePip = newEnablePip,
-                showPipInTopBar = newShowPipInTopBar
-            )
+    fun updateSettings(newSettings: VoiceSettings) {
+        val rounded = newSettings.copy(
+            speechRate = ((newSettings.speechRate * 10).roundToInt() / 10f),
+            speechPitch = ((newSettings.speechPitch * 10).roundToInt() / 10f)
         )
+        settings = rounded
+        onSettingsChanged(rounded)
     }
 
     val selectedLanguageLabel = remember(currentLanguage, availableLanguages, systemDefaultLabel) {
@@ -184,12 +134,12 @@ fun VoiceSettingsDialog(
         return "$cleanName$country$naturalTag"
     }
 
-    val selectedVoiceLabel = remember(voiceName, matchingVoices, defaultVoiceLabel) {
-        if (voiceName == null) {
+    val selectedVoiceLabel = remember(settings.voiceName, matchingVoices, defaultVoiceLabel) {
+        if (settings.voiceName == null) {
             defaultVoiceLabel
         } else {
-            matchingVoices.firstOrNull { it.name == voiceName }?.let { formatVoiceName(it) }
-                ?: voiceName ?: defaultVoiceLabel
+            matchingVoices.firstOrNull { it.name == settings.voiceName }?.let { formatVoiceName(it) }
+                ?: settings.voiceName ?: defaultVoiceLabel
         }
     }
 
@@ -458,12 +408,12 @@ fun VoiceSettingsDialog(
                                                         text = {
                                                             Text(
                                                                 defaultVoiceLabel,
-                                                                fontWeight = if (voiceName == null) FontWeight.Bold else FontWeight.Normal,
+                                                                fontWeight = if (settings.voiceName == null) FontWeight.Bold else FontWeight.Normal,
                                                                 color = MaterialTheme.colorScheme.onSurface
                                                             )
                                                         },
                                                         onClick = {
-                                                            updateSettings(newVoiceName = null)
+                                                            updateSettings(settings.copy(voiceName = null))
                                                             voiceDropdownExpanded = false
                                                         }
                                                     )
@@ -472,12 +422,12 @@ fun VoiceSettingsDialog(
                                                             text = {
                                                                 Text(
                                                                     formatVoiceName(voice),
-                                                                    fontWeight = if (voiceName == voice.name) FontWeight.Bold else FontWeight.Normal,
+                                                                    fontWeight = if (settings.voiceName == voice.name) FontWeight.Bold else FontWeight.Normal,
                                                                     color = MaterialTheme.colorScheme.onSurface
                                                                 )
                                                             },
                                                             onClick = {
-                                                                updateSettings(newVoiceName = voice.name)
+                                                                updateSettings(settings.copy(voiceName = voice.name))
                                                                 voiceDropdownExpanded = false
                                                             }
                                                         )
@@ -523,12 +473,12 @@ fun VoiceSettingsDialog(
                                     // Speech Rate (Speed)
                                     Column {
                                         val rateText = when {
-                                            rate <= 0.7f -> stringResource(R.string.speed_slower)
-                                            rate in 0.9f..1.1f -> stringResource(R.string.speed_normal)
-                                            rate >= 1.3f -> stringResource(R.string.speed_faster)
+                                            settings.speechRate <= 0.7f -> stringResource(R.string.speed_slower)
+                                            settings.speechRate in 0.9f..1.1f -> stringResource(R.string.speed_normal)
+                                            settings.speechRate >= 1.3f -> stringResource(R.string.speed_faster)
                                             else -> ""
                                         }
-                                        val speedDisplay = String.format(Locale.US, "%.1fx", rate)
+                                        val speedDisplay = String.format(Locale.US, "%.1fx", settings.speechRate)
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -547,8 +497,8 @@ fun VoiceSettingsDialog(
                                             )
                                         }
                                         Slider(
-                                            value = rate,
-                                            onValueChange = { updateSettings(newRate = it) },
+                                            value = settings.speechRate,
+                                            onValueChange = { updateSettings(settings.copy(speechRate = it)) },
                                             valueRange = 0.5f..2.0f,
                                             steps = 14,
                                             colors = SliderDefaults.colors(
@@ -561,12 +511,12 @@ fun VoiceSettingsDialog(
                                     // Speech Pitch
                                     Column {
                                         val pitchText = when {
-                                            pitch <= 0.8f -> stringResource(R.string.pitch_lower)
-                                            pitch in 0.95f..1.05f -> stringResource(R.string.pitch_normal)
-                                            pitch >= 1.2f -> stringResource(R.string.pitch_higher)
+                                            settings.speechPitch <= 0.8f -> stringResource(R.string.pitch_lower)
+                                            settings.speechPitch in 0.95f..1.05f -> stringResource(R.string.pitch_normal)
+                                            settings.speechPitch >= 1.2f -> stringResource(R.string.pitch_higher)
                                             else -> ""
                                         }
-                                        val pitchDisplay = String.format(Locale.US, "%.1fx", pitch)
+                                        val pitchDisplay = String.format(Locale.US, "%.1fx", settings.speechPitch)
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -585,8 +535,8 @@ fun VoiceSettingsDialog(
                                             )
                                         }
                                         Slider(
-                                            value = pitch,
-                                            onValueChange = { updateSettings(newPitch = it) },
+                                            value = settings.speechPitch,
+                                            onValueChange = { updateSettings(settings.copy(speechPitch = it)) },
                                             valueRange = 0.7f..1.3f,
                                             steps = 5,
                                             colors = SliderDefaults.colors(
@@ -602,8 +552,8 @@ fun VoiceSettingsDialog(
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable {
-                                                val nextState = !attentionChime
-                                                updateSettings(newChime = nextState)
+                                                val nextState = !settings.playAttentionChime
+                                                updateSettings(settings.copy(playAttentionChime = nextState))
                                                 if (nextState) {
                                                     ChimePlayer.play(context)
                                                 }
@@ -630,9 +580,9 @@ fun VoiceSettingsDialog(
                                             )
                                         }
                                         Switch(
-                                            checked = attentionChime,
+                                            checked = settings.playAttentionChime,
                                             onCheckedChange = {
-                                                updateSettings(newChime = it)
+                                                updateSettings(settings.copy(playAttentionChime = it))
                                                 if (it) {
                                                     ChimePlayer.play(context)
                                                 }
@@ -646,25 +596,7 @@ fun VoiceSettingsDialog(
 
                                     // Immediate Test Voice Action
                                     OutlinedButton(
-                                        onClick = {
-                                            onTestVoice(
-                                                VoiceSettings(
-                                                    speechRate = ((rate * 10).roundToInt() / 10f),
-                                                    speechPitch = ((pitch * 10).roundToInt() / 10f),
-                                                    voiceName = voiceName,
-                                                    playAttentionChime = attentionChime,
-                                                    showLanguageSwitcher = showLangSwitcher,
-                                                    secondaryLanguage = secondaryLang,
-                                                    shareUsabilityMetrics = shareMetrics,
-                                                    userRole = userRole,
-                                                    appTheme = appTheme,
-                                                    showSafetyCards = showSafetyCards,
-                                                    compactCardLayout = compactCardLayout,
-                                                    enablePip = enablePip,
-                                                    showPipInTopBar = showPipInTopBar
-                                                )
-                                            )
-                                        },
+                                        onClick = { onTestVoice(settings) },
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(10.dp),
                                         colors = ButtonDefaults.outlinedButtonColors(
@@ -697,8 +629,8 @@ fun VoiceSettingsDialog(
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable {
-                                                val nextState = !showLangSwitcher
-                                                updateSettings(newShowLangSwitcher = nextState)
+                                                val nextState = !settings.showLanguageSwitcher
+                                                updateSettings(settings.copy(showLanguageSwitcher = nextState))
                                             }
                                             .padding(vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically,
@@ -722,9 +654,9 @@ fun VoiceSettingsDialog(
                                             )
                                         }
                                         Switch(
-                                            checked = showLangSwitcher,
+                                            checked = settings.showLanguageSwitcher,
                                             onCheckedChange = {
-                                                updateSettings(newShowLangSwitcher = it)
+                                                updateSettings(settings.copy(showLanguageSwitcher = it))
                                             },
                                             colors = SwitchDefaults.colors(
                                                 checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -733,7 +665,7 @@ fun VoiceSettingsDialog(
                                         )
                                     }
 
-                                    if (showLangSwitcher) {
+                                    if (settings.showLanguageSwitcher) {
                                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                             Text(
                                                 text = stringResource(R.string.label_secondary_language),
@@ -745,9 +677,9 @@ fun VoiceSettingsDialog(
                                             val secondaryLanguagesList = remember(availableLanguages) {
                                                 availableLanguages.filter { it.first != LocaleHelper.LANG_SYSTEM }
                                             }
-                                            val secondaryLanguageLabel = remember(secondaryLang, secondaryLanguagesList) {
-                                                secondaryLanguagesList.firstOrNull { it.first == secondaryLang }?.second
-                                                    ?: LocaleHelper.getLanguageDisplayName(secondaryLang)
+                                            val secondaryLanguageLabel = remember(settings.secondaryLanguage, secondaryLanguagesList) {
+                                                secondaryLanguagesList.firstOrNull { it.first == settings.secondaryLanguage }?.second
+                                                    ?: LocaleHelper.getLanguageDisplayName(settings.secondaryLanguage)
                                             }
 
                                             Box(modifier = Modifier.fillMaxWidth()) {
@@ -793,7 +725,7 @@ fun VoiceSettingsDialog(
                                                         DropdownMenuItem(
                                                             text = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
                                                             onClick = {
-                                                                updateSettings(newSecondaryLang = code)
+                                                                updateSettings(settings.copy(secondaryLanguage = code))
                                                                 secondaryLangDropdownExpanded = false
                                                             }
                                                         )
@@ -802,12 +734,12 @@ fun VoiceSettingsDialog(
                                             }
 
                                             // Translation model status & download
-                                            var isModelDownloaded by remember(secondaryLang) { mutableStateOf<Boolean?>(null) }
+                                            var isModelDownloaded by remember(settings.secondaryLanguage) { mutableStateOf<Boolean?>(null) }
                                             var isDownloadingModel by remember { mutableStateOf(false) }
                                             var downloadErrorResId by remember { mutableStateOf<Int?>(null) }
 
-                                            LaunchedEffect(secondaryLang) {
-                                                TranslationHelper.isModelDownloaded(secondaryLang) { downloaded ->
+                                            LaunchedEffect(settings.secondaryLanguage) {
+                                                TranslationHelper.isModelDownloaded(settings.secondaryLanguage) { downloaded ->
                                                     isModelDownloaded = downloaded
                                                 }
                                             }
@@ -827,7 +759,7 @@ fun VoiceSettingsDialog(
                                                 ) {
                                                     Column(modifier = Modifier.weight(1f)) {
                                                         Text(
-                                                            text = stringResource(R.string.label_language_model, LocaleHelper.getLanguageDisplayName(secondaryLang)),
+                                                            text = stringResource(R.string.label_language_model, LocaleHelper.getLanguageDisplayName(settings.secondaryLanguage)),
                                                             style = MaterialTheme.typography.bodySmall,
                                                             fontWeight = FontWeight.Medium,
                                                             color = MaterialTheme.colorScheme.onSurface
@@ -858,7 +790,7 @@ fun VoiceSettingsDialog(
                                                                     downloadErrorResId = null
                                                                     isDownloadingModel = true
                                                                     TranslationHelper.downloadModel(
-                                                                        langCode = secondaryLang,
+                                                                        langCode = settings.secondaryLanguage,
                                                                         onProgress = { isDownloadingModel = it },
                                                                         onSuccess = {
                                                                             isDownloadingModel = false
@@ -892,7 +824,7 @@ fun VoiceSettingsDialog(
                                             }
 
                                             // TTS voice pack status & download
-                                            val isVoicePackInstalled = isTtsLanguageInstalled(secondaryLang)
+                                            val isVoicePackInstalled = isTtsLanguageInstalled(settings.secondaryLanguage)
                                             Surface(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 color = MaterialTheme.colorScheme.surface,
@@ -908,7 +840,7 @@ fun VoiceSettingsDialog(
                                                 ) {
                                                     Column(modifier = Modifier.weight(1f)) {
                                                         Text(
-                                                            text = stringResource(R.string.label_tts_voice_pack, LocaleHelper.getLanguageDisplayName(secondaryLang)),
+                                                            text = stringResource(R.string.label_tts_voice_pack, LocaleHelper.getLanguageDisplayName(settings.secondaryLanguage)),
                                                             style = MaterialTheme.typography.bodySmall,
                                                             fontWeight = FontWeight.Medium,
                                                             color = MaterialTheme.colorScheme.onSurface
@@ -960,7 +892,7 @@ fun VoiceSettingsDialog(
                                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                         themes.forEach { (themeKey, strings) ->
                                             val (nameRes, descRes) = strings
-                                            val isSelected = appTheme == themeKey
+                                            val isSelected = settings.appTheme == themeKey
 
                                             val (previewBg, previewSurface, previewBorder) = when (themeKey) {
                                                 VoiceSettings.THEME_OLED_BLACK -> Triple(Color(0xFF000000), Color(0xFFFFFFFF), Color(0xFF333333))
@@ -975,7 +907,7 @@ fun VoiceSettingsDialog(
                                                     .fillMaxWidth()
                                                     .clip(RoundedCornerShape(12.dp))
                                                     .clickable {
-                                                        updateSettings(newAppTheme = themeKey)
+                                                        updateSettings(settings.copy(appTheme = themeKey))
                                                         UsabilityTracker.recordThemeSelected(context, themeKey)
                                                     },
                                                 shape = RoundedCornerShape(12.dp),
@@ -1053,20 +985,20 @@ fun VoiceSettingsDialog(
                                             false to stringResource(R.string.card_layout_square)
                                         )
                                         options.forEach { (isCompact, label) ->
-                                            val isSelected = compactCardLayout == isCompact
+                                            val isSelected = settings.compactCardLayout == isCompact
                                             Surface(
                                                 modifier = Modifier
                                                     .weight(1f)
                                                     .clip(RoundedCornerShape(10.dp))
                                                     .clickable {
-                                                        if (compactCardLayout != isCompact) {
+                                                        if (settings.compactCardLayout != isCompact) {
                                                             UsabilityTracker.startIntent("card_layout_changed")
                                                             UsabilityTracker.endIntent(
                                                                 context,
                                                                 "card_layout_changed",
                                                                 outcome = if (isCompact) "compact" else "square"
                                                             )
-                                                            updateSettings(newCompactCardLayout = isCompact)
+                                                            updateSettings(settings.copy(compactCardLayout = isCompact))
                                                         }
                                                     },
                                                 shape = RoundedCornerShape(10.dp),
@@ -1117,8 +1049,8 @@ fun VoiceSettingsDialog(
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable {
-                                                val nextState = !enablePip
-                                                updateSettings(newEnablePip = nextState)
+                                                val nextState = !settings.enablePip
+                                                updateSettings(settings.copy(enablePip = nextState))
                                             }
                                             .padding(vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically,
@@ -1142,9 +1074,9 @@ fun VoiceSettingsDialog(
                                             )
                                         }
                                         Switch(
-                                            checked = enablePip,
+                                            checked = settings.enablePip,
                                             onCheckedChange = {
-                                                updateSettings(newEnablePip = it)
+                                                updateSettings(settings.copy(enablePip = it))
                                             },
                                             colors = SwitchDefaults.colors(
                                                 checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -1153,7 +1085,7 @@ fun VoiceSettingsDialog(
                                         )
                                     }
 
-                                    if (enablePip) {
+                                    if (settings.enablePip) {
                                         HorizontalDivider(
                                             modifier = Modifier.padding(vertical = 6.dp),
                                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
@@ -1164,10 +1096,10 @@ fun VoiceSettingsDialog(
                                                 .fillMaxWidth()
                                                 .clip(RoundedCornerShape(8.dp))
                                                 .clickable {
-                                                    val nextState = !showPipInTopBar
+                                                    val nextState = !settings.showPipInTopBar
                                                     UsabilityTracker.startIntent("setting_pip_top_bar")
                                                     UsabilityTracker.endIntent(context, "setting_pip_top_bar", outcome = if (nextState) "enabled" else "disabled")
-                                                    updateSettings(newShowPipInTopBar = nextState)
+                                                    updateSettings(settings.copy(showPipInTopBar = nextState))
                                                 }
                                                 .padding(vertical = 4.dp),
                                             verticalAlignment = Alignment.CenterVertically,
@@ -1191,11 +1123,11 @@ fun VoiceSettingsDialog(
                                                 )
                                             }
                                             Switch(
-                                                checked = showPipInTopBar,
+                                                checked = settings.showPipInTopBar,
                                                 onCheckedChange = {
                                                     UsabilityTracker.startIntent("setting_pip_top_bar")
                                                     UsabilityTracker.endIntent(context, "setting_pip_top_bar", outcome = if (it) "enabled" else "disabled")
-                                                    updateSettings(newShowPipInTopBar = it)
+                                                    updateSettings(settings.copy(showPipInTopBar = it))
                                                 },
                                                 colors = SwitchDefaults.colors(
                                                     checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -1248,8 +1180,8 @@ fun VoiceSettingsDialog(
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable {
-                                                val nextState = !showSafetyCards
-                                                updateSettings(newShowSafetyCards = nextState)
+                                                val nextState = !settings.showSafetyCards
+                                                updateSettings(settings.copy(showSafetyCards = nextState))
                                             }
                                             .padding(vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically,
@@ -1273,9 +1205,9 @@ fun VoiceSettingsDialog(
                                             )
                                         }
                                         Switch(
-                                            checked = showSafetyCards,
+                                            checked = settings.showSafetyCards,
                                             onCheckedChange = {
-                                                updateSettings(newShowSafetyCards = it)
+                                                updateSettings(settings.copy(showSafetyCards = it))
                                             },
                                             colors = SwitchDefaults.colors(
                                                 checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -1369,8 +1301,8 @@ fun VoiceSettingsDialog(
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable {
-                                                val nextState = !shareMetrics
-                                                updateSettings(newShareMetrics = nextState)
+                                                val nextState = !settings.shareUsabilityMetrics
+                                                updateSettings(settings.copy(shareUsabilityMetrics = nextState))
                                             }
                                             .padding(vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically,
@@ -1394,9 +1326,9 @@ fun VoiceSettingsDialog(
                                             )
                                         }
                                         Switch(
-                                            checked = shareMetrics,
+                                            checked = settings.shareUsabilityMetrics,
                                             onCheckedChange = {
-                                                updateSettings(newShareMetrics = it)
+                                                updateSettings(settings.copy(shareUsabilityMetrics = it))
                                             },
                                             colors = SwitchDefaults.colors(
                                                 checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -1405,7 +1337,7 @@ fun VoiceSettingsDialog(
                                         )
                                     }
 
-                                    if (shareMetrics) {
+                                    if (settings.shareUsabilityMetrics) {
                                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                             Text(
                                                 text = stringResource(R.string.label_user_role),
@@ -1424,11 +1356,11 @@ fun VoiceSettingsDialog(
                                                     VoiceSettings.ROLE_PROFESSIONAL to stringResource(R.string.role_professional)
                                                 )
                                                 roles.forEach { (rKey, rLabel) ->
-                                                    val isSelected = userRole == rKey
+                                                    val isSelected = settings.userRole == rKey
                                                     FilterChip(
                                                         selected = isSelected,
                                                         onClick = {
-                                                            updateSettings(newUserRole = rKey)
+                                                            updateSettings(settings.copy(userRole = rKey))
                                                             UsabilityTracker.recordRoleSet(context, rKey)
                                                         },
                                                         modifier = Modifier.weight(1f),
@@ -1470,7 +1402,7 @@ fun VoiceSettingsDialog(
                                     }
 
                                     if (showSharedDataDialog) {
-                                        val previewText = remember(shareMetrics) { UsabilityTracker.generatePreviewPayload(context) }
+                                        val previewText = remember(settings.shareUsabilityMetrics) { UsabilityTracker.generatePreviewPayload(context) }
                                         AlertDialog(
                                             onDismissRequest = { showSharedDataDialog = false },
                                             title = { Text(stringResource(R.string.dialog_shared_data_title)) },
