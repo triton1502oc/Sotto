@@ -245,7 +245,7 @@ object CardShareHelper {
         return bitmap
     }
 
-    private fun drawSottoBrandFooter(
+    internal fun drawSottoBrandFooter(
         context: Context,
         canvas: Canvas,
         centerX: Float,
@@ -264,33 +264,18 @@ object CardShareHelper {
         val totalWidth = iconSize + gap + textWidth
         val startX = centerX - (totalWidth / 2f)
 
-        // Draw subtle squircle badge behind Sotto foreground icon
+        // Draw authentic Sotto launcher icon (sage-green squircle with speech bubble & 5 voice equalizer bars)
         val badgeRect = RectF(startX, topY, startX + iconSize, topY + iconSize)
-        val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-            color = COLOR_BRAND_BADGE_BG
-        }
-        canvas.drawRoundRect(badgeRect, 12f, 12f, badgePaint)
-
-        val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = 1.5f
-            color = COLOR_CARD_BORDER
-        }
-        canvas.drawRoundRect(badgeRect, 12f, 12f, borderPaint)
-
-        // Draw Sotto icon vector inside badge
-        val iconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_launcher_foreground)
-            ?: ContextCompat.getDrawable(context, R.mipmap.ic_launcher_round)
-        if (iconDrawable != null) {
-            val inset = -4 // ic_launcher_foreground is an adaptive 108dp vector with safe-zone inset
-            iconDrawable.setBounds(
-                startX.toInt() + inset,
-                topY.toInt() + inset,
-                (startX + iconSize).toInt() - inset,
-                (topY + iconSize).toInt() - inset
+        val launcherDrawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher)
+            ?: ContextCompat.getDrawable(context, R.drawable.ic_qs_sotto_partner)
+        if (launcherDrawable != null) {
+            launcherDrawable.setBounds(
+                startX.toInt(),
+                topY.toInt(),
+                (startX + iconSize).toInt(),
+                (topY + iconSize).toInt()
             )
-            iconDrawable.draw(canvas)
+            launcherDrawable.draw(canvas)
         } else {
             // Fallback acoustic bars motif if drawable unavailable in test environment
             val barPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {

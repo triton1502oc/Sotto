@@ -34,14 +34,14 @@ class CardShareHelperTest {
     }
 
     @Test
-    fun `buildShareCaption prefixes Emergency with shield icon when isEmergency is true`() {
+    fun `buildShareCaption prefixes Safety with shield icon when isEmergency is true`() {
         val spec = ShareableCardSpec(
             primaryText = "Call ambulance immediately",
-            badgeLabel = "Emergency",
+            badgeLabel = "Safety",
             isEmergency = true
         )
         val caption = CardShareHelper.buildShareCaption(spec)
-        assertEquals("[🛡️ Emergency]\nCall ambulance immediately", caption)
+        assertEquals("[🛡️ Safety]\nCall ambulance immediately", caption)
     }
 
     @Test
@@ -60,7 +60,7 @@ class CardShareHelperTest {
         val spec = ShareableCardSpec(
             primaryText = "   ",
             secondaryText = "Saya butuh bantuan",
-            badgeLabel = "Emergency",
+            badgeLabel = "Safety",
             isEmergency = true
         )
         val caption = CardShareHelper.buildShareCaption(spec)

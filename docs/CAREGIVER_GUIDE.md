@@ -147,7 +147,7 @@ For autistic teens and adults, as well as individuals with unclear, slurred, or 
 
 ### B. Safety Bystander Mode
 - **Hero Card**: The prominent amber/gold safety card displays your local area and emergency contact directly to bystanders or first responders.
-- **Fullscreen Mode & Visual Sharing**: Long-press any card (or tap fullscreen on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or medical personnel. Tap the **Share** button on any Full-Screen Phrase Card or Partner Mode card to share a high-contrast PNG visual card (with subtle Sotto branding) + plain-text caption directly to WhatsApp or messaging apps.
+- **Fullscreen Mode & Visual Sharing**: Long-press any card (or tap fullscreen on the Quick-Speak bar) to fill the entire screen with giant, high-contrast text. Show your screen silently to bystanders or medical personnel. Tap the **Share** button on any Full-Screen Phrase Card (featuring the `[🛡️ Safety]` badge header for safety cards) or Partner Mode card to share a high-contrast PNG visual card (with subtle Sotto branding) + plain-text caption directly to WhatsApp or messaging apps.
 
 ### C. Single-Row QuickSpeak Dock Capsule
 - **Type Spontaneously**: Tap the docked input field (~56dp) to compose any phrase.
@@ -175,7 +175,7 @@ For autistic teens and adults, as well as individuals with unclear, slurred, or 
 Tap the settings icon in the top app bar to configure:
 - **Voice & Speech**: Speech speed, voice pitch, voice picker with Android Settings shortcut, attention chime, and dual-language translation.
 - **Appearance & Safety**: Sensory color themes (Charcoal, OLED Pure Black, Warm Amber, Slate Navy, Soft Parchment), card layout density (Compact rectangular default vs classic Square), and safety bystander card visibility.
-- **Data & Backup**: Instant offline QR code deck sharing, JSON v2 selective backup & restore, Why Log historical insights, Why Tree editor, and optional usability telemetry.
+- **Data & Backup**: Instant offline QR code deck sharing (export as camera-ready QR or branded PNG cards over WhatsApp/chat apps; import offline via camera scan, saved QR image/screenshot picker with `Pick QR Image`, or sharing directly from WhatsApp to Sotto), JSON v2 selective backup & restore, Why Log historical insights, Why Tree editor, and optional usability telemetry.
 
 ---
 

@@ -122,6 +122,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
     private var latestVoiceSettings by mutableStateOf(VoiceSettings())
     private var currentLanguage by mutableStateOf(LocaleHelper.LANG_SYSTEM)
     private var initialOpenPartnerMode by mutableStateOf(false)
+    private var incomingSharedBackup by mutableStateOf<BackupData?>(null)
 
     // Picture-in-Picture State (#45)
     private var isInPip by mutableStateOf(false)
@@ -143,6 +144,34 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
     }
 
+    private fun handleIncomingShareIntent(incomingIntent: Intent?) {
+        if (incomingIntent?.action != Intent.ACTION_SEND || incomingIntent.type?.startsWith("image/") != true) {
+            return
+        }
+        @Suppress("DEPRECATION")
+        val imageUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            incomingIntent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri::class.java)
+        } else {
+            incomingIntent.getParcelableExtra(Intent.EXTRA_STREAM) as? android.net.Uri
+        } ?: return
+
+        incomingIntent.action = Intent.ACTION_MAIN
+        incomingIntent.removeExtra(Intent.EXTRA_STREAM)
+
+        val decoded = com.amh.sotto.util.QRCodeImageHelper.decodeQrFromUri(this, imageUri)
+        if (!decoded.isNullOrBlank()) {
+            try {
+                val backup = PhraseBackupHelper.parseBackupJson(decoded)
+                incomingSharedBackup = backup
+                UsabilityTracker.recordActivation(this, "qr_image_imported")
+            } catch (_: Exception) {
+                Toast.makeText(this, R.string.error_import_failed, Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, R.string.err_qr_image_decode_failed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -150,6 +179,9 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
         if (savedInstanceState == null && intent?.getBooleanExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE, false) == true) {
             initialOpenPartnerMode = true
             intent?.removeExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE)
+        }
+        if (savedInstanceState == null) {
+            handleIncomingShareIntent(intent)
         }
         tts = TextToSpeech(this, this)
         UsabilityTracker.recordAppOpen(this)
@@ -295,6 +327,10 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                                 initialOpenPartnerMode = false
                                 intent?.removeExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE)
                             },
+                            incomingSharedBackup = incomingSharedBackup,
+                            onIncomingBackupConsumed = {
+                                incomingSharedBackup = null
+                            },
                             onEnterPip = { enterPipMode() }
                         )
                     }
@@ -310,6 +346,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             initialOpenPartnerMode = true
             intent.removeExtra(EmergencyTileService.EXTRA_OPEN_PARTNER_MODE)
         }
+        handleIncomingShareIntent(intent)
     }
 
     override fun onResume() {

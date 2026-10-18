@@ -1746,34 +1746,36 @@ private fun CaregiverDisplayCard(
             val activePrompt = if (activeTab == CaregiverTab.WHY_FINDER) whyPromptText else activeFreeformText
             val isFinishedWhy = activeTab == CaregiverTab.WHY_FINDER && whyState is WhyFinderState.Finished
             val canShareCard = isFinishedWhy || activePrompt.isNotBlank() || !lastReply.isNullOrBlank()
+            val formattedReplyLabel = lastReply?.takeIf { it.isNotBlank() }?.let {
+                stringResource(R.string.share_card_reply_format, it)
+            }
+            val finishedWhyTitle = if (whyState is WhyFinderState.Finished) {
+                val titleRes = when (whyState.outcome) {
+                    WhyOutcome.FOUND -> R.string.why_finder_found_title
+                    WhyOutcome.STOPPED -> R.string.why_finder_stopped_title
+                    else -> R.string.why_finder_not_found_title
+                }
+                stringResource(titleRes)
+            } else {
+                ""
+            }
 
             if (canShareCard) {
                 IconButton(
                     onClick = {
-                        val (primaryToShare, secondaryToShare) = if (isFinishedWhy) {
-                            val titleRes = when (whyState.outcome) {
-                                WhyOutcome.FOUND -> R.string.why_finder_found_title
-                                WhyOutcome.STOPPED -> R.string.why_finder_stopped_title
-                                else -> R.string.why_finder_not_found_title
-                            }
-                            val primary = whyState.causeText?.takeIf { it.isNotBlank() } ?: context.getString(titleRes)
+                        val (primaryToShare, secondaryToShare) = if (activeTab == CaregiverTab.WHY_FINDER && whyState is WhyFinderState.Finished) {
+                            val primary = whyState.causeText?.takeIf { it.isNotBlank() } ?: finishedWhyTitle
                             val detail = if (!whyState.bodyPart.isNullOrBlank()) {
                                 val partLabel = getBodyRegionLabel(whyState.bodyPart, context)
                                 val intensityStr = whyState.intensity?.let { " • $it/5" } ?: ""
                                 "$partLabel$intensityStr"
                             } else {
-                                lastReply?.takeIf { it.isNotBlank() }?.let {
-                                    context.getString(R.string.share_card_reply_format, it)
-                                }
+                                formattedReplyLabel
                             }
                             primary to detail
                         } else {
                             val primary = activePrompt.ifBlank { lastReply.orEmpty() }
-                            val secondary = if (activePrompt.isNotBlank() && !lastReply.isNullOrBlank()) {
-                                context.getString(R.string.share_card_reply_format, lastReply)
-                            } else {
-                                null
-                            }
+                            val secondary = if (activePrompt.isNotBlank()) formattedReplyLabel else null
                             primary to secondary
                         }
 

@@ -37,6 +37,7 @@ fun QRCodeDialog(
     dataString: String,
     onDismiss: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val clipboardManager = LocalClipboardManager.current
     var copied by remember { mutableStateOf(false) }
 
@@ -156,6 +157,36 @@ fun QRCodeDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    if (qrBitmap != null) {
+                        FilledTonalButton(
+                            onClick = {
+                                com.amh.sotto.util.QRCodeImageHelper.shareQrDeckImage(
+                                    context = context,
+                                    qrBitmap = qrBitmap,
+                                    title = title,
+                                    subtitle = subtitle,
+                                    payloadLabel = "$dataSizeLabel payload"
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_share),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.action_share_qr_image),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
                     OutlinedButton(
                         onClick = {
                             clipboardManager.setText(AnnotatedString(dataString))

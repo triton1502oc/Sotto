@@ -137,6 +137,8 @@ fun SottoApp(
     onPmfSurveyDismissed: () -> Unit = {},
     initialOpenPartnerMode: Boolean = false,
     onPartnerModeOpened: () -> Unit = {},
+    incomingSharedBackup: BackupData? = null,
+    onIncomingBackupConsumed: () -> Unit = {},
     onEnterPip: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -240,6 +242,13 @@ fun SottoApp(
     }
 
     var pendingBackupData by remember { mutableStateOf<BackupData?>(null) }
+
+    LaunchedEffect(incomingSharedBackup) {
+        if (incomingSharedBackup != null) {
+            pendingBackupData = incomingSharedBackup
+            onIncomingBackupConsumed()
+        }
+    }
     var showExportDialog by rememberSaveable { mutableStateOf(false) }
     var pendingExportOptions by remember { mutableStateOf(Triple(true, true, false)) }
     var pendingSelectedCategories by remember { mutableStateOf<Set<String>?>(null) }

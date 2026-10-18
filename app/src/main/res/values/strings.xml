@@ -276,15 +276,15 @@
     <string name="role_caregiver_desc">Assisted communication with Partner Mode &amp; Why Finder</string>
     <string name="role_professional_title">Healthcare / Therapist</string>
     <string name="role_professional_desc">Speech therapy and clinical AAC support</string>
-    <string name="onboarding_step_safety_title">Emergency Safety Card</string>
-    <string name="onboarding_step_safety_desc">Set up your emergency card so first responders or caregivers know where you live and who to contact.</string>
+    <string name="onboarding_step_safety_title">Safety Card</string>
+    <string name="onboarding_step_safety_desc">Set up your safety card so first responders or caregivers know where you live and who to contact.</string>
     <string name="label_neighborhood_area">Area / Neighborhood</string>
     <string name="hint_neighborhood_area">e.g. South Jakarta or Brooklyn</string>
     <string name="label_contact_name">Contact Name / Relationship</string>
     <string name="hint_contact_name">e.g. Mom, Dr. Alex (optional)</string>
     <string name="label_emergency_phone">Emergency Phone Number</string>
     <string name="hint_emergency_phone">e.g. 08123456789</string>
-    <string name="action_save_safety_card">Save Emergency Card</string>
+    <string name="action_save_safety_card">Save Safety Card</string>
     <string name="action_skip_for_later">Skip for Later</string>
     <string name="onboarding_step_ready_title">You\'re All Set!</string>
     <string name="onboarding_step_ready_caregiver_desc">Partner Mode is available at the top of your board for crisis support and two-way conversations.</string>
@@ -518,4 +518,11 @@
     <string name="share_card_brand_footer">Sotto • Assistive Communication</string>
     <string name="share_card_partner_badge">Partner Exchange</string>
     <string name="share_card_reply_format">Reply: %1$s</string>
+
+    <!-- Share Branded QR Deck PNG & Import QR from Image (#83) -->
+    <string name="action_share_qr_image">Share QR Image</string>
+    <string name="share_qr_chooser_title">Share Sotto QR Deck</string>
+    <string name="share_qr_caption">Sotto Phrase Deck QR — Open Sotto → Settings → Import via QR Code → Pick QR Image (or share this image directly to Sotto).</string>
+    <string name="action_pick_qr_image">Pick QR Image</string>
+    <string name="err_qr_image_decode_failed">No valid Sotto QR code found in the selected image.</string>
 </resources>

@@ -23,13 +23,31 @@ fun QRScannerDialog(
     onScan: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val clipboardManager = LocalClipboardManager.current
     var manualInput by remember { mutableStateOf("") }
+    var imageDecodeError by remember { mutableStateOf<String?>(null) }
     val promptText = stringResource(R.string.qr_scan_prompt)
+    val decodeErrorText = stringResource(R.string.err_qr_image_decode_failed)
 
     val scanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null && result.contents.isNotBlank()) {
             onScan(result.contents)
+        }
+    }
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            val decoded = com.amh.sotto.util.QRCodeImageHelper.decodeQrFromUri(context, uri)
+            if (!decoded.isNullOrBlank()) {
+                imageDecodeError = null
+                com.amh.sotto.util.UsabilityTracker.recordActivation(context, "qr_image_imported")
+                onScan(decoded)
+            } else {
+                imageDecodeError = decodeErrorText
+            }
         }
     }
 
@@ -73,23 +91,52 @@ fun QRScannerDialog(
                     )
                 }
 
-                // Camera Scan Primary Action
-                Button(
-                    onClick = {
-                        val options = ScanOptions().apply {
-                            setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                            setPrompt(promptText)
-                            setBeepEnabled(false)
-                            setOrientationLocked(false)
-                        }
-                        scanLauncher.launch(options)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 48.dp),
-                    shape = RoundedCornerShape(12.dp)
+                // Camera Scan & Pick QR Image Actions
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("📷  " + stringResource(R.string.action_scan_camera), fontWeight = FontWeight.SemiBold)
+                    Button(
+                        onClick = {
+                            imageDecodeError = null
+                            val options = ScanOptions().apply {
+                                setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                                setPrompt(promptText)
+                                setBeepEnabled(false)
+                                setOrientationLocked(false)
+                            }
+                            scanLauncher.launch(options)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("📷  " + stringResource(R.string.action_scan_camera), fontWeight = FontWeight.SemiBold)
+                    }
+
+                    FilledTonalButton(
+                        onClick = {
+                            imageDecodeError = null
+                            pickImageLauncher.launch("image/*")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("🖼️  " + stringResource(R.string.action_pick_qr_image), fontWeight = FontWeight.SemiBold)
+                    }
+
+                    if (!imageDecodeError.isNullOrBlank()) {
+                        Text(
+                            text = imageDecodeError!!,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
