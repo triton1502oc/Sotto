@@ -123,8 +123,6 @@ object UsabilityTracker {
         }
     }
 
-    fun hasActiveIntent(name: String): Boolean = activeIntents.containsKey(name)
-
     fun endIntent(
         context: Context,
         name: String,

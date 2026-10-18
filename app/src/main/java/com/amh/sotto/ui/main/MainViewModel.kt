@@ -101,18 +101,6 @@ class MainViewModel(
         }
     }
 
-    fun moveCategory(fromName: String, toName: String) {
-        val current = _categories.value.toMutableList()
-        val from = current.indexOfFirst { it.equals(fromName, ignoreCase = true) }
-        val to = current.indexOfFirst { it.equals(toName, ignoreCase = true) }
-        if (from != -1 && to != -1 && from != to) {
-            val item = current.removeAt(from)
-            current.add(to, item)
-            _categories.value = current
-            repository.saveCategories(current)
-        }
-    }
-
     // Backwards compatibility methods
     fun addCustomCategory(name: String): Boolean = addCategory(name)
     fun renameCustomCategory(oldName: String, newName: String): Boolean = renameCategory(oldName, newName)
