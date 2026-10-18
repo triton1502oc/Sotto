@@ -1,6 +1,5 @@
 package com.amh.sotto.util
 
-import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -15,7 +14,6 @@ import android.net.Uri
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
-import androidx.core.content.FileProvider
 import com.amh.sotto.R
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
@@ -27,8 +25,6 @@ import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import java.io.File
-import java.io.FileOutputStream
 
 /**
  * Renders branded Sotto QR code deck PNG images for sharing over WhatsApp/chat apps
@@ -39,7 +35,6 @@ object QRCodeImageHelper {
     private const val CANVAS_SIZE = 1080
     private const val OUTER_MARGIN = 48f
     private const val CARD_CORNER_RADIUS = 48f
-    private const val SHARED_DIR_NAME = "shared_cards"
     private const val SHARED_QR_FILE_NAME = "sotto_qr_deck.png"
     private const val MAX_DECODE_DIMENSION = 1600
 
@@ -305,33 +300,16 @@ object QRCodeImageHelper {
                 payloadLabel = payloadLabel,
                 footerBrandText = brandFooter
             )
-            val sharedDir = File(context.cacheDir, SHARED_DIR_NAME).apply {
-                if (!exists()) mkdirs()
-            }
-            val imageFile = File(sharedDir, SHARED_QR_FILE_NAME)
-            FileOutputStream(imageFile).use { out ->
-                brandedBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                out.flush()
-            }
-            brandedBitmap.recycle()
-
-            val authority = "${context.packageName}.fileprovider"
-            val contentUri = FileProvider.getUriForFile(context, authority, imageFile)
             val caption = context.getString(R.string.share_qr_caption)
-
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "image/png"
-                putExtra(Intent.EXTRA_STREAM, contentUri)
-                putExtra(Intent.EXTRA_TEXT, caption)
-                clipData = ClipData.newRawUri(title, contentUri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-
             val chooserTitle = context.getString(R.string.share_qr_chooser_title)
-            val chooserIntent = Intent.createChooser(shareIntent, chooserTitle).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(chooserIntent)
+            CardShareHelper.shareImage(
+                context = context,
+                bitmap = brandedBitmap,
+                fileName = SHARED_QR_FILE_NAME,
+                chooserTitle = chooserTitle,
+                caption = caption,
+                clipLabel = title
+            )
 
             UsabilityTracker.recordActivation(context, "qr_image_shared")
             UsabilityTracker.endIntent(context, "share_qr_image", outcome = "shared", contextTag = "qr_dialog")

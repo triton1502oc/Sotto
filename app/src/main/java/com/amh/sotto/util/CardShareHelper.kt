@@ -296,7 +296,47 @@ object CardShareHelper {
     }
 
     /**
-     * Renders the card PNG to temporary cache and opens the native Android Share Sheet.
+     * Renders an image bitmap to temporary cache and opens the native Android Share Sheet.
+     */
+    fun shareImage(
+        context: Context,
+        bitmap: Bitmap,
+        fileName: String,
+        chooserTitle: String,
+        caption: String? = null,
+        clipLabel: String = ""
+    ) {
+        val sharedDir = File(context.cacheDir, SHARED_DIR_NAME).apply {
+            if (!exists()) mkdirs()
+        }
+        val imageFile = File(sharedDir, fileName)
+        FileOutputStream(imageFile).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            out.flush()
+        }
+        bitmap.recycle()
+
+        val authority = "${context.packageName}.fileprovider"
+        val contentUri = FileProvider.getUriForFile(context, authority, imageFile)
+
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, contentUri)
+            if (!caption.isNullOrBlank()) {
+                putExtra(Intent.EXTRA_TEXT, caption)
+            }
+            clipData = ClipData.newRawUri(clipLabel.take(40), contentUri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        val chooserIntent = Intent.createChooser(shareIntent, chooserTitle).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(chooserIntent)
+    }
+
+    /**
+     * Shares a rendered card via Android's native share sheet.
      */
     fun shareCard(
         context: Context,
@@ -308,35 +348,16 @@ object CardShareHelper {
         UsabilityTracker.startIntent("share_card", sourceTag)
         try {
             val bitmap = renderCardBitmap(context, spec)
-            val sharedDir = File(context.cacheDir, SHARED_DIR_NAME).apply {
-                if (!exists()) mkdirs()
-            }
-            val imageFile = File(sharedDir, SHARED_FILE_NAME)
-            FileOutputStream(imageFile).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                out.flush()
-            }
-            bitmap.recycle()
-
-            val authority = "${context.packageName}.fileprovider"
-            val contentUri = FileProvider.getUriForFile(context, authority, imageFile)
             val caption = buildShareCaption(spec)
-
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "image/png"
-                putExtra(Intent.EXTRA_STREAM, contentUri)
-                if (caption.isNotBlank()) {
-                    putExtra(Intent.EXTRA_TEXT, caption)
-                }
-                clipData = ClipData.newRawUri(spec.primaryText.take(40), contentUri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-
             val chooserTitle = context.getString(R.string.share_card_chooser_title)
-            val chooserIntent = Intent.createChooser(shareIntent, chooserTitle).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(chooserIntent)
+            shareImage(
+                context = context,
+                bitmap = bitmap,
+                fileName = SHARED_FILE_NAME,
+                chooserTitle = chooserTitle,
+                caption = caption,
+                clipLabel = spec.primaryText
+            )
 
             UsabilityTracker.recordActivation(context, "card_shared")
             UsabilityTracker.endIntent(context, "share_card", outcome = "shared", contextTag = sourceTag)
