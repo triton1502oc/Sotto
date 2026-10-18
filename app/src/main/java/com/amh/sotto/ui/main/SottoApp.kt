@@ -122,10 +122,6 @@ fun SottoApp(
     onRenameCategory: (String, String) -> Boolean = { _, _ -> false },
     onDeleteCategory: (String) -> Boolean = { false },
     onReorderCategories: (Int, Int) -> Unit = { _, _ -> },
-    customCategories: List<String> = emptyList(),
-    onAddCustomCategory: (String) -> Boolean = { false },
-    onRenameCustomCategory: (String, String) -> Boolean = { _, _ -> false },
-    onDeleteCustomCategory: (String) -> Boolean = { false },
     onExportBackup: (Boolean, Boolean, Boolean, WhyFinderRepository?, Set<String>?) -> String = { _, _, _, _, _ -> "" },
     onImportBackup: (BackupData, Boolean, WhyFinderRepository?) -> ImportResult = { _, _, _ -> ImportResult(0, 0) },
     shouldPromptMetrics: Boolean = false,
@@ -142,7 +138,7 @@ fun SottoApp(
     onEnterPip: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val effectiveCategories = if (categories.isNotEmpty()) categories else customCategories
+    val effectiveCategories = categories
     var expandedPhrase by remember { mutableStateOf<Phrase?>(null) }
     var showMetricsOptInDialog by rememberSaveable { mutableStateOf(shouldPromptMetrics) }
     var showRolePromptDialog by rememberSaveable { mutableStateOf(shouldPromptRole) }
@@ -1573,7 +1569,6 @@ fun SottoApp(
                 onSpeakText(ttsText, LocaleHelper.LANG_AUTO)
             },
             categories = effectiveCategories,
-            customCategories = effectiveCategories,
             whyFinderRepository = whyFinderRepository,
             initialTab = partnerModeInitialTab,
             onDismiss = {
@@ -2375,7 +2370,7 @@ fun SottoApp(
                             errorMessage = existsError
                             return@Button
                         }
-                        if (onAddCategory(trimmed) || onAddCustomCategory(trimmed)) {
+                        if (onAddCategory(trimmed)) {
                             selectedCategory = trimmed
                             showAddCategoryDialog = false
                         }
@@ -2438,7 +2433,7 @@ fun SottoApp(
                             errorMessage = existsError
                             return@Button
                         }
-                        if (onRenameCategory(oldName, trimmed) || onRenameCustomCategory(oldName, trimmed)) {
+                        if (onRenameCategory(oldName, trimmed)) {
                             if (selectedCategory == oldName) {
                                 selectedCategory = trimmed
                             }
@@ -2484,7 +2479,6 @@ fun SottoApp(
                 Button(
                     onClick = {
                         onDeleteCategory(targetCat)
-                        onDeleteCustomCategory(targetCat)
                         if (selectedCategory == targetCat) {
                             selectedCategory = allCategoryKey
                         }

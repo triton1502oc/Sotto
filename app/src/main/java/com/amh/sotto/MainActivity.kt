@@ -222,14 +222,6 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
                             onRenameCategory = { old, new -> viewModel.renameCategory(old, new) },
                             onDeleteCategory = { viewModel.deleteCategory(it) },
                             onReorderCategories = { from, to -> viewModel.reorderCategories(from, to) },
-                            customCategories = categories,
-                            onAddCustomCategory = {
-                                val added = viewModel.addCategory(it)
-                                if (added) UsabilityTracker.recordActivation(this@MainActivity, "custom_category")
-                                added
-                            },
-                            onRenameCustomCategory = { old, new -> viewModel.renameCategory(old, new) },
-                            onDeleteCustomCategory = { viewModel.deleteCategory(it) },
                             onTestVoice = { testSettings ->
                                 if (ttsReady) {
                                     if (testSettings.playAttentionChime) {
