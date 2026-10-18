@@ -122,7 +122,7 @@ fun VoiceSettingsVoiceTab(
         }
     }
 
-    fun updateSettings(newSettings: VoiceSettings) = onUpdateSettings(newSettings)
+    fun updateSettings(newSettings: VoiceSettings) { onUpdateSettings(newSettings) }
 
                                 // Tab 0: Voice & Speech
                                 SettingsCard {
@@ -763,7 +763,7 @@ fun VoiceSettingsAppearanceTab(
     onEnterPip: () -> Unit
 ) {
     val context = LocalContext.current
-    fun updateSettings(newSettings: VoiceSettings) = onUpdateSettings(newSettings)
+    fun updateSettings(newSettings: VoiceSettings) { onUpdateSettings(newSettings) }
 
                                 // Tab 1: Appearance & Safety
                                 SettingsCard {
@@ -1121,7 +1121,7 @@ fun VoiceSettingsDataTab(
     onOpenWhyTreeEditor: () -> Unit
 ) {
     val context = LocalContext.current
-    fun updateSettings(newSettings: VoiceSettings) = onUpdateSettings(newSettings)
+    fun updateSettings(newSettings: VoiceSettings) { onUpdateSettings(newSettings) }
 
                                 // Tab 2: Data & Backup (#58)
                                 SettingsCard {
