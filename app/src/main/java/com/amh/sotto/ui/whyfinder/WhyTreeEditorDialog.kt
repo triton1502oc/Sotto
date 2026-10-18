@@ -440,209 +440,63 @@ fun WhyTreeEditorDialog(
 
     // Edit Question Dialog
     questionToEdit?.let { target ->
-        var editText by rememberSaveable { mutableStateOf(target.text) }
-        AlertDialog(
-            onDismissRequest = { questionToEdit = null },
-            title = { Text(stringResource(R.string.hint_question_text)) },
-            text = {
-                OutlinedTextField(
-                    value = editText,
-                    onValueChange = { editText = it },
-                    label = { Text(stringResource(R.string.hint_question_text)) },
-                    trailingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (editText.isNotBlank()) {
-                                IconButton(onClick = { editText = "" }, modifier = Modifier.size(32.dp)) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_close),
-                                        contentDescription = stringResource(R.string.cd_clear_text),
-                                        modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = {
-                                    launchSpeech { spoken ->
-                                        editText = if (editText.isBlank()) spoken else "$editText $spoken"
-                                    }
-                                },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_mic),
-                                    contentDescription = stringResource(R.string.cd_voice_input),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (editText.isNotBlank() && currentArea != null) {
-                            val updatedQuestions = currentArea.questions.map {
-                                if (it.id == target.id) it.copy(text = editText.trim()) else it
-                            }
-                            val updatedAreas = tree.areas.map {
-                                if (it.id == currentArea.id) it.copy(questions = updatedQuestions) else it
-                            }
-                            updateTree(tree.copy(areas = updatedAreas))
-                        }
-                        questionToEdit = null
+        QuestionInputDialog(
+            title = stringResource(R.string.hint_question_text),
+            label = stringResource(R.string.hint_question_text),
+            initialText = target.text,
+            onSpeechLaunch = { callback -> launchSpeech(callback) },
+            onConfirm = { trimmed ->
+                if (currentArea != null) {
+                    val updatedQuestions = currentArea.questions.map {
+                        if (it.id == target.id) it.copy(text = trimmed) else it
                     }
-                ) {
-                    Text(stringResource(R.string.action_save))
+                    val updatedAreas = tree.areas.map {
+                        if (it.id == currentArea.id) it.copy(questions = updatedQuestions) else it
+                    }
+                    updateTree(tree.copy(areas = updatedAreas))
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { questionToEdit = null }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            }
+            onDismiss = { questionToEdit = null }
         )
     }
 
     // Add Question Dialog
     if (showAddQuestionDialog && currentArea != null) {
-        var newText by rememberSaveable { mutableStateOf("") }
-        AlertDialog(
-            onDismissRequest = { showAddQuestionDialog = false },
-            title = { Text(stringResource(R.string.action_add_question)) },
-            text = {
-                OutlinedTextField(
-                    value = newText,
-                    onValueChange = { newText = it },
-                    label = { Text(stringResource(R.string.hint_question_text)) },
-                    placeholder = { Text("e.g. Is your shirt too tight?") },
-                    trailingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (newText.isNotBlank()) {
-                                IconButton(onClick = { newText = "" }, modifier = Modifier.size(32.dp)) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_close),
-                                        contentDescription = stringResource(R.string.cd_clear_text),
-                                        modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = {
-                                    launchSpeech { spoken ->
-                                        newText = if (newText.isBlank()) spoken else "$newText $spoken"
-                                    }
-                                },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_mic),
-                                    contentDescription = stringResource(R.string.cd_voice_input),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
+        QuestionInputDialog(
+            title = stringResource(R.string.action_add_question),
+            label = stringResource(R.string.hint_question_text),
+            placeholder = "e.g. Is your shirt too tight?",
+            onSpeechLaunch = { callback -> launchSpeech(callback) },
+            onConfirm = { trimmed ->
+                val newQ = WhyQuestion(
+                    id = "custom_${UUID.randomUUID()}",
+                    text = trimmed,
+                    type = WhyQuestionType.YES_NO
                 )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newText.isNotBlank()) {
-                            val newQ = WhyQuestion(
-                                id = "custom_${UUID.randomUUID()}",
-                                text = newText.trim(),
-                                type = WhyQuestionType.YES_NO
-                            )
-                            val updatedQuestions = currentArea.questions + newQ
-                            val updatedAreas = tree.areas.map {
-                                if (it.id == currentArea.id) it.copy(questions = updatedQuestions) else it
-                            }
-                            updateTree(tree.copy(areas = updatedAreas))
-                        }
-                        showAddQuestionDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.action_save))
+                val updatedQuestions = currentArea.questions + newQ
+                val updatedAreas = tree.areas.map {
+                    if (it.id == currentArea.id) it.copy(questions = updatedQuestions) else it
                 }
+                updateTree(tree.copy(areas = updatedAreas))
             },
-            dismissButton = {
-                TextButton(onClick = { showAddQuestionDialog = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            }
+            onDismiss = { showAddQuestionDialog = false }
         )
     }
 
     // Edit Area Opening Question Dialog
     editingAreaQuestion?.let { targetArea ->
-        var editOpeningText by rememberSaveable { mutableStateOf(targetArea.question) }
-        AlertDialog(
-            onDismissRequest = { editingAreaQuestion = null },
-            title = { Text(stringResource(R.string.label_area_question)) },
-            text = {
-                OutlinedTextField(
-                    value = editOpeningText,
-                    onValueChange = { editOpeningText = it },
-                    label = { Text(stringResource(R.string.label_area_question)) },
-                    trailingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (editOpeningText.isNotBlank()) {
-                                IconButton(onClick = { editOpeningText = "" }, modifier = Modifier.size(32.dp)) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_close),
-                                        contentDescription = stringResource(R.string.cd_clear_text),
-                                        modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = {
-                                    launchSpeech { spoken ->
-                                        editOpeningText = if (editOpeningText.isBlank()) spoken else "$editOpeningText $spoken"
-                                    }
-                                },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_mic),
-                                    contentDescription = stringResource(R.string.cd_voice_input),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (editOpeningText.isNotBlank()) {
-                            val updatedAreas = tree.areas.map {
-                                if (it.id == targetArea.id) it.copy(question = editOpeningText.trim()) else it
-                            }
-                            updateTree(tree.copy(areas = updatedAreas))
-                        }
-                        editingAreaQuestion = null
-                    }
-                ) {
-                    Text(stringResource(R.string.action_save))
+        QuestionInputDialog(
+            title = stringResource(R.string.label_area_question),
+            label = stringResource(R.string.label_area_question),
+            initialText = targetArea.question,
+            onSpeechLaunch = { callback -> launchSpeech(callback) },
+            onConfirm = { trimmed ->
+                val updatedAreas = tree.areas.map {
+                    if (it.id == targetArea.id) it.copy(question = trimmed) else it
                 }
+                updateTree(tree.copy(areas = updatedAreas))
             },
-            dismissButton = {
-                TextButton(onClick = { editingAreaQuestion = null }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            }
+            onDismiss = { editingAreaQuestion = null }
         )
     }
 
@@ -701,3 +555,76 @@ fun WhyTreeEditorDialog(
         )
     }
 }
+
+@Composable
+private fun QuestionInputDialog(
+    title: String,
+    label: String,
+    initialText: String = "",
+    placeholder: String? = null,
+    onSpeechLaunch: ((String) -> Unit) -> Unit,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var text by rememberSaveable(initialText) { mutableStateOf(initialText) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text(label) },
+                placeholder = placeholder?.let { { Text(it) } },
+                trailingIcon = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (text.isNotBlank()) {
+                            IconButton(onClick = { text = "" }, modifier = Modifier.size(32.dp)) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_close),
+                                    contentDescription = stringResource(R.string.cd_clear_text),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = {
+                                onSpeechLaunch { spoken ->
+                                    text = if (text.isBlank()) spoken else "$text $spoken"
+                                }
+                            },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_mic),
+                                contentDescription = stringResource(R.string.cd_voice_input),
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (text.isNotBlank()) {
+                        onConfirm(text.trim())
+                    }
+                    onDismiss()
+                }
+            ) {
+                Text(stringResource(R.string.action_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        }
+    )
+}
+
